@@ -68,13 +68,14 @@ $TEMPLATE->param(isDC => isDC());
 $TEMPLATE->param(isBC => isBC());
 $TEMPLATE->param(isAttacker => $ATTACKER);
 
-
+our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
 my $page = 'main';
-if (param('page') =~ /^(main)$/){
+if (param('page') =~ /^(main|check)$/){
 	$page = $1;
 }
 
+print header;
 $ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl");
 
 unless (my $return = do "${page}.pl"){
@@ -83,7 +84,6 @@ unless (my $return = do "${page}.pl"){
 	print "<p><b>couldn't run $page</b></p>"       unless $return;
 }
 
-print header;
 $ND::TEMPLATE->param(BODY => $ND::BODY->output);
 print $TEMPLATE->output;
 

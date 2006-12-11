@@ -36,6 +36,10 @@ sub isBC {
 	return exists $ND::GROUPS{BC};
 }
 
+sub isOfficer {
+	return exists $ND::GROUPS{Officers};
+}
+
 sub parseMarkup {
 	my ($text) = @_;
 
