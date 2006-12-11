@@ -21,4 +21,13 @@ use strict;
 
 $ND::TEMPLATE->param(TITLE => 'Main Page');
 
-$ND::TEMPLATE->param(BODY => 'FUN!');
+our $BODY;
+
+$BODY->param(Username => 'harv');
+$BODY->param(isMEMBER => 1);
+$BODY->param(isHC => 1);
+my @groups = map {name => $_->{name}}, @ND::GROUPS;
+$BODY->param(Groups => \@groups);
+
+
+1;

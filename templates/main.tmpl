@@ -1,6 +1,6 @@
-<p>Hello <TMPL_VAR=Username>.</p>
-<fieldset> <legend>Message from HC<TMPL_IF isHC> <a href="index.pl?page=motd">EDIT</TMPL_IF></a></legend>
-	<TMPL_VAR=MOTD>
+<p>Hello <TMPL_VAR NAME=Username>.</p>
+<fieldset> <legend>Message from HC<TMPL_IF isHC> <a href="index.pl?page=motd">EDIT</a></TMPL_IF></legend>
+	<TMPL_VAR NAME=MOTD>
 </fieldset>
 <fieldset> <legend>Planet/account details</legend>
 	<ul>
@@ -11,7 +11,8 @@
 	<li> Scan points: <TMPL_VAR NAME=ScanPoints> </li>
 	<li> Humor points: <TMPL_VAR NAME=HumorPoints> </li>
 	<li> Total points: <TMPL_VAR NAME=TotalPoints> </li>
-	<li> Member of the following groups: <TMPL_VAR NAME=Groups></li>
+	</TMPL_IF>
+	<li> Member of the following groups: <TMPL_LOOP Groups><TMPL_VAR NAME=Name><TMPL_UNLESS __last__>, </TMPL_UNLESS></TMPL_LOOP></li>
 	<TMPL_IF hasPLANET>
 	<li>Planet: <TMPL_VAR NAME=PlanetName></li>
 	<li>Size: <TMPL_VAR NAME=PlanetSize></li>

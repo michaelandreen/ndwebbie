@@ -35,7 +35,7 @@ our $PLANET = undef;
 our $TEMPLATE = undef;
 our $TICK = undef;
 
-$ND::TEMPLATE = HTML::Template->new(filename => 'skel.tmpl');
+$ND::TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl');
 
 for my $file ("db.pl"){
 	unless (my $return = do $file){
@@ -49,22 +49,39 @@ for my $file ("db.pl"){
 	,undef,$ENV{'REMOTE_USER'});
 
 ($TICK) = $DBH->selectrow_array('SELECT tick()',undef);
-$TEMPLATE->param(TICK => $TICK);
 
+my $query = $DBH->prepare('SELECT groupname,attack,gid from groupmembers NATURAL JOIN groups WHERE uid = ?');
+$query->execute($UID);
+
+our $ATTACKER = 0;
+our @GROUPS = ();
+while (my ($name,$attack,$gid) = $query->fetchrow()){
+	push @GROUPS,{name => $name, gid => $gid};
+	$ATTACKER = 1 if $attack;
+}
+
+
+$TEMPLATE->param(Tick => $TICK);
+$TEMPLATE->param(isMember => 1);
+$TEMPLATE->param(isAttacker => $ATTACKER);
+
+
+
+my $page = 'main';
+if (param('page') =~ /^(main)$/){
+	$page = $1;
+}
+
+$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl");
+
+unless (my $return = do "${page}.pl"){
+	print "couldn't parse $page: $@" if $@;
+	print "couldn't do $page: $!"    unless defined $return;
+	print "couldn't run $page"       unless $return;
+}
 
 print header;
-
-my $page = 'main.pl';
-if (param('page') =~ /^(main)$/){
-	$page = "$1.pl";
-}
-
-unless (my $return = do $page){
-	warn "couldn't parse $page: $@" if $@;
-	warn "couldn't do $page: $!"    unless defined $return;
-	warn "couldn't run $page"       unless $return;
-}
-
+$ND::TEMPLATE->param(BODY => $ND::BODY->output);
 print $TEMPLATE->output;
 
 
@@ -74,5 +91,7 @@ $UID = undef;
 $PLANET = undef;
 $TEMPLATE = undef;
 $TICK = undef;
+@GROUPS = undef;
+$ND::BODY = undef;
 
 exit;
