@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>NewDawn: <TMPL_VAR NAME=TITLE></title>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+	<link rel="stylesheet" type="text/css" href="nd.css"/>
+	<TMPL_VAR NAME=HEADER>
+</head>
+<body>
+<div id="leftbar">
+		<ul class="linkbar">
+			<li><a href="index.pl?page=main">Main page</a></li>
+		</ul>	<p>Tick: <TMPL_VAR NAME=TICK></p>
+		<TMPL_IF isMEMBER>
+		<p>Member menu</p>
+		<ul class="linkbar">
+			<li><a href="index.pl?page=points.php">Top members</a></li>
+			<li><a href="index.pl?page=addintel.php">Add intel/scans</a></li>
+			<li><a href="index.pl?page=launchConfirmation.php">Launch confirmation</a></li>
+			<li><a href="index.pl?page=covop.php">CovOp targets</a></li>
+			<li><a href="index.pl?page=covop.php?list=distwhores">Distwhores</a></li>
+			<li><a href="index.pl?page=top100.php">Top100 planets</a></li>
+			<li><a href="index.pl?page=defrequest.php">Request defense</a></li>
+		</ul>
+		</TMPL_IF>
+		<TMPL_IF isATTACKER>
+		<p>Attack menu</p>
+		<ul class="linkbar">
+			<li><form action="index.pl?page=check.php" method="post"><p>
+				<input class="coord" type="text" name="coords" value="1:1:1"/>
+				<input class="coord" type="submit" value="Check"/>
+				</p></form></li>
+			<li><a href="index.pl?page=raids.php">Web raids</a></li>
+			<li><a href="oldraids.php">Old raid page (Raid page for Internet Explorer users)</a></li>
+		</ul><div id="targets"></div>
+		</TMPL_IF>
+		<TMPL_IF isBC>
+		<p>BC menu</p>
+		<ul class="linkbar">
+			<li><a href="index.pl?page=editRaid.php">Create raid</a></li>
+		</ul>
+		</TMPL_IF>
+		<TMPL_IF isDC>
+		<p>DC menu</p>
+		<ul class="linkbar">
+			<li><a href="index.pl?page=calls.php">Defense calls</a></li>
+			<li><a href="index.pl?page=calls.php?show=uncovered">Not covered calls</a></li>
+			<li><a href="index.pl?page=calls.php?show=covered">Covered calls</a></li>
+			<li><a href="index.pl?page=calls.php?show=all">All calls</a></li>
+		</ul>
+		</TMPL_IF>
+		<TMPL_IF isHC>
+		<p>HC menu</p>
+		<ul class="linkbar">
+			<li><a href="index.pl?page=users.php">List users</a></li>
+			<li><a href="index.pl?page=intel.php">Intel</a></li>
+			<li><a href="index.pl?page=alliances.php">Alliances</a></li>
+			<li><a href="index.pl?page=allianceStatus.php">Alliance status</a></li>
+			<li><a href="index.pl?page=allianceRes.php">Alliance resources</a></li>
+		</ul>
+		</TMPL_IF>
+	<TMPL_VAR NAME=LEFTBAR>
+</div>
+<TMPL_VAR NAME=BODY>
+</body>
+</html>
