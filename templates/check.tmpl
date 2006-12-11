@@ -11,5 +11,22 @@
 		<td><TMPL_VAR NAME=FleetValue></td><TMPL_IF isBC><td class="<TMPL_VAR NAME=PlanetStatus>"><TMPL_VAR NAME=Nick></td><td><TMPL_VAR NAME=HitUs></td>
 		<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td></TMPL_IF>
 	</tr>
-</TMPL_LOOP>
+
+	</TMPL_LOOP>
 </table>
+<TMPL_IF OnePlanet>
+<table border="1">
+	<tr><th>Target</th><th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th></tr>
+	<TMPL_LOOP Missions>
+	<tr align="center">
+		<td><TMPL_VAR NAME=Target></td><td><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=LandingTick></td>
+		<td><TMPL_VAR NAME=ETA></td><td><TMPL_VAR NAME=Amount></td>
+	</tr>
+	</TMPL_LOOP>
+</table>
+<TMPL_LOOP Scans>
+<div class="leftinfo">
+<TMPL_VAR NAME=Scan>
+</div>
+</TMPL_LOOP>
+</TMPL_IF>
