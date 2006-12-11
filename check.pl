@@ -59,8 +59,10 @@ if (defined $z){
 	$query->execute($x,$y);
 }
 my @planets;
+my $planet_id = undef;
 while (my ($id,$coords,$planet,$race,$size,$score,$value,$xp,$sizerank,$scorerank,$valuerank,$xprank
 		,$fleetvalue,$resvalue,$planet_status,$hit_us,$alliance,$relationship,$nick) = $query->fetchrow){
+	$planet_id = $id;
 	my %planet = (Coords => $coords, Planet => $planet, Race => $race, Size => "$size ($sizerank)"
 		, Score => "$score ($scorerank)", Value => "$value ($valuerank)", XP => "$xp ($xprank)"
 		, FleetValue => "$fleetvalue ($resvalue)");
@@ -75,5 +77,85 @@ while (my ($id,$coords,$planet,$race,$size,$score,$value,$xp,$sizerank,$scoreran
 	push @planets,\%planet;
 }
 $BODY->param(Planets => \@planets);
+
+if ($planet_id){
+	$BODY->param(OnePlanet => 1);
+
+	my $query = $DBH->prepare(q{ 
+SELECT i.mission, i.tick AS landingtick,MIN(eta) AS eta, i.amount, coords(p.x,p.y,p.z) AS target
+FROM intel i
+	JOIN (planets
+		NATURAL JOIN planet_stats) p ON i.target = p.id
+	JOIN (planets
+		NATURAL JOIN planet_stats) p2 ON i.sender = p2.id
+WHERE  p.tick = ( SELECT max(tick) FROM planet_stats) AND i.tick > $TICK AND i.uid = -1 
+	AND p2.tick = p.tick AND p2.id = ?
+GROUP BY p.x,p.y,p.z,p2.x,p2.y,p2.z,i.mission,i.tick,i.amount,i.ingal,i.uid
+ORDER BY p.x,p.y,p.z});
+	$query->execute($planet_id);
+	my @missions;
+	while (my ($mission,$landingtick,$eta,$amount,$target) = $query->fetchrow){
+		push @missions,{Target => $target, Mission => $mission, LandingTick => $landingtick
+			, ETA => $eta, Amount => $amount};
+	}
+	$BODY->param(Missions => \@missions);
+
+	my @scans;
+	my $query = $DBH->prepare(q{SELECT value,tick FROM planet_stats 
+		WHERE id = ? AND tick > tick() - 24});
+	my $scan = q{
+<p>Value the last 24 ticks</p>
+<table><tr><th>Tick</th><th>Value</th><th>Difference</th></tr>};
+	my $old = 0;
+	$query->execute($planet_id);
+	while (my($value,$tick) = $query->fetchrow){
+		my $diff = $value-$old;
+		$old = $value;
+		my $class = 'Defend';
+		$class = 'Attack' if $diff < 0;
+		$scan .= qq{<tr><td>$tick</td><td>$value</td><td class="$class">$diff</td></tr>};
+	}
+	$scan .= q{</table>};
+	push @scans, {Scan => $scan};
+
+	my $query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats WHERE id = ?});
+	my $scan = q{
+<p>Previous Coords</p>
+<table><tr><th>Tick</th><th>Value</th><th>Difference</th></tr>};
+	$query->execute($planet_id);
+	$x = $y = $z = 0;
+	while (my($nx,$ny,$nz,$tick) = $query->fetchrow){
+		if ($nx != $x || $ny != $y || $nz != $z){
+			$x = $nx;
+			$y = $ny;
+			$z = $nz;
+			$scan .= qq{<tr><td>$tick</td><td>$x:$y:$z</td></tr>};
+		}
+	}
+	$scan .= q{</table>};
+	push @scans, {Scan => $scan};
+
+	my $query = $DBH->prepare(q{SELECT DISTINCT ON (type) type,scan_id, tick, scan FROM scans WHERE planet = ?
+		GROUP BY type,scan_id, tick, scan ORDER BY type,tick DESC});
+	$query->execute($planet_id);
+	my %scans;
+	while (my($type,$scan_id,$tick,$scan) = $query->fetchrow){
+		$scans{$type} = [$scan_id,$tick,$scan];
+	}
+	for my $type ('Planet','Jumpgate','Unit','Military','Fleet Analysis','Surface Analysis','Technology Analysis','News'){
+		next unless exists $scans{$type};
+		my $scan_id = $scans{$type}->[0];
+		my $tick = $scans{$type}->[1];
+		my $scan = $scans{$type}->[2];
+		if ($ND::TICK - $tick > 10){
+			$scan =~ s{<table( cellpadding="\d+")?>}{<table$1 class="old">};
+		}
+		push @scans,{Scan => qq{
+<p><b><a href="http://game.planetarion.com/showscan.pl?scan_id=$scan_id">$type</a> Scan from tick $tick</b></p>
+$scan}};
+	}
+
+	$BODY->param(Scans => \@scans);
+}
 
 1;
