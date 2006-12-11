@@ -1,0 +1,131 @@
+body {
+	padding-left: 12em;
+	/*padding-right: 12em;*/
+	font-family: sans-serif;
+	color: black;
+	background-color: #D9D9D9;
+}
+#leftbar,#rightbar{
+	padding: 0;
+	margin: 0;
+	position: absolute;
+	width: 10em;
+	top: 1em;
+}
+#leftbar{
+	left: 1em;
+}
+#rightbar{
+	right: 1em;
+}
+div.leftinfo{
+	float: left;
+	padding-right: 2em;
+}
+p.claimlinks{
+	clear: both;
+}
+
+ul.linkbar {
+	list-style-type: none;
+	width: 10em;
+	padding: 0;
+	margin: 0;
+}
+ul.linkbar li {
+	background: white;
+	color: black;
+	margin: 0.5em 0;
+	padding: 0.3em;
+	/*border-right: 1em solid black;*/
+}
+ul.linkbar a {
+	text-decoration: none;
+}
+input.coord {
+	width: 3.5em;
+}
+tr.odd {
+	background: white;
+	color: black;
+}
+tr.total {
+	background: black;
+	color: red;
+}
+
+td.ingal{
+	background: blue;
+	color: black;
+}
+td.Defend{
+	background: green;
+	color: black;
+}
+td.AllyDef{
+	background: lightgreen;
+	color: black;
+}
+td.Attack{
+	background: red;
+	color: black;
+}
+
+a.unclaim{
+	color: green;
+}
+input.unclaim{
+	background: green;
+}
+a.claim{
+	color: blue;
+}
+a.join{
+	color: #00AAAA;
+}
+input.join{
+	background: #00AAAA;
+}
+
+td.Friendly{
+	background: green;
+	color: black;
+}
+td.Friendly a{
+	color: yellow;
+	background: green;
+}
+td.Hostile{
+	background: red;
+	color: black;
+}
+td.NAP{
+	background: blue;
+	color: white;
+}
+td.NAP a{
+	color: yellow;
+	background: blue;
+}
+table.old{
+	border: outset 1pt;
+	border-collapse: separate;
+	border-color: red;
+}
+
+table.closedPlanet{
+	border: outset 2pt;
+	border-collapse: separate;
+	border-color: red;
+}
+li.bash{
+	color: #FF9933;
+}
+div.clear {
+	clear: both;
+	height: 0;
+	margin: 0;
+	padding: 0;
+	line-height: 0.0;
+	font-size: 1px;
+}
