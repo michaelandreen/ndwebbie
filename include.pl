@@ -36,4 +36,12 @@ sub isBC {
 	return exists $ND::GROUPS{BC};
 }
 
+sub parseMarkup {
+	my ($text) = @_;
+
+	$text =~ s{\n}{\n<br/>}g;
+	$text =~ s{\[B\](.*?)\[B\]}{<b>$1</b>};
+	return $text;
+}
+
 1;

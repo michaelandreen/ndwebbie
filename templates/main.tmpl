@@ -33,17 +33,23 @@
 </fieldset>
 <fieldset> <legend>Fleets</legend>
 	<table>
-	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th></tr></table>
+	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th></tr>
+	<TMPL_LOOP Fleets>
+	<tr><td><TMPL_VAR NAME=Target></td><td><TMPL_VAR NAME=Mission></td>
+		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=LandingTick></td>
+	</tr>
+	</TMPL_LOOP>
+	</table>
 </fieldset>
-<form action="/index.pl" method="post">
+<form action="/index.pl?page=main" method="post">
 <fieldset> <legend>SMS</legend>
 	<p>Number: 
-	<input type="text" name="sms" value="+46730506275"/>
+	<input type="text" name="sms" value="<TMPL_VAR NAME=SMS>"/>
 	<input type="submit" value="Submit"/>
 	</p>
 </fieldset>
 </form>
-<form action="/index.php" method="post">
+<form action="/index.pl?page=main.pl" method="post">
 <fieldset> <legend>Fleet</legend>
 	<p>Paste your total fleet from ships section on overview here (do it daily to see the menus):</p>
 	<textarea rows="15" cols="50" name="fleet"></textarea>
@@ -51,7 +57,7 @@
 	<br/><input type="submit" value="Submit"/>
 </fieldset>
 </form>
-<form action="/index.php" method="post">
+<form action="/index.pl?page=main" method="post">
 <fieldset> <legend>Change password</legend>
 	<p>Old password: 
 	<input type="password" name="oldpass" value=""/>
