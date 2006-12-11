@@ -24,9 +24,9 @@ $ND::TEMPLATE->param(TITLE => 'Main Page');
 our $BODY;
 
 $BODY->param(Username => 'harv');
-$BODY->param(isMEMBER => 1);
-$BODY->param(isHC => 1);
-my @groups = map {name => $_->{name}}, @ND::GROUPS;
+$BODY->param(isMember => isMember());
+$BODY->param(isHC => isHC());
+my @groups = map {name => $_}, sort keys %ND::GROUPS;
 $BODY->param(Groups => \@groups);
 
 

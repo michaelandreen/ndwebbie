@@ -25,6 +25,7 @@ use DBI;
 use DBD::Pg qw(:pg_types);
 use strict;
 
+
 my $cgi = new CGI;
 
 chdir $ENV{'DOCUMENT_ROOT'};
@@ -37,7 +38,7 @@ our $TICK = undef;
 
 $ND::TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl');
 
-for my $file ("db.pl"){
+for my $file ("db.pl","include.pl"){
 	unless (my $return = do $file){
 		warn "couldn't parse $file: $@" if $@;
 		warn "couldn't do $file: $!"    unless defined $return;
@@ -54,15 +55,17 @@ my $query = $DBH->prepare('SELECT groupname,attack,gid from groupmembers NATURAL
 $query->execute($UID);
 
 our $ATTACKER = 0;
-our @GROUPS = ();
+undef our %GROUPS;
 while (my ($name,$attack,$gid) = $query->fetchrow()){
-	push @GROUPS,{name => $name, gid => $gid};
+	$GROUPS{$name} = $gid;
 	$ATTACKER = 1 if $attack;
 }
 
-
 $TEMPLATE->param(Tick => $TICK);
-$TEMPLATE->param(isMember => 1);
+$TEMPLATE->param(isMember => isMember());
+$TEMPLATE->param(isHC => isHC());
+$TEMPLATE->param(isDC => isDC());
+$TEMPLATE->param(isBC => isBC());
 $TEMPLATE->param(isAttacker => $ATTACKER);
 
 
@@ -75,9 +78,9 @@ if (param('page') =~ /^(main)$/){
 $ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl");
 
 unless (my $return = do "${page}.pl"){
-	print "couldn't parse $page: $@" if $@;
-	print "couldn't do $page: $!"    unless defined $return;
-	print "couldn't run $page"       unless $return;
+	print "<p><b>couldn't parse $page: $@</b></p>" if $@;
+	print "<p><b>couldn't do $page: $!</b></p>"    unless defined $return;
+	print "<p><b>couldn't run $page</b></p>"       unless $return;
 }
 
 print header;
@@ -91,7 +94,7 @@ $UID = undef;
 $PLANET = undef;
 $TEMPLATE = undef;
 $TICK = undef;
-@GROUPS = undef;
+%GROUPS = undef;
 $ND::BODY = undef;
 
 exit;
