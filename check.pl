@@ -23,6 +23,7 @@ $ND::TEMPLATE->param(TITLE => 'Check planets and galaxies');
 
 our $BODY;
 our $DBH;
+our $LOG;
 
 $BODY->param(isBC => isMember() && (isOfficer() || isBC));
 
@@ -34,11 +35,21 @@ if (param('coords') =~ /(\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?(?: |:(\d+))?/){
 	$x = $1;
 	$y = $2;
 	$z = $3;
+	$BODY->param(Coords => param('coords'));
 }else{
 	die "Bad coords";
 }
 
-if (param('cmd') eq 'arbiter'){
+if (isMember() && param('cmd') eq 'arbiter'){
+	my $query = $DBH->prepare(q{SELECT count(*) AS friendlies FROM current_planet_stats WHERE x = ? AND z = ? 
+		AND (planet_status IN ('Friendly','NAP') OR relationship IN ('Friendly','NAP'))});
+	my $count = $DBH->selectrow_array($query,undef,$x,$y);
+	if ($count > 0){
+		$BODY->param(Arbiter => '<b>DO NOT ATTACK THIS GAL</b>');
+	}else{
+		$BODY->param(Arbiter => '<b>KILL THESE BASTARDS</b>');
+	}
+	$LOG->execute($ND::UID,"Arbiter check on $x:$y");
 }
 
 my $where = '';
@@ -57,6 +68,9 @@ if (defined $z){
 	$query->execute($x,$y,$z);
 }else{
 	$query->execute($x,$y);
+	if (isMember() && (isBC() || isOfficer()) && !isHC()){
+		$LOG->execute($ND::UID,"BC browsing $x:$y");
+	}
 }
 my @planets;
 my $planet_id = undef;
@@ -73,12 +87,15 @@ while (my ($id,$coords,$planet,$race,$size,$score,$value,$xp,$sizerank,$scoreran
 		$planet{PlanetStatus} = $planet_status;
 		$planet{Relationship} = $relationship;
 		$planet{isBC} = 1;
+		if ($z && $alliance eq 'NewDawn'){
+			$LOG->execute($ND::UID,"BC browsing ND planet $coords tick $ND::TICK");
+		}
 	}
 	push @planets,\%planet;
 }
 $BODY->param(Planets => \@planets);
 
-if ($planet_id){
+if ($z && $planet_id){
 	$BODY->param(OnePlanet => 1);
 
 	my $query = $DBH->prepare(q{ 
@@ -88,7 +105,7 @@ FROM intel i
 		NATURAL JOIN planet_stats) p ON i.target = p.id
 	JOIN (planets
 		NATURAL JOIN planet_stats) p2 ON i.sender = p2.id
-WHERE  p.tick = ( SELECT max(tick) FROM planet_stats) AND i.tick > $TICK AND i.uid = -1 
+WHERE  p.tick = ( SELECT max(tick) FROM planet_stats) AND i.tick > tick() AND i.uid = -1 
 	AND p2.tick = p.tick AND p2.id = ?
 GROUP BY p.x,p.y,p.z,p2.x,p2.y,p2.z,i.mission,i.tick,i.amount,i.ingal,i.uid
 ORDER BY p.x,p.y,p.z});
