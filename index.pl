@@ -51,6 +51,7 @@ for my $file ("db.pl","include.pl"){
 
 ($TICK) = $DBH->selectrow_array('SELECT tick()',undef);
 
+
 my $query = $DBH->prepare('SELECT groupname,attack,gid from groupmembers NATURAL JOIN groups WHERE uid = ?');
 $query->execute($UID);
 
@@ -61,12 +62,6 @@ while (my ($name,$attack,$gid) = $query->fetchrow()){
 	$ATTACKER = 1 if $attack;
 }
 
-$TEMPLATE->param(Tick => $TICK);
-$TEMPLATE->param(isMember => isMember());
-$TEMPLATE->param(isHC => isHC());
-$TEMPLATE->param(isDC => isDC());
-$TEMPLATE->param(isBC => isBC());
-$TEMPLATE->param(isAttacker => $ATTACKER);
 
 our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
@@ -83,6 +78,15 @@ unless (my $return = do "${page}.pl"){
 	print "<p><b>couldn't do $page: $!</b></p>"    unless defined $return;
 	print "<p><b>couldn't run $page</b></p>"       unless $return;
 }
+
+my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$UID);
+
+$TEMPLATE->param(Tick => $TICK);
+$TEMPLATE->param(isMember => (($TICK - $fleetupdate < 24) || isScanner()) && $PLANET && isMember());
+$TEMPLATE->param(isHC => isHC());
+$TEMPLATE->param(isDC => isDC());
+$TEMPLATE->param(isBC => isBC());
+$TEMPLATE->param(isAttacker => $ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET)));
 
 $ND::TEMPLATE->param(BODY => $ND::BODY->output);
 print $TEMPLATE->output;

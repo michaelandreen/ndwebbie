@@ -40,6 +40,10 @@ sub isOfficer {
 	return exists $ND::GROUPS{Officers};
 }
 
+sub isScanner {
+	return exists $ND::GROUPS{Scanner};
+}
+
 sub parseMarkup {
 	my ($text) = @_;
 
