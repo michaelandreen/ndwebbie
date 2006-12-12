@@ -52,8 +52,8 @@ if (isHC()){
 }
 my $query = $DBH->prepare(qq{SELECT id,coords(x,y,z), ruler, planet,race,
 	size, score, value, xp, sizerank, scorerank, valuerank, xprank
-	$extra_columns FROM current_planet_stats ORDER BY $order LIMIT 100 OFFSET $offset});
-$query->execute;
+	$extra_columns FROM current_planet_stats ORDER BY $order LIMIT 100 OFFSET ?});
+$query->execute($offset);
 my @planets;
 while (my ($id,$coords,$ruler,$planet,$race,$size,$score,$value,$xp,$sizerank,$scorerank,$valuerank,$xprank
 		,$planet_status,$hit_us,$alliance,$relationship,$nick) = $query->fetchrow){
