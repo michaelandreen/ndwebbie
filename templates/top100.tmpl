@@ -1,0 +1,34 @@
+<p><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
+	<a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
+<table border="1">
+	<tr>
+	<tr><th>Coords</th><th>Planet</th><th>Race</th>
+	<th><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size (rank)</a></th>
+	<th><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score (rank)</a></th>
+	<th><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=valuerank">Value (rank)</a></th>
+	<th><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=xprank">XP (rank)</a></th>
+	<TMPL_IF isHC>
+	<th>Nick</th>
+	<th><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=hit_us">Hit us</a></th>
+	<th>Alliance</th>
+	</TMPL_IF>
+	</tr>
+	<TMPL_LOOP Planets>
+	<tr align="center">
+	<td><a href="index.pl?page=check&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+	<td><TMPL_VAR NAME=Planet></td>
+	<td><TMPL_VAR NAME=Race></td>
+	<td><TMPL_VAR NAME=Size></td>
+	<td><TMPL_VAR NAME=Score></td>
+	<td><TMPL_VAR NAME=Value></td>
+	<td><TMPL_VAR NAME=XP></td>
+	<TMPL_IF isHC>
+	<td class="<TMPL_VAR NAME=PlanetStatus>"><TMPL_VAR NAME=Nick></td>
+	<td><TMPL_VAR NAME=HitUs></td>
+	<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td>
+	</TMPL_IF>
+	</tr>
+	</TMPL_LOOP>
+</table>
+<p><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
+	<a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>

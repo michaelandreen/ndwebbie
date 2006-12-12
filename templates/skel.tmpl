@@ -21,8 +21,8 @@
 			<li><a href="index.pl?page=launchConfirmation.php">Launch confirmation</a></li>
 			<li><a href="index.pl?page=covop">CovOp targets</a></li>
 			<li><a href="index.pl?page=covop&amp;list=distwhores">Distwhores</a></li>
-			<li><a href="index.pl?page=top100.php">Top100 planets</a></li>
-			<li><a href="index.pl?page=defrequest.php">Request defense</a></li>
+			<li><a href="index.pl?page=top100">Top100 planets</a></li>
+			<li><a href="index.pl?page=defrequest">Request defense</a></li>
 		</ul>
 		</TMPL_IF>
 		<TMPL_IF isATTACKER>
@@ -33,33 +33,32 @@
 				<input class="coord" type="text" name="coords" value="1:1:1"/>
 				<input class="coord" type="submit" value="Check"/>
 				</p></form></li>
-			<li><a href="index.pl?page=raids.php">Web raids</a></li>
-			<li><a href="oldraids.php">Old raid page (Raid page for Internet Explorer users)</a></li>
+			<li><a href="index.pl?page=raids">Web raids</a></li>
 		</ul><div id="targets"></div>
 		</TMPL_IF>
 		<TMPL_IF isBC>
 		<p>BC menu</p>
 		<ul class="linkbar">
-			<li><a href="index.pl?page=editRaid.php">Create raid</a></li>
+			<li><a href="index.pl?page=editRaid">Create raid</a></li>
 		</ul>
 		</TMPL_IF>
 		<TMPL_IF isDC>
 		<p>DC menu</p>
 		<ul class="linkbar">
-			<li><a href="index.pl?page=calls.php">Defense calls</a></li>
-			<li><a href="index.pl?page=calls.php?show=uncovered">Not covered calls</a></li>
-			<li><a href="index.pl?page=calls.php?show=covered">Covered calls</a></li>
-			<li><a href="index.pl?page=calls.php?show=all">All calls</a></li>
+			<li><a href="index.pl?page=calls">Defense calls</a></li>
+			<li><a href="index.pl?page=calls?show=uncovered">Not covered calls</a></li>
+			<li><a href="index.pl?page=calls?show=covered">Covered calls</a></li>
+			<li><a href="index.pl?page=calls?show=all">All calls</a></li>
 		</ul>
 		</TMPL_IF>
 		<TMPL_IF isHC>
 		<p>HC menu</p>
 		<ul class="linkbar">
-			<li><a href="index.pl?page=users.php">List users</a></li>
-			<li><a href="index.pl?page=intel.php">Intel</a></li>
-			<li><a href="index.pl?page=alliances.php">Alliances</a></li>
-			<li><a href="index.pl?page=allianceStatus.php">Alliance status</a></li>
-			<li><a href="index.pl?page=allianceRes.php">Alliance resources</a></li>
+			<li><a href="index.pl?page=users">List users</a></li>
+			<li><a href="index.pl?page=intel">Intel</a></li>
+			<li><a href="index.pl?page=alliances">Alliances</a></li>
+			<li><a href="index.pl?page=allianceStatus">Alliance status</a></li>
+			<li><a href="index.pl?page=allianceRes">Alliance resources</a></li>
 		</ul>
 		</TMPL_IF>
 	<TMPL_VAR NAME=LEFTBAR>
