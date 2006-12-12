@@ -1,4 +1,4 @@
-<p><TMPL_IF Arbiter><TMPL_VAR NAME=Arbiter><TMPL_ELSE><a href="index.pl?page=check&amp;cmd=arbiter&amp;coords=<TMPL_VAR NAME=Coords>">Do arbiter check on gal</a></TMPL_IF></p>
+<p><TMPL_IF Arbiter><TMPL_VAR NAME=Arbiter><TMPL_ELSE><a href="index.pl?page=check&amp;cmd=arbiter&amp;coords=<TMPL_VAR ESCAPE=URL NAME=Coords>">Do arbiter check on gal</a></TMPL_IF></p>
 <table border="1">
 	<tr><th>Coords</th><th>Planet</th><th>Race</th><th>Size (rank)</th><th>Score (rank)</th><th>Value (rank)</th>
 		<th>XP (rank)</th><th>Fleet (Resouce) value</th><TMPL_IF isBC><th>Nick</th><th>Hit us</th><th>Alliance</th></TMPL_IF>

@@ -41,9 +41,9 @@ if (param('coords') =~ /(\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?(?: |:(\d+))?/){
 }
 
 if (isMember() && param('cmd') eq 'arbiter'){
-	my $query = $DBH->prepare(q{SELECT count(*) AS friendlies FROM current_planet_stats WHERE x = ? AND z = ? 
+	my $query = $DBH->prepare(q{SELECT count(*) AS friendlies FROM current_planet_stats WHERE x = ? AND y = ? 
 		AND (planet_status IN ('Friendly','NAP') OR relationship IN ('Friendly','NAP'))});
-	my $count = $DBH->selectrow_array($query,undef,$x,$y);
+	my ($count) = $DBH->selectrow_array($query,undef,$x,$y);
 	if ($count > 0){
 		$BODY->param(Arbiter => '<b>DO NOT ATTACK THIS GAL</b>');
 	}else{
