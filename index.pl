@@ -66,7 +66,7 @@ while (my ($name,$attack,$gid) = $query->fetchrow()){
 our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
 my $page = 'main';
-if (param('page') =~ /^(main|check|motd|points|covop|top100)$/){
+if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation)$/){
 	$page = $1;
 }
 
