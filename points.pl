@@ -19,7 +19,7 @@
 
 use strict;
 
-$ND::TEMPLATE->param(TITLE => 'Edit MOTD');
+$ND::TEMPLATE->param(TITLE => 'Top Members');
 
 our $BODY;
 our $DBH;

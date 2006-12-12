@@ -1,0 +1,18 @@
+<table border="1">
+	<tr>
+	<th>Coords</th><th>Metal</th><th>Crystal</th><th>Eonium</th><th>% Sec Centres</th><th>Dists</th><th>Max (15 agents)</th><th>Last covop (tick)</th>
+	</tr>
+	<TMPL_LOOP Targets>
+	<tr align="center">
+	<td><a href="index.pl?page=check&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+	<td><TMPL_VAR NAME=Metal></td>
+	<td><TMPL_VAR NAME=Crystal></td>
+	<td><TMPL_VAR NAME=Eonium></td>
+	<td><TMPL_VAR NAME=SecCents></td>
+	<td><TMPL_VAR NAME=Dists></td>
+	<td><TMPL_VAR NAME=MaxResHack></td>
+	<td><TMPL_VAR NAME=Username> (<TMPL_VAR NAME=LastCovOp>)</td>
+	<td><a href="index.pl?page=covop<TMPL_VAR NAME=List>&amp;covop=<TMPL_VAR NAME=Target>">Did CovOp this tick</a>
+	</tr>
+	</TMPL_LOOP>
+</table>
