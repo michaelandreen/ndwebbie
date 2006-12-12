@@ -1,0 +1,6 @@
+<form action="/index.pl" method="post"><fieldset> <legend>Motd</legend>
+	<textarea rows="25" cols="80" name="motd"><TMPL_VAR NAME=MOTD></textarea>
+	<input type="hidden" name="cmd" value="change"/>
+	<input type="hidden" name="page" value="motd"/>
+	<br/><input type="submit" value="Change"/>
+</fieldset></form>

@@ -19,37 +19,25 @@
 
 use strict;
 
+$ND::TEMPLATE->param(TITLE => 'Edit MOTD');
 
-sub isMember {
-	return exists $ND::GROUPS{Members};
-}
+our $BODY;
+our $DBH;
+our $LOG;
 
-sub isHC {
-	return exists $ND::GROUPS{HC};
-}
+die "You don't have access" unless isHC();
 
-sub isDC {
-	return exists $ND::GROUPS{DC};
-}
-
-sub isBC {
-	return exists $ND::GROUPS{BC};
-}
-
-sub isOfficer {
-	return exists $ND::GROUPS{Officers};
-}
-
-sub isScanner {
-	return exists $ND::GROUPS{Scanner};
-}
-
-sub parseMarkup {
-	my ($text) = @_;
-
-	$text =~ s{\n}{\n<br/>}g;
-	$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>};
-	return $text;
+if (param('cmd') eq 'change'){
+	$DBH->begin_work;
+	my $query = $DBH->prepare(q{UPDATE misc SET value= ? WHERE id='MOTD'});
+	my $motd = escapeHTML(param('motd'));
+	$query->execute($motd);
+	$LOG->execute($ND::UID,"Updated MOTD");
+	$DBH->commit;
+	$BODY->param(MOTD => $motd);
+}else{
+	my ($motd) = $DBH->selectrow_array(q{SELECT value FROM misc WHERE id='MOTD'});
+	$BODY->param(MOTD => $motd);
 }
 
 1;
