@@ -19,7 +19,7 @@
 
 use strict;
 
-$ND::TEMPLATE->param(TITLE => 'Launch Confirmation');
+$ND::TEMPLATE->param(TITLE => 'Add Intel and Scans');
 
 our $BODY;
 our $DBH;
