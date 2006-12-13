@@ -63,7 +63,7 @@ sub max {
 }
 
 sub listTargets {
-	my $query = $ND::DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, released_coords, coords(x,y,z),c.launched
+	my $query = $ND::DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, released_coords, coords(x,y,z),c.launched,c.wave
 FROM raid_claims c
 	JOIN raid_targets t ON c.target = t.id
 	JOIN raids r ON t.raid = r.id
@@ -76,7 +76,7 @@ ORDER BY r.tick+c.wave,x,y,z});
 		my $coords = "Target $target->{id}";
 		$coords = $target->{coords} if $target->{released_coords};
 		push @targets,{Coords => $coords, Launched => $target->{launched}, Raid => $target->{raid}
-			, Target => $target->{id}, Tick => $target->{landingtick}};
+			, Target => $target->{id}, Tick => $target->{landingtick}, Wave => $target->{wave}};
 	}
 	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl");
 	$template->param(Targets => \@targets);

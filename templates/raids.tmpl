@@ -30,6 +30,7 @@
 	<p><TMPL_VAR NAME=Message></p>
 </fieldset>
 
+<TMPL_IF Ajax>
 <form action="index.pl" method="post">
 	<p>
 		<input type="button" value="Update claims"
@@ -38,6 +39,7 @@
 			onclick = "listTargets('index.pl?page=raids&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>')"/>
 	</p>
 </form>
+</TMPL_IF>
 <TMPL_LOOP Targets>
 <fieldset> <legend>Target: #<TMPL_VAR NAME=Id></legend>
 <a name="target<TMPL_VAR NAME=Id>"/>
@@ -68,10 +70,17 @@
 	<form action="index.pl" method="post">
 	<p class="claimlinks">
 	<span id="claim<TMPL_VAR NAME=Id>">
+	<TMPL_IF Ajax>
+	<TMPL_LOOP Claims>
+     <input type="button" value="Claim wave <TMPL_VAR NAME=Wave>"
+        onclick = "claim('index.pl?page=raids&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'Claim')"/>
+	</TMPL_LOOP>
+	<TMPL_ELSE>
 	<TMPL_LOOP Claims>
 	<a class="<TMPL_VAR NAME=Command>" href="/index.pl?page=raids&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=Command>&amp;target=<TMPL_VAR NAME=Target>&amp;wave=<TMPL_VAR NAME=Wave>#<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Command> wave <TMPL_VAR NAME=Wave><TMPL_IF Claimers> (<TMPL_VAR NAME=Claimers>)</TMPL_IF></a>
 	<TMPL_IF Owner><a href="/index.pl?page=raids&amp;raid=<TMPL_VAR NAME=Raid>&amp;target=<TMPL_VAR NAME=Target>&amp;cmd=set&amp;joinable=<TMPL_IF Joinable>FALSE<TMPL_ELSE>TRUE</TMPL_IF>&amp;wave=<TMPL_VAR NAME=Wave>#<TMPL_VAR NAME=Target>"><TMPL_IF Joinable>N<TMPL_ELSE>J</TMPL_IF></a></TMPL_IF>
 	</TMPL_LOOP>
+	</TMPL_IF>
 	</span>
 	</p>
 	</form>

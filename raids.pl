@@ -191,6 +191,7 @@ ORDER BY size});
 		while (my $target = $targetquery->fetchrow_hashref){
 			my %target;
 			$target{Id} = $target->{id};
+			$target{Ajax} = $ajax;
 			my $num = pow(10,length($target->{score})-2);
 			$target{Score} = ceil($target->{score}/$num)*$num;
 			$num = pow(10,length($target->{value})-2);
@@ -202,6 +203,31 @@ ORDER BY size});
 			$num = pow(10,length($target->{resvalue})-2);
 			$target{ResValue} = floor($target->{resvalue}/$num)*$num;
 			$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
+
+			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) type, tick, scan FROM scans 
+				WHERE planet = ? AND type ~ 'Unit|Planet|Military|.* Analysis' AND tick + 24 > tick()
+				GROUP BY type, tick, scan ORDER BY type ,tick DESC});
+			$scans->execute($target->{planet});
+			my %scans;
+			while (my $scan = $scans->fetchrow_hashref){
+				$scans{$scan->{type}} = $scan;
+			}
+
+			my @scans;
+			for my $type ('Planet','Unit','Military','Surface Analysis','Technology Analysis'){
+				next unless exists $scans{$type};
+				my $scan = $scans{$type};
+				if ($ND::TICK - $scan->{tick} > 5){
+					$scan->{scan} =~ s{<table( cellpadding="\d+")?>}{<table$1 class="old">};
+				}
+				if ($type eq 'Planet'){
+					$target{PlanetScan} = $scan->{scan};
+					next;
+				}
+				push @scans,{Scan => $scan->{scan}};
+			}
+			$target{Scans} = \@scans;
+
 			my @roids;
 			my @claims;
 			my $size = $target{Size};
@@ -213,8 +239,12 @@ ORDER BY size});
 					$xp = max(0,floor($roids * 10 * (min(2,$target{Score}/$planet->{score}) + min(2,$target{Value}/$planet->{value})-1)));
 				}
 				push @roids,{Wave => $i, Roids => $roids, XP => $xp};
-				push @claims,{Wave => $i, Target => $target{Id}, Command => 'Claim'
-					, Owner => 1, Raid => $raid->{id}, Joinable => 1};
+				if ($ajax){
+					push @claims,{Wave => $i, Target => $target{Id}}
+				}else{
+					push @claims,{Wave => $i, Target => $target{Id}, Command => 'Claim'
+						, Owner => 1, Raid => $raid->{id}, Joinable => 0};
+				}
 			}
 			$target{Roids} = \@roids;
 			$target{Claims} = \@claims;
