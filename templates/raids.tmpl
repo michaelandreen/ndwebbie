@@ -53,17 +53,26 @@
 		</TMPL_LOOP>
 	</ul>
 	<TMPL_IF Comment>
-	<fieldset> <legend>Comment</legend>
-		<p><TMPL_VAR NAME=Comment></p>
-	</fieldset>
+		<fieldset> <legend>Comment</legend>
+			<p><TMPL_VAR NAME=Comment></p>
+		</fieldset>
 	</TMPL_IF>
 	<TMPL_VAR NAME=PlanetScan>
 	</div>
 	<TMPL_LOOP Scans>
-	<div class="leftinfo">
-	<TMPL_VAR NAME=Scan>
-	</div>
+		<div class="leftinfo">
+		<TMPL_VAR NAME=Scan>
+		</div>
 	</TMPL_LOOP>
+	<div class="clear"> &nbsp;</div>
+	<form action="index.pl" method="post">
+	<p class="claimlinks">
+	<span id="claim<TMPL_VAR NAME=Id>">
+	<TMPL_LOOP Claims>
+	</TMPL_LOOP>
+	</span>
+	</p>
+	</form>
 </fieldset>
 </TMPL_LOOP>
 
