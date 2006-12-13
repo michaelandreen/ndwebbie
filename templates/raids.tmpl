@@ -1,0 +1,70 @@
+<TMPL_LOOP Raids>
+	<p><a href="index.pl?page=raids&amp;raid=<TMPL_VAR NAME=Raid>"><TMPL_VAR NAME=Raid></a>
+	<TMPL_IF isBC>
+		<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>">Edit</a>
+		<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=close">Close raid.</a>
+		<TMPL_UNLESS ReleasedCoords>
+		<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=showcoords">Show coords.</a>
+		</TMPL_UNLESS>
+	</TMPL_IF>
+	</p>
+</TMPL_LOOP>
+<TMPL_IF ClosedRaids>
+<p> Closed raids </p>
+<TMPL_LOOP ClosedRaids>
+		<p>
+			<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
+			
+			<TMPL_UNLESS Open>
+			<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=open">Open raid.</a>
+			</TMPL_UNLESS>
+		</p>
+</TMPL_LOOP>
+</TMPL_IF>
+
+<TMPL_IF Raid>
+<fieldset> <legend>Message</legend>
+	<p><b>REMEMBER TO PASTE LAUNCH CONFIRMATION IF YOU WANT AN ATTACK POINT</b></p>
+	<p><b style="color: red;">DO NOT JOIN A WAVE UNLESS YOU HAVE PERMISSION FROM THE PERSON WHO CLAIMED IT</b></p>
+	<p>Landing tick first wave: <TMPL_VAR NAME=LandingTick></p>
+	<p><TMPL_VAR NAME=Message></p>
+</fieldset>
+
+<form action="index.pl" method="post">
+	<p>
+		<input type="button" value="Update claims"
+			onclick = "update('index.pl?page=raids&amp;raid=<TMPL_VAR NAME=Raid>')"/>
+		<input type="button" value="Update target list"
+			onclick = "listTargets('index.pl?page=raids&amp;raid=<TMPL_VAR NAME=Raid>')"/>
+	</p>
+</form>
+<TMPL_LOOP Targets>
+<fieldset> <legend>Target: #<TMPL_VAR NAME=Id></legend>
+<a name="target<TMPL_VAR NAME=Id>"/>
+	<div class="leftinfo"><ul>
+		<li>Size: <TMPL_VAR NAME=Size></li>
+		<li class="<TMPL_VAR NAME=ScoreBash>">Score: <TMPL_VAR NAME=Score></li>
+		<li class="<TMPL_VAR NAME=ValueBash>">Value: <TMPL_VAR NAME=Value></li>
+		<li>Fleet value: <TMPL_VAR NAME=FleetValue></li>
+		<li>Resource value: <TMPL_VAR NAME=ResValue></li>
+		<li>Race: <TMPL_VAR NAME=Race></li>
+		<TMPL_LOOP Roids>
+			<li>Roids wave <TMPL_VAR NAME=Wave>: <TMPL_VAR NAME=Roids> (<TMPL_VAR NAME=XP> xp)</li>
+		</TMPL_LOOP>
+	</ul>
+	<TMPL_IF Comment>
+	<fieldset> <legend>Comment</legend>
+		<p><TMPL_VAR NAME=Comment></p>
+	</fieldset>
+	</TMPL_IF>
+	<TMPL_VAR NAME=PlanetScan>
+	</div>
+	<TMPL_LOOP Scans>
+	<div class="leftinfo">
+	<TMPL_VAR NAME=Scan>
+	</div>
+	</TMPL_LOOP>
+</fieldset>
+</TMPL_LOOP>
+
+</TMPL_IF>

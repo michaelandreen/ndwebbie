@@ -66,12 +66,22 @@ while (my ($name,$attack,$gid) = $query->fetchrow()){
 our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
 my $page = 'main';
-if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest)$/){
+if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids)$/){
 	$page = $1;
 }
 
-print header;
-$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl");
+our $XML = 0;
+$XML = 1 if param('xml') and $page =~ /^(raids)$/;
+
+if ($XML){
+	print header(-type=>'text/xml');
+	$ND::TEMPLATE = HTML::Template->new(filename => "templates/xml.tmpl");
+	$ND::BODY = HTML::Template->new(filename => "templates/${page}.xml.tmpl");
+}else{
+	print header;
+	$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl");
+}
+
 
 unless (my $return = do "${page}.pl"){
 	print "<p><b>couldn't parse $page: $@</b></p>" if $@;
@@ -79,33 +89,20 @@ unless (my $return = do "${page}.pl"){
 	print "<p><b>couldn't run $page</b></p>"       unless $return;
 }
 
-my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$UID);
+unless ($XML){
+	my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$UID);
 
-$TEMPLATE->param(Tick => $TICK);
-$TEMPLATE->param(isMember => (($TICK - $fleetupdate < 24) || isScanner()) && $PLANET && isMember());
-$TEMPLATE->param(isHC => isHC());
-$TEMPLATE->param(isDC => isDC());
-$TEMPLATE->param(isBC => isBC());
-$TEMPLATE->param(isAttacker => $ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET)));
-if ($ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET))){
-	my $query = $DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, released_coords, coords(x,y,z),c.launched
-FROM raid_claims c
-	JOIN raid_targets t ON c.target = t.id
-	JOIN raids r ON t.raid = r.id
-	JOIN current_planet_stats p ON t.planet = p.id
-WHERE c.uid = ? AND r.tick+c.wave > ? AND r.open AND not r.removed
-ORDER BY r.tick+c.wave,x,y,z});
-	$query->execute($UID,$TICK);
-	my @targets;
-	while (my $target = $query->fetchrow_hashref){
-		my $coords = "Target $target->{id}";
-		$coords = $target->{coords} if $target->{released_coords};
-		push @targets,{Coords => $coords, Launched => $target->{launched}, Raid => $target->{raid}
-			, Target => $target->{id}, Tick => $target->{landingtick}};
+	$TEMPLATE->param(Tick => $TICK);
+	$TEMPLATE->param(isMember => (($TICK - $fleetupdate < 24) || isScanner()) && $PLANET && isMember());
+	$TEMPLATE->param(isHC => isHC());
+	$TEMPLATE->param(isDC => isDC());
+	$TEMPLATE->param(isBC => isBC());
+	$TEMPLATE->param(isAttacker => $ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET)));
+	if ($ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET))){
+		$ND::TEMPLATE->param(Targets => listTargets());
 	}
-	$ND::TEMPLATE->param(Targets => \@targets);
-}
 
+}
 $ND::TEMPLATE->param(BODY => $ND::BODY->output);
 print $TEMPLATE->output;
 

@@ -1,0 +1,20 @@
+<targets>
+	<timestamp><TMPL_VAR NAME=Timestamp></timestamp>
+<TMPL_IF TargetList>
+	<targetlist>
+	<TMPL_VAR NAME=TargetList>
+	</targetlist>
+</TMPL_IF>
+<TMPL_LOOP Targets>
+	<target id="<TMPL_VAR NAME=Id>">
+	<TMPL_LOOP Waves>
+		<wave id="<TMPL_VAR NAME=Id>">
+			<command><TMPL_VAR NAME=Command></command>
+			<claimers><TMPL_VAR NAME=Claimers></claimers>
+			<joinable><TMPL_VAR NAME=Joinable></joinable>
+			<coords><TMPL_VAR NAME=Coords></coords>
+		</wave>
+	</TMPL_LOOP>
+	</target>
+</TMPL_LOOP>
+</targets>

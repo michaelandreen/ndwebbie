@@ -52,4 +52,35 @@ sub parseMarkup {
 	return $text;
 }
 
+sub min {
+    my ($x,$y) = @_;
+    return ($x > $y ? $y : $x);
+}
+
+sub max {
+    my ($x,$y) = @_;
+    return ($x < $y ? $y : $x);
+}
+
+sub listTargets {
+	my $query = $ND::DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, released_coords, coords(x,y,z),c.launched
+FROM raid_claims c
+	JOIN raid_targets t ON c.target = t.id
+	JOIN raids r ON t.raid = r.id
+	JOIN current_planet_stats p ON t.planet = p.id
+WHERE c.uid = ? AND r.tick+c.wave > ? AND r.open AND not r.removed
+ORDER BY r.tick+c.wave,x,y,z});
+	$query->execute($ND::UID,$ND::TICK);
+	my @targets;
+	while (my $target = $query->fetchrow_hashref){
+		my $coords = "Target $target->{id}";
+		$coords = $target->{coords} if $target->{released_coords};
+		push @targets,{Coords => $coords, Launched => $target->{launched}, Raid => $target->{raid}
+			, Target => $target->{id}, Tick => $target->{landingtick}};
+	}
+	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl");
+	$template->param(Targets => \@targets);
+	return $template->output;
+}
+
 1;

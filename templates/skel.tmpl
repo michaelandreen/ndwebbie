@@ -35,13 +35,7 @@
 				</p></form></li>
 			<li><a href="index.pl?page=raids">Web raids</a></li>
 		</ul>
-		<div id="targets"><TMPL_IF Targets>
-			<table><tr><th>Target</th><th>Landing tick</th></tr>
-			<TMPL_LOOP Targets>
-				<tr><td><a href="index.pl?page=check&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a><TMPL_IF Launched>*</TMPL_IF></td><td><a href="raids.php?raid=<TMPL_VAR NAME=Raid>#target<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Tick></a></td></tr>
-			</TMPL_LOOP>
-			</table>
-		</TMPL_IF></div>
+		<div id="targets"><TMPL_VAR NAME=Targets></div>
 		</TMPL_IF>
 		<TMPL_IF isBC>
 		<p>BC menu</p>
