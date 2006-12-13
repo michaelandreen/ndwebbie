@@ -156,6 +156,11 @@ if ($XML && $raid && param('cmd') eq 'update' ){
 	}
 	generateClaimXml($raid,$from);
 }
+if ($XML && param('cmd') eq 'gettargets' ){
+	$_ = listTargets();
+	chop;
+	$BODY->param(TargetList => $_);
+}
 
 unless ($XML){
 	$ND::TEMPLATE->param(TITLE => 'Raids');

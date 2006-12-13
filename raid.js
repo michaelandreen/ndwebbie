@@ -56,8 +56,11 @@ function listTargets(dataSource){
 		if (http.readyState == 4 &&
 				http.status == 200) {
 			var obj = document.getElementById("targets");
-			if (obj)
-				obj.innerHTML = http.responseText;
+			if (obj){
+				var re = new RegExp("targetlist>(.*)</targetlist", "m");
+				re.test(http.responseText);
+				obj.innerHTML = RegExp.$1;
+			}
 		}
 	}
 	http.send(null);
