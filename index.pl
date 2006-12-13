@@ -73,12 +73,12 @@ if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|a
 our $XML = 0;
 $XML = 1 if param('xml') and $page =~ /^(raids)$/;
 
+my $type = 'text/html';
 if ($XML){
-	print header(-type=>'text/xml');
+	$type = 'text/xml';
 	$ND::TEMPLATE = HTML::Template->new(filename => "templates/xml.tmpl");
 	$ND::BODY = HTML::Template->new(filename => "templates/${page}.xml.tmpl");
 }else{
-	print header;
 	$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl");
 }
 
@@ -104,7 +104,9 @@ unless ($XML){
 
 }
 $ND::TEMPLATE->param(BODY => $ND::BODY->output);
-print $TEMPLATE->output;
+my $output = $TEMPLATE->output;
+print header(-type=> $type, -charset => 'utf-8', -Content_Length => length $output);
+print $output;
 
 
 $DBH->disconnect;
