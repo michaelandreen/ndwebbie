@@ -86,9 +86,9 @@ function updateClaims(dataSource,xmldoc,timestamp){
 		obj.innerHTML = '';
 		var waves = targets[i].getElementsByTagName("wave");;
 		for (var j = 0; j < waves.length; j++){
-			var command = waves[j].firstChild.nextSibling;
-			var claimers = command.nextSibling;
-			var joinable = claimers.nextSibling;
+			var command = waves[j].getElementsByTagName("command")[0];
+			var claimers = waves[j].getElementsByTagName("claimers")[0];
+			var joinable = waves[j].getElementsByTagName("joinable")[0];
 			var wave = waves[j].attributes.getNamedItem("id").nodeValue;
 			command = command.firstChild.nodeValue;
 			if(claimers.firstChild){
@@ -112,7 +112,7 @@ function updateClaims(dataSource,xmldoc,timestamp){
 				}*/
 				obj.appendChild(b);
 			}
-			if (command == 'unclaim'){
+			if (command == 'Unclaim'){
 				var b = document.createElement("input");
 				b.type = 'button';
 				b.value = 'J';

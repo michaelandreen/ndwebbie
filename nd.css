@@ -71,19 +71,19 @@ td.Attack{
 	color: black;
 }
 
-a.unclaim{
+a.Unclaim{
 	color: green;
 }
-input.unclaim{
+input.Unclaim{
 	background: green;
 }
-a.claim{
+a.Claim{
 	color: blue;
 }
-a.join{
+a.Join{
 	color: #00AAAA;
 }
-input.join{
+input.Join{
 	background: #00AAAA;
 }
 

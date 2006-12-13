@@ -31,12 +31,9 @@ my $cgi = new CGI;
 chdir $ENV{'DOCUMENT_ROOT'};
 
 our $DBH = undef;
-our $UID = undef;
-our $PLANET = undef;
-our $TEMPLATE = undef;
-our $TICK = undef;
+our $USER = $ENV{'REMOTE_USER'};
 
-$ND::TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl');
+our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl');
 
 for my $file ("db.pl","include.pl"){
 	unless (my $return = do $file){
@@ -46,10 +43,10 @@ for my $file ("db.pl","include.pl"){
 	}
 }
 
-($UID,$PLANET) = $DBH->selectrow_array('SELECT uid,planet FROM users WHERE username = ?'
+our ($UID,$PLANET) = $DBH->selectrow_array('SELECT uid,planet FROM users WHERE username = ?'
 	,undef,$ENV{'REMOTE_USER'});
 
-($TICK) = $DBH->selectrow_array('SELECT tick()',undef);
+our ($TICK) = $DBH->selectrow_array('SELECT tick()',undef);
 
 
 my $query = $DBH->prepare('SELECT groupname,attack,gid from groupmembers NATURAL JOIN groups WHERE uid = ?');
@@ -112,6 +109,7 @@ print $output;
 $DBH->disconnect;
 $DBH = undef;
 $UID = undef;
+$USER = undef;
 $PLANET = undef;
 $TEMPLATE = undef;
 $TICK = undef;
