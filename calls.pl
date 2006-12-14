@@ -27,7 +27,6 @@ $ND::TEMPLATE->param(TITLE => 'Defense Calls');
 
 die "You don't have access" unless isBC();
 
-
 my $call;
 if (param('call') =~ /^(\d+)$/){
 	my $query = $DBH->prepare(q{
@@ -38,6 +37,74 @@ FROM calls c
 	JOIN current_planet_stats p ON u.planet = p.id
 WHERE c.id = ?});
 	$call = $DBH->selectrow_hashref($query,undef,$1);
+}
+if ($call){
+	if (param('cmd') eq 'Submit'){
+	}elsif (param('cmd') eq 'Submit'){
+		$DBH->begin_work;
+		if (param('ctick')){
+			if ($DBH->do(q{UPDATE calls SET landing_tick = ? WHERE id = ?}
+					,undef,param('tick'),$call->{id})){
+				$call->{landing_tick} = param('tick');
+			}else{
+				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+			}
+		}
+		if (param('info')){
+			if ($DBH->do(q{UPDATE calls SET info = ? WHERE id = ?}
+					,undef,param('info'),$call->{id})){
+				$call->{info} = param('info');
+			}else{
+				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+			}
+		}
+		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
+	}elsif(param('cmd') =~ /^(Cover|Uncover|Ignore|Open) call$/){
+		my $extra_vars = '';
+		if (param('cmd') eq 'Cover call'){
+			$extra_vars = ", covered = TRUE, open = FALSE";
+		}elsif (param('cmd') eq 'Uncover call'){
+			$extra_vars = ", covered = FALSE, open = TRUE";
+		}elsif (param('cmd') eq 'Ignore call'){
+			$extra_vars = ", covered = FALSE, open = FALSE";
+		}elsif (param('cmd') eq 'Open call'){
+			$extra_vars = ", covered = FALSE, open = TRUE";
+		}
+		if ($DBH->do(qq{UPDATE calls SET dc = ? $extra_vars WHERE id = ?},
+			,undef,$ND::UID,$call->{id})){
+			$call->{covered} = (param('cmd') eq 'Cover call');
+			$call->{open} = (param('cmd') =~ /^(Uncover|Open) call$/);
+		}else{
+			print "<p> Something went wrong: ".$DBH->errstr."</p>";
+		}
+	}elsif(param('cmd') eq 'Remove'){
+		$DBH->begin_work;
+		my $query = $DBH->prepare(q{DELETE FROM incomings WHERE id = ? AND call = ?});
+		for my $param (param()){
+			if ($param =~ /^change:(\d+)$/){
+				if($query->execute($1,$call->{id})){
+					$LOG->execute($ND::UID,"DC deleted fleet: $1, call $call->{id}");
+				}else{
+					print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				}
+			}
+		}
+		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
+	}elsif(param('cmd') eq 'Change'){
+		$DBH->begin_work;
+		my $query = $DBH->prepare(q{UPDATE incomings SET shiptype = ? WHERE id = ? AND call = ?});
+		for my $param (param()){
+			if ($param =~ /^change:(\d+)$/){
+				my $shiptype = escapeHTML(param("shiptype:$1"));
+				if($query->execute($shiptype,$1,$call->{id})){
+					$LOG->execute($ND::UID,"DC set fleet: $1, call $call->{id} to: $shiptype");
+				}else{
+					print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				}
+			}
+		}
+		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
+	}
 }
 
 if ($call){
