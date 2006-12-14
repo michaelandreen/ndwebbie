@@ -34,7 +34,7 @@
 		</div>
 		<div class="leftinfo">
 			<p>Raid message here</p>
-			<textarea rows="15" cols="40" name="message"></textarea>
+			<textarea rows="15" cols="40" name="message"><TMPL_VAR NAME=Message></textarea>
 		</div>
 		<div class="leftinfo">
 			<p>List all target coords here</p>
@@ -52,4 +52,44 @@
 		</p>
 	</fieldset>
 </form>
-
+<TMPL_IF Raid>
+	<p>Sort by:
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=coords">Coords</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=race">Race</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=size">Size</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=score">Score</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=value">Value</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=xp">XP</a>
+	</p>
+<TMPL_LOOP Targets>
+	<fieldset> <legend>Target: #<TMPL_VAR NAME=Id> <TMPL_VAR NAME=Coords></legend>
+	<div class="leftinfo">
+		<ul>
+			<li>Size: <TMPL_VAR NAME=Size></li>
+			<li>Score: <TMPL_VAR NAME=Score></li>
+			<li>Value: <TMPL_VAR NAME=Value></li>
+			<li>Race: <TMPL_VAR NAME=Race></li>
+		</ul>
+		<table>
+			<tr><th>Planet status</th><th>Alliance relationship</th></tr>
+			<tr>
+				<td class="<TMPL_VAR NAME=PlanetStatus>"><TMPL_VAR NAME=PlanetStatus></td>
+				<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Relationship></td>
+			</tr>
+		</table>
+	</div>
+	<form action="index.pl" method="post">
+		<input type="hidden" name="page" value="editRaid"/>
+		<input type="hidden" name="target" value="<TMPL_VAR NAME=Id>"/>
+		<input type="hidden" name="cmd" value="comment"/>
+		<input type="hidden" name="raid" value="<TMPL_VAR NAME=Raid>"/>
+		<p>	Comment:<br/>
+			<textarea rows="5" cols="20" name="comment"><TMPL_VAR NAME=Comment></textarea>
+			<br/><input type="submit" value="Submit"/>
+		</p>
+	</form>
+	<div class="clear">&nbsp;</div>
+	<p><a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;removeTarget=<TMPL_VAR NAME=Id>">Remove</a></p>
+	</fieldset>
+</TMPL_LOOP>
+</TMPL_IF>
