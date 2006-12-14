@@ -106,10 +106,8 @@ SELECT $columns, i.mission, i.tick AS landingtick,MIN(i.eta) AS eta, i.amount, i
 FROM (intel i NATURAL JOIN users u)
 	JOIN current_planet_stats t ON i.target = t.id
 	JOIN current_planet_stats o ON i.sender = o.id
-	LEFT OUTER JOIN alliances ta ON t.alliance_id = ta.id
-	LEFT OUTER JOIN alliances oa ON o.alliance_id = oa.id
 WHERE $where 
-GROUP BY t.x,t.y,t.z,o.x,o.y,o.z,i.mission,i.tick,i.amount,i.ingal,u.username,ta.name,oa.name 
+GROUP BY i.tick,i.mission,t.x,t.y,t.z,o.x,o.y,o.z,i.amount,i.ingal,u.username,t.alliance,o.alliance 
 ORDER BY i.tick DESC, i.mission};
 }
 

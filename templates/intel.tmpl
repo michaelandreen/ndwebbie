@@ -1,0 +1,118 @@
+<form action="index.pl" method="post"><p>
+	<input type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
+	<input type="submit" value="Check"/>
+	<input type="hidden" name="page" value="intel"/>
+	</p>
+</form>
+<p><a href="index.pl?page=intel&amp;show=all&amp;coords=<TMPL_VAR NAME=Coords>">Show all ticks</a></p>
+
+<TMPL_IF Coords>
+<form action="index.pl" method="post">
+	<input type="hidden" name="coords" value="<TMPL_VAR NAME=Coords>"/>
+	<input type="hidden" name="planet" value="<TMPL_VAR NAME=Planet>"/>
+	<input type="hidden" name="cmd" value="change"/>
+	<input type="hidden" name="page" value="intel"/>
+	<table>
+		<tr>
+			<th></th>
+			<th>Value</th>
+			<th>Change?</th>
+		</tr>
+		<tr><td>Nick</td>
+			<td><input type="text" name="nick" value="<TMPL_VAR NAME=Nick>"/></td>
+			<td><input type="checkbox" name="cnick"/></td>
+		</tr>
+		<tr><td>Channel</td>
+			<td><input type="text" name="channel" value="<TMPL_VAR NAME=Channel>"/></td>
+			<td><input type="checkbox" name="cchannel"/></td>
+		</tr>
+		<tr><td>Planet status</td>
+			<td><select name="status">
+				<TMPL_LOOP PlanetStatus>
+					<option value="<TMPL_VAR NAME=Status>" <TMPL_IF NAME=Selected>selected="selected"</TMPL_IF>><TMPL_VAR NAME=Status></option>
+				</TMPL_LOOP>
+				</select></td>
+			<td><input type="checkbox" name="cstatus"/></td>
+		</tr>
+		<tr><td>Alliance</td>
+			<td><select name="alliance">
+				<TMPL_LOOP Alliances>
+					<option value="<TMPL_VAR NAME=Id>" <TMPL_IF	NAME=Selected>selected="selected"</TMPL_IF>><TMPL_VAR NAME=Name></option>
+				</TMPL_LOOP>
+				</select></td>
+			<td><input type="checkbox" name="calliance"/></td>
+		</tr>
+	</table>
+	<p><input type="submit" value="Change"/>
+	</p>
+</form>
+</TMPL_IF>
+<TMPL_IF ChannelUsers>
+<p>Planets sharing this channel</p>
+<table>
+	<tr>
+	<th>Coords</th><th>Alliance</th><th>Nick</th><th>Channel</th>
+	</tr>
+<TMPL_LOOP ChannelUsers>
+	<tr>
+		<td><a href="index.pl?page=intel&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+		<td><TMPL_VAR NAME=Alliance></td><td><TMPL_VAR NAME=Nick></td><td><TMPL_VAR NAME=Channel></td>
+	</tr>
+</TMPL_LOOP>
+</table>
+</TMPL_IF>
+
+<TMPL_LOOP IntelLists>
+<TMPL_IF Message><p><TMPL_VAR NAME=Message></p></TMPL_IF>
+<table>
+	<tr>
+		<TMPL_IF Origin><th>Alliance</th><th>Sender</th></TMPL_IF>
+		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>
+		<TMPL_IF Target><th>Target</th><th>Alliance</th></TMPL_IF>
+		<th>Ingal</th><th>Reported by</th>
+	</tr>
+	<TMPL_LOOP Intel>
+	<tr>
+	<TMPL_IF Origin>
+	<td><a href="index.pl?page=intel&amp;coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>
+	<td><TMPL_VAR NAME=OAlliance></td>
+	</TMPL_IF>
+	<td class="<TMPL_VAR NAME=MissionClass>"><TMPL_VAR NAME=Mission></td>
+	<td align="center"><TMPL_VAR NAME=landingtick></td>
+	<td align="center"><TMPL_VAR NAME=ETA></td>
+	<td><TMPL_VAR NAME=Amount></td>
+	<TMPL_IF Target>
+	<td><a href="index.pl?page=intel&amp;coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
+	<td><TMPL_VAR NAME=TAlliance></td>
+	</TMPL_IF>
+	<td><TMPL_VAR NAME=Ingal></td>
+	<td><TMPL_VAR NAME=Username></td>
+	</tr>
+	</TMPL_LOOP>
+</table>
+</TMPL_LOOP>
+
+<table border="1">
+	<tr>
+	<th>Reported by</th>
+	<th>Report time</th>
+	<th>Message</th>
+	<th></th>
+	</tr>
+	<TMPL_LOOP IntelMessages>
+	<tr>
+		<td><TMPL_VAR NAME=Username></td>
+		<td><TMPL_VAR NAME=Report_date></td>
+		<td><TMPL_VAR NAME=Message></td>
+		<td><a href="index.pl?page=intel&amp;handle=<TMPL_VAR NAME=Id>">remove</a></td>
+	</tr>
+	</TMPL_LOOP>
+</table>
+
+	<form action="index.pl" method="post"><fieldset> <legend>Coords</legend>
+	<p>Paste a list of coords here</p>
+	<textarea rows="25" cols="80" name="coords"></textarea>
+	<input type="hidden" name="cmd" value="coords"/>
+	<input type="hidden" name="page" value="intel"/>
+	<br/><input type="submit" value="Submit"/>
+</fieldset></form>
