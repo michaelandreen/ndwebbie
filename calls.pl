@@ -59,7 +59,8 @@ if ($call){
 			}
 		}
 		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
-	}elsif(param('cmd') =~ /^(Cover|Uncover|Ignore|Open) call$/){
+	}elsif(param('cmd') =~ /^(Cover|Uncover|Ignore|Open|Take) call$/){
+		print "test";
 		my $extra_vars = '';
 		if (param('cmd') eq 'Cover call'){
 			$extra_vars = ", covered = TRUE, open = FALSE";
@@ -74,6 +75,7 @@ if ($call){
 			,undef,$ND::UID,$call->{id})){
 			$call->{covered} = (param('cmd') eq 'Cover call');
 			$call->{open} = (param('cmd') =~ /^(Uncover|Open) call$/);
+			$call->{DC} = $ND::USER;
 		}else{
 			print "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
@@ -114,15 +116,16 @@ if ($call){
 	$BODY->param(LandingTick => $call->{landing_tick});
 	$BODY->param(ETA => $call->{landing_tick}-$ND::TICK);
 	$BODY->param(Info => $call->{info});
+	$BODY->param(DC => $call->{dc});
 	if ($call->{covered}){
 		$BODY->param(Cover => 'Uncover');
 	}else{
 		$BODY->param(Cover => 'Cover');
 	}
 	if ($call->{open} && !$call->{covered}){
-		$BODY->param(Cover => 'Ignore');
+		$BODY->param(Ignore => 'Ignore');
 	}else{
-		$BODY->param(Cover => 'Open');
+		$BODY->param(Ignore => 'Open');
 	}
 	my $fleets = $DBH->prepare(q{
 SELECT id,mission,landing_tick,eta, (landing_tick+eta-1) AS back FROM fleets WHERE uid = ? AND (fleet = 0 OR (landing_tick + eta > ? AND landing_tick - eta - 11 < ? ))
