@@ -30,11 +30,65 @@ die "You don't have access" unless isBC();
 
 my $call;
 if (param('call') =~ /^(\d+)$/){
-	my $query = $DBH->prepare(q{});
+	my $query = $DBH->prepare(q{
+SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member
+FROM calls c 
+	JOIN users u ON c.member = u.uid
+	LEFT OUTER JOIN users dc ON c.dc = dc.uid
+	JOIN current_planet_stats p ON u.planet = p.id
+WHERE c.id = ?});
 	$call = $DBH->selectrow_hashref($query,undef,$1);
 }
 
 if ($call){
+	$BODY->param(Call => $call->{id});
+	$BODY->param(Coords => $call->{coords});
+	$BODY->param(DefensePoints => $call->{defense_points});
+	$BODY->param(LandingTick => $call->{landing_tick});
+	$BODY->param(ETA => $call->{landing_tick}-$ND::TICK);
+	$BODY->param(Info => $call->{info});
+	if ($call->{covered}){
+		$BODY->param(Cover => 'Uncover');
+	}else{
+		$BODY->param(Cover => 'Cover');
+	}
+	if ($call->{open} && !$call->{covered}){
+		$BODY->param(Cover => 'Ignore');
+	}else{
+		$BODY->param(Cover => 'Open');
+	}
+	my $fleets = $DBH->prepare(q{
+SELECT id,mission,landing_tick,eta, (landing_tick+eta-1) AS back FROM fleets WHERE uid = ? AND (fleet = 0 OR (landing_tick + eta > ? AND landing_tick - eta - 11 < ? ))
+ORDER BY fleet ASC});
+	my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE fleet = ?');
+	$fleets->execute($call->{member},$call->{landing_tick},$call->{landing_tick});
+	my @fleets;
+	while (my $fleet = $fleets->fetchrow_hashref){
+		if ($fleet->{back} == $call->{landing_tick}){
+			$fleet->{Fleetcatch} = 1;
+		}
+		$ships->execute($fleet->{id});
+		my @ships;
+		while (my $ship = $ships->fetchrow_hashref){
+			push @ships,$ship;
+		}
+		$fleet->{Ships} = \@ships;
+		push @fleets, $fleet;
+	}
+	$BODY->param(Fleets => \@fleets);
+	
+	my $attackers = $DBH->prepare(q{
+SELECT coords(p.x,p.y,p.z), p.planet_status, p.race,i.eta,i.amount,i.fleet,i.shiptype,p.relationship,p.alliance,i.id
+FROM incomings i
+	JOIN current_planet_stats p ON i.sender = p.id
+WHERE i.call = ?
+ORDER BY p.x,p.y,p.z});
+	$attackers->execute($call->{id});
+	my @attackers;
+	while(my $attacker = $attackers->fetchrow_hashref){
+		push @attackers,$attacker;
+	}
+	$BODY->param(Attackers => \@attackers);
 }else{
 	my $where = 'open AND c.landing_tick-6 > tick()';
 	if (param('show') eq 'covered'){
