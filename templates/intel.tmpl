@@ -4,7 +4,7 @@
 	<input type="hidden" name="page" value="intel"/>
 	</p>
 </form>
-<p><a href="index.pl?page=intel&amp;show=all&amp;coords=<TMPL_VAR NAME=Coords>">Show all ticks</a></p>
+<p><a href="index.pl?page=intel<TMPL_IF Coords>&amp;coords=<TMPL_VAR NAME=Coords></TMPL_IF>&amp;show=all">Show all ticks</a></p>
 
 <TMPL_IF Coords>
 <form action="index.pl" method="post">

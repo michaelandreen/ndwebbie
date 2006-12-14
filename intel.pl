@@ -143,6 +143,7 @@ if ($planet){
 				OR ( t.alliance_id = o.alliance_id AND i.mission = 'Attack'))
 			AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
 			$showticks}));
+	$query->execute() or print $DBH->errstr;
 
 	my @intellists;
 	my @intel;
@@ -154,7 +155,7 @@ if ($planet){
 		}
 		push @intel,$intel;
 	}
-	push @intellists,{Message => q{Missions where alliances doesn't match}, Intel => \@intel, Origin => 1, Target => 1};
+	push @intellists,{Message => q{Intel where alliances doesn't match}, Intel => \@intel, Origin => 1, Target => 1};
 	$BODY->param(IntelLIsts => \@intellists);
 }
 my $query = $DBH->prepare(q{SELECT i.id, u.username, i.message, report_date FROM intel_messages i
