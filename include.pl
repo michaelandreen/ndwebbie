@@ -83,4 +83,16 @@ ORDER BY r.tick+c.wave,x,y,z});
 	return $template->output;
 }
 
+sub alliances {
+	my ($alliance) = @_;
+	my @alliances;
+	push @alliances,{Id => -1, Name => '&nbsp;', Selected => not $alliance};
+	my $query = $ND::DBH->prepare(q{SELECT id,name FROM alliances ORDER BY name});
+	$query->execute;	
+	while (my $ally = $query->fetchrow_hashref){
+		push @alliances,{Id => $ally->{id}, Name => $ally->{name}, Selected => $alliance eq $ally->{name}};
+	}
+	return @alliances;
+}
+
 1;

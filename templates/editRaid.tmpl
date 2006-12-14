@@ -1,0 +1,55 @@
+<form action="/index.pl" method="post">
+	<fieldset> <legend><TMPL_IF Raid>Edit raid<TMPL_ELSE>New raid</TMPL_IF></legend>
+		<input type="hidden" name="page" value="editRaid"/>
+		<div class="leftinfo">
+		<TMPL_IF Raid>
+			<input type="hidden" name="cmd" value="change"/>
+			<input type="hidden" name="raid" value="<TMPL_VAR NAME=Raid>"/>
+			<p><a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=Open>"><TMPL_VAR NAME=Open> raid.</a></p>
+			<p><a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=ShowCoords>"><TMPL_VAR NAME=ShowCoordsName> coords.</a></p>
+			<p><a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=remove">Remove raid</a></p>
+		<TMPL_ELSE>
+			<input type="hidden" name="cmd" value="submit"/>
+		</TMPL_IF>
+			<p>Landing tick: <input type="text" name="tick" value="<TMPL_VAR NAME=LandingTick>"/></p>
+			<p>Number of waves: <input type="text" name="waves" value="<TMPL_VAR NAME=Waves>"/></p>
+		<TMPL_IF RemoveGroups>
+			<p>The following groups has access to the raid</p>
+			<table>
+			<tr><th>Group</th><th>Remove</th></tr>
+		<TMPL_LOOP RemoveGroups>
+			<tr><td><TMPL_VAR NAME=Name></td><td><input type="checkbox" name="<TMPL_VAR NAME=Id>" value="remove"/></td></tr>
+		</TMPL_LOOP>
+			</table>		
+		</TMPL_IF>
+		<TMPL_IF AddGroups>
+			<p>These does not have access to the raid</p>
+			<table>
+			<tr><th>Group</th><th>Add</th></tr>
+		<TMPL_LOOP AddGroups>
+			<tr><td><TMPL_VAR NAME=Name></td><td><input type="checkbox" name="<TMPL_VAR NAME=Id>" value="remove"/></td></tr>
+		</TMPL_LOOP>
+			</table>		
+		</TMPL_IF>
+		</div>
+		<div class="leftinfo">
+			<p>Raid message here</p>
+			<textarea rows="15" cols="40" name="message"></textarea>
+		</div>
+		<div class="leftinfo">
+			<p>List all target coords here</p>
+			<textarea rows="15" cols="40" name="targets"></textarea>
+		</div>
+		<div class="clear">&nbsp;</div>
+		<p>Add all coords from: <select name="alliance">
+			<TMPL_LOOP Alliances>
+				<option value="<TMPL_VAR NAME=Id>" <TMPL_IF NAME=Selected>selected="selected"</TMPL_IF>><TMPL_VAR NAME=Name></option>
+			</TMPL_LOOP>
+			</select>
+			<br/>Size limit (Filters out smaller planets): 
+			<input type="text" name="sizelimit" value=""/>
+			<br/><input type="submit" value="Submit"/>
+		</p>
+	</fieldset>
+</form>
+

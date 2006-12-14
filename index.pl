@@ -37,9 +37,9 @@ our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl');
 
 for my $file ("db.pl","include.pl"){
 	unless (my $return = do $file){
-		warn "couldn't parse $file: $@" if $@;
-		warn "couldn't do $file: $!"    unless defined $return;
-		warn "couldn't run $file"       unless $return;
+		print "couldn't parse $file: $@" if $@;
+		print "couldn't do $file: $!"    unless defined $return;
+		print "couldn't run $file"       unless $return;
 	}
 }
 
@@ -63,7 +63,7 @@ while (my ($name,$attack,$gid) = $query->fetchrow()){
 our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
 my $page = 'main';
-if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids)$/){
+if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids|editRaid)$/){
 	$page = $1;
 }
 
