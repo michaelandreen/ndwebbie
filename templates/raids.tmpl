@@ -1,10 +1,10 @@
 <TMPL_LOOP Raids>
 	<p><a href="index.pl?page=raids&amp;raid=<TMPL_VAR NAME=Raid>"><TMPL_VAR NAME=Raid></a>
 	<TMPL_IF isBC>
-		<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>">Edit</a>
-		<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=close">Close raid.</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>">Edit</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=close">Close raid.</a>
 		<TMPL_UNLESS ReleasedCoords>
-		<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=showcoords">Show coords.</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=showcoords">Show coords.</a>
 		</TMPL_UNLESS>
 	</TMPL_IF>
 	</p>
@@ -13,10 +13,10 @@
 <p> Closed raids </p>
 <TMPL_LOOP ClosedRaids>
 		<p>
-			<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
+			<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
 			
 			<TMPL_UNLESS Open>
-			<a href="index.pl?page=editRaids&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=open">Open raid.</a>
+			<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=open">Open raid.</a>
 			</TMPL_UNLESS>
 		</p>
 </TMPL_LOOP>
