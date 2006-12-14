@@ -40,20 +40,21 @@ WHERE c.id = ?});
 }
 if ($call){
 	if (param('cmd') eq 'Submit'){
-	}elsif (param('cmd') eq 'Submit'){
 		$DBH->begin_work;
 		if (param('ctick')){
 			if ($DBH->do(q{UPDATE calls SET landing_tick = ? WHERE id = ?}
 					,undef,param('tick'),$call->{id})){
 				$call->{landing_tick} = param('tick');
+				$LOG->execute($ND::UID,"DC updated landing tick for call $call->{id}");
 			}else{
 				print "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
-		if (param('info')){
+		if (param('cinfo')){
 			if ($DBH->do(q{UPDATE calls SET info = ? WHERE id = ?}
 					,undef,param('info'),$call->{id})){
 				$call->{info} = param('info');
+				$LOG->execute($ND::UID,"DC updated info for call $call->{id}");
 			}else{
 				print "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
