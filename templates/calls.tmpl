@@ -1,0 +1,20 @@
+<TMPL_IF Call>
+<TMPL_ELSE>
+<table>
+	<tr><th>Call</th><th>Member (def points)</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>Current eta</th><th>Inital eta</th><th>Alliance</th><th>Attackers</th></tr>
+<TMPL_LOOP Calls>
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td><a href="index.pl?page=calls&amp;call=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Id></a></td>
+		<td><TMPL_VAR NAME=Coords> (<TMPL_VAR NAME=Defense_points>)</td>
+		<td><TMPL_VAR NAME=Landing_tick></td>
+		<td><TMPL_VAR NAME=Race></td>
+		<td><TMPL_VAR NAME=Amount></td>
+		<td><TMPL_VAR NAME=Shiptype></td>
+		<td><TMPL_VAR NAME=Curreta></td>
+		<td><TMPL_VAR NAME=Eta></td>
+		<td><TMPL_VAR NAME=Alliance></td>
+		<td><TMPL_VAR NAME=Attackers></td>
+	</tr>
+</TMPL_LOOP>
+</table>
+</TMPL_IF>
