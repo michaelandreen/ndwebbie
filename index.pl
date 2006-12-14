@@ -63,7 +63,7 @@ while (my ($name,$attack,$gid) = $query->fetchrow()){
 our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
 my $page = 'main';
-if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids|editRaid|calls)$/){
+if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids|editRaid|calls|intel)$/){
 	$page = $1;
 }
 
@@ -89,6 +89,7 @@ unless (my $return = do "${page}.pl"){
 unless ($XML){
 	my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$UID);
 
+
 	$TEMPLATE->param(Tick => $TICK);
 	$TEMPLATE->param(isMember => (($TICK - $fleetupdate < 24) || isScanner()) && $PLANET && isMember());
 	$TEMPLATE->param(isHC => isHC());
@@ -98,6 +99,7 @@ unless ($XML){
 	if ($ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET))){
 		$ND::TEMPLATE->param(Targets => listTargets());
 	}
+	$TEMPLATE->param(Coords => param('coords') ? param('coords') : '1:1:1');
 
 }
 $ND::TEMPLATE->param(BODY => $ND::BODY->output);

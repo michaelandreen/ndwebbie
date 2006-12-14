@@ -41,7 +41,11 @@ sub isOfficer {
 }
 
 sub isScanner {
-	return exists $ND::GROUPS{Scanner};
+	return exists $ND::GROUPS{Scanners};
+}
+
+sub isIntel {
+	return exists $ND::GROUPS{Intel};
 }
 
 sub parseMarkup {
@@ -90,9 +94,23 @@ sub alliances {
 	my $query = $ND::DBH->prepare(q{SELECT id,name FROM alliances ORDER BY name});
 	$query->execute;	
 	while (my $ally = $query->fetchrow_hashref){
-		push @alliances,{Id => $ally->{id}, Name => $ally->{name}, Selected => $alliance eq $ally->{name}};
+		push @alliances,{Id => $ally->{id}, Name => $ally->{name}, Selected => $alliance == $ally->{id}};
 	}
 	return @alliances;
+}
+
+sub intelquery {
+	my ($columns,$where) = @_;
+	return qq{
+SELECT $columns, i.mission, i.tick AS landingtick,MIN(i.eta) AS eta, i.amount, i.ingal, u.username
+FROM (intel i NATURAL JOIN users u)
+	JOIN current_planet_stats t ON i.target = t.id
+	JOIN current_planet_stats o ON i.sender = o.id
+	LEFT OUTER JOIN alliances ta ON t.alliance_id = ta.id
+	LEFT OUTER JOIN alliances oa ON o.alliance_id = oa.id
+WHERE $where 
+GROUP BY t.x,t.y,t.z,o.x,o.y,o.z,i.mission,i.tick,i.amount,i.ingal,u.username,ta.name,oa.name 
+ORDER BY i.tick DESC, i.mission};
 }
 
 1;
