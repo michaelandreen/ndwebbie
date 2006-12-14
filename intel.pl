@@ -28,7 +28,7 @@ $ND::TEMPLATE->param(TITLE => 'Intel');
 die "You don't have access" unless isIntel() || isHC();
 
 my $planet;
-if (param('coords') =~ /(\d+)(?: |:)(\d+)(?: |:)(\d+)/){
+if (param('coords') =~ /^(\d+)(?: |:)(\d+)(?: |:)(\d+)$/){
 	my $query = $DBH->prepare(q{SELECT x,y,z,coords(x,y,z),id, nick, alliance,alliance_id, planet_status,channel FROM current_planet_stats
 WHERE  x = ? AND y = ? AND z = ?});
 	$planet = $DBH->selectrow_hashref($query,undef,$1,$2,$3);
@@ -38,7 +38,30 @@ my $showticks = 'AND (i.tick - i.eta) > (tick() - 48)';
 if (param('show') eq 'all'){
 	$showticks = '';
 }elsif (param('show') =~ /^(\d+)$/){
-	$showticks = "AND (i.tick - i.eta) > tick() - $1";
+	$showticks = "AND (i.tick - i.eta) > (tick() - $1)";
+}
+
+if (param('cmd') eq 'coords'){
+	my $coords = param('coords');
+	$DBH->do(q{CREATE TEMPORARY TABLE coordlist (
+	x integer NOT NULL,
+	y integer NOT NULL,
+	z integer NOT NULL,
+	PRIMARY KEY (x,y,z)
+		)});
+	my $insert = $DBH->prepare(q{INSERT INTO coordlist (x,y,z) VALUES(?,?,?)});
+	while ($coords =~ m/(\d+):(\d+):(\d+)/g){
+		$insert->execute($1,$2,$3);
+	}
+	my $planets = $DBH->prepare(q{SELECT (((p.x || ':') || p.y) || ':') || p.z AS coords, alliance FROM current_planet_stats p
+	JOIN coordlist c ON p.x = c.x AND p.y = c.y AND p.z = c.z
+ORDER BY alliance, p.x, p.y, p.z});
+	$planets->execute;
+	my @planets;
+	while (my $planet = $planets->fetchrow_hashref){
+		push @planets,$planet;
+	}
+	$BODY->param(CoordList => \@planets);
 }
 
 if ($planet){
