@@ -96,6 +96,7 @@ unless ($XML){
 	$TEMPLATE->param(isHC => isHC());
 	$TEMPLATE->param(isDC => isDC());
 	$TEMPLATE->param(isBC => isBC());
+	$TEMPLATE->param(isIntel => isBC());
 	$TEMPLATE->param(isAttacker => $ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET)));
 	if ($ATTACKER && (!isMember() || ((($TICK - $fleetupdate < 24) || isScanner()) && $PLANET))){
 		$ND::TEMPLATE->param(Targets => listTargets());
