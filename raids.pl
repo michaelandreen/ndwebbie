@@ -168,7 +168,7 @@ unless ($XML){
 	if ($raid){#We have a raid, so list all targets
 		$BODY->param(Raid => $raid->{id});
 		my $ajax = 1;
-		$ajax = 0 if ($ENV{HTTP_USER_AGENT} =~ /MSIE/);
+		#$ajax = 0 if ($ENV{HTTP_USER_AGENT} =~ /MSIE/);
 		$BODY->param(Ajax => $ajax);
 		my $noingal = '';
 		my $planet;

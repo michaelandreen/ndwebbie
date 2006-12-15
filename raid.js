@@ -88,8 +88,8 @@ function update(dataSource){
 	}
 }
 
-function updateClaims(dataSource,xmldoc,timestamp){
-	targets = xmldoc.getElementsByTagName("target");
+function updateClaims(dataSource,xmlthingy,timestamp){
+	var targets = xmlthingy.getElementsByTagName("target");
 	for (var i = 0; i < targets.length; i++){
 		var target = targets[i].attributes.getNamedItem("id").nodeValue;
 		var obj = document.getElementById("claim"+target);
@@ -119,7 +119,7 @@ function updateClaims(dataSource,xmldoc,timestamp){
 				b.type = 'button';
 				b.setAttribute("class", command);
 				b.value = command +' wave '+wave+' '+claimers;
-				b.setAttribute("onClick", "claim('"+dataSource+"',"+target+","+wave+",'"+command+"')");
+				b.setAttribute("onclick", "claim('"+dataSource+"',"+target+","+wave+",'"+command+"');");
 				/*b.onclick = function(){
 					claim(dataSource,t,wave,command);
 				}*/
@@ -134,9 +134,10 @@ function updateClaims(dataSource,xmldoc,timestamp){
 					b.value = 'N';
 					command = 'set&joinable=FALSE';
 				}
-				b.setAttribute("onClick", "claim('"+dataSource+"',"+target+","+wave+",'"+command+"')");
+				b.setAttribute("onclick", "claim('"+dataSource+"',"+target+","+wave+",'"+command+"');");
 				obj.appendChild(b);
 			}
+			obj.innerHTML = obj.innerHTML; // IE doesn't understand unless you tell it twice
 		}
 		obj = document.getElementById("coords"+target);
 		var coords = targets[i].getElementsByTagName("coords");;
@@ -144,7 +145,7 @@ function updateClaims(dataSource,xmldoc,timestamp){
 			obj.innerHTML = coords[0].firstChild.nodeValue;
 	}
 	if (timestamp){
-		timestamp = xmldoc.getElementsByTagName("timestamp");
+		timestamp = xmlthingy.getElementsByTagName("timestamp");
 		if (timestamp)
 			modified = timestamp[0].firstChild.nodeValue;
 	}
