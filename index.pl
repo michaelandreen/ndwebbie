@@ -71,6 +71,8 @@ if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|a
 our $XML = 0;
 $XML = 1 if param('xml') and $page =~ /^(raids)$/;
 
+our $AJAX = 1;
+
 my $type = 'text/html';
 if ($XML){
 	$type = 'text/xml';

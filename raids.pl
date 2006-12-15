@@ -164,12 +164,10 @@ if ($XML && param('cmd') eq 'gettargets' ){
 
 unless ($XML){
 	$ND::TEMPLATE->param(TITLE => 'Raids');
-	$ND::TEMPLATE->param(HEADER => '<script type="text/javascript" src="raid.js"></script>');
+	#$ND::TEMPLATE->param(HEADER => '<script type="text/javascript" src="raid.js"></script>');
 	if ($raid){#We have a raid, so list all targets
 		$BODY->param(Raid => $raid->{id});
-		my $ajax = 1;
-		#$ajax = 0 if ($ENV{HTTP_USER_AGENT} =~ /MSIE/);
-		$BODY->param(Ajax => $ajax);
+		$BODY->param(Ajax => $ND::AJAX);
 		my $noingal = '';
 		my $planet;
 		if ($ND::PLANET){
@@ -192,7 +190,7 @@ ORDER BY size});
 			my %target;
 			$target{Id} = $target->{id};
 			$target{Race} = $target->{race};
-			$target{Ajax} = $ajax;
+			$target{Ajax} = $ND::AJAX;
 			my $num = pow(10,length($target->{score})-2);
 			$target{Score} = ceil($target->{score}/$num)*$num;
 			$num = pow(10,length($target->{value})-2);
@@ -240,7 +238,7 @@ ORDER BY size});
 					$xp = max(0,floor($roids * 10 * (min(2,$target{Score}/$planet->{score}) + min(2,$target{Value}/$planet->{value})-1)));
 				}
 				push @roids,{Wave => $i, Roids => $roids, XP => $xp};
-				if ($ajax){
+				if ($ND::AJAX){
 					push @claims,{Wave => $i, Target => $target{Id}}
 				}else{
 					push @claims,{Wave => $i, Target => $target{Id}, Command => 'Claim'

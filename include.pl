@@ -80,7 +80,7 @@ ORDER BY r.tick+c.wave,x,y,z});
 		my $coords = "Target $target->{id}";
 		$coords = $target->{coords} if $target->{released_coords};
 		push @targets,{Coords => $coords, Launched => $target->{launched}, Raid => $target->{raid}
-			, Target => $target->{id}, Tick => $target->{landingtick}, Wave => $target->{wave}};
+			, Target => $target->{id}, Tick => $target->{landingtick}, Wave => $target->{wave}, AJAX => $ND::AJAX};
 	}
 	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl");
 	$template->param(Targets => \@targets);
