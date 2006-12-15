@@ -23,6 +23,7 @@ $ND::TEMPLATE->param(TITLE => 'Main Page');
 
 our $BODY;
 our $DBH;
+my $error;
 
 if (param('cmd') eq 'fleet'){
 	$DBH->begin_work;
@@ -37,10 +38,9 @@ if (param('cmd') eq 'fleet'){
 	$delete->execute($id);
 	my $insert = $DBH->prepare('INSERT INTO fleet_ships (fleet,ship,amount) VALUES (?,?,?)');
 	$fleet = param('fleet');
-	while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+((?:\d+|,)+)/g){
-		my $amount = $2;
-		$amount =~ s/,//;
-		$insert->execute($id,$1,$amount);
+	$fleet =~ s/,//g;
+	while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+(\d+)/g){
+		$insert->execute($id,$1,$2) or $error .= '<p>'.$DBH->errstr.'</p>';
 	}
 	$fleet = $DBH->prepare('UPDATE fleets SET landing_tick = tick() WHERE id = ?');
 	$fleet->execute($id);
@@ -116,6 +116,7 @@ while (my($fleet,$coords,$mission,$amount,$landing_tick) = $query->fetchrow){
 $BODY->param(Fleets => \@fleets);
 
 $BODY->param(SMS => $sms);
+$BODY->param(Error => $error);
 
 1;
 
