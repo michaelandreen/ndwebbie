@@ -30,7 +30,7 @@ var modified = '_';
 function claim(dataSource, target, wave,cmd){
 	var HTTP = getHTTPObject();
 	if(HTTP) {
-		var url = dataSource + '&cmd='+cmd+'&target=' + target + '&wave=' + wave;
+		var url = dataSource + '&cmd='+cmd+'&target=' + target + '&wave=' + wave + '&rand='+ Math.random();
 		//obj.innerHTML = "test";
 		HTTP.open("GET", url,true);
 		HTTP.onreadystatechange = function(){
@@ -58,7 +58,7 @@ function clearObject(obj){
 
 function listTargets(dataSource){
 	var http = getHTTPObject();
-	http.open("GET",dataSource+'&cmd=gettargets',true);
+	http.open("GET",dataSource+'&cmd=gettargets' + '&rand='+ Math.random(),true);
 	http.onreadystatechange = function(){
 		if (http.readyState == 4 &&
 				http.status == 200) {
@@ -77,7 +77,7 @@ function listTargets(dataSource){
 function update(dataSource){
 	var HTTP = getHTTPObject();
 	if(HTTP) {
-		HTTP.open("GET",dataSource+"&cmd=update&from="+modified,true);
+		HTTP.open("GET",dataSource+"&cmd=update&from="+modified + '&rand='+ Math.random(),true);
 		HTTP.onreadystatechange = function(){
 			if (HTTP.readyState == 4 &&
 					HTTP.status == 200) {
