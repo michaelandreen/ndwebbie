@@ -1,0 +1,35 @@
+<TMPL_VAR NAME=Error>
+<p><a href="index.pl?page=memberIntel&amp;show=all">Show all ticks</a></p>
+<TMPL_LOOP IntelLists>
+<TMPL_IF Message><p><TMPL_VAR NAME=Message></p></TMPL_IF>
+<table>
+	<tr>
+		<TMPL_IF Origin><th>Alliance</th><TMPL_ELSE><th>Nick</th></TMPL_IF><th>Sender</th>
+		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>
+		<th>Target</th><TMPL_IF Target><th>Alliance</th><TMPL_ELSE><th>Nick</th></TMPL_IF>
+		<th>Ingal</th><th>Reported by</th>
+	</tr>
+	<TMPL_LOOP Intel>
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<td><a href="index.pl?page=intel&amp;coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>
+	<TMPL_IF OAlliance>
+	<td><TMPL_VAR NAME=OAlliance></td>
+	<TMPL_ELSE>
+	<td><TMPL_VAR NAME=Nick></td>
+	</TMPL_IF>
+	<td class="<TMPL_VAR NAME=MissionClass>"><TMPL_VAR NAME=Mission></td>
+	<td align="center"><TMPL_VAR NAME=landingtick></td>
+	<td align="center"><TMPL_VAR NAME=ETA></td>
+	<td><TMPL_VAR NAME=Amount></td>
+	<td><a href="index.pl?page=intel&amp;coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
+	<TMPL_IF TAlliance>
+	<td><TMPL_VAR NAME=TAlliance></td>
+	<TMPL_ELSE>
+	<td><TMPL_VAR NAME=Nick></td>
+	</TMPL_IF>
+	<td><TMPL_VAR NAME=Ingal></td>
+	<td><TMPL_VAR NAME=Username></td>
+	</tr>
+	</TMPL_LOOP>
+</table>
+</TMPL_LOOP>
