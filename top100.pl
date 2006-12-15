@@ -55,6 +55,7 @@ my $query = $DBH->prepare(qq{SELECT id,coords(x,y,z), ruler, planet,race,
 	$extra_columns FROM current_planet_stats ORDER BY $order LIMIT 100 OFFSET ?});
 $query->execute($offset);
 my @planets;
+my $i = 0;
 while (my ($id,$coords,$ruler,$planet,$race,$size,$score,$value,$xp,$sizerank,$scorerank,$valuerank,$xprank
 		,$planet_status,$hit_us,$alliance,$relationship,$nick) = $query->fetchrow){
 	my %planet = (Coords => $coords, Planet => "$ruler OF $planet", Race => $race, Size => "$size ($sizerank)"
@@ -67,7 +68,9 @@ while (my ($id,$coords,$ruler,$planet,$race,$size,$score,$value,$xp,$sizerank,$s
 		$planet{Relationship} = $relationship;
 		$planet{isHC} = 1;
 	}
+	$planet{ODD} = $i % 2;
 	push @planets,\%planet;
+	$i++;
 }
 $BODY->param(Planets => \@planets);
 

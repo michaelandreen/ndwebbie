@@ -1,4 +1,4 @@
-<table border="1">
+<table>
 	<tr>
 	<th>User</th>
 	<th><a href="index.pl?page=points&amp;type=total">Total</a></th>
@@ -9,7 +9,7 @@
 	<th><a href="index.pl?page=points&amp;type=rank">ND Rank</a></th>
 	</tr>
 	<TMPL_LOOP Members>
-	<tr>
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 	<td><TMPL_VAR NAME=Username></td>
 	<td><TMPL_VAR NAME=Total></td>
 	<td><TMPL_VAR NAME=Defense></td>

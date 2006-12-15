@@ -43,9 +43,11 @@ my $query = $DBH->prepare("SELECT username,defense_points,attack_points,scan_poi
 $query->execute;
 
 my @members;
+my $i = 0;
 while (my ($username,$defense,$attack,$scan,$humor,$total,$rank) = $query->fetchrow){
 	push @members,{Username => $username, Defense => $defense, Attack => $attack
-		, Scan => $scan, Humor => $humor, Total => $total, Rank => $rank};
+		, Scan => $scan, Humor => $humor, Total => $total, Rank => $rank, ODD => $i % 2};
+	$i++;
 }
 $BODY->param(Members => \@members);
 

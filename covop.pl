@@ -57,10 +57,12 @@ FROM covop_targets c JOIN current_planet_stats p ON p.id = c.planet
 $query->execute($ND::PLANET);
 
 my @targets;
+my $i = 0;
 while (my ($id,$coords,$metal,$crystal,$eonium,$seccents,$dists,$lastcovop,$user,$max) = $query->fetchrow){
 	push @targets,{Username => $user, Target => $id, Coords => $coords
 		, Metal => $metal, Crystal => $crystal, Eonium => $eonium, SecCents => $seccents
-		, Dists => $dists, MaxResHack => $max, LastCovOp => $lastcovop, List => $list};
+		, Dists => $dists, MaxResHack => $max, LastCovOp => $lastcovop, List => $list, ODD => $i % 2};
+	$i++;
 }
 $BODY->param(Targets => \@targets);
 

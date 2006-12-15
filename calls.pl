@@ -26,7 +26,7 @@ my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Defense Calls');
 
-die "You don't have access" unless isBC();
+die "You don't have access" unless isDC();
 
 my $call;
 if (param('call') =~ /^(\d+)$/){

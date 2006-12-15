@@ -1,6 +1,6 @@
 <p><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
 	<a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
-<table border="1">
+<table>
 	<tr><th>Coords</th><th>Planet</th><th>Race</th>
 	<th><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size (rank)</a></th>
 	<th><a href="index.pl?page=top100&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score (rank)</a></th>
@@ -13,7 +13,7 @@
 	</TMPL_IF>
 	</tr>
 	<TMPL_LOOP Planets>
-	<tr align="center">
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 	<td><a href="index.pl?page=check&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 	<td><TMPL_VAR NAME=Planet></td>
 	<td><TMPL_VAR NAME=Race></td>
