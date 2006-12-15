@@ -67,5 +67,6 @@ if (param('cmd') eq 'submit_message'){
 		$error .= $DBH->errstr;
 	}
 }
+$BODY->param(Tick => $ND::TICK);
 $BODY->param(Error => $error);
 1;

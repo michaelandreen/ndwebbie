@@ -65,7 +65,7 @@ if(param('oldpass') && param('pass')){
 my ($motd) = $DBH->selectrow_array("SELECT value FROM misc WHERE id='MOTD'");
 
 $BODY->param(MOTD => parseMarkup($motd));
-$BODY->param(Username => 'harv');
+$BODY->param(Username => $ND::USER);
 $BODY->param(isMember => isMember());
 $BODY->param(isHC => isHC());
 my @groups = map {name => $_}, sort keys %ND::GROUPS;
