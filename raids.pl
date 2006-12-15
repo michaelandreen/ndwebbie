@@ -191,6 +191,7 @@ ORDER BY size});
 		while (my $target = $targetquery->fetchrow_hashref){
 			my %target;
 			$target{Id} = $target->{id};
+			$target{Race} = $target->{race};
 			$target{Ajax} = $ajax;
 			my $num = pow(10,length($target->{score})-2);
 			$target{Score} = ceil($target->{score}/$num)*$num;
