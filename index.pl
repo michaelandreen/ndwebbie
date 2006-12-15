@@ -32,6 +32,7 @@ chdir $ENV{'DOCUMENT_ROOT'};
 
 our $DBH = undef;
 our $USER = $ENV{'REMOTE_USER'};
+my $error;
 
 our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl');
 
@@ -81,9 +82,9 @@ if ($XML){
 
 
 unless (my $return = do "${page}.pl"){
-	print "<p><b>couldn't parse $page: $@</b></p>" if $@;
-	print "<p><b>couldn't do $page: $!</b></p>"    unless defined $return;
-	print "<p><b>couldn't run $page</b></p>"       unless $return;
+	$error .= "<p><b>couldn't parse $page: $@</b></p>" if $@;
+	$error .= "<p><b>couldn't do $page: $!</b></p>"    unless defined $return;
+	$error .= "<p><b>couldn't run $page</b></p>"       unless $return;
 }
 
 unless ($XML){
@@ -100,6 +101,7 @@ unless ($XML){
 		$ND::TEMPLATE->param(Targets => listTargets());
 	}
 	$TEMPLATE->param(Coords => param('coords') ? param('coords') : '1:1:1');
+	$TEMPLATE->param(Error => $error);
 
 }
 $ND::TEMPLATE->param(BODY => $ND::BODY->output);

@@ -22,6 +22,7 @@ use POSIX;
 our $BODY;
 our $DBH;
 our $LOG;
+my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Intel');
 
@@ -73,7 +74,7 @@ if ($planet){
 					,undef,$value,$planet->{id})){
 				$planet->{nick} = $value;
 			}else{
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
 		if (param('cchannel')){
@@ -82,7 +83,7 @@ if ($planet){
 					,undef,$value,$planet->{id})){
 				$planet->{channel} = $value;
 			}else{
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
 		if (param('cstatus')){
@@ -91,7 +92,7 @@ if ($planet){
 					,undef,$value,$planet->{id})){
 				$planet->{planet_status} = $value;
 			}else{
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
 		if (param('calliance')){
@@ -99,10 +100,10 @@ if ($planet){
 					,undef,param('alliance'),$planet->{id})){
 				$planet->{alliance_id} = param('alliance');
 			}else{
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
-		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
+		$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 	}
 }
 
@@ -132,7 +133,7 @@ if ($planet){
 	$BODY->param(Alliances => \@alliances);
 
 	my $query = $DBH->prepare(intelquery('o.alliance AS oalliance,coords(o.x,o.y,o.z) AS origin',"t.id = ? $showticks"));
-	$query->execute($planet->{id}) or print $DBH->errstr;
+	$query->execute($planet->{id}) or $error .= $DBH->errstr;
 	my @intellists;
 	my @intel;
 	while (my $intel = $query->fetchrow_hashref){
@@ -146,7 +147,7 @@ if ($planet){
 	push @intellists,{Message => 'Incoming fleets', Intel => \@intel, Origin => 1};
 
 	my $query = $DBH->prepare(intelquery('t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',"o.id = ? $showticks"));
-	$query->execute($planet->{id}) or print $DBH->errstr;
+	$query->execute($planet->{id}) or $error .= $DBH->errstr;
 	my @intel;
 	while (my $intel = $query->fetchrow_hashref){
 		if ($intel->{ingal}){
@@ -166,7 +167,7 @@ if ($planet){
 				OR ( t.alliance_id = o.alliance_id AND i.mission = 'Attack'))
 			AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
 			$showticks}));
-	$query->execute() or print $DBH->errstr;
+	$query->execute() or $error .= $DBH->errstr;
 
 	my @intellists;
 	my @intel;
@@ -191,4 +192,5 @@ while (my $message = $query->fetchrow_hashref){
 	push @messages,$message;
 }
 $BODY->param(IntelMessages => \@messages);
+$BODY->param(Error => $error);
 1;

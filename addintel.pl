@@ -24,30 +24,30 @@ $ND::TEMPLATE->param(TITLE => 'Add Intel and Scans');
 our $BODY;
 our $DBH;
 our $LOG;
-
-
+my $error;
 
 die "You don't have access" unless isMember();
 
 if (param('cmd') eq 'submit' || param('cmd') eq 'submit_message'){
-		my $findscan = $DBH->prepare("SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 48");
-		my $addscan = $DBH->prepare('INSERT INTO scans (scan_id,tick,"type") VALUES (?,tick(),?)');
-		my $addpoint = $DBH->prepare('UPDATE users SET scan_points = scan_points + 1 WHERE uid = ? ');
+	my $findscan = $DBH->prepare("SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 48");
+	my $addscan = $DBH->prepare('INSERT INTO scans (scan_id,tick,"type") VALUES (?,tick(),?)');
+	my $addpoint = $DBH->prepare('UPDATE users SET scan_points = scan_points + 1 WHERE uid = ? ');
 	my $intel = param('intel');
 	my @scans;
 	while ($intel =~ m/http:\/\/game.planetarion.com\/showscan.pl\?scan_id=(\d+)/g){
 		my %scan;
 		$scan{Scan} = $1;
+		$scan{Message} = "Scan $1: ";
 		$findscan->execute($1);
 		if ($findscan->rows == 0){
 			if ($addscan->execute($1,$ND::UID)){
 				$addpoint->execute($ND::UID);
-				$scan{Message} = '<i>added</i>';
+				$scan{Message} .= '<i>added</i>';
 			}else{
-				$scan{Message} = "<b>something went wrong:</b> <i>$DBH->errstr</i>";
+				$scan{Message} .= "<b>something went wrong:</b> <i>$DBH->errstr</i>";
 			}
 		}else{
-				$scan{Message} = '<b>already exists</b>';
+				$scan{Message} .= '<b>already exists</b>';
 		}
 		push @scans,\%scan;
 	}
@@ -56,13 +56,16 @@ if (param('cmd') eq 'submit' || param('cmd') eq 'submit_message'){
 	$tick = param('tick') if $tick =~ /^(\d+)$/;
 	my $addintel = $DBH->prepare(qq{SELECT add_intel(?,?,?,?,?,?,?,?,?,?,?)});
 	while ($intel =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\*?\s+.+(?:Ter|Cat|Xan|Zik)?\s+(\d+)\s+(Attack|Defend)\s+(\d+)/g){
-		$addintel->execute($tick,$9, $1,$2,$3,$4,$5,$6,$7,$8,$ND::UID) or print $DBH->errstr;
+		$addintel->execute($tick,$9, $1,$2,$3,$4,$5,$6,$7,$8,$ND::UID) or $error .= $DBH->errstr;
 	}
 }
 if (param('cmd') eq 'submit_message'){
 	my $query = $DBH->prepare(q{INSERT INTO intel_messages (uid,message) VALUES(?,?)});
-	$query->execute($ND::UID,escapeHTML(param('intel'))) or print $DBH->errstr;
+	if($query->execute($ND::UID,escapeHTML(param('intel')))){
+		$error .= 'Intel messaged added';
+	}else{
+		$error .= $DBH->errstr;
+	}
 }
-
-
+$BODY->param(Error => $error);
 1;

@@ -22,6 +22,7 @@ use POSIX;
 our $BODY;
 our $DBH;
 our $LOG;
+my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Defense Calls');
 
@@ -47,7 +48,7 @@ if ($call){
 				$call->{landing_tick} = param('tick');
 				$LOG->execute($ND::UID,"DC updated landing tick for call $call->{id}");
 			}else{
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
 		if (param('cinfo')){
@@ -56,12 +57,12 @@ if ($call){
 				$call->{info} = param('info');
 				$LOG->execute($ND::UID,"DC updated info for call $call->{id}");
 			}else{
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
-		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
+		$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 	}elsif(param('cmd') =~ /^(Cover|Uncover|Ignore|Open|Take) call$/){
-		print "test";
+		$error .= "test";
 		my $extra_vars = '';
 		if (param('cmd') eq 'Cover call'){
 			$extra_vars = ", covered = TRUE, open = FALSE";
@@ -78,7 +79,7 @@ if ($call){
 			$call->{open} = (param('cmd') =~ /^(Uncover|Open) call$/);
 			$call->{DC} = $ND::USER;
 		}else{
-			print "<p> Something went wrong: ".$DBH->errstr."</p>";
+			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
 	}elsif(param('cmd') eq 'Remove'){
 		$DBH->begin_work;
@@ -88,11 +89,11 @@ if ($call){
 				if($query->execute($1,$call->{id})){
 					$LOG->execute($ND::UID,"DC deleted fleet: $1, call $call->{id}");
 				}else{
-					print "<p> Something went wrong: ".$DBH->errstr."</p>";
+					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}
 			}
 		}
-		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
+		$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 	}elsif(param('cmd') eq 'Change'){
 		$DBH->begin_work;
 		my $query = $DBH->prepare(q{UPDATE incomings SET shiptype = ? WHERE id = ? AND call = ?});
@@ -102,11 +103,11 @@ if ($call){
 				if($query->execute($shiptype,$1,$call->{id})){
 					$LOG->execute($ND::UID,"DC set fleet: $1, call $call->{id} to: $shiptype");
 				}else{
-					print "<p> Something went wrong: ".$DBH->errstr."</p>";
+					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}
 			}
 		}
-		$DBH->commit or print "<p> Something went wrong: ".$DBH->errstr."</p>";
+		$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 	}
 }
 
@@ -184,8 +185,8 @@ FROM calls c
 WHERE $where
 GROUP BY c.id, p.x,p.y,p.z, u.username, c.landing_tick, c.info,u.defense_points
 ORDER BY c.landing_tick DESC
-		})or print $DBH->errstr;
-	$query->execute or print $DBH->errstr;
+		})or $error .= $DBH->errstr;
+	$query->execute or $error .= $DBH->errstr;
 	my @calls;
 	my $i = 0;
 	while (my $call = $query->fetchrow_hashref){
@@ -195,4 +196,5 @@ ORDER BY c.landing_tick DESC
 	}
 	$BODY->param(Calls => \@calls);
 }
+$BODY->param(Error => $error);
 1;

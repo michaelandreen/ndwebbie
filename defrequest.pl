@@ -24,8 +24,7 @@ $ND::TEMPLATE->param(TITLE => 'Request Defense');
 our $BODY;
 our $DBH;
 our $LOG;
-
-
+my $error;
 
 die "You don't have access" unless isMember();
 
@@ -34,9 +33,8 @@ if (param('cmd') eq 'submit'){
 	if($insert->execute($ND::UID,param('message'))){
 		$BODY->param(Reply => param('message'));
 	}else{
- 		print "<b>".$DBH->errstr."</b>";
+ 		$error .= "<b>".$DBH->errstr."</b>";
 	}
 }
-
-
+$BODY->param(Error => $error);
 1;

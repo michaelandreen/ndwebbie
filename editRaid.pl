@@ -22,6 +22,7 @@ use POSIX;
 our $BODY;
 our $DBH;
 our $LOG;
+my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Create/Edit Raids');
 
@@ -42,7 +43,7 @@ if (param('cmd') eq 'submit'){
 		my $query = $DBH->prepare(q{SELECT id,tick,waves,message,released_coords,open FROM raids WHERE id = ?});
 		$raid = $DBH->selectrow_hashref($query,undef,$raid);
 	}else{
-		print "<p> Something went wrong: ".$DBH->errstr."</p>";
+		$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 	}
 }
 
@@ -74,14 +75,14 @@ if ($raid){
 		$raid->{tick} = param('tick');
 		unless ($DBH->do(qq{UPDATE raids SET message = ?, tick = ?, waves = ? WHERE id = ?}
 				,undef,$message,param('tick'),param('waves'),$raid->{id})){
-			print "<p> Something went wrong: ".$DBH->errstr."</p>";
+			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
 		my $sizelimit = '';
 		if (param('sizelimit') =~ /^(\d+)$/){
 			$sizelimit = "AND p.size >= $1";
 			unless ($DBH->do(qq{DELETE FROM raid_targets WHERE id IN (SELECT t.id FROM current_planet_stats p 
 	JOIN raid_targets t ON p.id = t.planet WHERE p.size < ? AND t.raid = ?)},undef,$1,$raid->{id})){
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
 		my $targets = param('targets');
@@ -89,7 +90,7 @@ if ($raid){
 	SELECT ?, id FROM current_planet_stats p WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE) $sizelimit)});
 		while ($targets =~ m/(\d+):(\d+)(?::(\d+))?/g){
 			unless ($addtarget->execute($raid->{id},$1,$2,$3)){
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
 		if (param('alliance') =~ /^(\d+)$/ && $1 != 1){
@@ -97,7 +98,7 @@ if ($raid){
 			my $addtarget = $DBH->prepare(qq{INSERT INTO raid_targets(raid,planet) (
 	SELECT ?,id FROM current_planet_stats p WHERE alliance_id = ? $sizelimit)});
 			unless ($addtarget->execute($raid->{id},$1)){
-				print "<p> Something went wrong: ".$DBH->errstr."</p>";
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
 		}
 		my $groups = $DBH->prepare('SELECT gid,groupname FROM groups WHERE attack');
@@ -113,19 +114,19 @@ if ($raid){
 			}
 			if ($query){
 				unless ($query->execute($raid->{id},$group->{gid})){
-					print "<p> Something went wrong: ".$DBH->errstr."</p>";
+					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}
 			}
 		}
 		unless ($DBH->commit){
-			print "<p> Something went wrong: ".$DBH->errstr."</p>";
+			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
 	}
 	if (param('removeTarget')){
-		print "test";
+		$error .= "test";
 		unless($DBH->do(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?}
 				,undef,$raid->{id},param('removeTarget'))){
-			print "<p> Something went wrong: ".$DBH->errstr."</p>";
+			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
 	}
 }
@@ -174,7 +175,7 @@ if ($raid){
 		FROM current_planet_stats p JOIN raid_targets r ON p.id = r.planet 
 		WHERE r.raid = ?
 		ORDER BY $order});
-	$targetquery->execute($raid->{id}) or print $DBH->errstr;
+	$targetquery->execute($raid->{id}) or $error .= $DBH->errstr;
 	my @targets;
 	while (my $target = $targetquery->fetchrow_hashref){
 		push @targets,$target;
@@ -184,5 +185,6 @@ if ($raid){
 	$BODY->param(Waves => 3);
 	$BODY->param(LandingTick => $ND::TICK+12);
 }
+$BODY->param(Error => $error);
 
 1;
