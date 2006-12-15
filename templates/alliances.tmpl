@@ -4,6 +4,7 @@
 	<input type="hidden" name="page" value="alliances"/>
 	<input type="hidden" name="cmd" value="change"/>
 	<input type="hidden" name="alliance" value="<TMPL_VAR NAME=Id>"/>
+<div class="leftinfo">
 	<p>Alliance: <TMPL_VAR NAME=Alliance></p>
 	<p>Relationship: <select name="relationship">
 		<TMPL_LOOP Relationships>
@@ -11,7 +12,14 @@
 		</TMPL_LOOP>
 		</select>
 		<input type="checkbox" name="crelationship"/></p>
-	<p><input type="submit" value="Submit"/></p>
+</div>
+
+<div class="leftinfo">
+	<p>Paste a list of coords that you want to add to this alliance</p>
+	<textarea rows="10" cols="40" name="coords"></textarea>
+</div>
+<div class="clear">&nbsp;</div>
+	<p class="claimlinks"><input type="submit" value="Submit"/></p>
 </fieldset></form>
 <div class="leftinfo">
 <table>
@@ -40,16 +48,6 @@
 	</tr>
 	</TMPL_LOOP>
 </table>
-</div>
-<div class="leftinfo">
-<form action="index.pl" method="post"><fieldset> <legend>Coords</legend>
-	<input type="hidden" name="page" value="alliances"/>
-	<input type="hidden" name="cmd" value="coords"/>
-	<input type="hidden" name="alliance" value="<TMPL_VAR NAME=Id>"/>
-	<p>Paste a list of coords that you want to add to this alliance</p>
-	<textarea rows="25" cols="40" name="coords"></textarea>
-	<p><input type="submit" value="Submit"/></p>
-</fieldset></form>
 </div>
 <div class="leftinfo">
 <table>

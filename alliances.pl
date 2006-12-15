@@ -33,12 +33,31 @@ if (param('alliance') =~ /^(\d+)$/){
 	my $query = $DBH->prepare(q{SELECT id,name, relationship FROM alliances WHERE id = ?});
 	$alliance = $DBH->selectrow_hashref($query,undef,$1);
 }
-if ($alliance && param ('cmd') eq 'coords'){
-	$DBH->begin_work;
-	$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
-}
 if ($alliance && param ('cmd') eq 'change'){
 	$DBH->begin_work;
+	if (param('crelationship')){
+		my $value = escapeHTML(param('relationship'));
+		if ($DBH->do(q{UPDATE alliances SET relationship = ? WHERE id =?}
+				,undef,$value,$alliance->{id})){
+			$alliance->{relationship} = $value;
+			$LOG->execute($ND::UID,"HC set alliance: $alliance->{id} relationship: $value");
+		}else{
+			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+		}
+	}
+	my $coords = param('coords');
+	my $addplanet = $DBH->prepare(q{
+UPDATE planets SET alliance_id = ?, nick = coalesce(?,nick)
+WHERE id = (SELECT id FROM current_planet_stats WHERE x = ? AND y = ? AND z = ?);
+		});
+	while ($coords =~ m/(\d+):(\d+):(\d+)(?:\s+nick=\s*(\S+))?/g){
+		if ($addplanet->execute($alliance->{id},$4,$1,$2,$3)){
+			$error .= "<p> Added planet $1:$2:$3 (nick $4) to this alliance</p>";
+			$LOG->execute($ND::UID,"HC Added planet $1:$2:$3 (nick $4) to alliance: $alliance->{id}");
+		}else{
+			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+		}
+	}
 	$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 }
 
