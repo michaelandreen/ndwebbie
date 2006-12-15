@@ -25,10 +25,10 @@ function getHTTPObject() {
   return xmlhttp;
 }
 
-var HTTP = getHTTPObject();
 var modified = '_';
 
 function claim(dataSource, target, wave,cmd){
+	var HTTP = getHTTPObject();
 	if(HTTP) {
 		var url = dataSource + '&cmd='+cmd+'&target=' + target + '&wave=' + wave;
 		//obj.innerHTML = "test";
@@ -39,13 +39,20 @@ function claim(dataSource, target, wave,cmd){
 				updateClaims(dataSource,HTTP.responseXML,false);
 				var obj = document.getElementById("targets");
 				if (obj){
+					clearObject(obj);
 					var re = new RegExp("targetlist>(.*)</targetlist", "m");
-					re.test(HTTP.responseText);
-					obj.innerHTML = RegExp.$1;
+					if(re.test(HTTP.responseText))
+						obj.innerHTML = RegExp.$1;
 				}
 			}
 		}
 		HTTP.send(null);
+	}
+}
+
+function clearObject(obj){
+	while (obj.hasChildNodes()){
+		obj.removeChild(obj.firstChild);
 	}
 }
 
@@ -57,9 +64,10 @@ function listTargets(dataSource){
 				http.status == 200) {
 			var obj = document.getElementById("targets");
 			if (obj){
+				clearObject(obj);
 				var re = new RegExp("targetlist>(.*)</targetlist", "m");
-				re.test(http.responseText);
-				obj.innerHTML = RegExp.$1;
+				if(re.test(http.responseText))
+					obj.innerHTML = RegExp.$1;
 			}
 		}
 	}
@@ -67,6 +75,7 @@ function listTargets(dataSource){
 }
 
 function update(dataSource){
+	var HTTP = getHTTPObject();
 	if(HTTP) {
 		HTTP.open("GET",dataSource+"&cmd=update&from="+modified,true);
 		HTTP.onreadystatechange = function(){
@@ -86,7 +95,8 @@ function updateClaims(dataSource,xmldoc,timestamp){
 		var obj = document.getElementById("claim"+target);
 		if (!obj)
 			continue;
-		obj.innerHTML = '';
+		//obj.innerHTML = '';
+		clearObject(obj);
 		var waves = targets[i].getElementsByTagName("wave");;
 		for (var j = 0; j < waves.length; j++){
 			var command = waves[j].getElementsByTagName("command")[0];
