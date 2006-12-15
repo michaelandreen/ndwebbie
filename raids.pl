@@ -33,7 +33,6 @@ sub generateClaimXml {
 	if ($target){
 		$target = "r.id = $target";
 		$_ = listTargets();
-		chop;
 		$BODY->param(TargetList => $_);
 	}else{
 		$target = "r.raid = $raid->{id}";
@@ -158,7 +157,6 @@ if ($XML && $raid && param('cmd') eq 'update' ){
 }
 if ($XML && param('cmd') eq 'gettargets' ){
 	$_ = listTargets();
-	chop;
 	$BODY->param(TargetList => $_);
 }
 

@@ -40,7 +40,7 @@ function claim(dataSource, target, wave,cmd){
 				var obj = document.getElementById("targets");
 				if (obj){
 					clearObject(obj);
-					var re = new RegExp("targetlist>(.*)</targetlist", "m");
+					var re = new RegExp("targetlist>((.|\\n)*)</targetlist");
 					if(re.test(HTTP.responseText))
 						obj.innerHTML = RegExp.$1;
 				}
