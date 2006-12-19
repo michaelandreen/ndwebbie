@@ -68,9 +68,9 @@ while (my ($id,$coords,$ruler,$planet,$race,$size,$score,$value,$xp,$sizerank,$s
 		$planet{Relationship} = $relationship;
 		$planet{isHC} = 1;
 	}
+	$i++;
 	$planet{ODD} = $i % 2;
 	push @planets,\%planet;
-	$i++;
 }
 $BODY->param(Planets => \@planets);
 

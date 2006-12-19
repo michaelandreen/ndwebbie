@@ -59,10 +59,10 @@ $query->execute($ND::PLANET);
 my @targets;
 my $i = 0;
 while (my ($id,$coords,$metal,$crystal,$eonium,$seccents,$dists,$lastcovop,$user,$max) = $query->fetchrow){
+	$i++;
 	push @targets,{Username => $user, Target => $id, Coords => $coords
 		, Metal => $metal, Crystal => $crystal, Eonium => $eonium, SecCents => $seccents
 		, Dists => $dists, MaxResHack => $max, LastCovOp => $lastcovop, List => $list, ODD => $i % 2};
-	$i++;
 }
 $BODY->param(Targets => \@targets);
 

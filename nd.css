@@ -1,5 +1,5 @@
 body {
-	padding-left: 12em;
+	padding-left: 14em;
 	/*padding-right: 12em;*/
 	font-family: sans-serif;
 	color: black;
@@ -9,7 +9,7 @@ body {
 	padding: 0;
 	margin: 0;
 	position: absolute;
-	width: 10em;
+	width: 14em;
 	top: 1em;
 }
 #leftbar{
@@ -28,7 +28,7 @@ p.claimlinks{
 
 ul.linkbar {
 	list-style-type: none;
-	width: 10em;
+	width: 13.5em;
 	padding: 0;
 	margin: 0;
 }
@@ -42,8 +42,11 @@ ul.linkbar li {
 ul.linkbar a {
 	text-decoration: none;
 }
-input.coord {
-	width: 3.5em;
+input.coordsinput {
+	width: 4em;
+}
+input.small {
+	width: 1.7em;
 }
 tr.odd {
 	background: white;

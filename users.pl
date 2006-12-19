@@ -115,9 +115,9 @@ $BODY->param(AddGroups => \@addgroups);
 	my @users;
 	my $i = 0;
 	while (my $user = $query->fetchrow_hashref){
+		$i++;
 		$user->{ODD} = $i % 2;
 		push @users, $user;
-		$i++;
 	}
 	$BODY->param(Users => \@users);
 }

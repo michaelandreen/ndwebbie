@@ -143,9 +143,9 @@ if ($planet){
 		}else{
 			$intel->{missionclass} = $intel->{mission};
 		}
+		$i++;
 		$intel->{ODD} = $i % 2;
 		push @intel,$intel;
-		$i++;
 	}
 	push @intellists,{Message => 'Incoming fleets', Intel => \@intel, Origin => 1};
 
@@ -159,9 +159,9 @@ if ($planet){
 		}else{
 			$intel->{missionclass} = $intel->{mission};
 		}
+		$i++;
 		$intel->{ODD} = $i % 2;
 		push @intel,$intel;
-		$i++;
 	}
 	push @intellists,{Message => 'Outgoing Fleets', Intel => \@intel, Target => 1};
 
@@ -184,9 +184,9 @@ if ($planet){
 		}else{
 			$intel->{missionclass} = $intel->{mission};
 		}
+		$i++;
 		$intel->{ODD} = $i % 2;
 		push @intel,$intel;
-		$i++;
 	}
 	push @intellists,{Message => q{Intel where alliances doesn't match}, Intel => \@intel, Origin => 1, Target => 1};
 	$BODY->param(IntelLIsts => \@intellists);

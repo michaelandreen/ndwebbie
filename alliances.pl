@@ -84,9 +84,9 @@ ORDER BY $order});
 	$members->execute($alliance->{id});
 	my $i = 0;
 	while (my $member = $members->fetchrow_hashref){
+		$i++;
 		$member->{ODD} = $i % 2;
 		push @members,$member;
-		$i++;
 	}
 	$BODY->param(Members => \@members);
 
@@ -105,9 +105,9 @@ ORDER BY $order});
 		}else{
 			$intel->{missionclass} = $intel->{mission};
 		}
+		$i++;
 		$intel->{ODD} = $i % 2;
 		push @intel,$intel;
-		$i++;
 	}
 	$BODY->param(Intel => \@intel);
 }else{
@@ -131,10 +131,10 @@ ORDER BY $order
 	my @alliances;
 	my $i = 0;
 	while (my $alliance = $query->fetchrow_hashref){
+		$i++;
 		next if ($alliance->{score} < 1 && $alliance->{kscore} < 1);
 		$alliance->{ODD} = $i % 2;
 		push @alliances, $alliance;
-		$i++;
 	}
 	$BODY->param(Alliances => \@alliances);
 }

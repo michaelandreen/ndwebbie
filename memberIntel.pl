@@ -47,9 +47,9 @@ while (my $intel = $query->fetchrow_hashref){
 	}else{
 		$intel->{missionclass} = $intel->{mission};
 	}
+	$i++;
 	$intel->{ODD} = $i % 2;
 	push @intel,$intel;
-	$i++;
 }
 push @intellists,{Message => 'Incoming fleets', Intel => \@intel, Origin => 1};
 
@@ -63,9 +63,9 @@ while (my $intel = $query->fetchrow_hashref){
 	}else{
 		$intel->{missionclass} = $intel->{mission};
 	}
+	$i++;
 	$intel->{ODD} = $i % 2;
 	push @intel,$intel;
-	$i++;
 }
 push @intellists,{Message => 'Outgoing Fleets', Intel => \@intel, Target => 1};
 

@@ -190,10 +190,10 @@ ORDER BY c.landing_tick DESC
 	my @calls;
 	my $i = 0;
 	while (my $call = $query->fetchrow_hashref){
+		$i++;
 		$call->{ODD} = $i % 2;
 		$call->{shiptype} = escapeHTML($call->{shiptype});
 		push @calls, $call;
-		$i++;
 	}
 	$BODY->param(Calls => \@calls);
 }

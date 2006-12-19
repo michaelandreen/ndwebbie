@@ -120,7 +120,7 @@ $USER = undef;
 $PLANET = undef;
 $TEMPLATE = undef;
 $TICK = undef;
-%GROUPS = undef;
+undef %GROUPS;
 $ND::BODY = undef;
 
 exit;

@@ -45,9 +45,9 @@ $query->execute;
 my @members;
 my $i = 0;
 while (my ($username,$defense,$attack,$scan,$humor,$total,$rank) = $query->fetchrow){
+	$i++;
 	push @members,{Username => $username, Defense => $defense, Attack => $attack
 		, Scan => $scan, Humor => $humor, Total => $total, Rank => $rank, ODD => $i % 2};
-	$i++;
 }
 $BODY->param(Members => \@members);
 
