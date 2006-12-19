@@ -132,3 +132,16 @@ div.clear {
 	line-height: 0.0;
 	font-size: 1px;
 }
+
+td.LowestPrio{
+	background: red;
+	color: black;
+}
+td.MediumPrio{
+	background: yellow;
+	color: black;
+}
+td.HighestPrio{
+	background: green;
+	color: black;
+}

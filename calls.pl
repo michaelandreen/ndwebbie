@@ -170,6 +170,10 @@ ORDER BY p.x,p.y,p.z});
 	}elsif (param('show') eq 'uncovered'){
 		$where = 'not covered';
 	}
+	my $pointlimits = $DBH->prepare(q{SELECT value :: int FROM misc WHERE id = ?});
+	my ($minpoints) = $DBH->selectrow_array($pointlimits,undef,'DEFMIN');
+	my ($maxpoints) = $DBH->selectrow_array($pointlimits,undef,'DEFMAX');
+
 	my $query = $DBH->prepare(qq{
 SELECT c.id, coords(p.x,p.y,p.z), u.defense_points, c.landing_tick, 
 	TRIM('/' FROM concat(p2.race||' /')) AS race, TRIM('/' FROM concat(i.amount||' /')) AS amount,
@@ -190,6 +194,13 @@ ORDER BY c.landing_tick DESC
 	my @calls;
 	my $i = 0;
 	while (my $call = $query->fetchrow_hashref){
+		if ($call->{defense_points} < $minpoints){
+			$call->{DefPrio} = 'LowestPrio';
+		}elsif ($call->{defense_points} < $maxpoints){
+			$call->{DefPrio} = 'MediumPrio';
+		}else{
+			$call->{DefPrio} = 'HighestPrio';
+		}
 		$i++;
 		$call->{ODD} = $i % 2;
 		$call->{shiptype} = escapeHTML($call->{shiptype});
