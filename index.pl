@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 #**************************************************************************
 #   Copyright (C) 2006 by Michael Andreen <harvATruinDOTnu>               *
 #                                                                         *
@@ -25,14 +25,14 @@ use DBI;
 use DBD::Pg qw(:pg_types);
 use strict;
 
-
 my $cgi = new CGI;
-
-chdir $ENV{'DOCUMENT_ROOT'};
-
 our $DBH = undef;
 our $USER = $ENV{'REMOTE_USER'};
 my $error;
+
+if ($ENV{'DOCUMENT_ROOT'} =~ m{((\w|/)+)}){
+	chdir $1;
+}
 
 our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl', global_vars => 1);
 
