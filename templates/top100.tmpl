@@ -14,7 +14,7 @@
 	</tr>
 	<TMPL_LOOP Planets>
 	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-	<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+	<td><a href="index.pl?page=check&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 	<td><TMPL_VAR NAME=Planet></td>
 	<td><TMPL_VAR NAME=Race></td>
 	<td><TMPL_VAR NAME=Size></td>
@@ -22,7 +22,7 @@
 	<td><TMPL_VAR NAME=Value></td>
 	<td><TMPL_VAR NAME=XP></td>
 	<TMPL_IF isHC>
-	<td class="<TMPL_VAR NAME=PlanetStatus>"><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick></a></td>
+	<td class="<TMPL_VAR NAME=PlanetStatus>"><a href="index.pl?page=intel&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick></a></td>
 	<td><TMPL_VAR NAME=HitUs></td>
 	<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td>
 	</TMPL_IF>
