@@ -2,7 +2,7 @@
 	<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>"><TMPL_VAR NAME=Raid></a>
 	<TMPL_IF isBC>
 		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>">Edit</a>
-		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=close">Close raid.</a>
+		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=Close">Close raid.</a>
 		<TMPL_UNLESS ReleasedCoords>
 		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=showcoords">Show coords.</a>
 		</TMPL_UNLESS>
@@ -16,7 +16,7 @@
 			<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
 			
 			<TMPL_UNLESS Open>
-			<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=open">Open raid.</a>
+			<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=Open">Open raid.</a>
 			</TMPL_UNLESS>
 		</p>
 </TMPL_LOOP>
