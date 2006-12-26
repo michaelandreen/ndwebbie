@@ -7,7 +7,7 @@
 		<p>Paste <b>scan urls</b> and intel from <b>gal status</b> here</p>
 		<textarea rows="20" cols="50" name="intel"></textarea>
 		<input type="hidden" name="cmd" value="submit"/>
-		<input type="hidden" name="page" value="addintel"/>
+		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 		<br/>Tick:<input type="text" name="tick" value="<TMPL_VAR NAME=Tick>"/>
 		<input type="submit" value="Submit"/>
 	</fieldset></form>
@@ -17,6 +17,6 @@
 	<p>Write other messages to intel dept here (sms numbers, relay channels, bots etc) (<b>NOT gal status</b>):</p>
 	<textarea rows="20" cols="50" name="intel"></textarea>
 	<input type="hidden" name="cmd" value="submit_message"/>
-	<input type="hidden" name="page" value="addintel"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<br/><input type="submit" value="Submit"/>
 </fieldset></form>

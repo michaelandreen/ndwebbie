@@ -1,7 +1,7 @@
 <TMPL_VAR NAME=Error>
 <TMPL_IF User>
 <form action="/index.pl" method="post"><fieldset> <legend>User details</legend>
-	<input type="hidden" name="page" value="users"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<input type="hidden" name="cmd" value="change"/>
 	<input type="hidden" name="user" value="<TMPL_VAR NAME=User>"/>
 	<table>
@@ -65,7 +65,7 @@
 	<tr><th>User</th></tr>
 <TMPL_LOOP Users>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td><a href="index.pl?page=users&amp;user=<TMPL_VAR NAME=Uid>"><TMPL_VAR NAME=Username></a></td>
+		<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;user=<TMPL_VAR NAME=Uid>"><TMPL_VAR NAME=Username></a></td>
 	</tr>
 </TMPL_LOOP>
 </table>

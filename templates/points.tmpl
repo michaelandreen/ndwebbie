@@ -1,12 +1,12 @@
 <table>
 	<tr>
 	<th>User</th>
-	<th><a href="index.pl?page=points&amp;type=total">Total</a></th>
-	<th><a href="index.pl?page=points&amp;type=defense">Defenses</a></th>
-	<th><a href="index.pl?page=points&amp;type=attack">Attacks</a></th>
-	<th><a href="index.pl?page=points&amp;type=scan">Scans</a></th>
-	<th><a href="index.pl?page=points&amp;type=humor">Humor</a></th>
-	<th><a href="index.pl?page=points&amp;type=rank">ND Rank</a></th>
+	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;type=total">Total</a></th>
+	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;type=defense">Defenses</a></th>
+	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;type=attack">Attacks</a></th>
+	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;type=scan">Scans</a></th>
+	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;type=humor">Humor</a></th>
+	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;type=rank">ND Rank</a></th>
 	</tr>
 	<TMPL_LOOP Members>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">

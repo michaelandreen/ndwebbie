@@ -22,7 +22,7 @@
 	<li>XP: <TMPL_VAR NAME=PlanetXP></li>	
 	<TMPL_ELSE>
 		<TMPL_IF isMEMBER>
-		<form action="index.pl?page=main" method="post">
+		<form action="index.pl?page=<TMPL_VAR NAME=PAGE>" method="post">
 			<p>We need your planet's coordinates: 
 			<input type="text" name="planet" value=""/>
 			<input type="submit" value="Submit"/>
@@ -50,16 +50,18 @@
 	</p>
 </fieldset>
 </form>
-<form action="/index.pl?page=main.pl" method="post">
+<form action="/index.pl" method="post">
 <fieldset> <legend>Fleet</legend>
 	<p>Paste your total fleet from ships section on overview here (do it daily to see the menus):</p>
 	<textarea rows="15" cols="50" name="fleet"></textarea>
 	<input type="hidden" name="cmd" value="fleet"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<br/><input type="submit" value="Submit"/>
 </fieldset>
 </form>
-<form action="/index.pl?page=main" method="post">
+<form action="/index.pl" method="post">
 <fieldset> <legend>Change password</legend>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<p>Old password: 
 	<input type="password" name="oldpass" value=""/>
 	New password: 

@@ -34,7 +34,7 @@ our $DBH = undef;
 our $USER = $ENV{'REMOTE_USER'};
 my $error;
 
-our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl');
+our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl', global_vars => 1);
 
 for my $file ("db.pl","include.pl"){
 	unless (my $return = do $file){
@@ -79,7 +79,8 @@ if ($XML){
 	$ND::TEMPLATE = HTML::Template->new(filename => "templates/xml.tmpl");
 	$ND::BODY = HTML::Template->new(filename => "templates/${page}.xml.tmpl");
 }else{
-	$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl");
+	$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl", global_vars => 1);
+	$ND::BODY->param(PAGE => $page);
 }
 
 
