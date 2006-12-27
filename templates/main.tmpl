@@ -33,15 +33,24 @@
 	</ul>
 </fieldset>
 <fieldset> <legend>Fleets</legend>
+<form action="/index.pl" method="post">
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<table>
-	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th></tr>
+	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
 	<TMPL_LOOP Fleets>
-	<tr><td><TMPL_VAR NAME=Target></td><td><TMPL_VAR NAME=Mission></td>
-		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=LandingTick></td>
-		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=Back></td>
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td><TMPL_VAR NAME=Target></td><td><TMPL_VAR NAME=Mission></td>
+		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=Landing_Tick></td>
+		<td><TMPL_IF Fleet><input class="coordsinput" type="text" name="back:<TMPL_VAR NAME=Id>" value="<TMPL_VAR NAME=Back>"/></TMPL_IF></td>
+		<td><TMPL_IF Fleet><input type="checkbox" name="change:<TMPL_VAR NAME=Id>"/></TMPL_IF></td>
 	</tr>
 	</TMPL_LOOP>
 	</table>
+	<p>
+		<input type="submit" name="cmd" value="Change Fleets"/>
+		<input type="submit" name="cmd" value="Recall Fleets"/>
+	</p>
+</form>
 </fieldset>
 <form action="/index.pl?page=main" method="post">
 <fieldset> <legend>SMS</legend>

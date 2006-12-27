@@ -57,6 +57,35 @@ UPDATE users SET planet =
 WHERE uid = ? });
 	$query->execute($1,$2,$3,$ND::UID);
 }
+if (param('cmd') eq 'Recall Fleets'){
+	$DBH->begin_work;
+	my $updatefleets = $DBH->prepare('UPDATE fleets SET back = tick() + (tick() - (landing_tick - eta))  WHERE uid = ? AND id = ?');
+	
+	for my $param (param()){
+		if ($param =~ /^change:(\d+)$/){
+			if($updatefleets->execute($ND::UID,$1)){
+				$ND::LOG->execute($ND::UID,"Member recalled fleet $1");
+			}else{
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+			}
+		}
+	}
+	$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
+}
+if (param('cmd') eq 'Change Fleets'){
+	$DBH->begin_work;
+	my $updatefleets = $DBH->prepare('UPDATE fleets SET back = ? WHERE uid = ? AND id = ?');
+	for my $param (param()){
+		if ($param =~ /^change:(\d+)$/){
+			if($updatefleets->execute(param("back:$1"),$ND::UID,$1)){
+				$ND::LOG->execute($ND::UID,"Member set fleet $1 to be back tick: ".param("back:$1"));
+			}else{
+				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+			}
+		}
+	}
+	$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
+}
 if(param('oldpass') && param('pass')){
 	my $query = $DBH->prepare('UPDATE users SET password = MD5(?) WHERE password = MD5(?) AND uid = ?');
 	$query->execute(param('pass'),param('oldpass'),$ND::UID);
@@ -99,19 +128,22 @@ if ($planet){
 }
 
 
-my $query = $DBH->prepare(q{SELECT f.fleet, coords(x,y,z), mission, sum(fs.amount) AS amount, landing_tick 
+my $query = $DBH->prepare(q{SELECT f.fleet,f.id, coords(x,y,z) AS target, mission, sum(fs.amount) AS amount, landing_tick, back
 FROM fleets f 
 	JOIN fleet_ships fs ON f.id = fs.fleet 
 	JOIN current_planet_stats p ON f.target = p.id
-WHERE f.uid = ? AND (f.fleet = 0 OR landing_tick > ?)
-GROUP BY f.fleet, x,y,z, mission, landing_tick
+WHERE f.uid = ? AND (f.fleet = 0 OR back >= ?)
+GROUP BY f.fleet,f.id, x,y,z, mission, landing_tick,back
 ORDER BY f.fleet
 });
 
-$query->execute($ND::UID,$ND::TICK);
+$query->execute($ND::UID,$ND::TICK) or $error .= '<p>'.$DBH->errstr.'</p>';
 my @fleets;
-while (my($fleet,$coords,$mission,$amount,$landing_tick) = $query->fetchrow){
-	push @fleets,{Target => $coords, Mission => $mission, Amount => $amount, LandingTick => $landing_tick};
+my $i = 0;
+while (my $fleet = $query->fetchrow_hashref){
+	$i++;
+	$fleet->{ODD} = $i % 2;
+	push @fleets,$fleet;
 }
 $BODY->param(Fleets => \@fleets);
 
