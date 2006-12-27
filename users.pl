@@ -110,7 +110,11 @@ $BODY->param(RemoveGroups => \@remgroups);
 $BODY->param(AddGroups => \@addgroups);
 
 }else{
-	my $query = $DBH->prepare(qq{SELECT uid,username FROM users ORDER BY username})or $error .= $DBH->errstr;
+	my $query = $DBH->prepare(qq{SELECT u.uid,username,TRIM(',' FROM concat(g.groupname||',')) AS groups
+		FROM users u LEFT OUTER JOIN (groupmembers gm NATURAL JOIN groups g) ON gm.uid = u.uid
+		WHERE u.uid > 0
+		GROUP BY u.uid,username
+		ORDER BY username})or $error .= $DBH->errstr;
 	$query->execute or $error .= $DBH->errstr;
 	my @users;
 	my $i = 0;
