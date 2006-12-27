@@ -199,6 +199,7 @@ ORDER BY c.landing_tick DESC
 	$query->execute or $error .= $DBH->errstr;
 	my @calls;
 	my $i = 0;
+	my $tick = $ND::TICK;
 	while (my $call = $query->fetchrow_hashref){
 		if ($call->{defense_points} < $minpoints){
 			$call->{DefPrio} = 'LowestPrio';
@@ -206,6 +207,11 @@ ORDER BY c.landing_tick DESC
 			$call->{DefPrio} = 'MediumPrio';
 		}else{
 			$call->{DefPrio} = 'HighestPrio';
+		}
+		while ($tick - 24 > $call->{landing_tick}){
+			$tick -= 24;
+			push @calls,{};
+			$i = 0;
 		}
 		$i++;
 		$call->{ODD} = $i % 2;

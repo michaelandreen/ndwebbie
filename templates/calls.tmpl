@@ -75,7 +75,7 @@
 <TMPL_LOOP Calls>
 	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;call=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Id></a></td>
-		<td class='<TMPL_VAR NAME=DefPrio>'><TMPL_VAR NAME=Coords> (<TMPL_VAR NAME=Defense_points>)</td>
+		<td class='<TMPL_VAR NAME=DefPrio>'><TMPL_VAR NAME=Coords> <TMPL_IF Id>(<TMPL_VAR NAME=Defense_points>)<TMPL_ELSE>-New Day-</TMPL_IF></td>
 		<td><TMPL_VAR NAME=Landing_tick></td>
 		<td><TMPL_VAR NAME=Race></td>
 		<td><TMPL_VAR NAME=Amount></td>
