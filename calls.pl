@@ -130,7 +130,7 @@ if ($call){
 		$BODY->param(Ignore => 'Open');
 	}
 	my $fleets = $DBH->prepare(q{
-SELECT id,mission,landing_tick,eta, (landing_tick+eta-1) AS back FROM fleets WHERE uid = ? AND (fleet = 0 OR (landing_tick + eta > ? AND landing_tick - eta - 11 < ? ))
+SELECT id,mission,landing_tick,eta, back FROM fleets WHERE uid = ? AND (fleet = 0 OR (landing_tick + eta > ? AND landing_tick - eta - 11 < ? ))
 ORDER BY fleet ASC});
 	my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE fleet = ?');
 	$fleets->execute($call->{member},$call->{landing_tick},$call->{landing_tick});

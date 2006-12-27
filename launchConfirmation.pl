@@ -24,6 +24,7 @@ $ND::TEMPLATE->param(TITLE => 'Launch Confirmation');
 our $BODY;
 our $DBH;
 our $LOG;
+my $error;
 
 
 
@@ -40,13 +41,13 @@ if (param('cmd') eq 'submit'){
 	my $finddefensetarget = $DBH->prepare(q{SELECT NULL});
 	my $addattackpoint = $DBH->prepare('UPDATE users SET attack_points = attack_points + 1 WHERE uid = ?');
 	my $launchedtarget = $DBH->prepare('UPDATE raid_claims SET launched = True WHERE uid = ? AND target = ? AND wave = ?');
-	my $addfleet = $DBH->prepare(qq{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta) VALUES (?,?,?,?,(SELECT max(fleet)+1 from fleets WHERE uid = ?),?)});
+	my $addfleet = $DBH->prepare(qq{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,?,?,(SELECT max(fleet)+1 from fleets WHERE uid = ?),?,?)});
 	my $addships = $DBH->prepare('INSERT INTO fleet_ships (fleet,ship,amount) VALUES (?,?,?)');
 
 	my $fleet = $DBH->prepare("SELECT id FROM fleets WHERE uid = ? AND fleet = 0");
 	my ($basefleet) = $DBH->selectrow_array($fleet,undef,$ND::UID);
 	unless ($basefleet){
-		my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta) VALUES (?,?,'Base',0,0,0)});
+		my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,'Full fleet',0,0,0,0)});
 		$insert->execute($ND::UID,$ND::PLANET);
 	}
 	my @missions;
@@ -94,9 +95,10 @@ if (param('cmd') eq 'submit'){
 			}
 		}
 
-		$addfleet->execute($ND::UID,$planet_id,$mission,$tick,$ND::UID,$eta);
+		$addfleet->execute($ND::UID,$planet_id,$mission,$tick,$ND::UID,$eta,$tick+$eta-1) or $error .= '<p>'.$DBH->errstr.'</p>';
 		my $fleet = $DBH->last_insert_id(undef,undef,undef,undef,"fleets_id_seq");
 		$mission{Fleet} = $fleet;
+		$mission{Back} = $tick+$eta-1;
 		my $ships = $10;
 		my @ships;
 		while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+\w+\s+(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Struc)\s+(\d+)/g){
@@ -107,9 +109,10 @@ if (param('cmd') eq 'submit'){
 		$LOG->execute($ND::UID,"Pasted confirmation for $mission mission to $x:$y:$z, landing tick $tick");
 		push @missions,\%mission;
 	}
-	$DBH->commit;
+	$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
 	$BODY->param(Missions => \@missions);
 }
+$BODY->param(Error => $error);
 
 
 1;

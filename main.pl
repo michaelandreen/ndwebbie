@@ -30,7 +30,7 @@ if (param('cmd') eq 'fleet'){
 	my $fleet = $DBH->prepare("SELECT id FROM fleets WHERE uid = ? AND fleet = 0");
 	my ($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
 	unless ($id){
-		my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta) VALUES (?,?,'Base',0,0,0)});
+		my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,'Full fleet',0,0,0,0)});
 		$insert->execute($ND::UID,$ND::PLANET);
 		($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
 	}

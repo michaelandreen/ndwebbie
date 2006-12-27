@@ -1,9 +1,11 @@
+<TMPL_VAR NAME=Error>
 <TMPL_LOOP Missions>
 <TMPL_IF Warning><p><b><TMPL_VAR NAME=Warning></b></p></TMPL_IF>
 <p>Adding the following fleet: <TMPL_VAR NAME=Fleet>
 <br/>Target: <TMPL_VAR NAME=Target>
 <br/>Mission: <TMPL_VAR NAME=Mission>
 <br/>Landing tick: <TMPL_VAR NAME=Tick>
+<br/>Back: <TMPL_VAR NAME=Back>
 </p>
 <table>
 <TMPL_LOOP Ships>

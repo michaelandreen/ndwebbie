@@ -34,10 +34,11 @@
 </fieldset>
 <fieldset> <legend>Fleets</legend>
 	<table>
-	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th></tr>
+	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th></tr>
 	<TMPL_LOOP Fleets>
 	<tr><td><TMPL_VAR NAME=Target></td><td><TMPL_VAR NAME=Mission></td>
 		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=LandingTick></td>
+		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=Back></td>
 	</tr>
 	</TMPL_LOOP>
 	</table>
