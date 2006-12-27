@@ -17,7 +17,9 @@
 		<table>
 			<tr><th>Ship</th><th>Amount</th></tr>
 			<TMPL_LOOP Ships>
-				<tr><td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td></tr>
+				<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+					<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+				</tr>
 			</TMPL_LOOP>
 		</table>
 	</div>
@@ -49,7 +51,7 @@
 	<th>Change/remove?</th>
 	</tr>
 	<TMPL_LOOP Attackers>
-	<tr>
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="index.pl?page=check&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td class="<TMPL_VAR NAME=Planet_status>"><TMPL_VAR NAME=Planet_status></td>
 		<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance> (<TMPL_VAR NAME=Relationship>)</td>

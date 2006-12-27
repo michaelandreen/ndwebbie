@@ -130,11 +130,12 @@ if ($call){
 		$BODY->param(Ignore => 'Open');
 	}
 	my $fleets = $DBH->prepare(q{
-SELECT id,mission,landing_tick,eta, back FROM fleets WHERE uid = ? AND (fleet = 0 OR (landing_tick + eta > ? AND landing_tick - eta - 11 < ? ))
+SELECT id,mission,landing_tick,eta, back FROM fleets WHERE uid = ? AND (fleet = 0 OR (back >= ? AND landing_tick - eta - 11 < ? ))
 ORDER BY fleet ASC});
 	my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE fleet = ?');
 	$fleets->execute($call->{member},$call->{landing_tick},$call->{landing_tick});
 	my @fleets;
+	my $i = 0;
 	while (my $fleet = $fleets->fetchrow_hashref){
 		if ($fleet->{back} == $call->{landing_tick}){
 			$fleet->{Fleetcatch} = 1;
@@ -142,6 +143,8 @@ ORDER BY fleet ASC});
 		$ships->execute($fleet->{id});
 		my @ships;
 		while (my $ship = $ships->fetchrow_hashref){
+			$i++;
+			$ship->{ODD} = $i % 2;
 			push @ships,$ship;
 		}
 		$fleet->{Ships} = \@ships;
@@ -157,7 +160,10 @@ WHERE i.call = ?
 ORDER BY p.x,p.y,p.z});
 	$attackers->execute($call->{id});
 	my @attackers;
+	my $i = 0;
 	while(my $attacker = $attackers->fetchrow_hashref){
+		$i++;
+		$attacker->{ODD} = $i % 2;
 		push @attackers,$attacker;
 	}
 	$BODY->param(Attackers => \@attackers);
