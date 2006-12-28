@@ -4,7 +4,7 @@
 	</tr>
 	<TMPL_LOOP Targets>
 	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-	<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+	<td><a href="<TMPL_VAR NAME=PAGE>?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 	<td><TMPL_VAR NAME=Metal></td>
 	<td><TMPL_VAR NAME=Crystal></td>
 	<td><TMPL_VAR NAME=Eonium></td>
@@ -12,7 +12,7 @@
 	<td><TMPL_VAR NAME=Dists></td>
 	<td><TMPL_VAR NAME=MaxResHack></td>
 	<td><TMPL_VAR NAME=Username> (<TMPL_VAR NAME=LastCovOp>)</td>
-	<td><a href="/?page=<TMPL_VAR NAME=PAGE><TMPL_VAR NAME=List>&amp;covop=<TMPL_VAR NAME=Target>">Did CovOp this tick</a>
+	<td><a href="<TMPL_VAR NAME=PAGE>?<TMPL_VAR NAME=List>&amp;covop=<TMPL_VAR NAME=Target>">Did CovOp this tick</a>
 	</tr>
 	</TMPL_LOOP>
 </table>

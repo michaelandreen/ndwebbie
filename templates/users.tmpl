@@ -65,7 +65,7 @@
 	<tr><th>User</th><th>Groups</th></tr>
 <TMPL_LOOP Users>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;user=<TMPL_VAR NAME=Uid>"><TMPL_VAR NAME=Username></a></td>
+		<td><a href="<TMPL_VAR NAME=PAGE>?user=<TMPL_VAR NAME=Uid>"><TMPL_VAR NAME=Username></a></td>
 		<td><TMPL_VAR NAME=Groups></td>
 	</tr>
 </TMPL_LOOP>
