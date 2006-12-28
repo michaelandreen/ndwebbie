@@ -84,7 +84,7 @@ ORDER BY r.tick+c.wave,x,y,z});
 			, AJAX => $ND::AJAX, JoinName => $target->{joinable} ? 'N' : 'J'
 			, Joinable => $target->{joinable} ? 'FALSE' : 'TRUE'};
 	}
-	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl");
+	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl", cache => 1);
 	$template->param(Targets => \@targets);
 	return $template->output;
 }

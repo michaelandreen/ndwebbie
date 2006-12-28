@@ -26,6 +26,14 @@ use DBD::Pg qw(:pg_types);
 use strict;
 
 my $cgi = new CGI;
+local $ND::DBH;
+local $ND::USER;
+local $ND::UID;
+local $ND::PLANET;
+local $ND::TEMPLATE;
+local $ND::BODY;
+local $ND::TICK;
+
 our $DBH = undef;
 our $USER = $ENV{'REMOTE_USER'};
 my $error;
@@ -34,7 +42,7 @@ if ($ENV{'DOCUMENT_ROOT'} =~ m{((\w|/)+)}){
 	chdir $1;
 }
 
-our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl', global_vars => 1);
+our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl', global_vars => 1, cache => 1);
 
 for my $file ("db.pl","include.pl"){
 	unless (my $return = do $file){
@@ -76,10 +84,10 @@ our $AJAX = 1;
 my $type = 'text/html';
 if ($XML){
 	$type = 'text/xml';
-	$ND::TEMPLATE = HTML::Template->new(filename => "templates/xml.tmpl");
-	$ND::BODY = HTML::Template->new(filename => "templates/${page}.xml.tmpl");
+	$ND::TEMPLATE = HTML::Template->new(filename => "templates/xml.tmpl", cache => 1);
+	$ND::BODY = HTML::Template->new(filename => "templates/${page}.xml.tmpl", cache => 1);
 }else{
-	$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl", global_vars => 1);
+	$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl", global_vars => 1, cache => 1);
 	$ND::BODY->param(PAGE => $page);
 }
 
