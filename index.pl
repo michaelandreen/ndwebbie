@@ -23,9 +23,9 @@ use CGI qw/:standard/;
 use HTML::Template;
 use DBI;
 use DBD::Pg qw(:pg_types);
+#use Apache2::Request;
 use strict;
 
-my $cgi = new CGI;
 local $ND::DBH;
 local $ND::USER;
 local $ND::UID;
@@ -36,7 +36,7 @@ local $ND::TICK;
 
 our $DBH = undef;
 our $USER = $ENV{'REMOTE_USER'};
-my $error;
+my $error;# = $ND::r->param('page');
 
 if ($ENV{'DOCUMENT_ROOT'} =~ m{((\w|/)+)}){
 	chdir $1;
@@ -72,7 +72,7 @@ while (my ($name,$attack,$gid) = $query->fetchrow()){
 our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
 my $page = 'main';
-if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids|editRaid|calls|intel|users|alliances|memberIntel|resources)$/){
+if (param('page') =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids|editRaid|calls|intel|users|alliances|memberIntel|resources|planetNaps)$/){
 	$page = $1;
 }
 
@@ -132,4 +132,4 @@ $TICK = undef;
 undef %GROUPS;
 $ND::BODY = undef;
 
-exit;
+1;
