@@ -181,7 +181,7 @@ ORDER BY p.x,p.y,p.z});
 	my ($maxpoints) = $DBH->selectrow_array($pointlimits,undef,'DEFMAX');
 
 	my $query = $DBH->prepare(qq{
-SELECT c.id, coords(p.x,p.y,p.z), u.defense_points, c.landing_tick, 
+SELECT c.id, coords(p.x,p.y,p.z), u.defense_points, c.landing_tick, c.dc,
 	TRIM('/' FROM concat(p2.race||' /')) AS race, TRIM('/' FROM concat(i.amount||' /')) AS amount,
 	TRIM('/' FROM concat(i.eta||' /')) AS eta, TRIM('/' FROM concat(i.shiptype||' /')) AS shiptype,
 	TRIM('/' FROM concat(c.landing_tick - tick() ||' /')) AS curreta,
@@ -193,7 +193,7 @@ FROM calls c
 	JOIN current_planet_stats p ON u.planet = p.id
 	JOIN current_planet_stats p2 ON i.sender = p2.id
 WHERE $where
-GROUP BY c.id, p.x,p.y,p.z, u.username, c.landing_tick, c.info,u.defense_points
+GROUP BY c.id, p.x,p.y,p.z, u.username, c.landing_tick, c.info,u.defense_points,c.dc
 ORDER BY c.landing_tick DESC
 		})or $error .= $DBH->errstr;
 	$query->execute or $error .= $DBH->errstr;
@@ -213,6 +213,7 @@ ORDER BY c.landing_tick DESC
 			push @calls,{};
 			$i = 0;
 		}
+		$call->{dc} = 'Hostile' unless defined $call->{dc};
 		$i++;
 		$call->{ODD} = $i % 2;
 		$call->{shiptype} = escapeHTML($call->{shiptype});
