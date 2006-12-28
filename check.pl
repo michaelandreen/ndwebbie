@@ -74,6 +74,7 @@ if (defined $z){
 }
 my @planets;
 my $planet_id = undef;
+my $i = 0;
 while (my ($id,$coords,$planet,$race,$size,$score,$value,$xp,$sizerank,$scorerank,$valuerank,$xprank
 		,$fleetvalue,$resvalue,$planet_status,$hit_us,$alliance,$relationship,$nick) = $query->fetchrow){
 	$planet_id = $id;
@@ -91,6 +92,8 @@ while (my ($id,$coords,$planet,$race,$size,$score,$value,$xp,$sizerank,$scoreran
 			$LOG->execute($ND::UID,"BC browsing ND planet $coords tick $ND::TICK");
 		}
 	}
+	$i++;
+	$planet{ODD} = $i % 2;
 	push @planets,\%planet;
 }
 $BODY->param(Planets => \@planets);

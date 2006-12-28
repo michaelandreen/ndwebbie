@@ -1,10 +1,10 @@
 <p><TMPL_IF Arbiter><TMPL_VAR NAME=Arbiter><TMPL_ELSE><a href="<TMPL_VAR NAME=PAGE>?cmd=arbiter&amp;coords=<TMPL_VAR ESCAPE=URL NAME=Coords>">Do arbiter check on gal</a></TMPL_IF></p>
-<table border="1">
+<table>
 	<tr><th>Coords</th><th>Planet</th><th>Race</th><th>Size (rank)</th><th>Score (rank)</th><th>Value (rank)</th>
 		<th>XP (rank)</th><th>Fleet (Resouce) value</th><TMPL_IF isBC><th>Nick</th><th>Hit us</th><th>Alliance</th></TMPL_IF>
 	</tr>
 	<TMPL_LOOP Planets>
-	<tr align="center">
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="<TMPL_VAR NAME=PAGE>?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td><TMPL_VAR NAME=Planet></td><td><TMPL_VAR NAME=Race></td><td><TMPL_VAR NAME=Size></td>
 		<td><TMPL_VAR NAME=Score></td><td><TMPL_VAR NAME=Value></td><td><TMPL_VAR NAME=XP></td>
