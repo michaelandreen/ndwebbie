@@ -1,10 +1,10 @@
 <TMPL_LOOP Raids>
-	<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>"><TMPL_VAR NAME=Raid></a>
+	<p><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>"><TMPL_VAR NAME=Raid></a>
 	<TMPL_IF isBC>
-		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>">Edit</a>
-		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=Close">Close raid.</a>
+		<a href="editRaid?raid=<TMPL_VAR NAME=Raid>">Edit</a>
+		<a href="editRaid?raid=<TMPL_VAR NAME=Raid>&amp;cmd=Close">Close raid.</a>
 		<TMPL_UNLESS ReleasedCoords>
-		<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=showcoords">Show coords.</a>
+		<a href="editRaid?raid=<TMPL_VAR NAME=Raid>&amp;cmd=showcoords">Show coords.</a>
 		</TMPL_UNLESS>
 	</TMPL_IF>
 	</p>
@@ -13,10 +13,10 @@
 <p> Closed raids </p>
 <TMPL_LOOP ClosedRaids>
 		<p>
-			<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
+			<a href="editRaid?raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
 			
 			<TMPL_UNLESS Open>
-			<a href="index.pl?page=editRaid&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=Open">Open raid.</a>
+			<a href="editRaid?raid=<TMPL_VAR NAME=Raid>&amp;cmd=Open">Open raid.</a>
 			</TMPL_UNLESS>
 		</p>
 </TMPL_LOOP>
@@ -31,12 +31,12 @@
 </fieldset>
 
 <TMPL_IF Ajax>
-<form action="index.pl" method="post">
+<form action="/" method="post">
 	<p>
 		<input type="button" value="Update claims"
-			onclick = "update('index.pl?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>')"/>
+			onclick = "update('/?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>')"/>
 		<input type="button" value="Update target list"
-			onclick = "listTargets('index.pl?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>')"/>
+			onclick = "listTargets('/?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>')"/>
 	</p>
 </form>
 </TMPL_IF>
@@ -67,18 +67,18 @@
 		</div>
 	</TMPL_LOOP>
 	<div class="clear"> &nbsp;</div>
-	<form action="index.pl" method="post">
+	<form action="/" method="post">
 	<p class="claimlinks">
 	<span id="claim<TMPL_VAR NAME=Id>">
 	<TMPL_IF Ajax>
 	<TMPL_LOOP Claims>
      <input type="button" value="Claim wave <TMPL_VAR NAME=Wave>"
-        onclick = "claim('index.pl?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'Claim')"/>
+        onclick = "claim('/?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'Claim')"/>
 	</TMPL_LOOP>
 	<TMPL_ELSE>
 	<TMPL_LOOP Claims>
-	<a class="<TMPL_VAR NAME=Command>" href="/index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=Command>&amp;target=<TMPL_VAR NAME=Target>&amp;wave=<TMPL_VAR NAME=Wave>#<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Command> wave <TMPL_VAR NAME=Wave><TMPL_IF Claimers> (<TMPL_VAR NAME=Claimers>)</TMPL_IF></a>
-	<TMPL_IF Owner><a href="/index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;target=<TMPL_VAR NAME=Target>&amp;cmd=set&amp;joinable=<TMPL_IF Joinable>FALSE<TMPL_ELSE>TRUE</TMPL_IF>&amp;wave=<TMPL_VAR NAME=Wave>#<TMPL_VAR NAME=Target>"><TMPL_IF Joinable>N<TMPL_ELSE>J</TMPL_IF></a></TMPL_IF>
+	<a class="<TMPL_VAR NAME=Command>" href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=Command>&amp;target=<TMPL_VAR NAME=Target>&amp;wave=<TMPL_VAR NAME=Wave>#<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Command> wave <TMPL_VAR NAME=Wave><TMPL_IF Claimers> (<TMPL_VAR NAME=Claimers>)</TMPL_IF></a>
+	<TMPL_IF Owner><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;target=<TMPL_VAR NAME=Target>&amp;cmd=set&amp;joinable=<TMPL_IF Joinable>FALSE<TMPL_ELSE>TRUE</TMPL_IF>&amp;wave=<TMPL_VAR NAME=Wave>#<TMPL_VAR NAME=Target>"><TMPL_IF Joinable>N<TMPL_ELSE>J</TMPL_IF></a></TMPL_IF>
 	</TMPL_LOOP>
 	</TMPL_IF>
 	</span>
@@ -89,7 +89,7 @@
 </TMPL_LOOP>
 <TMPL_IF Ajax>
 	<script type="text/javascript">
-	update('index.pl?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>');
+	update('/?page=<TMPL_VAR NAME=PAGE>&amp;xml=1&amp;raid=<TMPL_VAR NAME=Raid>');
 	</script>
 </TMPL_IF>
 

@@ -1,6 +1,6 @@
 <TMPL_VAR NAME=Error>
 <p>Hello <TMPL_VAR NAME=Username>.</p>
-<fieldset> <legend>Message from HC<TMPL_IF isHC> <a href="index.pl?page=motd">EDIT</a></TMPL_IF></legend>
+<fieldset> <legend>Message from HC<TMPL_IF isHC> <a href="motd?">EDIT</a></TMPL_IF></legend>
 	<TMPL_VAR NAME=MOTD>
 </fieldset>
 <fieldset> <legend>Planet/account details</legend>
@@ -22,7 +22,7 @@
 	<li>XP: <TMPL_VAR NAME=PlanetXP></li>	
 	<TMPL_ELSE>
 		<TMPL_IF isMEMBER>
-		<form action="index.pl?page=<TMPL_VAR NAME=PAGE>" method="post">
+		<form action="/?page=<TMPL_VAR NAME=PAGE>" method="post">
 			<p>We need your planet's coordinates: 
 			<input type="text" name="planet" value=""/>
 			<input type="submit" value="Submit"/>
@@ -33,7 +33,7 @@
 	</ul>
 </fieldset>
 <fieldset> <legend>Fleets</legend>
-<form action="/index.pl" method="post">
+<form action="/" method="post">
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<table>
 	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
@@ -52,7 +52,7 @@
 	</p>
 </form>
 </fieldset>
-<form action="/index.pl?page=main" method="post">
+<form action="main?" method="post">
 <fieldset> <legend>SMS</legend>
 	<p>Number: 
 	<input type="text" name="sms" value="<TMPL_VAR NAME=SMS>"/>
@@ -60,7 +60,7 @@
 	</p>
 </fieldset>
 </form>
-<form action="/index.pl" method="post">
+<form action="/" method="post">
 <fieldset> <legend>Fleet</legend>
 	<p>Paste your total fleet from ships section on overview here (do it daily to see the menus):</p>
 	<textarea rows="15" cols="50" name="fleet"></textarea>
@@ -69,7 +69,7 @@
 	<br/><input type="submit" value="Submit"/>
 </fieldset>
 </form>
-<form action="/index.pl" method="post">
+<form action="/" method="post">
 <fieldset> <legend>Change password</legend>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<p>Old password: 

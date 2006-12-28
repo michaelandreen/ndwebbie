@@ -1,18 +1,18 @@
 <TMPL_VAR NAME=Error>
-<form action="index.pl" method="post"><p>
+<form action="/" method="post"><p>
 	<input type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
 	<input type="submit" value="Check"/>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	</p>
 </form>
-<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE><TMPL_IF Coords>&amp;coords=<TMPL_VAR NAME=Coords></TMPL_IF>&amp;show=all">Show all ticks</a></p>
+<p><a href="/?page=<TMPL_VAR NAME=PAGE><TMPL_IF Coords>&amp;coords=<TMPL_VAR NAME=Coords></TMPL_IF>&amp;show=all">Show all ticks</a></p>
 
 <TMPL_IF CoordList>
 <table>
 	<tr><th>Coords</th><th>Alliance</th></tr>
 	<TMPL_LOOP CoordList>
 	<tr>
-		<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+		<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td><TMPL_VAR NAME=Alliance></td>
 	</tr>
 	</TMPL_LOOP>
@@ -20,7 +20,7 @@
 </TMPL_IF>
 
 <TMPL_IF Coords>
-<form action="index.pl" method="post">
+<form action="/" method="post">
 	<input type="hidden" name="coords" value="<TMPL_VAR NAME=Coords>"/>
 	<input type="hidden" name="planet" value="<TMPL_VAR NAME=Planet>"/>
 	<input type="hidden" name="cmd" value="change"/>
@@ -68,7 +68,7 @@
 	</tr>
 <TMPL_LOOP ChannelUsers>
 	<tr>
-		<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+		<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td><TMPL_VAR NAME=Alliance></td><td><TMPL_VAR NAME=Nick></td><td><TMPL_VAR NAME=Channel></td>
 	</tr>
 </TMPL_LOOP>
@@ -87,7 +87,7 @@
 	<TMPL_LOOP Intel>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 	<TMPL_IF Origin>
-	<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>
+	<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>
 	<td><TMPL_VAR NAME=OAlliance></td>
 	</TMPL_IF>
 	<td class="<TMPL_VAR NAME=MissionClass>"><TMPL_VAR NAME=Mission></td>
@@ -95,7 +95,7 @@
 	<td align="center"><TMPL_VAR NAME=ETA></td>
 	<td><TMPL_VAR NAME=Amount></td>
 	<TMPL_IF Target>
-	<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
+	<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
 	<td><TMPL_VAR NAME=TAlliance></td>
 	</TMPL_IF>
 	<td><TMPL_VAR NAME=Ingal></td>
@@ -117,12 +117,12 @@
 		<td><TMPL_VAR NAME=Username></td>
 		<td><TMPL_VAR NAME=Report_date></td>
 		<td><TMPL_VAR NAME=Message></td>
-		<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;handle=<TMPL_VAR NAME=Id>">remove</a></td>
+		<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;handle=<TMPL_VAR NAME=Id>">remove</a></td>
 	</tr>
 	</TMPL_LOOP>
 </table>
 
-	<form action="index.pl" method="post"><fieldset> <legend>Coords</legend>
+	<form action="/" method="post"><fieldset> <legend>Coords</legend>
 	<p>Paste a list of coords here</p>
 	<textarea rows="25" cols="80" name="coords"></textarea>
 	<input type="hidden" name="cmd" value="coords"/>

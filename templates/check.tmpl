@@ -1,11 +1,11 @@
-<p><TMPL_IF Arbiter><TMPL_VAR NAME=Arbiter><TMPL_ELSE><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;cmd=arbiter&amp;coords=<TMPL_VAR ESCAPE=URL NAME=Coords>">Do arbiter check on gal</a></TMPL_IF></p>
+<p><TMPL_IF Arbiter><TMPL_VAR NAME=Arbiter><TMPL_ELSE><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;cmd=arbiter&amp;coords=<TMPL_VAR ESCAPE=URL NAME=Coords>">Do arbiter check on gal</a></TMPL_IF></p>
 <table border="1">
 	<tr><th>Coords</th><th>Planet</th><th>Race</th><th>Size (rank)</th><th>Score (rank)</th><th>Value (rank)</th>
 		<th>XP (rank)</th><th>Fleet (Resouce) value</th><TMPL_IF isBC><th>Nick</th><th>Hit us</th><th>Alliance</th></TMPL_IF>
 	</tr>
 	<TMPL_LOOP Planets>
 	<tr align="center">
-		<td><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+		<td><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td><TMPL_VAR NAME=Planet></td><td><TMPL_VAR NAME=Race></td><td><TMPL_VAR NAME=Size></td>
 		<td><TMPL_VAR NAME=Score></td><td><TMPL_VAR NAME=Value></td><td><TMPL_VAR NAME=XP></td>
 		<td><TMPL_VAR NAME=FleetValue></td><TMPL_IF isBC><td class="<TMPL_VAR NAME=PlanetStatus>"><TMPL_VAR NAME=Nick></td><td><TMPL_VAR NAME=HitUs></td>

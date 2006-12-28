@@ -2,17 +2,17 @@
 <table>
 	<tr>
 		<th>Name</th><th>Relationship</th><th>Members (in res calc)</th>
-		<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;order=score">Score</a></th>
-		<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;order=size">Size</a></th>
-		<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;order=resources">Resources</a></th>
-		<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;order=respplanet">Resources / Planet</a></th>
-		<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;order=nscore">Res score (gain)</a>[1]</th>
-		<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;order=nscore2">Avg res score (gain)</a>[2]</th>
-		<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;order=nscore3">Estimated score</a>[3]</th>
+		<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;order=score">Score</a></th>
+		<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;order=size">Size</a></th>
+		<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;order=resources">Resources</a></th>
+		<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;order=respplanet">Resources / Planet</a></th>
+		<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;order=nscore">Res score (gain)</a>[1]</th>
+		<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;order=nscore2">Avg res score (gain)</a>[2]</th>
+		<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;order=nscore3">Estimated score</a>[3]</th>
 	</tr>
 <TMPL_LOOP Alliances>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td><a href="index.pl?page=alliances&amp;alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
+		<td><a href="alliances?alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
 		<td class="<TMPL_VAR NAME=relationship>"><TMPL_VAR NAME=relationship></td>
 		<td><TMPL_VAR NAME=members> (<TMPL_VAR NAME=planets>)</td>
 		<td><TMPL_VAR NAME=score></td>

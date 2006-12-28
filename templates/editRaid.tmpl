@@ -1,14 +1,14 @@
 <TMPL_VAR NAME=Error>
-<form action="/index.pl" method="post">
+<form action="/" method="post">
 	<fieldset> <legend><TMPL_IF Raid>Edit raid<TMPL_ELSE>New raid</TMPL_IF></legend>
 		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 		<div class="leftinfo">
 		<TMPL_IF Raid>
 			<input type="hidden" name="cmd" value="change"/>
 			<input type="hidden" name="raid" value="<TMPL_VAR NAME=Raid>"/>
-			<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=Open>"><TMPL_VAR NAME=Open> raid.</a></p>
-			<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=ShowCoords>"><TMPL_VAR NAME=ShowCoordsName> coords.</a></p>
-			<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=remove">Remove raid</a></p>
+			<p><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=Open>"><TMPL_VAR NAME=Open> raid.</a></p>
+			<p><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=<TMPL_VAR NAME=ShowCoords>"><TMPL_VAR NAME=ShowCoordsName> coords.</a></p>
+			<p><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;cmd=remove">Remove raid</a></p>
 		<TMPL_ELSE>
 			<input type="hidden" name="cmd" value="submit"/>
 		</TMPL_IF>
@@ -55,12 +55,12 @@
 </form>
 <TMPL_IF Raid>
 	<p>Sort by:
-		<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=coords">Coords</a>
-		<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=race">Race</a>
-		<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=size">Size</a>
-		<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=score">Score</a>
-		<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=value">Value</a>
-		<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=xp">XP</a>
+		<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=coords">Coords</a>
+		<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=race">Race</a>
+		<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=size">Size</a>
+		<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=score">Score</a>
+		<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=value">Value</a>
+		<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;order=xp">XP</a>
 	</p>
 <TMPL_LOOP Targets>
 	<fieldset> <legend>Target: #<TMPL_VAR NAME=Id> <TMPL_VAR NAME=Coords></legend>
@@ -79,7 +79,7 @@
 			</tr>
 		</table>
 	</div>
-	<form action="index.pl" method="post">
+	<form action="/" method="post">
 		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 		<input type="hidden" name="target" value="<TMPL_VAR NAME=Id>"/>
 		<input type="hidden" name="cmd" value="comment"/>
@@ -90,7 +90,7 @@
 		</p>
 	</form>
 	<div class="clear">&nbsp;</div>
-	<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;removeTarget=<TMPL_VAR NAME=Id>">Remove</a></p>
+	<p><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;raid=<TMPL_VAR NAME=Raid>&amp;removeTarget=<TMPL_VAR NAME=Id>">Remove</a></p>
 	</fieldset>
 </TMPL_LOOP>
 </TMPL_IF>

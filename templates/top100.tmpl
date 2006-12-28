@@ -1,20 +1,20 @@
-<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
-	<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
+<p><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
+	<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
 <table>
 	<tr><th>Coords</th><th>Planet</th><th>Race</th>
-	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size (rank)</a></th>
-	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score (rank)</a></th>
-	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=valuerank">Value (rank)</a></th>
-	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=xprank">XP (rank)</a></th>
+	<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size (rank)</a></th>
+	<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score (rank)</a></th>
+	<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=valuerank">Value (rank)</a></th>
+	<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=xprank">XP (rank)</a></th>
 	<TMPL_IF isHC>
 	<th>Nick</th>
-	<th><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=hit_us">Hit us</a></th>
+	<th><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=Offset>&amp;order=hit_us">Hit us</a></th>
 	<th>Alliance</th>
 	</TMPL_IF>
 	</tr>
 	<TMPL_LOOP Planets>
 	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-	<td><a href="index.pl?page=check&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+	<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 	<td><TMPL_VAR NAME=Planet></td>
 	<td><TMPL_VAR NAME=Race></td>
 	<td><TMPL_VAR NAME=Size></td>
@@ -22,12 +22,12 @@
 	<td><TMPL_VAR NAME=Value></td>
 	<td><TMPL_VAR NAME=XP></td>
 	<TMPL_IF isHC>
-	<td class="<TMPL_VAR NAME=PlanetStatus>"><a href="index.pl?page=intel&amp;coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick></a></td>
+	<td class="<TMPL_VAR NAME=PlanetStatus>"><a href="intel?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick></a></td>
 	<td><TMPL_VAR NAME=HitUs></td>
 	<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td>
 	</TMPL_IF>
 	</tr>
 	</TMPL_LOOP>
 </table>
-<p><a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
-	<a href="index.pl?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
+<p><a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
+	<a href="/?page=<TMPL_VAR NAME=PAGE>&amp;offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
