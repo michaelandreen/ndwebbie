@@ -1,6 +1,6 @@
 <TMPL_VAR NAME=Error>
 <TMPL_IF Call>
-<form action="/" method="post"><fieldset> <legend>Call details, call# <TMPL_VAR NAME=Call></legend>
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Call details, call# <TMPL_VAR NAME=Call></legend>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<input type="hidden" name="call" value="<TMPL_VAR NAME=Call>"/>
 	<p>Current DC: <TMPL_VAR NAME=DC></p>
@@ -35,7 +35,7 @@
 	</p>
 </fieldset></form>
 <p>Attackers:</p>
-<form action="/" method="post">
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<input type="hidden" name="call" value="<TMPL_VAR NAME=Call>"/>
 	<table>

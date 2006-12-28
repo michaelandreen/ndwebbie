@@ -1,5 +1,5 @@
 <TMPL_VAR NAME=Error>
-<form action="/" method="post"><p>
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><p>
 	<input type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
 	<input type="submit" value="Check"/>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
@@ -20,7 +20,7 @@
 </TMPL_IF>
 
 <TMPL_IF Coords>
-<form action="/" method="post">
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<input type="hidden" name="coords" value="<TMPL_VAR NAME=Coords>"/>
 	<input type="hidden" name="planet" value="<TMPL_VAR NAME=Planet>"/>
 	<input type="hidden" name="cmd" value="change"/>
@@ -122,7 +122,7 @@
 	</TMPL_LOOP>
 </table>
 
-	<form action="/" method="post"><fieldset> <legend>Coords</legend>
+	<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Coords</legend>
 	<p>Paste a list of coords here</p>
 	<textarea rows="25" cols="80" name="coords"></textarea>
 	<input type="hidden" name="cmd" value="coords"/>

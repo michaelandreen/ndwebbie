@@ -14,7 +14,7 @@
 </table>
 <hr/>
 </TMPL_LOOP>
-<form action="/" method="post"><fieldset> <legend>Launch confirmation</legend>
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Launch confirmation</legend>
 	<p>Paste all (ctrl+a should be ok, but try with just single mission if you get an error, save the ctrl+a output and contact harv) information from <b>missions page</b> here (NOT from news page, and not overview, nor gal status). It's ok to paste when prelaunched, as long as you're sure you won't change your plans.</p>
 	<textarea rows="25" cols="80" name="mission"></textarea>
 	<input type="hidden" name="cmd" value="submit"/>

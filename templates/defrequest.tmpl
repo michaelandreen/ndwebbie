@@ -1,7 +1,7 @@
 <TMPL_VAR NAME=Error>
 <TMPL_IF Reply><p>Sent the message '<TMPL_VAR NAME=Reply>' to def
 channel</p></TMPL_IF>
-<form action="/" method="post"><fieldset> <legend>Launch confirmation</legend>
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Launch confirmation</legend>
 	<p>Message to def channel (like a line from gal status):</p>
 	<input type="text" name="message" value=""/>
 	<input type="hidden" name="cmd" value="submit"/>

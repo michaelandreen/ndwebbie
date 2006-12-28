@@ -1,5 +1,5 @@
 <TMPL_VAR NAME=Error>
-<form action="/" method="post">
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<fieldset> <legend><TMPL_IF Raid>Edit raid<TMPL_ELSE>New raid</TMPL_IF></legend>
 		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 		<div class="leftinfo">
@@ -79,7 +79,7 @@
 			</tr>
 		</table>
 	</div>
-	<form action="/" method="post">
+	<form action="<TMPL_VAR NAME=PAGE>" method="post">
 		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 		<input type="hidden" name="target" value="<TMPL_VAR NAME=Id>"/>
 		<input type="hidden" name="cmd" value="comment"/>

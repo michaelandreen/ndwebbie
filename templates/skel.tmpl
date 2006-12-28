@@ -29,7 +29,7 @@
 		<TMPL_IF isATTACKER>
 		<p>Attack menu</p>
 		<ul class="linkbar">
-			<li><form action="/" method="post"><p>
+			<li><form action="<TMPL_VAR NAME=PAGE>" method="post"><p>
 				<input type="hidden" name="page" value="check"/>
 				<input class="coordsinput" type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
 				<input class="coordsbutton" type="submit" value="Check"/>

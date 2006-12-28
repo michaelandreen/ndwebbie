@@ -22,7 +22,7 @@
 	<li>XP: <TMPL_VAR NAME=PlanetXP></li>	
 	<TMPL_ELSE>
 		<TMPL_IF isMEMBER>
-		<form action="/?page=<TMPL_VAR NAME=PAGE>" method="post">
+		<form action="<TMPL_VAR NAME=PAGE>" method="post">
 			<p>We need your planet's coordinates: 
 			<input type="text" name="planet" value=""/>
 			<input type="submit" value="Submit"/>
@@ -33,7 +33,7 @@
 	</ul>
 </fieldset>
 <fieldset> <legend>Fleets</legend>
-<form action="/" method="post">
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<table>
 	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
@@ -52,7 +52,7 @@
 	</p>
 </form>
 </fieldset>
-<form action="main?" method="post">
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 <fieldset> <legend>SMS</legend>
 	<p>Number: 
 	<input type="text" name="sms" value="<TMPL_VAR NAME=SMS>"/>
@@ -60,7 +60,7 @@
 	</p>
 </fieldset>
 </form>
-<form action="/" method="post">
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 <fieldset> <legend>Fleet</legend>
 	<p>Paste your total fleet from ships section on overview here (do it daily to see the menus):</p>
 	<textarea rows="15" cols="50" name="fleet"></textarea>
@@ -69,7 +69,7 @@
 	<br/><input type="submit" value="Submit"/>
 </fieldset>
 </form>
-<form action="/" method="post">
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 <fieldset> <legend>Change password</legend>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<p>Old password: 

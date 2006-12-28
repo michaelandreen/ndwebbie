@@ -1,6 +1,6 @@
 <TMPL_VAR NAME=Error>
 <TMPL_IF User>
-<form action="/" method="post"><fieldset> <legend>User details</legend>
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>User details</legend>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<input type="hidden" name="cmd" value="change"/>
 	<input type="hidden" name="user" value="<TMPL_VAR NAME=User>"/>
