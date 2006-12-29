@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'Main Page');
 
@@ -27,26 +26,55 @@ our $BODY;
 our $DBH;
 my $error;
 
-if (param('cmd') eq 'fleet'){
-	$DBH->begin_work;
-	my $fleet = $DBH->prepare("SELECT id FROM fleets WHERE uid = ? AND fleet = 0");
-	my ($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
-	unless ($id){
-		my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,'Full fleet',0,0,0,0)});
-		$insert->execute($ND::UID,$ND::PLANET);
-		($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
+if (defined param('cmd')){
+	if (param('cmd') eq 'fleet'){
+		$DBH->begin_work;
+		my $fleet = $DBH->prepare("SELECT id FROM fleets WHERE uid = ? AND fleet = 0");
+		my ($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
+		unless ($id){
+			my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,'Full fleet',0,0,0,0)});
+			$insert->execute($ND::UID,$ND::PLANET);
+			($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
+		}
+		my $delete = $DBH->prepare("DELETE FROM fleet_ships WHERE fleet = ?");
+		$delete->execute($id);
+		my $insert = $DBH->prepare('INSERT INTO fleet_ships (fleet,ship,amount) VALUES (?,?,?)');
+		$fleet = param('fleet');
+		$fleet =~ s/,//g;
+		while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+(\d+)/g){
+			$insert->execute($id,$1,$2) or $error .= '<p>'.$DBH->errstr.'</p>';
+		}
+		$fleet = $DBH->prepare('UPDATE fleets SET landing_tick = tick() WHERE id = ?');
+		$fleet->execute($id);
+		$DBH->commit;
+	}elsif (param('cmd') eq 'Recall Fleets'){
+		$DBH->begin_work;
+		my $updatefleets = $DBH->prepare('UPDATE fleets SET back = tick() + (tick() - (landing_tick - eta))  WHERE uid = ? AND id = ?');
+
+		for my $param (param()){
+			if ($param =~ /^change:(\d+)$/){
+				if($updatefleets->execute($ND::UID,$1)){
+					$ND::LOG->execute($ND::UID,"Member recalled fleet $1");
+				}else{
+					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+				}
+			}
+		}
+		$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
+	}elsif (param('cmd') eq 'Change Fleets'){
+		$DBH->begin_work;
+		my $updatefleets = $DBH->prepare('UPDATE fleets SET back = ? WHERE uid = ? AND id = ?');
+		for my $param (param()){
+			if ($param =~ /^change:(\d+)$/){
+				if($updatefleets->execute(param("back:$1"),$ND::UID,$1)){
+					$ND::LOG->execute($ND::UID,"Member set fleet $1 to be back tick: ".param("back:$1"));
+				}else{
+					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+				}
+			}
+		}
+		$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
 	}
-	my $delete = $DBH->prepare("DELETE FROM fleet_ships WHERE fleet = ?");
-	$delete->execute($id);
-	my $insert = $DBH->prepare('INSERT INTO fleet_ships (fleet,ship,amount) VALUES (?,?,?)');
-	$fleet = param('fleet');
-	$fleet =~ s/,//g;
-	while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+(\d+)/g){
-		$insert->execute($id,$1,$2) or $error .= '<p>'.$DBH->errstr.'</p>';
-	}
-	$fleet = $DBH->prepare('UPDATE fleets SET landing_tick = tick() WHERE id = ?');
-	$fleet->execute($id);
-	$DBH->commit;
 }
 if (param('sms')){
 	my $query = $DBH->prepare('UPDATE users SET sms = ? WHERE uid = ?');
@@ -58,35 +86,6 @@ UPDATE users SET planet =
 	(SELECT id from current_planet_stats where x = ? AND y = ? AND z = ?)
 WHERE uid = ? });
 	$query->execute($1,$2,$3,$ND::UID);
-}
-if (param('cmd') eq 'Recall Fleets'){
-	$DBH->begin_work;
-	my $updatefleets = $DBH->prepare('UPDATE fleets SET back = tick() + (tick() - (landing_tick - eta))  WHERE uid = ? AND id = ?');
-	
-	for my $param (param()){
-		if ($param =~ /^change:(\d+)$/){
-			if($updatefleets->execute($ND::UID,$1)){
-				$ND::LOG->execute($ND::UID,"Member recalled fleet $1");
-			}else{
-				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
-			}
-		}
-	}
-	$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
-}
-if (param('cmd') eq 'Change Fleets'){
-	$DBH->begin_work;
-	my $updatefleets = $DBH->prepare('UPDATE fleets SET back = ? WHERE uid = ? AND id = ?');
-	for my $param (param()){
-		if ($param =~ /^change:(\d+)$/){
-			if($updatefleets->execute(param("back:$1"),$ND::UID,$1)){
-				$ND::LOG->execute($ND::UID,"Member set fleet $1 to be back tick: ".param("back:$1"));
-			}else{
-				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
-			}
-		}
-	}
-	$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
 }
 if(param('oldpass') && param('pass')){
 	my $query = $DBH->prepare('UPDATE users SET password = MD5(?) WHERE password = MD5(?) AND uid = ?');
