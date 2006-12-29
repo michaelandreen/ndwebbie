@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -38,7 +37,7 @@ if (param('raid') =~ /^(\d+)$/){
 	my $query = $DBH->prepare(q{SELECT id,tick,waves,message,released_coords,open FROM raids WHERE id = ?});
 	$raid = $DBH->selectrow_hashref($query,undef,$1);
 }
-if (param('cmd') eq 'submit'){
+if (defined param('cmd') && param('cmd') eq 'submit'){
 	my $query = $DBH->prepare(q{INSERT INTO raids (tick,waves,message) VALUES(?,?,'')});
 	if ($query->execute(param('tick'),param('waves'))){
 		$raid = $DBH->last_insert_id(undef,undef,undef,undef,"raids_id_seq");
@@ -49,7 +48,7 @@ if (param('cmd') eq 'submit'){
 	}
 }
 
-if ($raid){
+if ($raid && defined param('cmd')){
 	if (param('cmd') eq 'remove'){
 		$DBH->do(q{UPDATE raids SET open = FALSE, removed = TRUE WHERE id = ?},undef,$raid->{id});
 	}elsif (param('cmd') eq 'Open'){
@@ -129,12 +128,12 @@ if ($raid){
 			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
 	}
-	if (param('removeTarget')){
-		$error .= "test";
-		unless($DBH->do(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?}
-				,undef,$raid->{id},param('removeTarget'))){
-			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
-		}
+}
+if ($raid && param('removeTarget')){
+	$error .= "test";
+	unless($DBH->do(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?}
+			,undef,$raid->{id},param('removeTarget'))){
+		$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 	}
 }
 
@@ -174,7 +173,7 @@ if ($raid){
 	$BODY->param(Message => $raid->{message});
 	
 	my $order = "p.x,p.y,p.z";
-	if (param('order') =~ /^(score|size|value|xp|race)$/){
+	if (param('order') && param('order') =~ /^(score|size|value|xp|race)$/){
 		$order = "$1 DESC";
 	}
 
