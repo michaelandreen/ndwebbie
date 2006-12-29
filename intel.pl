@@ -18,6 +18,8 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -135,7 +137,7 @@ if ($planet){
 	my $query = $DBH->prepare(intelquery('o.alliance AS oalliance,coords(o.x,o.y,o.z) AS origin',"t.id = ? $showticks"));
 	$query->execute($planet->{id}) or $error .= $DBH->errstr;
 	my @intellists;
-	my @intel;
+	my @incomings;
 	my $i = 0;
 	while (my $intel = $query->fetchrow_hashref){
 		if ($intel->{ingal}){
@@ -145,14 +147,14 @@ if ($planet){
 		}
 		$i++;
 		$intel->{ODD} = $i % 2;
-		push @intel,$intel;
+		push @incomings,$intel;
 	}
-	push @intellists,{Message => 'Incoming fleets', Intel => \@intel, Origin => 1};
+	push @intellists,{Message => 'Incoming fleets', Intel => \@incomings, Origin => 1};
 
-	my $query = $DBH->prepare(intelquery('t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',"o.id = ? $showticks"));
+	$query = $DBH->prepare(intelquery('t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',"o.id = ? $showticks"));
 	$query->execute($planet->{id}) or $error .= $DBH->errstr;
-	my @intel;
-	my $i = 0;
+	my @outgoings;
+	$i = 0;
 	while (my $intel = $query->fetchrow_hashref){
 		if ($intel->{ingal}){
 			$intel->{missionclass} = 'ingal';
@@ -161,9 +163,9 @@ if ($planet){
 		}
 		$i++;
 		$intel->{ODD} = $i % 2;
-		push @intel,$intel;
+		push @outgoings,$intel;
 	}
-	push @intellists,{Message => 'Outgoing Fleets', Intel => \@intel, Target => 1};
+	push @intellists,{Message => 'Outgoing Fleets', Intel => \@outgoings, Target => 1};
 
 	$BODY->param(IntelLIsts => \@intellists);
 

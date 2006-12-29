@@ -18,6 +18,8 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -160,7 +162,7 @@ WHERE i.call = ?
 ORDER BY p.x,p.y,p.z});
 	$attackers->execute($call->{id});
 	my @attackers;
-	my $i = 0;
+	$i = 0;
 	while(my $attacker = $attackers->fetchrow_hashref){
 		$i++;
 		$attacker->{ODD} = $i % 2;

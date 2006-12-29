@@ -18,6 +18,8 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -98,7 +100,7 @@ ORDER BY $order});
 	$query->execute($alliance->{id},$alliance->{id},$alliance->{id},$alliance->{id}) or $error .= $DBH->errstr;
 
 	my @intel;
-	my $i = 0;
+	$i = 0;
 	while (my $intel = $query->fetchrow_hashref){
 		if ($intel->{ingal}){
 			$intel->{missionclass} = 'ingal';
