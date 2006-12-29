@@ -19,8 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
-use POSIX;
 our $BODY;
 our $DBH;
 our $LOG;
@@ -31,20 +29,22 @@ $ND::TEMPLATE->param(TITLE => 'Intel');
 die "You don't have access" unless isIntel() || isHC();
 
 my $planet;
-if (param('coords') =~ /^(\d+)(?: |:)(\d+)(?: |:)(\d+)$/){
+if (defined param('coords') && param('coords') =~ /^(\d+)(?: |:)(\d+)(?: |:)(\d+)$/){
 	my $query = $DBH->prepare(q{SELECT x,y,z,coords(x,y,z),id, nick, alliance,alliance_id, planet_status,channel FROM current_planet_stats
 WHERE  x = ? AND y = ? AND z = ?});
 	$planet = $DBH->selectrow_hashref($query,undef,$1,$2,$3);
 }
 
 my $showticks = 'AND (i.tick - i.eta) > (tick() - 48)';
-if (param('show') eq 'all'){
-	$showticks = '';
-}elsif (param('show') =~ /^(\d+)$/){
-	$showticks = "AND (i.tick - i.eta) > (tick() - $1)";
+if (defined param('show')){
+	if (param('show') eq 'all'){
+		$showticks = '';
+	}elsif (param('show') =~ /^(\d+)$/){
+		$showticks = "AND (i.tick - i.eta) > (tick() - $1)";
+	}
 }
 
-if (param('cmd') eq 'coords'){
+if (defined param('cmd') && param('cmd') eq 'coords'){
 	my $coords = param('coords');
 	$DBH->do(q{CREATE TEMPORARY TABLE coordlist (
 	x integer NOT NULL,
@@ -67,7 +67,7 @@ ORDER BY alliance, p.x, p.y, p.z});
 	$BODY->param(CoordList => \@planets);
 }
 
-if ($planet){
+if ($planet && defined param('cmd')){
 	if (param('cmd') eq 'change'){
 		$DBH->begin_work;
 		if (param('cnick')){
@@ -128,7 +128,7 @@ if ($planet){
 	$BODY->param(Channel => $planet->{channel});
 	my @status;
 	for my $status ("&nbsp;","Friendly", "NAP", "Hostile"){
-		push @status,{Status => $status, Selected => $status eq $planet->{planet_status}}
+		push @status,{Status => $status, Selected => defined $planet->{planet_status} && $status eq $planet->{planet_status}}
 	}
 	$BODY->param(PlanetStatus => \@status);
 	my @alliances = alliances($planet->{alliance_id});
