@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -31,7 +30,7 @@ $ND::TEMPLATE->param(TITLE => 'Defense Calls');
 die "You don't have access" unless isDC();
 
 my $call;
-if (param('call') =~ /^(\d+)$/){
+if (defined param('call') && param('call') =~ /^(\d+)$/){
 	my $query = $DBH->prepare(q{
 SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member
 FROM calls c 
@@ -41,7 +40,7 @@ FROM calls c
 WHERE c.id = ?});
 	$call = $DBH->selectrow_hashref($query,undef,$1);
 }
-if ($call){
+if ($call && defined param('cmd')){
 	if (param('cmd') eq 'Submit'){
 		$DBH->begin_work;
 		if (param('ctick')){
@@ -171,12 +170,14 @@ ORDER BY p.x,p.y,p.z});
 	$BODY->param(Attackers => \@attackers);
 }else{
 	my $where = 'open AND c.landing_tick-6 > tick()';
-	if (param('show') eq 'covered'){
-		$where = 'covered';
-	}elsif (param('show') eq 'all'){
-		$where = 'true';
-	}elsif (param('show') eq 'uncovered'){
-		$where = 'not covered';
+	if (defined param('show')){
+		if (param('show') eq 'covered'){
+			$where = 'covered';
+		}elsif (param('show') eq 'all'){
+			$where = 'true';
+		}elsif (param('show') eq 'uncovered'){
+			$where = 'not covered';
+		}
 	}
 	my $pointlimits = $DBH->prepare(q{SELECT value :: int FROM misc WHERE id = ?});
 	my ($minpoints) = $DBH->selectrow_array($pointlimits,undef,'DEFMIN');
