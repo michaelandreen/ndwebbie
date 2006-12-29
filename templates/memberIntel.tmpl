@@ -11,12 +11,12 @@
 	</tr>
 	<TMPL_LOOP Intel>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-	<td><a href="intel?coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>
 	<TMPL_IF OAlliance>
 	<td><TMPL_VAR NAME=OAlliance></td>
 	<TMPL_ELSE>
 	<td><TMPL_VAR NAME=Nick></td>
 	</TMPL_IF>
+	<td><a href="intel?coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>
 	<td class="<TMPL_VAR NAME=MissionClass>"><TMPL_VAR NAME=Mission></td>
 	<td align="center"><TMPL_VAR NAME=landingtick></td>
 	<td align="center"><TMPL_VAR NAME=ETA></td>
