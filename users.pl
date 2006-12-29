@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-use POSIX;
 our $BODY;
 our $DBH;
 our $LOG;
