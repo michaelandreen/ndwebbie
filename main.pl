@@ -18,6 +18,8 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'Main Page');
 
@@ -128,7 +130,7 @@ if ($planet){
 }
 
 
-my $query = $DBH->prepare(q{SELECT f.fleet,f.id, coords(x,y,z) AS target, mission, sum(fs.amount) AS amount, landing_tick, back
+$query = $DBH->prepare(q{SELECT f.fleet,f.id, coords(x,y,z) AS target, mission, sum(fs.amount) AS amount, landing_tick, back
 FROM fleets f 
 	JOIN fleet_ships fs ON f.id = fs.fleet 
 	JOIN current_planet_stats p ON f.target = p.id

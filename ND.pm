@@ -56,7 +56,7 @@ sub handler {
 sub page {
 	our $DBH = ND::DB::DB();
 	our $USER = $ENV{'REMOTE_USER'};
-	my $error;# = $ND::r->param('page');
+	my $error = '';
 
 	chdir '/var/www/ndawn/code';
 
@@ -98,11 +98,10 @@ sub page {
 		$ND::BODY->param(PAGE => $ND::PAGE);
 	}
 
-
 	unless (my $return = do "$ND::PAGE.pl"){
-		$error .= "<p><b>couldn't parse $ND::page: $@</b></p>" if $@;
-		$error .= "<p><b>couldn't do $ND::page: $!</b></p>"    unless defined $return;
-		$error .= "<p><b>couldn't run $ND::page</b></p>"       unless $return;
+		$error .= "<p><b>couldn't parse $ND::PAGE: $@</b></p>" if $@;
+		$error .= "<p><b>couldn't do $ND::PAGE: $!</b></p>"    unless defined $return && defined $!;
+		$error .= "<p><b>couldn't run $ND::PAGE</b></p>"       unless $return;
 	}
 
 	unless ($XML){
@@ -120,9 +119,9 @@ sub page {
 			$ND::TEMPLATE->param(Targets => listTargets());
 		}
 		$TEMPLATE->param(Coords => param('coords') ? param('coords') : '1:1:1');
-		$TEMPLATE->param(Error => $error);
 
 	}
+	$TEMPLATE->param(Error => $error);
 	$ND::TEMPLATE->param(BODY => $ND::BODY->output);
 	my $output = $TEMPLATE->output;
 	print header(-type=> $type, -charset => 'utf-8', -Content_Length => length $output);

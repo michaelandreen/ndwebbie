@@ -18,78 +18,13 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
 our $LOG;
 our $XML;
-
-
-sub generateClaimXml {
-	my ($raid, $from, $target) = @_;
-
-	my ($timestamp) = $DBH->selectrow_array("SELECT MAX(modified)::timestamp AS modified FROM raid_targets");
-	$BODY->param(Timestamp => $timestamp);
-	if ($target){
-		$target = "r.id = $target";
-		$_ = listTargets();
-		$BODY->param(TargetList => $_);
-	}else{
-		$target = "r.raid = $raid->{id}";
-	}
-
-	if ($from){
-		$from = "AND modified > '$from'";
-	}
-	my $targets = $DBH->prepare(qq{SELECT r.id,r.planet FROM raid_targets r WHERE $target $from});
-	$targets->execute;
-	my $claims =  $DBH->prepare(qq{ SELECT username,joinable,launched FROM raid_claims
-		NATURAL JOIN users WHERE target = ? AND wave = ?});
-	my @targets;
-	while (my $target = $targets->fetchrow_hashref){
-		my %target;
-		$target{Id} = $target->{id};
-		$target{Coords} = $target->{id};
-		my @waves;
-		for (my $i = 1; $i <= $raid->{waves}; $i++){
-			my %wave;
-			$wave{Id} = $i;
-			$claims->execute($target->{id},$i);
-			my $joinable = 0;
-			my $claimers;
-			if ($claims->rows != 0){
-				my $owner = 0;
-				my @claimers;
-				while (my $claim = $claims->fetchrow_hashref){
-					$owner = 1 if ($ND::USER eq $claim->{username});
-					$joinable = 1 if ($claim->{joinable});
-					$claim->{username} .= '*' if ($claim->{launched});
-					push @claimers,$claim->{username};
-				}
-				$claimers = join '/', @claimers;
-				if ($owner){
-					$wave{Command} = 'Unclaim';
-					if ($raid->{released_coords}){
-						$target{Coords} = $DBH->selectrow_array('SELECT coords(x,y,z) FROM current_planet_stats WHERE id = ?',undef,$target->{planet});
-					}
-				}elsif ($joinable){
-					$wave{Command} = 'Join';
-				}else{
-					$wave{Command} = 'none';
-				}
-			}else{
-				#if (!isset($planet) || ($target->value/$planet->value > 0.4 || $target->score/$planet->score > 0.4))
-				$wave{Command} = 'Claim';
-			}
-			$wave{Claimers} = $claimers;
-			$wave{Joinable} = $joinable;
-			push @waves,\%wave;
-		}
-		$target{Waves} = \@waves;
-		push @targets,\%target;
-	}
-	$BODY->param(Targets => \@targets);
-}
 
 my $raid;
 if (param('raid') =~ /^(\d+)$/){

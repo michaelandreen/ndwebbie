@@ -18,6 +18,8 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -34,9 +36,10 @@ if (param('user') =~ /^(\d+)$/){
 SELECT uid,username,hostmask,coords(x,y,z) AS planet,attack_points,defense_points,scan_points,humor_points  
 	FROM users u LEFT OUTER JOIN current_planet_stats p ON u.planet = p.id
 WHERE uid = ?;
-}) or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+}) or $error .= "<p> Something went wrong: </p>";
 	$user = $DBH->selectrow_hashref($query,undef,$1) or $error.= "<p> Something went wrong: ".$DBH->errstr."</p>";
 }
+
 
 if ($user && param('cmd') eq 'change'){
 	$DBH->begin_work;
@@ -68,6 +71,7 @@ if ($user && param('cmd') eq 'change'){
 	$groups->execute();
 	while (my $group = $groups->fetchrow_hashref){
 		my $query;
+		next unless defined param($group->{gid});
 		if (param($group->{gid}) eq 'remove'){
 			$query = $delgroup;
 		}elsif(param($group->{gid}) eq 'add'){

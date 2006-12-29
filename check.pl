@@ -18,6 +18,8 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'Check planets and galaxies');
 
@@ -121,7 +123,7 @@ ORDER BY p.x,p.y,p.z});
 	$BODY->param(Missions => \@missions);
 
 	my @scans;
-	my $query = $DBH->prepare(q{SELECT value,tick FROM planet_stats 
+	$query = $DBH->prepare(q{SELECT value,tick FROM planet_stats 
 		WHERE id = ? AND tick > tick() - 24});
 	my $scan = q{
 <p>Value the last 24 ticks</p>
@@ -138,8 +140,8 @@ ORDER BY p.x,p.y,p.z});
 	$scan .= q{</table>};
 	push @scans, {Scan => $scan};
 
-	my $query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats WHERE id = ?});
-	my $scan = q{
+	$query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats WHERE id = ?});
+	$scan = q{
 <p>Previous Coords</p>
 <table><tr><th>Tick</th><th>Value</th><th>Difference</th></tr>};
 	$query->execute($planet_id);
@@ -155,7 +157,7 @@ ORDER BY p.x,p.y,p.z});
 	$scan .= q{</table>};
 	push @scans, {Scan => $scan};
 
-	my $query = $DBH->prepare(q{SELECT DISTINCT ON (type) type,scan_id, tick, scan FROM scans WHERE planet = ?
+	$query = $DBH->prepare(q{SELECT DISTINCT ON (type) type,scan_id, tick, scan FROM scans WHERE planet = ?
 		GROUP BY type,scan_id, tick, scan ORDER BY type,tick DESC});
 	$query->execute($planet_id);
 	my %scans;
