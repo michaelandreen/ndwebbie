@@ -99,6 +99,7 @@ ORDER BY r.tick+c.wave,x,y,z});
 sub alliances {
 	my ($alliance) = @_;
 	my @alliances;
+	$alliance = -1 unless defined $alliance;
 	push @alliances,{Id => -1, Name => '&nbsp;', Selected => not $alliance};
 	my $query = $ND::DBH->prepare(q{SELECT id,name FROM alliances ORDER BY name});
 	$query->execute;	

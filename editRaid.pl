@@ -18,6 +18,8 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -67,6 +69,11 @@ if ($raid){
 		if($DBH->do(q{UPDATE raids SET released_coords = FALSE WHERE id = ?},undef,$raid->{id})){
 			$raid->{released_coords} = 0;
 		}
+	}elsif (param('cmd') eq 'comment'){
+		$DBH->do(q{UPDATE raid_targets SET comment = ? WHERE id = ?}
+			,undef,escapeHTML(param('comment')),param('target'))
+			or $error .= p($DBH->errstr);
+
 	}elsif (param('cmd') eq 'change'){
 		$DBH->begin_work;
 		my $message = escapeHTML(param('message'));
