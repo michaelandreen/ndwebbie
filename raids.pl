@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -27,12 +26,12 @@ our $LOG;
 our $XML;
 
 my $raid;
-if (param('raid') =~ /^(\d+)$/){
+if (defined param('raid')){
 	my $query = $DBH->prepare(q{SELECT id,tick,waves,message,released_coords FROM raids WHERE id = ? AND open AND not removed AND id IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?)});
-	$raid = $DBH->selectrow_hashref($query,undef,$1,$ND::UID);
+	$raid = $DBH->selectrow_hashref($query,undef,param('raid'),$ND::UID);
 }
 
-if (param('target') =~ /^(\d+)$/ && param('wave') =~ /^(\d+)$/){
+if (defined param('cmd') && defined param('target') && defined param('wave') && param('target') =~ /^(\d+)$/ && param('wave') =~ /^(\d+)$/){
 	my $target = param('target');
 	my $wave = param('wave');
 	
@@ -65,7 +64,7 @@ if (param('target') =~ /^(\d+)$/ && param('wave') =~ /^(\d+)$/){
 			}
 		}
 	}
-	if (param('joinable') =~ /(TRUE|FALSE)/){
+	if (param('cmd') eq 'set' && defined param('joinable') && param('joinable') =~ /(TRUE|FALSE)/){
 		my $claims = $DBH->prepare(qq{SELECT username FROM raid_claims NATURAL JOIN users WHERE target = ? AND wave = ? AND uid = ?});
 		$claims->execute($target,$wave,$ND::UID);
 		if ($claims->rows != 0){
@@ -132,8 +131,10 @@ ORDER BY size});
 			$target{Size} = floor($target->{size}/$num)*$num;
 			$num = pow(10,length($target->{fleetvalue})-2);
 			$target{FleetValue} = floor($target->{fleetvalue}/$num)*$num;
-			$num = pow(10,length($target->{resvalue})-2);
-			$target{ResValue} = floor($target->{resvalue}/$num)*$num;
+			if (defined $target->{resvalue}){
+				$num = pow(10,length($target->{resvalue})-2);
+				$target{ResValue} = floor($target->{resvalue}/$num)*$num;
+			}
 			$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
 
 			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) type, tick, scan FROM scans 

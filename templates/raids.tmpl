@@ -34,9 +34,9 @@
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<p>
 		<input type="button" value="Update claims"
-			onclick = "update('<TMPL_VAR NAME=PAGE>?xml=1&amp;raid=<TMPL_VAR NAME=Raid>')"/>
+			onclick = "update('<TMPL_VAR NAME=PAGE>?xml=1;raid=<TMPL_VAR NAME=Raid>')"/>
 		<input type="button" value="Update target list"
-			onclick = "listTargets('<TMPL_VAR NAME=PAGE>?xml=1&amp;raid=<TMPL_VAR NAME=Raid>')"/>
+			onclick = "listTargets('<TMPL_VAR NAME=PAGE>?xml=1;raid=<TMPL_VAR NAME=Raid>')"/>
 	</p>
 </form>
 </TMPL_IF>
@@ -73,7 +73,7 @@
 	<TMPL_IF Ajax>
 	<TMPL_LOOP Claims>
      <input type="button" value="Claim wave <TMPL_VAR NAME=Wave>"
-        onclick = "claim('<TMPL_VAR NAME=PAGE>?xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'Claim')"/>
+        onclick = "claim('<TMPL_VAR NAME=PAGE>?xml=1;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'Claim')"/>
 	</TMPL_LOOP>
 	<TMPL_ELSE>
 	<TMPL_LOOP Claims>
@@ -89,7 +89,7 @@
 </TMPL_LOOP>
 <TMPL_IF Ajax>
 	<script type="text/javascript">
-	update('<TMPL_VAR NAME=PAGE>?xml=1&amp;raid=<TMPL_VAR NAME=Raid>');
+	update('<TMPL_VAR NAME=PAGE>?xml=1;raid=<TMPL_VAR NAME=Raid>');
 	</script>
 </TMPL_IF>
 
