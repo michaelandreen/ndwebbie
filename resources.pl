@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -31,7 +30,7 @@ $ND::TEMPLATE->param(TITLE => 'Alliance Resources');
 die "You don't have access" unless isHC();
 
 my $order = "respplanet DESC";
-if (param('order') =~ /^(score|resources|respplanet|nscore|nscore2|nscore3)$/){
+if (defined param('order') && param('order') =~ /^(size|score|resources|respplanet|nscore|nscore2|nscore3)$/){
 	$order = "$1 DESC";
 }
 
