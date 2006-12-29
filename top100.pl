@@ -19,13 +19,13 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'Top100 ');
 
 our $BODY;
 our $DBH;
 our $LOG;
+my $error = '';
 
 $BODY->param(isHC => isHC());
 
@@ -33,7 +33,7 @@ $BODY->param(isHC => isHC());
 die "You don't have access" unless isMember();
 
 my $offset = 0;
-if (param('offset') =~ /^(\d+)$/){
+if (defined param('offset') && param('offset') =~ /^(\d+)$/){
 	$offset = $1;
 }
 $BODY->param(Offset => $offset);
@@ -41,7 +41,7 @@ $BODY->param(PrevOffset => $offset - 100);
 $BODY->param(NextOffset => $offset + 100);
 
 my $order = 'scorerank';
-if (param('order') =~ /^(scorerank|sizerank|valuerank|xprank|hit_us)$/){
+if (defined param('order') && param('order') =~ /^(scorerank|sizerank|valuerank|xprank|hit_us)$/){
 	$order = $1;
 }
 $BODY->param(Order => $order);
@@ -52,28 +52,21 @@ my $extra_columns = '';
 if (isHC()){
 	$extra_columns = ",planet_status,hit_us, alliance,relationship,nick";
 }
-my $query = $DBH->prepare(qq{SELECT id,coords(x,y,z), ruler, planet,race,
+my $query = $DBH->prepare(qq{SELECT coords(x,y,z),((ruler || ' OF ') || planet) as planet,race,
 	size, score, value, xp, sizerank, scorerank, valuerank, xprank
 	$extra_columns FROM current_planet_stats ORDER BY $order LIMIT 100 OFFSET ?});
-$query->execute($offset);
+$query->execute($offset) or $error .= p($DBH->errstr);
 my @planets;
 my $i = 0;
-while (my ($id,$coords,$ruler,$planet,$race,$size,$score,$value,$xp,$sizerank,$scorerank,$valuerank,$xprank
-		,$planet_status,$hit_us,$alliance,$relationship,$nick) = $query->fetchrow){
-	my %planet = (Coords => $coords, Planet => "$ruler OF $planet", Race => $race, Size => "$size ($sizerank)"
-		, Score => "$score ($scorerank)", Value => "$value ($valuerank)", XP => "$xp ($xprank)");
+while (my $planet = $query->fetchrow_hashref){
 	if (isHC){
-		$planet{HitUs} = $hit_us;
-		$planet{Alliance} = "$alliance ($relationship)";
-		$planet{Nick} = "$nick ($planet_status)";
-		$planet{PlanetStatus} = $planet_status;
-		$planet{Relationship} = $relationship;
-		$planet{isHC} = 1;
+		$planet->{isHC} = 1;
 	}
 	$i++;
-	$planet{ODD} = $i % 2;
-	push @planets,\%planet;
+	$planet->{ODD} = $i % 2;
+	push @planets,$planet;
 }
 $BODY->param(Planets => \@planets);
+$BODY->param(Error => $error);
 
 1;

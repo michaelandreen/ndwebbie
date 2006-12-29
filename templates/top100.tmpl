@@ -1,3 +1,4 @@
+<TMPL_VAR NAME=Error>
 <p><a href="<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
 	<a href="<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
 <table>
@@ -17,13 +18,13 @@
 	<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 	<td><TMPL_VAR NAME=Planet></td>
 	<td><TMPL_VAR NAME=Race></td>
-	<td><TMPL_VAR NAME=Size></td>
-	<td><TMPL_VAR NAME=Score></td>
-	<td><TMPL_VAR NAME=Value></td>
-	<td><TMPL_VAR NAME=XP></td>
+	<td><TMPL_VAR NAME=Size>(<TMPL_VAR NAME=Sizerank>)</td>
+	<td><TMPL_VAR NAME=Score>(<TMPL_VAR NAME=Scorerank>)</td>
+	<td><TMPL_VAR NAME=Value>(<TMPL_VAR NAME=Valuerank>)</td>
+	<td><TMPL_VAR NAME=XP>(<TMPL_VAR NAME=XPrank>)</td>
 	<TMPL_IF isHC>
-	<td class="<TMPL_VAR NAME=PlanetStatus>"><a href="intel?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick></a></td>
-	<td><TMPL_VAR NAME=HitUs></td>
+	<td class="<TMPL_VAR NAME=Planet_Status>"><a href="intel?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick>(<TMPL_VAR NAME=Planet_Status>)</a></td>
+	<td><TMPL_VAR NAME=Hit_Us></td>
 	<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td>
 	</TMPL_IF>
 	</tr>
