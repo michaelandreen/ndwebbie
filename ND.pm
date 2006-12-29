@@ -66,7 +66,7 @@ sub page {
 		,undef,$ENV{'REMOTE_USER'});
 
 	our ($TICK) = $DBH->selectrow_array('SELECT tick()',undef);
-	$TICK = 0 unless defined TICK;
+	$TICK = 0 unless defined $TICK;
 
 
 	my $query = $DBH->prepare('SELECT groupname,attack,gid from groupmembers NATURAL JOIN groups WHERE uid = ?');
@@ -130,6 +130,7 @@ sub page {
 	print $output;
 
 
+	$DBH->rollback;
 	$DBH->disconnect;
 	$DBH = undef;
 	$UID = undef;
