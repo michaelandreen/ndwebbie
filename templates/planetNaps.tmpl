@@ -1,0 +1,22 @@
+<TMPL_VAR NAME=Error>
+<!--<TMPL_VAR NAME=PAGE>-->
+<table>
+	<tr><th>Coords</th><th>Planet</th><th>Race</th><th>Size (rank)</th><th>Score (rank)</th><th>Value (rank)</th>
+		<th>XP (rank)</th><th>Fleet (Resouce) value</th><th>Nick</th><th>Hit us</th><th>Alliance</th>
+	</tr>
+	<TMPL_LOOP Planets>
+	<tr align="center"  class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+		<td><TMPL_VAR NAME=Planet></td><td><TMPL_VAR NAME=Race></td>
+		<td><TMPL_VAR NAME=Size>(<TMPL_VAR NAME=Sizerank>)</td>
+		<td><TMPL_VAR NAME=Score>(<TMPL_VAR NAME=Scorerank>)</td>
+		<td><TMPL_VAR NAME=Value>(<TMPL_VAR NAME=Valuerank>)</td>
+		<td><TMPL_VAR NAME=XP>(<TMPL_VAR NAME=XPrank>)</td>
+		<td><TMPL_VAR NAME=FleetValue> (<TMPL_VAR NAME=ResValue>)</td>
+		<td class="<TMPL_VAR NAME=Planet_Status>"><a href="intel?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick>(<TMPL_VAR NAME=Planet_Status>)</a></td>
+		<td><TMPL_VAR NAME=Hit_Us></td>
+		<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td>
+	</tr>
+
+	</TMPL_LOOP>
+</table>
