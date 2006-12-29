@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'Request Defense');
 
@@ -30,7 +29,7 @@ my $error;
 
 die "You don't have access" unless isMember();
 
-if (param('cmd') eq 'submit'){
+if (defined param('cmd') && param('cmd') eq 'submit'){
 	my $insert = $DBH->prepare('INSERT INTO defense_requests (uid,message) VALUES (?,?)');
 	if($insert->execute($ND::UID,param('message'))){
 		$BODY->param(Reply => param('message'));
