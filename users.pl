@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -31,7 +30,7 @@ die "You don't have access" unless isHC();
 
 my $error = '';
 my $user;
-if (param('user') =~ /^(\d+)$/){
+if (defined param('user') && param('user') =~ /^(\d+)$/){
 	my $query = $DBH->prepare(q{
 SELECT uid,username,hostmask,coords(x,y,z) AS planet,attack_points,defense_points,scan_points,humor_points  
 	FROM users u LEFT OUTER JOIN current_planet_stats p ON u.planet = p.id
@@ -41,7 +40,7 @@ WHERE uid = ?;
 }
 
 
-if ($user && param('cmd') eq 'change'){
+if ($user && defined param('cmd') && param('cmd') eq 'change'){
 	$DBH->begin_work;
 	for my $param (param()){
 		if ($param =~ /^c:(\w+)$/){
