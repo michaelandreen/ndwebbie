@@ -19,8 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
-use POSIX;
 our $BODY;
 our $DBH;
 our $LOG;
@@ -31,11 +29,11 @@ $ND::TEMPLATE->param(TITLE => 'Alliances');
 die "You don't have access" unless isHC();
 
 my $alliance;
-if (param('alliance') =~ /^(\d+)$/){
+if (defined param('alliance') && param('alliance') =~ /^(\d+)$/){
 	my $query = $DBH->prepare(q{SELECT id,name, relationship FROM alliances WHERE id = ?});
 	$alliance = $DBH->selectrow_hashref($query,undef,$1);
 }
-if ($alliance && param ('cmd') eq 'change'){
+if ($alliance && defined param('cmd') && param ('cmd') eq 'change'){
 	$DBH->begin_work;
 	if (param('crelationship')){
 		my $value = escapeHTML(param('relationship'));
@@ -54,8 +52,10 @@ WHERE id = (SELECT id FROM current_planet_stats WHERE x = ? AND y = ? AND z = ?)
 		});
 	while ($coords =~ m/(\d+):(\d+):(\d+)(?:\s+nick=\s*(\S+))?/g){
 		if ($addplanet->execute($alliance->{id},$4,$1,$2,$3)){
-			$error .= "<p> Added planet $1:$2:$3 (nick $4) to this alliance</p>";
-			$LOG->execute($ND::UID,"HC Added planet $1:$2:$3 (nick $4) to alliance: $alliance->{id}");
+			my $nick = '';
+			$nick = '(nick $4)' if defined $4;
+			$error .= "<p> Added planet $1:$2:$3 $nick to this alliance</p>";
+			$LOG->execute($ND::UID,"HC Added planet $1:$2:$3 $nick to alliance: $alliance->{id}");
 		}else{
 			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
@@ -68,12 +68,12 @@ if ($alliance){
 	$BODY->param(Id => $alliance->{id});
 	my @relationships;
 	for my $relationship ("&nbsp;","Friendly", "NAP", "Hostile"){
-		push @relationships,{Rel => $relationship, Selected => $relationship eq $alliance->{relationship}}
+		push @relationships,{Rel => $relationship, Selected => defined $alliance->{relationship} && $relationship eq $alliance->{relationship}}
 	}
 	$BODY->param(Relationships => \@relationships);
 
 	my $order = "p.x,p.y,p.z";
-	if (param('order') =~ /^(score|size|value|xp|hit_us|race)$/){
+	if (defined param('order') && param('order') =~ /^(score|size|value|xp|hit_us|race)$/){
 		$order = "$1 DESC";
 	}
 	my $members = $DBH->prepare(qq{
@@ -115,7 +115,7 @@ ORDER BY $order});
 }else{
 
 	my $order = "score DESC";
-	if (param('order') =~ /^(score|kscore|size|ksize|members|kmem|kxp|kxp|scavg|kscavg|siavg|ksiavg|kxpavg|kvalue|kvalavg)$/){
+	if (defined param('order') && param('order') =~ /^(score|kscore|size|ksize|members|kmem|kxp|kxp|scavg|kscavg|siavg|ksiavg|kxpavg|kvalue|kvalavg)$/){
 		$order = "$1 DESC";
 	}
 	my $query = $DBH->prepare(qq{
@@ -133,8 +133,8 @@ ORDER BY $order
 	my @alliances;
 	my $i = 0;
 	while (my $alliance = $query->fetchrow_hashref){
+		next unless (defined $alliance->{score} || $alliance->{kscore} > 0);
 		$i++;
-		next if ($alliance->{score} < 1 && $alliance->{kscore} < 1);
 		$alliance->{ODD} = $i % 2;
 		push @alliances, $alliance;
 	}

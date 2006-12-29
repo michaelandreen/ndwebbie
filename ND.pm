@@ -66,6 +66,7 @@ sub page {
 		,undef,$ENV{'REMOTE_USER'});
 
 	our ($TICK) = $DBH->selectrow_array('SELECT tick()',undef);
+	$TICK = 0 unless defined TICK;
 
 
 	my $query = $DBH->prepare('SELECT groupname,attack,gid from groupmembers NATURAL JOIN groups WHERE uid = ?');
@@ -107,6 +108,7 @@ sub page {
 	unless ($XML){
 		my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$UID);
 
+		$fleetupdate = 0 unless defined $fleetupdate;
 
 		$TEMPLATE->param(Tick => $TICK);
 		$TEMPLATE->param(isMember => (($TICK - $fleetupdate < 24) || isScanner()) && $PLANET && isMember());
