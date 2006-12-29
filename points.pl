@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'Top Members');
 
@@ -30,7 +29,7 @@ our $LOG;
 die "You don't have access" unless isMember();
 
 my $type = "total";
-if (param('type') =~ /^(defense|attack|total|humor|scan|rank)$/){
+if (defined param('type') && param('type') =~ /^(defense|attack|total|humor|scan|rank)$/){
 	$type = $1;
 }
 $type .= '_points' unless ($type eq 'rank');
