@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'Launch Confirmation');
 
@@ -32,7 +31,7 @@ my $error;
 
 die "You don't have access" unless isMember();
 
-if (param('cmd') eq 'submit'){
+if (defined param('cmd') && param('cmd') eq 'submit'){
 	my $missions = param('mission');
 	my $findplanet = $DBH->prepare("SELECT planetid(?,?,?,?)");
 	my $findattacktarget = $DBH->prepare(q{SELECT c.target,c.wave,c.launched FROM  raid_claims c
