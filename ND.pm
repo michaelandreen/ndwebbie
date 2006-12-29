@@ -26,8 +26,12 @@ use DBD::Pg qw(:pg_types);
 use Apache2::Request;
 use ND::Include;
 use ND::DB;
+use Tie::File;
+use Fcntl 'O_RDONLY';
 use strict;
 use warnings FATAL => 'all';
+
+tie our @PAGES, 'Tie::File', "/var/www/ndawn/code/pages", mode => O_RDONLY or die $!;
 
 sub handler {
 	local $ND::r = shift;
@@ -77,13 +81,10 @@ sub page {
 
 	our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
-	my $page = 'main';
-	if ($ND::PAGE =~ /^(main|check|motd|points|covop|top100|launchConfirmation|addintel|defrequest|raids|editRaid|calls|intel|users|alliances|memberIntel|resources|planetNaps)$/){
-		$page = $1;
-	}
+	$ND::PAGE = 'main' unless grep { /^$ND::PAGE$/ } @PAGES;
 
 	our $XML = 0;
-	$XML = 1 if param('xml') and $page =~ /^(raids)$/;
+	$XML = 1 if param('xml') and $ND::PAGE =~ /^(raids)$/;
 
 	our $AJAX = 1;
 
@@ -91,17 +92,17 @@ sub page {
 	if ($XML){
 		$type = 'text/xml';
 		$ND::TEMPLATE = HTML::Template->new(filename => "templates/xml.tmpl", cache => 1);
-		$ND::BODY = HTML::Template->new(filename => "templates/${page}.xml.tmpl", cache => 1);
+		$ND::BODY = HTML::Template->new(filename => "templates/$ND::PAGE.xml.tmpl", cache => 1);
 	}else{
-		$ND::BODY = HTML::Template->new(filename => "templates/${page}.tmpl", global_vars => 1, cache => 1);
-		$ND::BODY->param(PAGE => $page);
+		$ND::BODY = HTML::Template->new(filename => "templates/$ND::PAGE.tmpl", global_vars => 1, cache => 1);
+		$ND::BODY->param(PAGE => $ND::PAGE);
 	}
 
 
-	unless (my $return = do "${page}.pl"){
-		$error .= "<p><b>couldn't parse $page: $@</b></p>" if $@;
-		$error .= "<p><b>couldn't do $page: $!</b></p>"    unless defined $return;
-		$error .= "<p><b>couldn't run $page</b></p>"       unless $return;
+	unless (my $return = do "$ND::PAGE.pl"){
+		$error .= "<p><b>couldn't parse $ND::page: $@</b></p>" if $@;
+		$error .= "<p><b>couldn't do $ND::page: $!</b></p>"    unless defined $return;
+		$error .= "<p><b>couldn't run $ND::page</b></p>"       unless $return;
 	}
 
 	unless ($XML){
