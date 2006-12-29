@@ -17,8 +17,15 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
+package ND::Include;
 use strict;
+use warnings FATAL => 'all';
+require Exporter;
 
+our @ISA = qw/Exporter/;
+
+our @EXPORT = qw/isMember isHC isDC isBC isOfficer isScanner isIntel parseMarkup min max listTargets
+	alliances intelquery/;
 
 sub isMember {
 	return exists $ND::GROUPS{Members};
