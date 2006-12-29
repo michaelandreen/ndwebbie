@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'CovOp Targets');
 
@@ -30,15 +29,15 @@ our $LOG;
 die "You don't have access" unless isMember();
 
 my $show = q{AND ((planet_status IS NULL OR NOT planet_status IN ('Friendly','NAP')) AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP')))};
-$show = '' if param('show') eq 'all';
-if (param('covop') =~ /^(\d+)$/){
+$show = '' if defined param('show') && param('show') eq 'all';
+if (defined param('covop') && param('covop') =~ /^(\d+)$/){
 	my $update = $DBH->prepare('UPDATE covop_targets SET covop_by = ?, last_covop = tick() WHERE planet = ? ');
 	$update->execute($ND::UID,$1);
 }
 
 my $list = '';
 my $where = '';
-if (param('list') eq 'distwhores'){
+if (defined param('list') && param('list') eq 'distwhores'){
 	$list = '&amp;list=distwhores';
 	$where = qq{WHERE dists > 0 $show
 ORDER BY dists DESC,COALESCE(sec_centres::float/structures*100,0)ASC}
