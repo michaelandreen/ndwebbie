@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 
 $ND::TEMPLATE->param(TITLE => 'List planet naps');
 
