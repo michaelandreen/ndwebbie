@@ -19,7 +19,6 @@
 
 use strict;
 use warnings FATAL => 'all';
-no warnings qw(uninitialized);
 use POSIX;
 our $BODY;
 our $DBH;
@@ -31,10 +30,12 @@ $ND::TEMPLATE->param(TITLE => 'Member Intel');
 die "You don't have access" unless isHC();
 
 my $showticks = 'AND i.tick > tick()';
-if (param('show') eq 'all'){
-	$showticks = '';
-}elsif (param('show') =~ /^(\d+)$/){
-	$showticks = "AND (i.tick - i.eta) > (tick() - $1)";
+if (defined param('show')){
+	if (param('show') eq 'all'){
+		$showticks = '';
+	}elsif (param('show') =~ /^(\d+)$/){
+		$showticks = "AND (i.tick - i.eta) > (tick() - $1)";
+	}
 }
 
 
