@@ -49,20 +49,20 @@ sub handler {
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
 		$ND::PAGE = $1 unless $1 eq 'index' and $3 eq 'pl';
 	}
+	$ND::PAGE = '' unless defined $ND::PAGE;
 	page();
 	return Apache2::Const::OK;
 }
 
 sub page {
 	our $DBH = ND::DB::DB();
-	our $USER = $ENV{'REMOTE_USER'};
 	my $error = '';
 
 	chdir '/var/www/ndawn/code';
 
 	our $TEMPLATE = HTML::Template->new(filename => 'templates/skel.tmpl', global_vars => 1, cache => 1);
 
-	our ($UID,$PLANET) = $DBH->selectrow_array('SELECT uid,planet FROM users WHERE username = ?'
+	our ($UID,$PLANET,$USER) = $DBH->selectrow_array('SELECT uid,planet,username FROM users WHERE username ILIKE ?'
 		,undef,$ENV{'REMOTE_USER'});
 
 	our ($TICK) = $DBH->selectrow_array('SELECT tick()',undef);
