@@ -32,7 +32,8 @@ sub handler {
 
 	my $dbh = ND::DB::DB();
 	my ($count) = $dbh->selectrow_array(q{SELECT count(*) FROM users WHERE
-		username ILIKE ? AND password = MD5(?)},undef,$r->user,$sent_pw);
+		lower(username) = lower(?) AND password = MD5(?)},undef,$r->user,$sent_pw);
+	$dbh->disconnect;
 	if ($count == 1){
 		return Apache2::Const::OK;
 	}
