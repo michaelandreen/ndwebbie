@@ -80,7 +80,7 @@ if (param('sms')){
 	my $query = $DBH->prepare('UPDATE users SET sms = ? WHERE uid = ?');
 	$query->execute(escapeHTML(param('sms')),$ND::UID);
 }
-if (isMember() && !$ND::PLANET && (param('planet') =~ m/(\d+)(?: |:)(\d+)(?: |:)(\d+)/)){
+if (isMember() && !$ND::PLANET && defined param('planet') && (param('planet') =~ m/(\d+)(?: |:)(\d+)(?: |:)(\d+)/)){
 	my $query = $DBH->prepare(q{
 UPDATE users SET planet = 
 	(SELECT id from current_planet_stats where x = ? AND y = ? AND z = ?)
