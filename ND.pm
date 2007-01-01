@@ -31,7 +31,6 @@ use Fcntl 'O_RDONLY';
 use strict;
 use warnings FATAL => 'all';
 
-tie our @PAGES, 'Tie::File', "/var/www/ndawn/code/pages", mode => O_RDONLY or die $!;
 
 sub handler {
 	local $ND::r = shift;
@@ -82,7 +81,8 @@ sub page {
 
 	our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
 
-	$ND::PAGE = 'main' unless grep { /^$ND::PAGE$/ } @PAGES;
+	tie my @pages, 'Tie::File', "/var/www/ndawn/code/pages", mode => O_RDONLY, memory => 0 or die $!;
+	$ND::PAGE = 'main' unless grep { /^$ND::PAGE$/ } @pages;
 
 	our $XML = 0;
 	$XML = 1 if param('xml') and $ND::PAGE =~ /^(raids)$/;
