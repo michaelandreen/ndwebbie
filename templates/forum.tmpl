@@ -1,0 +1,22 @@
+<TMPL_VAR NAME=Error>
+<TMPL_IF Thread>
+</TMPL_IF>
+<TMPL_IF Board>
+</TMPL_IF>
+<TMPL_IF Overview>
+<table class="boards">
+<tr>
+	<th>Unread</th>
+	<th>Board</th>
+</tr>
+<TMPL_LOOP Categories>
+	<tr><th colspan="2"><TMPL_VAR NAME=Category></th></tr>
+	<TMPL_LOOP Boards>
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td align="center"><TMPL_VAR NAME=Unread></td>
+		<td><a href="<TMPL_VAR NAME=PAGE>?board=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Board></a></td>
+	</tr>
+	</TMPL_LOOP>
+</TMPL_LOOP>
+</table>
+</TMPL_IF>
