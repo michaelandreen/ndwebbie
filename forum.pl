@@ -43,7 +43,7 @@ if ($thread){ #Display the thread
 }elsif($board){ #List threads in this board
 	$BODY->param(Board => 1);
 	$BODY->param(Post => $board->{post});
-	$BODY->param(Post => $board->{id});
+	$BODY->param(Id => $board->{id});
 	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
 FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN forum_thread_visits ftv ON ftv.ftid = ft.ftid
 WHERE ft.fbid = $1

@@ -26,6 +26,11 @@ legend {
 	border-width: 1px;
 	padding: 1px;
 }
+table.boards td {
+	border-style: solid;
+	border-width: 1px;
+	padding: 1px;
+}
 div.leftinfo{
 	float: left;
 	padding-right: 2em;
