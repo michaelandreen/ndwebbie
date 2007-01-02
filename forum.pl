@@ -51,7 +51,7 @@ if (defined param('cmd') && param('cmd') eq 'submit'){
 	$DBH->begin_work;
 	if ($board && $board->{post}){
 		my $insert = $DBH->prepare(q{INSERT INTO forum_threads (fbid,subject) VALUES($1,$2)});
-		if ($insert->execute($board->{id},param('subject'))){
+		if ($insert->execute($board->{id},escapeHTML(param('subject')))){
 			$thread = $DBH->selectrow_hashref($findThread,undef,
 				$DBH->last_insert_id(undef,undef,undef,undef,"forum_threads_ftid_seq"),$ND::UID)
 				or $ERROR .= p($DBH->errstr);
