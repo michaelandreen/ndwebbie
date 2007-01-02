@@ -66,7 +66,7 @@ if (defined param('cmd') && param('cmd') eq 'submit'){
 	$DBH->commit or $ERROR .= p($DBH->errstr);
 }
 
-my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM forum_categories});
+my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM forum_categories ORDER BY fcid});
 my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
 FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 WHERE ft.fbid = $1
@@ -82,7 +82,8 @@ if ($thread){ #Display the thread
 	my $posts = $DBH->prepare(q{SELECT u.username,date_trunc('minute',fp.time::timestamp) AS time,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
 FROM forum_threads ft JOIN forum_posts fp USING (ftid) NATURAL JOIN users u LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 WHERE ft.ftid = $1
-ORDER BY fp.time ASC});
+ORDER BY fp.time ASC
+});
 	$posts->execute($thread->{id},$ND::UID) or $ERROR .= p($DBH->errstr);
 	my @posts;
 	my $old = 1;
@@ -121,7 +122,8 @@ ORDER BY fp.time ASC});
 FROM forum_boards fb NATURAL JOIN forum_access fa
 WHERE fb.fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 	WHERE uid = $2))
-GROUP BY fb.fbid,fb.board});
+GROUP BY fb.fbid,fb.board
+});
 	while (my $category = $categories->fetchrow_hashref){
 		$boards->execute($category->{id},$ND::UID) or $ERROR .= p($DBH->errstr);
 		my @boards;
@@ -152,7 +154,7 @@ FROM forum_boards fb NATURAL JOIN forum_access fa LEFT OUTER JOIN (forum_threads
 WHERE fb.fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 		WHERE uid = $2))
 GROUP BY fb.fbid, fb.board
-		});
+ORDER BY fb.fbid	});
 	my @categories;
 	while (my $category = $categories->fetchrow_hashref){
 		$boards->execute($category->{id},$ND::UID) or $ERROR .= p($DBH->errstr);

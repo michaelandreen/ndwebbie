@@ -115,11 +115,11 @@ sub page {
 
 		my ($unread) = $DBH->selectrow_array(q{
 			SELECT count(*) AS unread
-FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft 
+FROM forum_boards fb NATURAL JOIN forum_threads ft 
 	JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN 
 		(SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
-WHERE ftv.time IS NULL OR fp.time > ftv.time AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
-	WHERE uid = $1))
+WHERE ftv.time IS NULL OR fp.time > ftv.time AND
+	fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1)))
 			},undef,$UID) or $ERROR .= p($DBH->errstr);
 
 		$TEMPLATE->param(UnreadPosts => $unread);
