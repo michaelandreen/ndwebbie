@@ -26,23 +26,46 @@ our $BODY;
 our $DBH;
 my $error;
 
-my %thread;
+my $thread;
 #TODO: fetch thread info.
 
-my %board;
-#TODO: fetch board info.
+my $board;
+if(param('b')){
+	my $query = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post)
+FROM forum_boards fb NATURAL JOIN forum_access fa
+WHERE fb.fbid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
+	WHERE uid = $2))
+GROUP BY fb.fbid,fb.board});
+	$board = $DBH->selectrow_hashref($query,undef,param('b'),$ND::UID) or $error .= p($DBH->errstr);
+}
 
-if (%thread){ #Display the thread
-}elsif(%board){ #List threads in this board
+if ($thread){ #Display the thread
+}elsif($board){ #List threads in this board
+	$BODY->param(Board => 1);
+	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.fpid::boolean,FALSE) AND COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
+FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN forum_thread_visits ftv ON ftv.ftid = ft.ftid
+WHERE ft.fbid = $1
+GROUP BY ft.ftid, ft.subject});
+	$threads->execute($board->{id}) or $error .= p($DBH->errstr);
+	my $i = 0;
+	my @threads;
+	while (my $thread = $threads->fetchrow_hashref){
+		$i++;
+		$thread->{Odd} = $i % 2;
+		push @threads,$thread;
+	}
+	$BODY->param(Threads => \@threads);
+
 }else{ #List boards
 	$BODY->param(Overview => 1);
 	my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM
 		forum_categories});
-	my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board
-		FROM forum_boards fb NATURAL JOIN forum_access fa
-		WHERE fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
-			WHERE uid = $2))
-		GROUP BY fb.fbid, fb.board
+	my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board,count(NULLIF(COALESCE(fp.fpid::boolean,FALSE) AND COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
+FROM forum_boards fb NATURAL JOIN forum_access fa LEFT OUTER JOIN (forum_threads ft JOIN forum_posts fp USING (ftid)) ON fb.fbid = ft.fbid LEFT OUTER JOIN forum_thread_visits ftv ON ftv.ftid = ft.ftid
+WHERE fb.fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
+		WHERE uid = $2))
+AND (ftv.uid IS NULL OR ftv.uid = $2)
+GROUP BY fb.fbid, fb.board
 		});
 	$categories->execute or $error .= p($DBH->errstr);
 	my @categories;
@@ -51,7 +74,6 @@ if (%thread){ #Display the thread
 		my @boards;
 		my $i = 0;
 		while (my $board = $boards->fetchrow_hashref){
-			$board->{Unread} = 0;
 			$i++;
 			$board->{Odd} = $i % 2;
 			push @boards,$board;
