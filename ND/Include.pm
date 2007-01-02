@@ -64,7 +64,7 @@ sub parseMarkup {
 	my ($text) = @_;
 
 	$text =~ s{\n}{\n<br/>}g;
-	$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>};
+	$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>}gi;
 	return $text;
 }
 
