@@ -113,6 +113,12 @@ sub page {
 
 		$fleetupdate = 0 unless defined $fleetupdate;
 
+		my ($unread) = $DBH->selectrow_array(q{SELECT count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
+FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN 
+	(SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
+			},undef,$UID) or $ERROR .= p($DBH->errstr);
+
+		$TEMPLATE->param(UnreadPosts => $unread);
 		$TEMPLATE->param(Tick => $TICK);
 		$TEMPLATE->param(isMember => (($TICK - $fleetupdate < 24) || isScanner()) && $PLANET && isMember());
 		$TEMPLATE->param(isHC => isHC());
