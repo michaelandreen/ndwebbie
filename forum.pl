@@ -31,7 +31,7 @@ my $thread;
 
 my $board;
 if(param('b')){
-	my $query = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post)
+	my $query = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post
 FROM forum_boards fb NATURAL JOIN forum_access fa
 WHERE fb.fbid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 	WHERE uid = $2))
@@ -42,7 +42,9 @@ GROUP BY fb.fbid,fb.board});
 if ($thread){ #Display the thread
 }elsif($board){ #List threads in this board
 	$BODY->param(Board => 1);
-	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.fpid::boolean,FALSE) AND COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
+	$BODY->param(Post => $board->{post});
+	$BODY->param(Post => $board->{id});
+	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
 FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN forum_thread_visits ftv ON ftv.ftid = ft.ftid
 WHERE ft.fbid = $1
 GROUP BY ft.ftid, ft.subject});

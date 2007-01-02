@@ -16,6 +16,18 @@
 	</tr>
 </TMPL_LOOP>
 </table>
+<TMPL_IF Post>
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>New Thread</legend>
+	<p></p>
+	<p>Subject: <input type="text" name="subject" value=""/></p>
+	<textarea rows="25" cols="80" name="mission"></textarea>
+	<input type="hidden" name="cmd" value="submit"/>
+	<input type="hidden" name="b" value="<TMPL_VAR NAME=Id>"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	<br/>
+	<input type="submit" value="Submit"/>
+</fieldset></form>
+</TMPL_IF>
 </TMPL_IF>
 <TMPL_IF Overview>
 <table class="boards">
