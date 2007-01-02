@@ -35,6 +35,9 @@ table.boards td {
 table.boards th {
 	font-size: larger;
 }
+fieldset.forum-post {
+	width: 40em;
+}
 fieldset.forum-post legend b {
 	font-size: larger;
 }

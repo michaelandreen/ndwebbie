@@ -11,8 +11,8 @@
 </fieldset>
 </TMPL_LOOP>
 <TMPL_IF Post>
-<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset> <legend>New Reply</legend>
-	<textarea rows="25" cols="80" name="message"></textarea>
+<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
+	<textarea rows="25" cols="60" name="message"></textarea>
 	<input type="hidden" name="cmd" value="submit"/>
 	<input type="hidden" name="t" value="<TMPL_VAR NAME=Id>"/>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
