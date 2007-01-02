@@ -38,9 +38,9 @@
 </TMPL_LOOP>
 </table>
 <TMPL_IF Post>
-<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset> <legend>New Thread</legend>
+<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset class="forum-post"> <legend>New Thread</legend>
 	<p>Subject: <input type="text" name="subject" value=""/></p>
-	<textarea rows="25" cols="80" name="message"></textarea>
+	<textarea rows="25" cols="60" name="message"></textarea>
 	<input type="hidden" name="cmd" value="submit"/>
 	<input type="hidden" name="b" value="<TMPL_VAR NAME=Id>"/>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
@@ -65,17 +65,6 @@
 	</TMPL_LOOP>
 </TMPL_LOOP>
 </table>
-<TMPL_IF Post>
-<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset> <legend>New Thread</legend>
-	<p>Subject: <input type="text" name="subject" value=""/></p>
-	<textarea rows="25" cols="80" name="message"></textarea>
-	<input type="hidden" name="cmd" value="submit"/>
-	<input type="hidden" name="b" value="<TMPL_VAR NAME=Id>"/>
-	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
-	<br/>
-	<input type="submit" value="Submit"/>
-</fieldset></form>
-</TMPL_IF>
 </TMPL_IF>
 <TMPL_IF AllUnread>
 <h2>All new posts</h2>
