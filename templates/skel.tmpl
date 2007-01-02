@@ -14,7 +14,7 @@
 		<ul class="linkbar">
 			<li><a href="main">Main page</a></li>
 			<li><a href="forum">Forum</a></li>
-			<li><a href="forum?allUnread=1">New posts (<TMPL_VAR NAME=UnreadPosts>)</a></li>
+			<li><a href="forum?allUnread=1">New posts <TMPL_IF UnreadPosts>(<b><TMPL_VAR NAME=UnreadPosts></b>)</TMPL_IF></a></li>
 		</ul>	<p>Tick: <TMPL_VAR NAME=TICK></p>
 		<TMPL_IF isMEMBER>
 		<p>Member menu</p>
