@@ -24,17 +24,7 @@ $ND::TEMPLATE->param(TITLE => 'Forum');
 
 our $BODY;
 our $DBH;
-my $error;
-
-my $thread;
-if(param('t')){
-	my $query = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post
-FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft
-WHERE ft.ftid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
-	WHERE uid = $2))
-GROUP BY ft.ftid,ft.subject});
-	$thread = $DBH->selectrow_hashref($query,undef,param('t'),$ND::UID) or $error .= p($DBH->errstr);
-}
+our $ERROR;
 
 my $board;
 if(param('b')){
@@ -43,8 +33,38 @@ FROM forum_boards fb NATURAL JOIN forum_access fa
 WHERE fb.fbid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 	WHERE uid = $2))
 GROUP BY fb.fbid,fb.board});
-	$board = $DBH->selectrow_hashref($query,undef,param('b'),$ND::UID) or $error .= p($DBH->errstr);
+	$board = $DBH->selectrow_hashref($query,undef,param('b'),$ND::UID) or $ERROR .= p($DBH->errstr);
 }
+
+my $thread;
+my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post
+FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft
+WHERE ft.ftid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
+	WHERE uid = $2))
+GROUP BY ft.ftid,ft.subject});
+if(param('t')){
+	$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or $ERROR .= p($DBH->errstr);
+}
+
+if (defined param('cmd') && param('cmd') eq 'submit'){
+	$DBH->begin_work;
+	if ($board && $board->{post}){
+		my $insert = $DBH->prepare(q{INSERT INTO forum_threads (fbid,subject) VALUES($1,$2)});
+		if ($insert->execute($board->{id},param('subject'))){
+			$thread = $DBH->selectrow_hashref($findThread,undef,
+				$DBH->last_insert_id(undef,undef,undef,undef,"forum_threads_ftid_seq"),$ND::UID)
+				or $ERROR .= p($DBH->errstr);
+		}else{
+			$ERROR .= p($DBH->errstr);
+		}
+	}
+	if ($thread && $thread->{post}){
+		my $insert = $DBH->prepare(q{INSERT INTO forum_posts (ftid,message,uid) VALUES($1,$2,$3)});
+		$insert->execute($thread->{id},escapeHTML(param('message')),$ND::UID) or $ERROR .= p($DBH->errstr);
+	}
+	$DBH->commit or $ERROR .= p($DBH->errstr);
+}
+
 
 if ($thread){ #Display the thread
 	$BODY->param(Thread => 1);
@@ -53,15 +73,16 @@ if ($thread){ #Display the thread
 	$BODY->param(Post => $thread->{post});
 
 	my $posts = $DBH->prepare(q{SELECT u.username,date_trunc('minute',fp.time::timestamp) AS time,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
-FROM forum_threads ft JOIN forum_posts fp USING (ftid) NATURAL JOIN users u LEFT OUTER JOIN forum_thread_visits ftv ON ftv.ftid = ft.ftid
-WHERE ft.ftid = $1});
-	$posts->execute($thread->{id}) or $error .= p($DBH->errstr);
+FROM forum_threads ft JOIN forum_posts fp USING (ftid) NATURAL JOIN users u LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
+WHERE ft.ftid = $1
+ORDER BY fp.time ASC});
+	$posts->execute($thread->{id},$ND::UID) or $ERROR .= p($DBH->errstr);
 	my @posts;
 	my $old = 1;
 	while (my $post = $posts->fetchrow_hashref){
 		if ($old && $post->{unread}){
 			$old = 0;
-			push @posts,{Username=> 'New posts', Message => '<a name="NewPosts>"/>'};
+			$post->{NewPosts} = 1;
 		}
 		$post->{message} = parseMarkup($post->{message});
 		push @posts,$post;
@@ -75,10 +96,10 @@ WHERE ft.ftid = $1});
 	$BODY->param(Post => $board->{post});
 	$BODY->param(Id => $board->{id});
 	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
-FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN forum_thread_visits ftv ON ftv.ftid = ft.ftid
+FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 WHERE ft.fbid = $1
 GROUP BY ft.ftid, ft.subject});
-	$threads->execute($board->{id}) or $error .= p($DBH->errstr);
+	$threads->execute($board->{id},$ND::UID) or $ERROR .= p($DBH->errstr);
 	my $i = 0;
 	my @threads;
 	while (my $thread = $threads->fetchrow_hashref){
@@ -93,16 +114,15 @@ GROUP BY ft.ftid, ft.subject});
 	my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM
 		forum_categories});
 	my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board,count(NULLIF(COALESCE(fp.fpid::boolean,FALSE) AND COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
-FROM forum_boards fb NATURAL JOIN forum_access fa LEFT OUTER JOIN (forum_threads ft JOIN forum_posts fp USING (ftid)) ON fb.fbid = ft.fbid LEFT OUTER JOIN forum_thread_visits ftv ON ftv.ftid = ft.ftid
+FROM forum_boards fb NATURAL JOIN forum_access fa LEFT OUTER JOIN (forum_threads ft JOIN forum_posts fp USING (ftid)) ON fb.fbid = ft.fbid LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 WHERE fb.fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 		WHERE uid = $2))
-AND (ftv.uid IS NULL OR ftv.uid = $2)
 GROUP BY fb.fbid, fb.board
 		});
-	$categories->execute or $error .= p($DBH->errstr);
+	$categories->execute or $ERROR .= p($DBH->errstr);
 	my @categories;
 	while (my $category = $categories->fetchrow_hashref){
-		$boards->execute($category->{id},$ND::UID) or $error .= p($DBH->errstr);
+		$boards->execute($category->{id},$ND::UID) or $ERROR .= p($DBH->errstr);
 		my @boards;
 		my $i = 0;
 		while (my $board = $boards->fetchrow_hashref){
@@ -117,7 +137,6 @@ GROUP BY fb.fbid, fb.board
 	$BODY->param(Categories => \@categories);
 
 }
-$BODY->param(Error => $error);
 
 1;
 

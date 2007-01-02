@@ -1,12 +1,25 @@
-<TMPL_VAR NAME=Error>
 <TMPL_IF Thread>
 <h2><TMPL_VAR NAME=Subject></h2>
 <TMPL_LOOP Posts>
+<TMPL_IF NewPosts>
+<hr/>
+<p><a name="NewPosts">New posts below:</a></p>
+</TMPL_IF>
 <fieldset class="forum-post">
-<legend class="<TMPL_VAR NAME=Unread>"><b><TMPL_VAR NAME=Username></b> : <TMPL_VAR NAME=Time></legend>
+<legend class="unread:<TMPL_VAR NAME=Unread>"><b><TMPL_VAR NAME=Username></b> : <TMPL_VAR NAME=Time></legend>
 <TMPL_VAR NAME=Message>
 </fieldset>
 </TMPL_LOOP>
+<TMPL_IF Post>
+<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset> <legend>New Reply</legend>
+	<textarea rows="25" cols="80" name="message"></textarea>
+	<input type="hidden" name="cmd" value="submit"/>
+	<input type="hidden" name="t" value="<TMPL_VAR NAME=Id>"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	<br/>
+	<input type="submit" value="Submit"/>
+</fieldset></form>
+</TMPL_IF>
 </TMPL_IF>
 <TMPL_IF Board>
 <h2><TMPL_VAR NAME=Board></h2>
@@ -20,16 +33,16 @@
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td align="center"><TMPL_VAR NAME=Unread></td>
 		<td align="center"><TMPL_VAR NAME=Posts></td>
-		<td><a href="<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Subject></a></td>
+		<td><a href="<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts"><TMPL_VAR NAME=Subject></a></td>
 	</tr>
 </TMPL_LOOP>
 </table>
 <TMPL_IF Post>
-<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>New Thread</legend>
-	<p></p>
+<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset> <legend>New Thread</legend>
 	<p>Subject: <input type="text" name="subject" value=""/></p>
-	<textarea rows="25" cols="80" name="mission"></textarea>
+	<textarea rows="25" cols="80" name="message"></textarea>
 	<input type="hidden" name="cmd" value="submit"/>
+	<input type="hidden" name="b" value="<TMPL_VAR NAME=Id>"/>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<br/>
 	<input type="submit" value="Submit"/>
