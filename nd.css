@@ -30,6 +30,13 @@ table.boards td {
 	border-style: solid;
 	border-width: 1px;
 	padding: 1px;
+	font-size: larger;
+}
+table.boards th {
+	font-size: larger;
+}
+fieldset.forum-post legend b {
+	font-size: larger;
 }
 div.leftinfo{
 	float: left;
