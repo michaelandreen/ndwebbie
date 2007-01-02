@@ -75,7 +75,7 @@ WHERE uid =	$1 AND ftid = $2},undef,$ND::UID,$thread);
 	if ($rows == 0){
 		$ND::DBH->do(q{INSERT INTO forum_thread_visits (uid,ftid) VALUES ($1,$2)}
 			,undef,$ND::UID,$thread) or $ND::ERROR .= p($ND::DBH->errstr);
-	}else{
+	}elsif(not defined $rows){
 		$ND::ERROR .= p($ND::DBH->errstr);
 	}
 }
