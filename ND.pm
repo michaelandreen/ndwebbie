@@ -43,6 +43,7 @@ sub handler {
 	local $ND::BODY;
 	local $ND::TICK;
 	local %ND::GROUPS;
+	local $ND::ERROR;
 	local $ND::PAGE = $ND::req->param('page');
 
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
@@ -55,7 +56,9 @@ sub handler {
 
 sub page {
 	our $DBH = ND::DB::DB();
-	my $error = '';
+	$DBH->do(q{SET timezone = 'GMT'});
+
+	our $ERROR = '';
 
 	chdir '/var/www/ndawn/code';
 
@@ -100,9 +103,9 @@ sub page {
 	}
 
 	unless (my $return = do "$ND::PAGE.pl"){
-		$error .= "<p><b>couldn't parse $ND::PAGE: $@</b></p>" if $@;
-		$error .= "<p><b>couldn't do $ND::PAGE: $!</b></p>"    unless defined $return && defined $!;
-		$error .= "<p><b>couldn't run $ND::PAGE</b></p>"       unless $return;
+		$ERROR .= "<p><b>couldn't parse $ND::PAGE: $@</b></p>" if $@;
+		$ERROR .= "<p><b>couldn't do $ND::PAGE: $!</b></p>"    unless defined $return && defined $!;
+		$ERROR .= "<p><b>couldn't run $ND::PAGE</b></p>"       unless $return;
 	}
 
 	unless ($XML){
@@ -123,7 +126,7 @@ sub page {
 		$TEMPLATE->param(Coords => param('coords') ? param('coords') : '1:1:1');
 
 	}
-	$TEMPLATE->param(Error => $error);
+	$TEMPLATE->param(Error => $ERROR);
 	$ND::TEMPLATE->param(BODY => $ND::BODY->output);
 	my $output = $TEMPLATE->output;
 	print header(-type=> $type, -charset => 'utf-8', -Content_Length => length $output);

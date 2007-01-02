@@ -1,7 +1,15 @@
 <TMPL_VAR NAME=Error>
 <TMPL_IF Thread>
+<h2><TMPL_VAR NAME=Subject></h2>
+<TMPL_LOOP Posts>
+<fieldset class="forum-post">
+<legend class="<TMPL_VAR NAME=Unread>"><b><TMPL_VAR NAME=Username></b> : <TMPL_VAR NAME=Time></legend>
+<TMPL_VAR NAME=Message>
+</fieldset>
+</TMPL_LOOP>
 </TMPL_IF>
 <TMPL_IF Board>
+<h2><TMPL_VAR NAME=Board></h2>
 <table class="boards">
 <tr>
 	<th>Unread</th>

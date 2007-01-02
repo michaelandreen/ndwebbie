@@ -20,12 +20,13 @@
 package ND::Include;
 use strict;
 use warnings FATAL => 'all';
+use CGI qw{:standard};
 require Exporter;
 
 our @ISA = qw/Exporter/;
 
 our @EXPORT = qw/isMember isHC isDC isBC isOfficer isScanner isIntel isTech parseMarkup min max listTargets
-	alliances intelquery generateClaimXml/;
+	alliances intelquery generateClaimXml markThreadAsRead/;
 
 sub isMember {
 	return exists $ND::GROUPS{Members} || isTech();
@@ -65,6 +66,18 @@ sub parseMarkup {
 	$text =~ s{\n}{\n<br/>}g;
 	$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>};
 	return $text;
+}
+
+sub markThreadAsRead {
+	my ($thread) = @_;
+	my $rows = $ND::DBH->do(q{UPDATE forum_thread_visits SET time = now() 
+WHERE uid =	$1 AND ftid = $2},undef,$ND::UID,$thread);
+	if ($rows == 0){
+		$ND::DBH->do(q{INSERT INTO forum_thread_visits (uid,ftid) VALUES ($1,$2)}
+			,undef,$ND::UID,$thread) or $ND::ERROR .= p($ND::DBH->errstr);
+	}else{
+		$ND::ERROR .= p($ND::DBH->errstr);
+	}
 }
 
 sub min {
