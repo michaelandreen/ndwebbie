@@ -11,68 +11,68 @@
 </head>
 <body>
 <div id="leftbar">
-		<ul class="linkbar">
-			<li><a href="main">Main page</a></li>
-			<li><a href="forum">Forum</a></li>
-			<li><a href="forum?allUnread=1">New posts <TMPL_IF UnreadPosts>(<b><TMPL_VAR NAME=UnreadPosts></b>)</TMPL_IF></a></li>
-		</ul>	<p>Tick: <TMPL_VAR NAME=TICK></p>
-		<TMPL_IF isMEMBER>
-		<p>Member menu</p>
-		<ul class="linkbar">
-			<li><a href="points">Top members</a></li>
-			<li><a href="addintel">Add intel/scans</a></li>
-			<li><a href="launchConfirmation">Launch confirmation</a></li>
-			<li><a href="covop">CovOp targets</a></li>
-			<li><a href="covop?list=distwhores">Distwhores</a></li>
-			<li><a href="top100">Top100 planets</a></li>
-			<li><a href="defrequest">Request defense</a></li>
-		</ul>
+	<ul class="linkbar">
+		<li><a href="main">Main page</a></li>
+		<li><a href="forum">Forum</a></li>
+		<li><a href="forum?allUnread=1">New posts <TMPL_IF UnreadPosts>(<b><TMPL_VAR NAME=UnreadPosts></b>)</TMPL_IF></a></li>
+	</ul>	<p>Tick: <TMPL_VAR NAME=TICK></p>
+	<TMPL_IF isMEMBER>
+	<p>Member menu</p>
+	<ul class="linkbar">
+		<li><a href="points">Top members</a></li>
+		<li><a href="addintel">Add intel/scans</a></li>
+		<li><a href="launchConfirmation">Launch confirmation</a></li>
+		<li><a href="covop">CovOp targets</a></li>
+		<li><a href="covop?list=distwhores">Distwhores</a></li>
+		<li><a href="top100">Top100 planets</a></li>
+		<li><a href="defrequest">Request defense</a></li>
+	</ul>
+	</TMPL_IF>
+	<TMPL_IF isATTACKER>
+	<p>Attack menu</p>
+	<ul class="linkbar">
+		<li><form action="check" method="post"><p>
+			<input type="hidden" name="page" value="check"/>
+			<input class="coordsinput" type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
+			<input class="coordsbutton" type="submit" value="Check"/>
+			</p></form></li>
+		<li><a href="raids">Web raids</a></li>
+	</ul>
+	<div id="targets"><TMPL_VAR NAME=Targets></div>
+	</TMPL_IF>
+	<TMPL_IF isBC>
+	<p>BC menu</p>
+	<ul class="linkbar">
+		<li><a href="editRaid">Create raid</a></li>
+	</ul>
+	</TMPL_IF>
+	<TMPL_IF isDC>
+	<p>DC menu</p>
+	<ul class="linkbar">
+		<li><a href="calls">Defense calls</a></li>
+		<li><a href="calls?show=uncovered">Not covered calls</a></li>
+		<li><a href="calls?show=covered">Covered calls</a></li>
+		<li><a href="calls?show=all">All calls</a></li>
+	</ul>
+	</TMPL_IF>
+	<TMPL_IF isHC>
+	<p>HC menu</p>
+	<ul class="linkbar">
+		<li><a href="users">List users</a></li>
+		<li><a href="intel">Intel</a></li>
+		<li><a href="alliances">Alliances</a></li>
+		<li><a href="memberIntel">Member Intel</a></li>
+		<li><a href="resources">Alliance resources</a></li>
+		<li><a href="planetNaps">Planet Naps</a></li>
+	</ul>
+	<TMPL_ELSE>
+		<TMPL_IF isIntel>
+	<p>Intel menu</p>
+	<ul class="linkbar">
+		<li><a href="intel">Intel</a></li>
+	</ul>
 		</TMPL_IF>
-		<TMPL_IF isATTACKER>
-		<p>Attack menu</p>
-		<ul class="linkbar">
-			<li><form action="check" method="post"><p>
-				<input type="hidden" name="page" value="check"/>
-				<input class="coordsinput" type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
-				<input class="coordsbutton" type="submit" value="Check"/>
-				</p></form></li>
-			<li><a href="raids">Web raids</a></li>
-		</ul>
-		<div id="targets"><TMPL_VAR NAME=Targets></div>
-		</TMPL_IF>
-		<TMPL_IF isBC>
-		<p>BC menu</p>
-		<ul class="linkbar">
-			<li><a href="editRaid">Create raid</a></li>
-		</ul>
-		</TMPL_IF>
-		<TMPL_IF isDC>
-		<p>DC menu</p>
-		<ul class="linkbar">
-			<li><a href="calls">Defense calls</a></li>
-			<li><a href="calls?show=uncovered">Not covered calls</a></li>
-			<li><a href="calls?show=covered">Covered calls</a></li>
-			<li><a href="calls?show=all">All calls</a></li>
-		</ul>
-		</TMPL_IF>
-		<TMPL_IF isHC>
-		<p>HC menu</p>
-		<ul class="linkbar">
-			<li><a href="users">List users</a></li>
-			<li><a href="intel">Intel</a></li>
-			<li><a href="alliances">Alliances</a></li>
-			<li><a href="memberIntel">Member Intel</a></li>
-			<li><a href="resources">Alliance resources</a></li>
-			<li><a href="planetNaps">Planet Naps</a></li>
-		</ul>
-		<TMPL_ELSE>
-			<TMPL_IF isIntel>
-		<p>Intel menu</p>
-		<ul class="linkbar">
-			<li><a href="intel">Intel</a></li>
-		</ul>
-			</TMPL_IF>
-		</TMPL_IF>
+	</TMPL_IF>
 	<TMPL_VAR NAME=LEFTBAR>
 </div>
 <TMPL_VAR NAME=Error>
