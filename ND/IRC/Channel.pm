@@ -19,6 +19,7 @@
 package ND::IRC::Channel;
 use strict;
 use warnings;
+use ND::IRC::Access;
 require Exporter;
 
 our @ISA = qw/Exporter/;
