@@ -19,9 +19,12 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Forum;
+
 our $BODY;
 our $DBH;
 our $LOG;
+our $ERROR;
 my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Intel');
@@ -42,6 +45,12 @@ if (defined param('show')){
 	}elsif (param('show') =~ /^(\d+)$/){
 		$showticks = "AND (i.tick - i.eta) > (tick() - $1)";
 	}
+}
+
+my $thread;
+if (defined $planet){
+	$thread = $DBH->selectrow_hashref(q{SELECT ftid AS id, subject FROM forum_threads
+		where planet = $1},undef,$planet->{id}) or $ERROR .= p($DBH->errstr);
 }
 
 if (defined param('cmd') && param('cmd') eq 'coords'){
@@ -65,6 +74,9 @@ ORDER BY alliance, p.x, p.y, p.z});
 		push @planets,$planet;
 	}
 	$BODY->param(CoordList => \@planets);
+}
+if (defined $thread and defined param('cmd') and param('cmd') eq 'forumpost'){
+	addForumPost($DBH,$thread,$ND::UID,param('message'));
 }
 
 if ($planet && defined param('cmd')){
@@ -134,6 +146,8 @@ if ($planet){
 	my @alliances = alliances($planet->{alliance_id});
 	$BODY->param(Alliances => \@alliances);
 
+	$BODY->param(Thread => viewForumThread $thread);
+
 	my $query = $DBH->prepare(intelquery('o.alliance AS oalliance,coords(o.x,o.y,o.z) AS origin',"t.id = ? $showticks"));
 	$query->execute($planet->{id}) or $error .= $DBH->errstr;
 	my @intellists;
@@ -202,6 +216,6 @@ while (my $message = $query->fetchrow_hashref){
 	$message->{message} = parseMarkup($message->{message});
 	push @messages,$message;
 }
-$BODY->param(IntelMessages => \@messages);
+#$BODY->param(IntelMessages => \@messages);
 $BODY->param(Error => $error);
 1;

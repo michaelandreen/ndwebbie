@@ -1,4 +1,5 @@
 <TMPL_VAR NAME=Error>
+<div class='leftinfo'>
 <form action="<TMPL_VAR NAME=PAGE>" method="post"><p>
 	<input type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
 	<input type="submit" value="Check"/>
@@ -73,6 +74,22 @@
 	</tr>
 </TMPL_LOOP>
 </table>
+</TMPL_IF>
+</div>
+
+<TMPL_IF Thread>
+<div>
+<TMPL_VAR NAME=Thread>
+<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
+	<textarea rows="10" cols="60" name="message"></textarea>
+	<input type="hidden" name="cmd" value="forumpost"/>
+	<input type="hidden" name="t" value="<TMPL_VAR NAME=Id>"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	<input type="hidden" name="coords" value="<TMPL_VAR NAME=Coords>"/>
+	<br/>
+	<input type="submit" value="Submit"/>
+</fieldset></form>
+</div>
 </TMPL_IF>
 
 <TMPL_LOOP IntelLists>
