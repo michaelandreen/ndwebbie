@@ -1,0 +1,21 @@
+<h2><TMPL_VAR NAME=Subject></h2>
+<TMPL_LOOP Posts>
+<TMPL_IF NewPosts>
+<hr/>
+<p><a name="NewPosts">New posts below:</a></p>
+</TMPL_IF>
+<fieldset class="forum-post">
+<legend class="unread:<TMPL_VAR NAME=Unread>"><b><TMPL_VAR NAME=Username></b> : <TMPL_VAR NAME=Time></legend>
+<TMPL_VAR NAME=Message>
+</fieldset>
+</TMPL_LOOP>
+<TMPL_IF Post>
+<form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
+	<textarea rows="25" cols="60" name="message"></textarea>
+	<input type="hidden" name="cmd" value="forumpost"/>
+	<input type="hidden" name="t" value="<TMPL_VAR NAME=Id>"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	<br/>
+	<input type="submit" value="Submit"/>
+</fieldset></form>
+</TMPL_IF>

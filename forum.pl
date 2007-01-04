@@ -19,6 +19,8 @@
 
 use strict;
 use warnings FATAL => 'all';
+no warnings 'uninitialized';
+use ND::Forum;
 
 $ND::TEMPLATE->param(TITLE => 'Forum');
 
@@ -47,7 +49,7 @@ if(param('t')){
 	$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or $ERROR .= p($DBH->errstr);
 }
 
-if (defined param('cmd') && param('cmd') eq 'submit'){
+if (defined param('cmd') && param('cmd') eq 'forumpost'){
 	$DBH->begin_work;
 	if ($board && $board->{post}){
 		my $insert = $DBH->prepare(q{INSERT INTO forum_threads (fbid,subject) VALUES($1,$2)});
@@ -60,8 +62,7 @@ if (defined param('cmd') && param('cmd') eq 'submit'){
 		}
 	}
 	if ($thread && $thread->{post}){
-		my $insert = $DBH->prepare(q{INSERT INTO forum_posts (ftid,message,uid) VALUES($1,$2,$3)});
-		$insert->execute($thread->{id},escapeHTML(param('message')),$ND::UID) or $ERROR .= p($DBH->errstr);
+		addForumPost($DBH,$thread,$ND::UID,param('message'));
 	}
 	$DBH->commit or $ERROR .= p($DBH->errstr);
 }
@@ -74,30 +75,7 @@ GROUP BY ft.ftid, ft.subject
 HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= $3});
 
 if ($thread){ #Display the thread
-	$BODY->param(Thread => 1);
-	$BODY->param(Subject => $thread->{subject});
-	$BODY->param(Id => $thread->{id});
-	$BODY->param(Post => $thread->{post});
-
-	my $posts = $DBH->prepare(q{SELECT u.username,date_trunc('minute',fp.time::timestamp) AS time,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
-FROM forum_threads ft JOIN forum_posts fp USING (ftid) NATURAL JOIN users u LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
-WHERE ft.ftid = $1
-ORDER BY fp.time ASC
-});
-	$posts->execute($thread->{id},$ND::UID) or $ERROR .= p($DBH->errstr);
-	my @posts;
-	my $old = 1;
-	while (my $post = $posts->fetchrow_hashref){
-		if ($old && $post->{unread}){
-			$old = 0;
-			$post->{NewPosts} = 1;
-		}
-		$post->{message} = parseMarkup($post->{message});
-		push @posts,$post;
-	}
-	$BODY->param(Posts => \@posts);
-
-	markThreadAsRead($thread->{id});
+	$BODY->param(Thread => viewForumThread $thread);
 
 }elsif($board){ #List threads in this board
 	$BODY->param(Board => $board->{board});

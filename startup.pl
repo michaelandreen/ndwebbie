@@ -10,8 +10,9 @@ DBI->install_driver("Pg");
 use DBI;
 use DBD::Pg qw(:pg_types);
 
-use DB;
+use ND::DB;
 use ND::Include;
+use ND::Forum;
 
 use Tie::File;
 
