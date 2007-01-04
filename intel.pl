@@ -19,7 +19,7 @@
 
 use strict;
 use warnings FATAL => 'all';
-use ND::Forum;
+use ND::Web::Forum;
 
 our $BODY;
 our $DBH;

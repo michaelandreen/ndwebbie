@@ -20,7 +20,7 @@
 use strict;
 use warnings FATAL => 'all';
 no warnings 'uninitialized';
-use ND::Forum;
+use ND::Web::Forum;
 
 $ND::TEMPLATE->param(TITLE => 'Forum');
 

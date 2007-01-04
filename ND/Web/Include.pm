@@ -17,7 +17,7 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Include;
+package ND::Web::Include;
 use strict;
 use warnings FATAL => 'all';
 use CGI qw{:standard};

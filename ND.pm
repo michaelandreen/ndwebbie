@@ -24,7 +24,7 @@ use HTML::Template;
 use DBI;
 use DBD::Pg qw(:pg_types);
 use Apache2::Request;
-use ND::Include;
+use ND::Web::Include;
 use ND::DB;
 use Tie::File;
 use Fcntl 'O_RDONLY';
