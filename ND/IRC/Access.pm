@@ -54,12 +54,9 @@ sub masterinvite {
 sub groupmember {
 	my ($groups) = @_;
 	$groups = join ",", map {"'$_'"} split //, $groups;
-	my $f = $ND::DBH->prepare("SELECT username FROM users NATURAL JOIN groupmembers NATURAL JOIN groups WHERE flag IN ('T',$groups) AND hostmask ILIKE ?");
+	my $f = $ND::DBH->prepare("SELECT uid,username FROM users NATURAL JOIN groupmembers NATURAL JOIN groups WHERE flag IN ('T',$groups) AND lower(hostmask) = ?");
 	$f->execute($ND::address);
-	if ($f->fetchrow()){
-		return 1;
-	}
-	return 0;
+	return $f->fetchrow_hashref;
 };
 
 1;

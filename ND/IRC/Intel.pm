@@ -22,6 +22,7 @@ use warnings;
 use ND::DB;
 use ND::IRC::Access;
 use ND::IRC::Misc;
+use ND::Include;
 require Exporter;
 
 our @ISA = qw/Exporter/;
@@ -46,10 +47,13 @@ sub checkIntel {
 sub setHostile {
 	my ($x,$y,$z) = @_;
 	DB();
-	if(dc()){
-		my $rv = $ND::DBH->do("UPDATE planets SET planet_status = 'Hostile' WHERE id = (SELECT id FROM current_planet_stats WHERE x = ? AND y = ? and z = ?)",undef,$x,$y,$z);
+	if(my $user = dc()){
+		my $findid = $ND::DBH->prepare_cached(q{SELECT planetid(?,?,?,0)});
+		my ($id) = $ND::DBH->selectrow_array($findid,undef,$x,$y,$z);
+		my $rv = $ND::DBH->do(q{UPDATE planets SET planet_status = 'Hostile' WHERE id = $1},undef,$id);
 		if ($rv == 1){
 			$ND::server->command("msg $ND::target $x:$y:$z is now marked s hostile");
+			intel_log $user->{uid},$id,"Set planet_status to: 'Hostile'";
 		}
 	}
 }
@@ -69,10 +73,13 @@ sub findNick {
 sub setNick {
 	my ($x,$y,$z,$nick) = @_;
 	DB();
-	if (officer()){
-		if ($ND::DBH->do("UPDATE planets SET nick = ? WHERE id = planetid(?,?,?,0)"
-				,undef,$nick,$x,$y,$z)){
+	if (my $user = officer){
+		my $findid = $ND::DBH->prepare_cached(q{SELECT planetid(?,?,?,0)});
+		my ($id) = $ND::DBH->selectrow_array($findid,undef,$x,$y,$z);
+		if ($ND::DBH->do('UPDATE planets SET nick = $1 WHERE id = $2'
+				,undef,$nick,$id)){
 			$ND::server->command("msg $ND::target $x:$y:$z has been updated");
+			intel_log $user->{uid},$id,"Set nick to: $nick";
 		}
 	}
 }
@@ -80,15 +87,19 @@ sub setNick {
 sub setAlly {
 	my ($x,$y,$z,$ally) = @_;
 	DB();
-	if (officer()){
+	if (my $user = officer){
 		my $aid;
 		if ($ally ne 'unknown'){
 			($aid,$ally) = $ND::DBH->selectrow_array("SELECT id,name FROM alliances WHERE name ILIKE ?",undef,$ally);
 		}
 		if ($ally){
-			$ND::DBH->do("UPDATE planets SET alliance_id = ? WHERE id = planetid(?,?,?,0)"
-				,undef,$aid,$x,$y,$z);
-			$ND::server->command("msg $ND::target Setting $x:$y:$z as $ally");
+			my $findid = $ND::DBH->prepare_cached(q{SELECT planetid(?,?,?,0)});
+			my ($id) = $ND::DBH->selectrow_array($findid,undef,$x,$y,$z);
+			if($ND::DBH->do('UPDATE planets SET alliance_id = $1 WHERE id = $2'
+				,undef,$aid,$id)){
+				$ND::server->command("msg $ND::target Setting $x:$y:$z as $ally");
+				intel_log $user->{uid},$id,"Set alliance_id to: $aid ($ally)";
+			}
 		}else{
 			$ND::server->command("msg $ND::target Couldn't find such an alliance");
 		}
@@ -98,10 +109,13 @@ sub setAlly {
 sub setChannel {
 	my ($x,$y,$z,$channel) = @_;
 	DB();
-	if (officer()){
-		if ($ND::DBH->do("UPDATE planets SET channel = ? WHERE id = planetid(?,?,?,0)"
-				,undef,$channel,$x,$y,$z)){
+	if (my $user = officer()){
+		my $findid = $ND::DBH->prepare_cached(q{SELECT planetid(?,?,?,0)});
+		my ($id) = $ND::DBH->selectrow_array($findid,undef,$x,$y,$z);
+		if ($ND::DBH->do('UPDATE planets SET channel = $1 WHERE id = $2'
+				,undef,$channel,$id)){
 			$ND::server->command("msg $ND::target $x:$y:$z relay channel has been set to: $channel");
+			intel_log $user->{uid},$id,"Set channel to: $channel";
 		}
 	}
 }
