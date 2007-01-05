@@ -20,6 +20,7 @@
 use strict;
 use warnings FATAL => 'all';
 use ND::Web::Forum;
+use ND::Include;
 
 our $BODY;
 our $DBH;
@@ -85,6 +86,7 @@ if ($planet && defined param('cmd')){
 			my $value = escapeHTML(param('nick'));
 			if ($DBH->do(q{UPDATE planets SET nick = ? WHERE id =?}
 					,undef,$value,$planet->{id})){
+				intel_log $ND::UID,$planet->{id},"Set nick to: $value";
 				$planet->{nick} = $value;
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
@@ -94,6 +96,7 @@ if ($planet && defined param('cmd')){
 			my $value = escapeHTML(param('channel'));
 			if ($DBH->do(q{UPDATE planets SET channel = ? WHERE id =?}
 					,undef,$value,$planet->{id})){
+				intel_log $ND::UID,$planet->{id},"Set channel to: $value";
 				$planet->{channel} = $value;
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
@@ -103,6 +106,7 @@ if ($planet && defined param('cmd')){
 			my $value = escapeHTML(param('status'));
 			if ($DBH->do(q{UPDATE planets SET planet_status = ? WHERE id =?}
 					,undef,$value,$planet->{id})){
+				intel_log $ND::UID,$planet->{id},"Set planet_status to: $value";
 				$planet->{planet_status} = $value;
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
@@ -111,6 +115,7 @@ if ($planet && defined param('cmd')){
 		if (param('calliance')){
 			if ($DBH->do(q{UPDATE planets SET alliance_id = NULLIF(?,-1) WHERE id =?}
 					,undef,param('alliance'),$planet->{id})){
+				intel_log $ND::UID,$planet->{id},"Set alliance_id to: ".param('alliance');
 				$planet->{alliance_id} = param('alliance');
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";

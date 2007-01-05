@@ -25,7 +25,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/min max log_message/;
+our @EXPORT = qw/min max log_message intel_log/;
 
 sub min {
     my ($x,$y) = @_;
@@ -41,7 +41,14 @@ sub log_message {
 	my ($uid, $message) = @_;
 	my $log = $ND::DBH->prepare_cached(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
 		(SELECT ftid FROM forum_threads WHERE log_uid = $1),$1,$2)});
-	$log->execute($uid,$message);
+	$log->execute($uid,$message) or $ND::ERROR .= p($ND::DBH->errstr);
+}
+
+sub intel_log {
+	my ($uid,$planet, $message) = @_;
+	my $log = $ND::DBH->prepare_cached(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
+		(SELECT ftid FROM forum_threads WHERE planet = $3),$1,$2)});
+	$log->execute($uid,$message,$planet) or $ND::ERROR .= p($ND::DBH->errstr);
 }
 
 1;

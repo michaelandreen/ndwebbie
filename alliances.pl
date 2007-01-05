@@ -22,6 +22,7 @@ use warnings FATAL => 'all';
 use ND::Include;
 our $BODY;
 our $DBH;
+our $ERROR;
 my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Alliances');
@@ -46,16 +47,18 @@ if ($alliance && defined param('cmd') && param ('cmd') eq 'change'){
 		}
 	}
 	my $coords = param('coords');
+	my $findplanet = $DBH->prepare(q{SELECT id FROM current_planet_stats WHERE x = ? AND y = ? AND z = ?});
 	my $addplanet = $DBH->prepare(q{
-UPDATE planets SET alliance_id = ?, nick = coalesce(?,nick)
-WHERE id = (SELECT id FROM current_planet_stats WHERE x = ? AND y = ? AND z = ?);
+UPDATE planets SET alliance_id = $2, nick = coalesce($3,nick)
+WHERE id = $1;
 		});
 	while ($coords =~ m/(\d+):(\d+):(\d+)(?:\s+nick=\s*(\S+))?/g){
-		if ($addplanet->execute($alliance->{id},$4,$1,$2,$3)){
+		my ($id) = $DBH->selectrow_array($findplanet,undef,$1,$2,$3) or $ERROR .= p $DBH->errstr;
+		if ($addplanet->execute($id,$alliance->{id},$4)){
 			my $nick = '';
 			$nick = '(nick $4)' if defined $4;
 			$error .= "<p> Added planet $1:$2:$3 $nick to this alliance</p>";
-			log_message $ND::UID,"HC Added planet $1:$2:$3 $nick to alliance: $alliance->{id}";
+			intel_log $ND::UID,$id,"HC Added planet $1:$2:$3 $nick to alliance: $alliance->{id} ($alliance->{name})";
 		}else{
 			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
