@@ -114,7 +114,7 @@ sub laston {
 
 	if (officer()){
 		my $f = $ND::DBH->prepare(qq{SELECT username,last
-			FROM (SELECT uid,username, date_part('day',now() - laston)::int AS last FROM users) u NATURAL JOIN groupmembers NATURAL JOIN groups WHERE flag = ? AND (last >= ? OR last IS NULL) ORDER BY last DESC
+			FROM (SELECT uid,username, date_part('day',now() - laston)::int AS last,laston FROM users) u NATURAL JOIN groupmembers NATURAL JOIN groups WHERE flag = ? AND (last >= ? OR last IS NULL) ORDER BY laston
 			});
 		$min = 0 unless defined $min;
 		$f->execute($flag,$min);
