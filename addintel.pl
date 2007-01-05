@@ -25,6 +25,7 @@ $ND::TEMPLATE->param(TITLE => 'Add Intel and Scans');
 
 our $BODY;
 our $DBH;
+our $ERROR;
 my $error;
 
 die "You don't have access" unless isMember();
@@ -63,7 +64,14 @@ if (defined param('cmd')){
 	}
 	if (param('cmd') eq 'submit_message'){
 		my $board = {id => 12};
-		if (my $thread = addForumThread $DBH,$board,$ND::UID,param('subject')){
+		my $subject = param('subject');
+		unless ($subject){
+			if (param('intel') =~ /(.*\w.*)/){
+				$subject = $1;
+			}
+			
+		}
+		if (my $thread = addForumThread $DBH,$board,$ND::UID,$subject){
 			$error .= p 'Intel message added' if addForumPost $DBH,$thread,$ND::UID,param('intel')
 		}
 	}
