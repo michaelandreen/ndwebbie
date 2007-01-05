@@ -77,7 +77,9 @@ if ($user && defined param('cmd') && param('cmd') eq 'change'){
 		}
 		if ($query){
 			if ($query->execute($user->{uid},$group->{gid})){
-				log_message $ND::UID,"HC added user: $user->{uid} to group: $group->{gid}";
+				my ($action,$a2) = ('added','to');
+				($action,$a2) = ('removed','from') if param($group->{gid}) eq 'remove';
+				log_message $ND::UID,"HC $action user: $user->{uid} ($user->{username}) $a2 group: $group->{gid} ($group->{groupname})";
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
