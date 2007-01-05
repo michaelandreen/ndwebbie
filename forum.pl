@@ -52,14 +52,7 @@ if(param('t')){
 if (defined param('cmd') && param('cmd') eq 'forumpost'){
 	$DBH->begin_work;
 	if ($board && $board->{post}){
-		my $insert = $DBH->prepare(q{INSERT INTO forum_threads (fbid,subject) VALUES($1,$2)});
-		if ($insert->execute($board->{id},escapeHTML(param('subject')))){
-			$thread = $DBH->selectrow_hashref($findThread,undef,
-				$DBH->last_insert_id(undef,undef,undef,undef,"forum_threads_ftid_seq"),$ND::UID)
-				or $ERROR .= p($DBH->errstr);
-		}else{
-			$ERROR .= p($DBH->errstr);
-		}
+		$thread = addForumThread $DBH,$board,$ND::UID,param('subject');
 	}
 	if ($thread && $thread->{post}){
 		addForumPost($DBH,$thread,$ND::UID,param('message'));

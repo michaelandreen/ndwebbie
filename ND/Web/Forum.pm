@@ -27,7 +27,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/viewForumThread addForumPost markThreadAsRead/;
+our @EXPORT = qw/viewForumThread addForumPost addForumThread markThreadAsRead/;
 
 sub viewForumThread {
 	my ($thread) = @_;
@@ -69,6 +69,21 @@ sub addForumPost {
 		return 0;
 	}
 	return 1;
+}
+
+sub addForumThread {
+	my ($dbh,$board,$uid,$subject) = @_;
+
+	my $insert = $dbh->prepare(q{INSERT INTO forum_threads (fbid,subject) VALUES($1,$2)});
+
+	if ($insert->execute($board->{id},escapeHTML($subject))){
+		my $id = $dbh->last_insert_id(undef,undef,undef,undef,"forum_threads_ftid_seq");
+		return $dbh->selectrow_hashref(q{SELECT ftid AS id, subject, $2::boolean AS post FROM forum_threads WHERE ftid = $1}
+			,undef,$id,$board->{post})
+			or $ND::ERROR .= p($dbh->errstr);
+	}else{
+		$ND::ERROR .= p($dbh->errstr);
+	}
 }
 
 sub markThreadAsRead {

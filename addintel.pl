@@ -19,6 +19,7 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Web::Forum;
 
 $ND::TEMPLATE->param(TITLE => 'Add Intel and Scans');
 
@@ -61,11 +62,9 @@ if (defined param('cmd')){
 		}
 	}
 	if (param('cmd') eq 'submit_message'){
-		my $query = $DBH->prepare(q{INSERT INTO intel_messages (uid,message) VALUES(?,?)});
-		if($query->execute($ND::UID,escapeHTML(param('intel')))){
-			$error .= 'Intel messaged added';
-		}else{
-			$error .= $DBH->errstr;
+		my $board = {id => 12};
+		if (my $thread = addForumThread $DBH,$board,$ND::UID,param('subject')){
+			$error .= p 'Intel message added' if addForumPost $DBH,$thread,$ND::UID,param('intel')
 		}
 	}
 }
