@@ -24,7 +24,6 @@ $ND::TEMPLATE->param(TITLE => 'CovOp Targets');
 
 our $BODY;
 our $DBH;
-our $LOG;
 
 die "You don't have access" unless isMember();
 

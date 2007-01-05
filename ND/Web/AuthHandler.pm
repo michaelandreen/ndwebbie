@@ -24,6 +24,7 @@ use warnings FATAL => 'all';
 
 use ND::DB;
 use Apache2::Access ();
+use again;
 
 sub handler {
 	my $r = shift;
@@ -35,6 +36,7 @@ sub handler {
 		lower(username) = lower(?) AND password = MD5(?)},undef,$r->user,$sent_pw);
 	$dbh->disconnect;
 	if ($count == 1){
+		do 'reload.pl';
 		return Apache2::Const::OK;
 	}
 	$r->note_basic_auth_failure();

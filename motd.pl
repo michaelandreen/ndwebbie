@@ -18,21 +18,22 @@
 #**************************************************************************/
 
 use strict;
+use warnings FATAL => 'all';
+use ND::Include;
 
 $ND::TEMPLATE->param(TITLE => 'Edit MOTD');
 
 our $BODY;
 our $DBH;
-our $LOG;
 
 die "You don't have access" unless isHC();
 
-if (param('cmd') eq 'change'){
+if (defined param 'cmd' and param('cmd') eq 'change'){
 	$DBH->begin_work;
 	my $query = $DBH->prepare(q{UPDATE misc SET value= ? WHERE id='MOTD'});
 	my $motd = escapeHTML(param('motd'));
 	$query->execute($motd);
-	$LOG->execute($ND::UID,"Updated MOTD");
+	log_message $ND::UID,"Updated MOTD";
 	$DBH->commit;
 	$BODY->param(MOTD => $motd);
 }else{

@@ -21,7 +21,6 @@ use strict;
 use warnings FATAL => 'all';
 our $BODY;
 our $DBH;
-our $LOG;
 my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Member Intel');

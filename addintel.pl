@@ -24,7 +24,6 @@ $ND::TEMPLATE->param(TITLE => 'Add Intel and Scans');
 
 our $BODY;
 our $DBH;
-our $LOG;
 my $error;
 
 die "You don't have access" unless isMember();

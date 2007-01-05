@@ -19,9 +19,9 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
 our $BODY;
 our $DBH;
-our $LOG;
 my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Create/Edit Raids');
@@ -32,7 +32,7 @@ my @alliances = alliances();
 $BODY->param(Alliances => \@alliances);
 
 my $raid;
-if (param('raid') =~ /^(\d+)$/){
+if (defined param 'raid' and param('raid') =~ /^(\d+)$/){
 	my $query = $DBH->prepare(q{SELECT id,tick,waves,message,released_coords,open FROM raids WHERE id = ?});
 	$raid = $DBH->selectrow_hashref($query,undef,$1);
 }
@@ -99,7 +99,7 @@ if ($raid && defined param('cmd')){
 			}
 		}
 		if (param('alliance') =~ /^(\d+)$/ && $1 != 1){
-			$LOG->execute($ND::UID,"BC adding alliance $1 to raid");
+			log_message $ND::UID,"BC adding alliance $1 to raid";
 			my $addtarget = $DBH->prepare(qq{INSERT INTO raid_targets(raid,planet) (
 	SELECT ?,id FROM current_planet_stats p WHERE alliance_id = ? $sizelimit)});
 			unless ($addtarget->execute($raid->{id},$1)){
@@ -112,6 +112,7 @@ if ($raid && defined param('cmd')){
 		$groups->execute();
 		while (my $group = $groups->fetchrow_hashref){
 			my $query;
+			next unless defined param $group->{gid};
 			if (param($group->{gid}) eq 'remove'){
 				$query = $delgroup;
 			}elsif(param($group->{gid}) eq 'add'){

@@ -20,12 +20,12 @@
 use strict;
 use warnings FATAL => 'all';
 no warnings qw(uninitialized);
+use ND::Include;
 
 $ND::TEMPLATE->param(TITLE => 'Check planets and galaxies');
 
 our $BODY;
 our $DBH;
-our $LOG;
 
 $BODY->param(isBC => isMember() && (isOfficer() || isBC));
 
@@ -51,7 +51,7 @@ if (isMember() && param('cmd') eq 'arbiter'){
 	}else{
 		$BODY->param(Arbiter => '<b>KILL THESE BASTARDS</b>');
 	}
-	$LOG->execute($ND::UID,"Arbiter check on $x:$y");
+	log_message $ND::UID,"Arbiter check on $x:$y";
 }
 
 my $where = '';
@@ -71,7 +71,7 @@ if (defined $z){
 }else{
 	$query->execute($x,$y);
 	if (isMember() && (isBC() || isOfficer()) && !isHC()){
-		$LOG->execute($ND::UID,"BC browsing $x:$y");
+		log_message $ND::UID,"BC browsing $x:$y";
 	}
 }
 my @planets;
@@ -91,7 +91,7 @@ while (my ($id,$coords,$planet,$race,$size,$score,$value,$xp,$sizerank,$scoreran
 		$planet{Relationship} = $relationship;
 		$planet{isBC} = 1;
 		if ($z && $alliance eq 'NewDawn'){
-			$LOG->execute($ND::UID,"BC browsing ND planet $coords tick $ND::TICK");
+			log_message $ND::UID,"BC browsing ND planet $coords tick $ND::TICK";
 		}
 	}
 	$i++;

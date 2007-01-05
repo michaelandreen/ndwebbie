@@ -81,9 +81,6 @@ sub page {
 		$ATTACKER = 1 if $attack;
 	}
 
-
-	our $LOG = $DBH->prepare('INSERT INTO log (uid,text) VALUES(?,?)');
-
 	tie my @pages, 'Tie::File', "/var/www/ndawn/code/pages", mode => O_RDONLY, memory => 0 or die $!;
 	$ND::PAGE = 'main' unless grep { /^$ND::PAGE$/ } @pages;
 

@@ -11,6 +11,7 @@ use DBI;
 use DBD::Pg qw(:pg_types);
 
 use ND::DB;
+use ND::Include;
 use ND::Web::Include;
 use ND::Web::Forum;
 

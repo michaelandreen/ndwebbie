@@ -24,7 +24,6 @@ $ND::TEMPLATE->param(TITLE => 'Top100 ');
 
 our $BODY;
 our $DBH;
-our $LOG;
 my $error = '';
 
 $BODY->param(isHC => isHC());

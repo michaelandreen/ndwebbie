@@ -19,12 +19,12 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
 
 $ND::TEMPLATE->param(TITLE => 'Launch Confirmation');
 
 our $BODY;
 our $DBH;
-our $LOG;
 my $error;
 
 
@@ -56,7 +56,8 @@ if (defined param('cmd') && param('cmd') eq 'submit'){
 	while ($missions =~ m/\S+\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((?:(\d+)\+)?(\d+)\).*?(?:\d+hrs\s+)?\d+mins\s+(Attack|Defend|Return|Fake Attack|Fake Defend)(.*?)(?:Launching in tick (\d+), arrival in tick (\d+)|ETA: \d+, Return ETA: (\d+))/sg){
 		my %mission;
 
-		my $tick = $ND::TICK+$7+$8;
+		my $tick = $ND::TICK+$8;
+		$tick += $7 if defined $7;
 		my $eta = $8;
 		my $mission = $9;
 		my $x = $4;
@@ -92,7 +93,7 @@ if (defined param('cmd') && param('cmd') eq 'submit'){
 				$addattackpoint->execute($ND::UID);
 				$launchedtarget->execute($ND::UID,$claim->{target},$claim->{wave});
 				$mission{Warning} = "OK:$claim->{target},$claim->{wave},$claim->{launched}";
-				$LOG->execute($ND::UID,"Gave attack point for confirmation on $mission mission to $x:$y:$z, landing tick $tick");
+				log_message $ND::UID,"Gave attack point for confirmation on $mission mission to $x:$y:$z, landing tick $tick";
 			}
 		}
 
@@ -107,7 +108,7 @@ if (defined param('cmd') && param('cmd') eq 'submit'){
 			push @ships,{Ship => $1, Amount => $2};
 		}
 		$mission{Ships} = \@ships;
-		$LOG->execute($ND::UID,"Pasted confirmation for $mission mission to $x:$y:$z, landing tick $tick");
+		log_message $ND::UID,"Pasted confirmation for $mission mission to $x:$y:$z, landing tick $tick";
 		push @missions,\%mission;
 	}
 	$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';

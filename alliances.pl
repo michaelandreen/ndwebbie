@@ -19,9 +19,9 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
 our $BODY;
 our $DBH;
-our $LOG;
 my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Alliances');
@@ -40,7 +40,7 @@ if ($alliance && defined param('cmd') && param ('cmd') eq 'change'){
 		if ($DBH->do(q{UPDATE alliances SET relationship = ? WHERE id =?}
 				,undef,$value,$alliance->{id})){
 			$alliance->{relationship} = $value;
-			$LOG->execute($ND::UID,"HC set alliance: $alliance->{id} relationship: $value");
+			log_message $ND::UID,"HC set alliance: $alliance->{id} relationship: $value";
 		}else{
 			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
@@ -55,7 +55,7 @@ WHERE id = (SELECT id FROM current_planet_stats WHERE x = ? AND y = ? AND z = ?)
 			my $nick = '';
 			$nick = '(nick $4)' if defined $4;
 			$error .= "<p> Added planet $1:$2:$3 $nick to this alliance</p>";
-			$LOG->execute($ND::UID,"HC Added planet $1:$2:$3 $nick to alliance: $alliance->{id}");
+			log_message $ND::UID,"HC Added planet $1:$2:$3 $nick to alliance: $alliance->{id}";
 		}else{
 			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}

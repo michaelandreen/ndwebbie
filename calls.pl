@@ -21,7 +21,6 @@ use strict;
 use warnings FATAL => 'all';
 our $BODY;
 our $DBH;
-our $LOG;
 my $error;
 
 $ND::TEMPLATE->param(TITLE => 'Defense Calls');
@@ -46,7 +45,7 @@ if ($call && defined param('cmd')){
 			if ($DBH->do(q{UPDATE calls SET landing_tick = ? WHERE id = ?}
 					,undef,param('tick'),$call->{id})){
 				$call->{landing_tick} = param('tick');
-				$LOG->execute($ND::UID,"DC updated landing tick for call $call->{id}");
+				log_message $ND::UID,"DC updated landing tick for call $call->{id}";
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
@@ -55,7 +54,7 @@ if ($call && defined param('cmd')){
 			if ($DBH->do(q{UPDATE calls SET info = ? WHERE id = ?}
 					,undef,param('info'),$call->{id})){
 				$call->{info} = param('info');
-				$LOG->execute($ND::UID,"DC updated info for call $call->{id}");
+				log_message $ND::UID,"DC updated info for call $call->{id}";
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
@@ -87,7 +86,7 @@ if ($call && defined param('cmd')){
 		for my $param (param()){
 			if ($param =~ /^change:(\d+)$/){
 				if($query->execute($1,$call->{id})){
-					$LOG->execute($ND::UID,"DC deleted fleet: $1, call $call->{id}");
+					log_message $ND::UID,"DC deleted fleet: $1, call $call->{id}";
 				}else{
 					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}
@@ -101,7 +100,7 @@ if ($call && defined param('cmd')){
 			if ($param =~ /^change:(\d+)$/){
 				my $shiptype = escapeHTML(param("shiptype:$1"));
 				if($query->execute($shiptype,$1,$call->{id})){
-					$LOG->execute($ND::UID,"DC set fleet: $1, call $call->{id} to: $shiptype");
+					log_message $ND::UID,"DC set fleet: $1, call $call->{id} to: $shiptype";
 				}else{
 					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}

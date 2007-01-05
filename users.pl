@@ -19,9 +19,9 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
 our $BODY;
 our $DBH;
-our $LOG;
 
 $ND::TEMPLATE->param(TITLE => 'Users');
 
@@ -57,7 +57,7 @@ if ($user && defined param('cmd') && param('cmd') eq 'change'){
 			if ($DBH->do(qq{UPDATE users SET $column = ? WHERE uid = ? }
 					,undef,$value,$user->{uid})){
 				$user->{$column} = param($column);
-				$LOG->execute($ND::UID,"HC set $column to $value for user: $user->{uid}");
+				log_message $ND::UID,"HC set $column to $value for user: $user->{uid}";
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
@@ -77,7 +77,7 @@ if ($user && defined param('cmd') && param('cmd') eq 'change'){
 		}
 		if ($query){
 			if ($query->execute($user->{uid},$group->{gid})){
-				$LOG->execute($ND::UID,"HC added user: $user->{uid} to group: $group->{gid}");
+				log_message $ND::UID,"HC added user: $user->{uid} to group: $group->{gid}";
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}

@@ -23,7 +23,6 @@ use ND::Web::Forum;
 
 our $BODY;
 our $DBH;
-our $LOG;
 our $ERROR;
 my $error;
 

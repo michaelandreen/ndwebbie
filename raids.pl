@@ -19,10 +19,10 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
 use POSIX;
 our $BODY;
 our $DBH;
-our $LOG;
 our $XML;
 
 my $raid;
@@ -48,7 +48,7 @@ if (defined param('cmd') && defined param('target') && defined param('wave') && 
 		if ($claims->rows == 0){
 			my $query = $DBH->prepare(q{INSERT INTO raid_claims (target,uid,wave) VALUES(?,?,?)});
 			if($query->execute($target,$ND::UID,$wave)){
-				$LOG->execute($ND::UID,"Claimed target $target wave $wave.");
+				log_message $ND::UID,"Claimed target $target wave $wave.";
 			}
 		}
 	}
@@ -60,7 +60,7 @@ if (defined param('cmd') && defined param('target') && defined param('wave') && 
 		if ($claims->rows != 0){
 			my $query = $DBH->prepare(q{INSERT INTO raid_claims (target,uid,wave,joinable) VALUES(?,?,?,TRUE)});
 			if($query->execute($target,$ND::UID,$wave)){
-				$LOG->execute($ND::UID,"Joined target $target wave $wave.");
+				log_message $ND::UID,"Joined target $target wave $wave.";
 			}
 		}
 	}
@@ -74,7 +74,7 @@ if (defined param('cmd') && defined param('target') && defined param('wave') && 
 	if (param('cmd') eq 'Unclaim'){
 		my $query = $DBH->prepare(qq{DELETE FROM raid_claims WHERE target = ? AND uid = ? AND wave = ?});
 		if ($query->execute($target,$ND::UID,$wave)){
-			$LOG->execute($ND::UID,"Unclaimed target $target wave $wave.");
+			log_message $ND::UID,"Unclaimed target $target wave $wave.";
 		}
 	}
 	$DBH->commit;

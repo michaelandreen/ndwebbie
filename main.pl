@@ -19,6 +19,7 @@
 
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
 
 $ND::TEMPLATE->param(TITLE => 'Main Page');
 
@@ -54,7 +55,7 @@ if (defined param('cmd')){
 		for my $param (param()){
 			if ($param =~ /^change:(\d+)$/){
 				if($updatefleets->execute($ND::UID,$1)){
-					$ND::LOG->execute($ND::UID,"Member recalled fleet $1");
+					log_message $ND::UID,"Member recalled fleet $1";
 				}else{
 					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}
@@ -67,7 +68,7 @@ if (defined param('cmd')){
 		for my $param (param()){
 			if ($param =~ /^change:(\d+)$/){
 				if($updatefleets->execute(param("back:$1"),$ND::UID,$1)){
-					$ND::LOG->execute($ND::UID,"Member set fleet $1 to be back tick: ".param("back:$1"));
+					log_message $ND::UID,"Member set fleet $1 to be back tick: ".param("back:$1");
 				}else{
 					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}
