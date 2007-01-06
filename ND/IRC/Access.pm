@@ -55,7 +55,7 @@ sub groupmember {
 	my ($groups) = @_;
 	$groups = join ",", map {"'$_'"} split //, $groups;
 	my $f = $ND::DBH->prepare("SELECT uid,username FROM users NATURAL JOIN groupmembers NATURAL JOIN groups WHERE flag IN ('T',$groups) AND lower(hostmask) = ?");
-	$f->execute($ND::address);
+	$f->execute(lc($ND::address));
 	return $f->fetchrow_hashref;
 };
 
