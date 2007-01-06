@@ -49,6 +49,9 @@ sub handler {
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
 		$ND::PAGE = $1 unless $1 eq 'index' and $3 eq 'pl';
 	}
+	if ($ENV{REQUEST_URI} =~ m{^.*/(\w+)$}){
+		param($1,1);
+	}
 	$ND::PAGE = '' unless defined $ND::PAGE;
 	page();
 	return Apache2::Const::OK;
@@ -58,7 +61,7 @@ sub page {
 	our $DBH = ND::DB::DB();
 	$DBH->do(q{SET timezone = 'GMT'});
 
-	our $ERROR = '';
+	our $ERROR;
 
 	chdir '/var/www/ndawn/code';
 
@@ -96,7 +99,7 @@ sub page {
 		$ND::BODY = HTML::Template->new(filename => "templates/$ND::PAGE.xml.tmpl", cache => 1);
 	}else{
 		$ND::BODY = HTML::Template->new(filename => "templates/$ND::PAGE.tmpl", global_vars => 1, cache => 1);
-		$ND::BODY->param(PAGE => $ND::PAGE);
+		$ND::BODY->param(PAGE => '/'.$ND::PAGE);
 	}
 
 	unless (my $return = do "$ND::PAGE.pl"){
