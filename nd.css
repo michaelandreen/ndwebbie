@@ -44,6 +44,12 @@ table.boards th {
 table.boards tr.even {
 	background: white;
 }
+
+table.boards a {
+	text-decoration: none;
+	width: 100%;
+	display: block;
+}
 fieldset.forum-post {
 	width: 40em;
 }
@@ -73,6 +79,8 @@ ul.linkbar li {
 }
 ul.linkbar a {
 	text-decoration: none;
+	width: 100%;
+	display: block;
 }
 input.coordsinput {
 	width: 4em;
