@@ -40,7 +40,7 @@ sub max {
 sub log_message {
 	my ($uid, $message) = @_;
 	my $log = $ND::DBH->prepare_cached(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
-		(SELECT ftid FROM forum_threads WHERE log_uid = $1),$1,$2)});
+		(SELECT ftid FROM users WHERE uid = $1),$1,$2)});
 	$log->execute($uid,$message) or $ND::ERROR .= p($ND::DBH->errstr);
 }
 
