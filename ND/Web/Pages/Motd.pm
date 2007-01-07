@@ -17,38 +17,44 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
+package ND::Web::Pages::Motd;
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
+use CGI qw/:standard/;
+use ND::Web::Include;
 
-$ND::TEMPLATE->param(TITLE => 'Top Members');
+$ND::PAGES{motd} = {parse => \&parse, process => \&process, render=> \&render};
 
-our $BODY;
-our $DBH;
-
-die "You don't have access" unless isMember();
-
-my $type = "total";
-if (defined param('type') && param('type') =~ /^(defense|attack|total|humor|scan|rank)$/){
-	$type = $1;
+sub parse {
+	my ($uri) = @_;
 }
-$type .= '_points' unless ($type eq 'rank');
 
-my $order = 'DESC';
-$order = 'ASC' if ($type eq 'rank');
+sub process {
 
-my $limit = 'LIMIT 10';
-$limit = '' if isHC();
-
-my $query = $DBH->prepare("SELECT username,defense_points,attack_points,scan_points,humor_points, (attack_points+defense_points+scan_points/20) as total_points, rank FROM users WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2) ORDER BY $type $order $limit");
-$query->execute;
-
-my @members;
-my $i = 0;
-while (my ($username,$defense,$attack,$scan,$humor,$total,$rank) = $query->fetchrow){
-	$i++;
-	push @members,{Username => $username, Defense => $defense, Attack => $attack
-		, Scan => $scan, Humor => $humor, Total => $total, Rank => $rank, ODD => $i % 2};
 }
-$BODY->param(Members => \@members);
+
+sub render {
+	my ($DBH,$BODY) = @_;
+
+	$ND::TEMPLATE->param(TITLE => 'Edit MOTD');
+
+
+	return $ND::NOACCESS unless isHC();
+
+	if (defined param 'cmd' and param('cmd') eq 'change'){
+		$DBH->begin_work;
+		my $query = $DBH->prepare(q{UPDATE misc SET value= ? WHERE id='MOTD'});
+		my $motd = escapeHTML(param('motd'));
+		$query->execute($motd);
+		log_message $ND::UID,"Updated MOTD";
+		$DBH->commit;
+		$BODY->param(MOTD => $motd);
+	}else{
+		my ($motd) = $DBH->selectrow_array(q{SELECT value FROM misc WHERE id='MOTD'});
+		$BODY->param(MOTD => $motd);
+	}
+	return $BODY;
+}
 
 1;

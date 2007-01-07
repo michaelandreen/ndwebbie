@@ -31,6 +31,9 @@ use Fcntl 'O_RDONLY';
 use strict;
 use warnings FATAL => 'all';
 
+chdir '/var/www/ndawn/code';
+our %PAGES;
+our $NOACCESS = HTML::Template->new(filename => 'templates/NoAccess.tmpl', global_vars => 1, cache => 1);
 
 sub handler {
 	local $ND::r = shift;
@@ -49,15 +52,16 @@ sub handler {
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
 		$ND::PAGE = $1 unless $1 eq 'index' and $3 eq 'pl';
 	}
-	if ($ENV{REQUEST_URI} =~ m{^.*/(\w+)$}){
-		param($1,1);
-	}
-	$ND::PAGE = '' unless defined $ND::PAGE;
-	page();
+	$ND::PAGE = 'main' unless exists $PAGES{$ND::PAGE};
+
+	$PAGES{$ND::PAGE}->{parse}->($ENV{REQUEST_URI});
+
+	page($ND::PAGE);
 	return Apache2::Const::OK;
 }
 
 sub page {
+	my ($PAGE) = @_;
 	our $DBH = ND::DB::DB();
 	$DBH->do(q{SET timezone = 'GMT'});
 
@@ -84,13 +88,10 @@ sub page {
 		$ATTACKER = 1 if $attack;
 	}
 
-	tie my @pages, 'Tie::File', "/var/www/ndawn/code/pages", mode => O_RDONLY, memory => 0 or die $!;
-	$ND::PAGE = 'main' unless grep { /^$ND::PAGE$/ } @pages;
-
 	our $XML = 0;
-	$XML = 1 if param('xml') and $ND::PAGE =~ /^(raids)$/;
-
 	our $AJAX = 1;
+
+	$PAGES{$PAGE}->{process}->();
 
 	my $type = 'text/html';
 	if ($XML){
@@ -102,11 +103,7 @@ sub page {
 		$ND::BODY->param(PAGE => '/'.$ND::PAGE);
 	}
 
-	unless (my $return = do "$ND::PAGE.pl"){
-		$ERROR .= "<p><b>couldn't parse $ND::PAGE: $@</b></p>" if $@;
-		$ERROR .= "<p><b>couldn't do $ND::PAGE: $!</b></p>"    unless defined $return && defined $!;
-		$ERROR .= "<p><b>couldn't run $ND::PAGE</b></p>"       unless $return;
-	}
+	$ND::BODY = $PAGES{$PAGE}->{render}->($DBH,$ND::BODY);
 
 	unless ($XML){
 		my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$UID);

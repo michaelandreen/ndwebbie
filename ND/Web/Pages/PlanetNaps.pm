@@ -17,55 +17,43 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
+package ND::Web::Pages::PlanetNaps;
 use strict;
 use warnings FATAL => 'all';
+use CGI qw/:standard/;
+use ND::Web::Include;
 
-$ND::TEMPLATE->param(TITLE => 'Top100 ');
+$ND::PAGES{planetNaps} = {parse => \&parse, process => \&process, render=> \&render};
 
-our $BODY;
-our $DBH;
-my $error = '';
-
-$BODY->param(isHC => isHC());
-
-
-die "You don't have access" unless isMember();
-
-my $offset = 0;
-if (defined param('offset') && param('offset') =~ /^(\d+)$/){
-	$offset = $1;
+sub parse {
+	my ($uri) = @_;
 }
-$BODY->param(Offset => $offset);
-$BODY->param(PrevOffset => $offset - 100);
-$BODY->param(NextOffset => $offset + 100);
 
-my $order = 'scorerank';
-if (defined param('order') && param('order') =~ /^(scorerank|sizerank|valuerank|xprank|hit_us)$/){
-	$order = $1;
+sub process {
+
 }
-$BODY->param(Order => $order);
-$order .= ' DESC' if ($order eq 'hit_us');
 
+sub render {
+	my ($DBH,$BODY) = @_;
+	my $error;
 
-my $extra_columns = '';
-if (isHC()){
-	$extra_columns = ",planet_status,hit_us, alliance,relationship,nick";
-}
-my $query = $DBH->prepare(qq{SELECT coords(x,y,z),((ruler || ' OF ') || planet) as planet,race,
-	size, score, value, xp, sizerank, scorerank, valuerank, xprank
-	$extra_columns FROM current_planet_stats ORDER BY $order LIMIT 100 OFFSET ?});
-$query->execute($offset) or $error .= p($DBH->errstr);
-my @planets;
-my $i = 0;
-while (my $planet = $query->fetchrow_hashref){
-	if (isHC){
-		$planet->{isHC} = 1;
+	$ND::TEMPLATE->param(TITLE => 'List planet naps');
+
+	return $ND::NOACCESS unless isHC();
+
+	my $query = $DBH->prepare(qq{Select coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race, size, score, value, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 - coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue, planet_status,hit_us, alliance,relationship,nick from current_planet_stats p LEFT OUTER JOIN covop_targets c ON p.id = c.planet WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc});
+
+	$query->execute or $error .= p($DBH->errstr);
+	my @planets;
+	my $i = 0;
+	while (my $planet = $query->fetchrow_hashref){
+		$i++;
+		$planet->{ODD} = $i % 2;
+		push @planets,$planet;
 	}
-	$i++;
-	$planet->{ODD} = $i % 2;
-	push @planets,$planet;
+	$BODY->param(Planets => \@planets);
+	$BODY->param(Error => $error);
+	return $BODY;
 }
-$BODY->param(Planets => \@planets);
-$BODY->param(Error => $error);
 
 1;

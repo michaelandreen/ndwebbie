@@ -17,24 +17,38 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
+package ND::Web::Pages::DefRequest;
 use strict;
 use warnings FATAL => 'all';
+use CGI qw/:standard/;
+use ND::Web::Include;
 
-$ND::TEMPLATE->param(TITLE => 'Request Defense');
+$ND::PAGES{defrequest} = {parse => \&parse, process => \&process, render=> \&render};
 
-our $BODY;
-our $DBH;
-my $error;
-
-die "You don't have access" unless isMember();
-
-if (defined param('cmd') && param('cmd') eq 'submit'){
-	my $insert = $DBH->prepare('INSERT INTO defense_requests (uid,message) VALUES (?,?)');
-	if($insert->execute($ND::UID,param('message'))){
-		$BODY->param(Reply => param('message'));
-	}else{
- 		$error .= "<b>".$DBH->errstr."</b>";
-	}
+sub parse {
 }
-$BODY->param(Error => $error);
+
+sub process {
+
+}
+
+sub render {
+	my ($DBH,$BODY) = @_;
+	$ND::TEMPLATE->param(TITLE => 'Request Defense');
+
+	my $error;
+
+	return $ND::NOACCESS unless isMember();
+
+	if (defined param('cmd') && param('cmd') eq 'submit'){
+		my $insert = $DBH->prepare('INSERT INTO defense_requests (uid,message) VALUES (?,?)');
+		if($insert->execute($ND::UID,param('message'))){
+			$BODY->param(Reply => param('message'));
+		}else{
+			$error .= "<b>".$DBH->errstr."</b>";
+		}
+	}
+	$BODY->param(Error => $error);
+	return $BODY;
+}
 1;
