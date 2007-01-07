@@ -47,7 +47,7 @@ sub log_message {
 sub intel_log {
 	my ($uid,$planet, $message) = @_;
 	my $log = $ND::DBH->prepare_cached(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
-		(SELECT ftid FROM forum_threads WHERE planet = $3),$1,$2)});
+		(SELECT ftid FROM planets WHERE id = $3),$1,$2)});
 	$log->execute($uid,$message,$planet) or $ND::ERROR .= p($ND::DBH->errstr);
 }
 

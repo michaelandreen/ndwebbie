@@ -33,9 +33,9 @@ die "You don't have access" unless isIntel() || isHC();
 
 my $planet;
 if (defined param('coords') && param('coords') =~ /^(\d+)(?: |:)(\d+)(?: |:)(\d+)$/){
-	my $query = $DBH->prepare(q{SELECT x,y,z,coords(x,y,z),id, nick, alliance,alliance_id, planet_status,channel FROM current_planet_stats
+	my $query = $DBH->prepare(q{SELECT x,y,z,coords(x,y,z),id, nick, alliance,alliance_id, planet_status,channel,ftid FROM current_planet_stats
 WHERE  x = ? AND y = ? AND z = ?});
-	$planet = $DBH->selectrow_hashref($query,undef,$1,$2,$3);
+	$planet = $DBH->selectrow_hashref($query,undef,$1,$2,$3) or $ND::ERROR .= p $DBH->errstr;
 }
 
 my $showticks = 'AND (i.tick - i.eta) > (tick() - 48)';
@@ -50,7 +50,7 @@ if (defined param('show')){
 my $thread;
 if (defined $planet){
 	$thread = $DBH->selectrow_hashref(q{SELECT ftid AS id, subject FROM forum_threads
-		where planet = $1},undef,$planet->{id}) or $ERROR .= p($DBH->errstr);
+		where ftid = $1},undef,$planet->{ftid}) or $ERROR .= p($DBH->errstr);
 }
 
 if (defined param('cmd') && param('cmd') eq 'coords'){
