@@ -1,6 +1,7 @@
 <TMPL_VAR Thread>
 <TMPL_IF Board>
 <h2><TMPL_VAR NAME=Board></h2>
+<p><a href="<TMPL_VAR NAME=PAGE>?b=<TMPL_VAR NAME=Id>;markAsRead=<TMPL_VAR ESCAPE=URL NAME=DATE>">Mark threads as read</a></p>
 <table class="boards">
 <tr>
 	<th>Unread</th>
@@ -61,6 +62,7 @@
 	<tr>
 		<th></th>
 		<th colspan="2"><a href="<TMPL_VAR NAME=PAGE>?b=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Board></a></th>
+		<th><a href="<TMPL_VAR NAME=PAGE>/allUnread?b=<TMPL_VAR NAME=Id>;markAsRead=<TMPL_VAR ESCAPE=URL NAME=DATE>">Mark threads as read</a></th>
 	</tr>
 		<TMPL_LOOP Threads>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">

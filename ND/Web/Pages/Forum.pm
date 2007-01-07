@@ -29,7 +29,7 @@ $ND::PAGES{forum} = {parse => \&parse, process => \&process, render=> \&render};
 
 sub parse {
 	my ($uri) = @_;
-	if ($uri =~ m{^/.*/allUnread$}){
+	if ($uri =~ m{^/.*/allUnread}){
 		param('allUnread',1);
 	}
 }
@@ -51,6 +51,22 @@ sub render {
 			WHERE uid = $2))
 			GROUP BY fb.fbid,fb.board});
 		$board = $DBH->selectrow_hashref($boards,undef,param('b'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+	}
+	if (param('markAsRead')){
+		my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts, max(fp.time)::timestamp as last_post
+		FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
+		WHERE ((ft.fbid IS NULL AND $1 IS NULL) OR ft.fbid = $1) AND fp.time <= $3
+		GROUP BY ft.ftid, ft.subject
+		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= 1
+		});
+
+		$threads->bind_param('$1',$board->{id},{TYPE => DBI::SQL_INTEGER }) or $ND::ERROR .= p($DBH->errstr);
+		$threads->bind_param('$2',$ND::UID,{TYPE => DBI::SQL_INTEGER }) or $ND::ERROR .= p($DBH->errstr);
+		$threads->bind_param('$3',param('markAsRead')) or $ND::ERROR .= p($DBH->errstr);
+		$threads->execute or $ND::ERROR .= p($DBH->errstr);
+		while (my $thread = $threads->fetchrow_hashref){
+			markThreadAsRead $thread->{id};
+		}
 	}
 
 	my $thread;
@@ -85,23 +101,11 @@ sub render {
 	if ($thread){ #Display the thread
 		$BODY->param(Thread => viewForumThread $thread);
 
-	}elsif($board){ #List threads in this board
-		$BODY->param(Board => $board->{board});
-		$BODY->param(Post => $board->{post});
-		$BODY->param(Id => $board->{id});
-		$threads->execute($board->{id},$ND::UID,0) or $ND::ERROR .= p($DBH->errstr);
-		my $i = 0;
-		my @threads;
-		while (my $thread = $threads->fetchrow_hashref){
-			$i++;
-			$thread->{Odd} = $i % 2;
-			push @threads,$thread;
-		}
-		$BODY->param(Threads => \@threads);
-
 	}elsif(defined param('allUnread')){ #List threads in this board
 		$BODY->param(AllUnread => 1);
 		$BODY->param(Id => $board->{id});
+		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
+		$BODY->param(Date => $time);
 		$categories->execute or $ND::ERROR .= p($DBH->errstr);
 		my @categories;
 		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post
@@ -132,6 +136,22 @@ sub render {
 			push @categories,$category if @boards;
 		}
 		$BODY->param(Categories => \@categories);
+
+	}elsif($board){ #List threads in this board
+		$BODY->param(Board => $board->{board});
+		$BODY->param(Post => $board->{post});
+		$BODY->param(Id => $board->{id});
+		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
+		$BODY->param(Date => $time);
+		$threads->execute($board->{id},$ND::UID,0) or $ND::ERROR .= p($DBH->errstr);
+		my $i = 0;
+		my @threads;
+		while (my $thread = $threads->fetchrow_hashref){
+			$i++;
+			$thread->{Odd} = $i % 2;
+			push @threads,$thread;
+		}
+		$BODY->param(Threads => \@threads);
 
 	}else{ #List boards
 		$BODY->param(Overview => 1);
