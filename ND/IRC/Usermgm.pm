@@ -96,13 +96,13 @@ sub flag {
 
 	if (officer()|| ($ND::target eq $ND::scanchan && $flag eq 'S')){
 		my $f = $ND::DBH->prepare(qq{
-SELECT TRIM(', ' FROM concat(username||', ')) FROM
+SELECT TRIM(', ' FROM concat(username||', ')),count(username) FROM
 	(SELECT uid, username FROM users ORDER BY username) u NATURAL JOIN groupmembers gm 
 	JOIN groups g ON g.gid = gm.gid
 WHERE flag = ?;
 			});
-		if (my ($users) = $ND::DBH->selectrow_array($f,undef,$flag)){
-			$ND::server->command("msg $ND::target Users with flag $ND::B$flag$ND::B: $users");
+		if (my ($users,$count) = $ND::DBH->selectrow_array($f,undef,$flag)){
+			$ND::server->command("msg $ND::target $ND::B$count$ND::B Users with flag $ND::B$flag$ND::B: $users");
 		}
 	}else{
 		$ND::server->command("msg $ND::target Only officers are allowed to check that");
@@ -119,11 +119,13 @@ sub laston {
 		$min = 0 unless defined $min;
 		$f->execute($flag,$min);
 		my $text;
+		my $i = 0;
 		while (my $user = $f->fetchrow_hashref){
 			$user->{last} = '?' unless defined $user->{last};
 			$text .= "$user->{username}($user->{last}) ";
+			$i++;
 		}
-		$ND::server->command("msg $ND::target Users(days) with flag $ND::B$flag$ND::B: $text");
+		$ND::server->command("msg $ND::target $ND::B$i$ND::B Users(days) with flag $ND::B$flag$ND::B: $text");
 	}else{
 		$ND::server->command("msg $ND::target Only officers are allowed to check that");
 	}
