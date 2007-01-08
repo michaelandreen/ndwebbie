@@ -52,7 +52,7 @@ sub handler {
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
 		$ND::PAGE = $1 unless $1 eq 'index' and $3 eq 'pl';
 	}
-	$ND::PAGE = 'main' unless exists $PAGES{$ND::PAGE};
+	$ND::PAGE = 'main' unless (defined $ND::PAGE and exists $PAGES{$ND::PAGE});
 
 	$PAGES{$ND::PAGE}->{parse}->($ENV{REQUEST_URI});
 
