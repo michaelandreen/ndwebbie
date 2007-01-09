@@ -22,11 +22,10 @@
 <form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset class="forum-post"> <legend>New Thread</legend>
 	<p>Subject: <input type="text" name="subject" value=""/></p>
 	<textarea rows="25" cols="60" name="message"></textarea>
-	<input type="hidden" name="cmd" value="forumpost"/>
 	<input type="hidden" name="b" value="<TMPL_VAR NAME=Id>"/>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<br/>
-	<input type="submit" value="Submit"/>
+	<input type="submit" name="cmd" value="Submit"/>
 </fieldset></form>
 </TMPL_IF>
 </TMPL_IF>
