@@ -25,7 +25,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/min max log_message intel_log/;
+our @EXPORT = qw/min max log_message intel_log unread_query/;
 
 sub min {
     my ($x,$y) = @_;
@@ -49,6 +49,17 @@ sub intel_log {
 	my $log = $ND::DBH->prepare_cached(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
 		(SELECT ftid FROM planets WHERE id = $3),$1,$2)});
 	$log->execute($uid,$message,$planet) or $ND::ERROR .= p($ND::DBH->errstr);
+}
+
+sub unread_query {
+	return $ND::DBH->prepare_cached(q{
+			SELECT count(*) AS unread, max(ftv.time) AS last_vist
+FROM forum_boards fb NATURAL JOIN forum_threads ft 
+	JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN 
+		(SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
+WHERE (ftv.time IS NULL OR fp.time > ftv.time) AND fbid > 0 AND
+	fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1)))
+		});
 }
 
 1;
