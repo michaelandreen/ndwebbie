@@ -50,9 +50,6 @@ table.boards{
 table.boards th {
 	font-size: larger;
 }
-table.boards tr.even {
-	background: gray;
-}
 
 table a {
 	text-decoration: none;
@@ -96,6 +93,10 @@ input.coordsinput {
 }
 input.small {
 	width: 1.7em;
+}
+tr.even {
+	background: #B2B2B2;
+	color: black;
 }
 tr.odd {
 	background: gray;
