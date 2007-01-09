@@ -31,10 +31,11 @@ sub handler {
 	return $res if $res != Apache2::Const::OK;
 
 	my $dbh = ND::DB::DB();
-	my ($count) = $dbh->selectrow_array(q{SELECT count(*) FROM users WHERE
+	my ($username) = $dbh->selectrow_array(q{SELECT username FROM users WHERE
 		lower(username) = lower(?) AND password = MD5(?)},undef,$r->user,$sent_pw);
 	$dbh->disconnect;
-	if ($count == 1){
+	if ($username){
+		$r->user($username);
 		return Apache2::Const::OK;
 	}
 	$r->note_basic_auth_failure();
