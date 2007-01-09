@@ -65,6 +65,8 @@ sub parseMarkup {
 
 	$text =~ s{\n}{\n<br/>}g;
 	$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>}gi;
+	$text =~ s{\[I\](.*?)\[/I\]}{<i>$1</i>}gi;
+	$text =~ s{\[url\](.*?)\[/url\]}{<a href="$1">$1</a>}gi;
 	return $text;
 }
 
