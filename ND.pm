@@ -125,6 +125,8 @@ sub page {
 			$ND::TEMPLATE->param(Targets => listTargets());
 		}
 		$TEMPLATE->param(Coords => param('coords') ? param('coords') : '1:1:1');
+		my ($css) = $DBH->selectrow_array(q{SELECT css FROM users WHERE uid = $1},undef,$ND::UID);
+		$TEMPLATE->param(CSS => $css);
 
 	}
 	$TEMPLATE->param(Error => $ERROR);

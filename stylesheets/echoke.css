@@ -1,0 +1,226 @@
+body 
+{ 
+	padding-left: 15em; 
+	font-size: medium; 
+	color: gray; 
+	font-family: Sans-Serif; 
+	background-color: #f5f5f5; 
+} 
+#leftbar, #rightbar 
+{ 
+	padding-right: 0px; 
+	padding-left: 0px; 
+	font-weight: bold; 
+	padding-bottom: 0px; 
+	margin: 0px; 
+	width: 14em; 
+	color: olive; 
+	padding-top: 0px; 
+	position: absolute; 
+	top: 1em; 
+} 
+#leftbar{ 
+	left: 1em; 
+} 
+#rightbar{ 
+	right: 1em; 
+} 
+
+legend {
+	color: black; 
+	background: white; 
+	border-style: solid; 
+	border-width: 1px; 
+	padding: 1px; 
+} 
+table.boards td 
+{ 
+	border-right: #990000 thin solid; 
+	padding-right: 2px; 
+	border-top: #990000 thin solid; 
+	padding-left: 2px; 
+	font-size: larger; 
+	padding-bottom: 2px; 
+	border-left: #990000 thin solid; 
+	padding-top: 2px; 
+	border-bottom: #990000 thin solid; 
+	border-collapse: separate; 
+	border-spacing: 15pt; 
+} 
+table.boards{ 
+	border-collapse: separate; 
+	border-spacing: 5px; 
+} 
+table.boards th 
+{ 
+	font-weight: bold; 
+	font-size: larger; 
+	color: #990000; 
+} 
+table.boards tr.even { 
+	background: white; 
+} 
+
+table.boards a { 
+	text-decoration: none; 
+	width: 100%; 
+	display: block; 
+} 
+fieldset.forum-post { 
+	width: 40em; 
+} 
+fieldset.forum-post legend b { 
+	font-size: larger; 
+} 
+div.leftinfo{ 
+	float: left; 
+	padding-right: 2em; 
+} 
+p.claimlinks{ 
+	clear: both; 
+} 
+
+ul.linkbar 
+{ 
+	padding-right: 0px; 
+	padding-left: 0px; 
+	padding-bottom: 0px; 
+	margin: 0px; 
+	width: 13.5em; 
+	color: #000033; 
+	padding-top: 0px; 
+} 
+ul.linkbar li { 
+	background: white; 
+	color: black; 
+	margin: 0.5em 0; 
+	padding: 0.3em; 
+	/*border-right: 1em solid black;*/ 
+} 
+ul.linkbar a { 
+	text-decoration: none; 
+	width: 100%; 
+	display: block; 
+} 
+input.coordsinput { 
+	width: 4em; 
+} 
+input.small { 
+	width: 1.7em; 
+} 
+tr.odd { 
+	background: white; 
+	color: black; 
+} 
+tr.total { 
+	background: black; 
+	color: red; 
+} 
+
+td.ingal{ 
+	background: blue; 
+	color: black; 
+} 
+td.Defend{ 
+	background: green; 
+	color: black; 
+} 
+td.AllyDef 
+{ 
+	background: #ccff00; 
+	color: black; 
+} 
+td.Attack 
+{ 
+	background: tomato; 
+	color: black; 
+} 
+
+a.Unclaim{ 
+	color: #336666; 
+} 
+input.Unclaim{ 
+	background: #336666; 
+} 
+a.Claim{ 
+	color: blue; 
+} 
+a.Join{ 
+	color: #00AAAA; 
+} 
+input.Join{ 
+	background: #00AAAA; 
+} 
+
+td.Friendly 
+{ 
+	font-weight: bold; 
+	background: #ccff00; 
+	color: darkolivegreen; 
+} 
+td.Friendly a 
+{ 
+	font-weight: bold; 
+	font-size: larger; 
+	background: #ccff00; 
+	color: white; 
+} 
+td.Hostile 
+{ 
+	font-weight: bold; 
+	background: tomato; 
+	color: black; 
+} 
+td.NAP 
+{ 
+	background: turquoise; 
+	color: white; 
+} 
+td.NAP a 
+{ 
+	font-weight: bold; 
+	font-size: larger; 
+	color: white; 
+	background: turquoise; 
+} 
+table.old{ 
+	border: outset 1pt; 
+	border-collapse: separate; 
+	border-color: red; 
+} 
+
+table.closedPlanet 
+{ 
+	border-right: maroon 2pt outset; 
+	border-top: maroon 2pt outset; 
+	border-left: maroon 2pt outset; 
+	border-bottom: maroon 2pt outset; 
+	border-collapse: separate; 
+} 
+li.bash 
+{ 
+	color: #336666; 
+} 
+div.clear { 
+	clear: both; 
+	height: 0; 
+	margin: 0; 
+	padding: 0; 
+	line-height: 0.0; 
+	font-size: 1px; 
+} 
+
+td.LowestPrio{ 
+	background: tomato; 
+	color: white; 
+} 
+td.MediumPrio 
+{ 
+	background: #b3b169; 
+	color: white; 
+} 
+td.HighestPrio 
+{ 
+	background: #336666; 
+	color: white; 
+}

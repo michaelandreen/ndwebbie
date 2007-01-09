@@ -1,0 +1,10 @@
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Style</legend>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	<input type="hidden" name="cmd" value="stylesheet"/>
+	Stylesheet: <select name="stylesheet">
+				<TMPL_LOOP StyleSheets>
+					<option value="<TMPL_VAR NAME=Style>" <TMPL_IF NAME=Selected>selected="selected"</TMPL_IF>><TMPL_VAR NAME=Style></option>
+				</TMPL_LOOP>
+				</select>
+	<br/><input type="submit" value="Change"/>
+</fieldset></form>

@@ -5,7 +5,7 @@
 <head>
 	<title>NewDawn: <TMPL_VAR NAME=TITLE></title>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
-	<link rel="stylesheet" type="text/css" href="/nd.css"/>
+	<link rel="stylesheet" type="text/css" href="/stylesheets/<TMPL_IF CSS><TMPL_VAR NAME=CSS><TMPL_ELSE>nd</TMPL_IF>.css"/>
 	<script type="text/javascript" src="/raid.js"></script>
 	<TMPL_VAR NAME=HEADER>
 </head>
@@ -13,6 +13,7 @@
 <div id="leftbar">
 	<ul class="linkbar">
 		<li><a href="/main">Main page</a></li>
+		<li><a href="/settings">Settings</a></li>
 		<li><a href="/forum">Forum</a></li>
 		<li><a href="/forum/allUnread">New posts <TMPL_IF UnreadPosts>(<b><TMPL_VAR NAME=UnreadPosts></b>)</TMPL_IF></a></li>
 	</ul>	<p>Tick: <TMPL_VAR NAME=TICK></p>
