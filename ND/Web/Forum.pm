@@ -54,7 +54,12 @@ ORDER BY fp.time ASC
 		$post->{message} = parseMarkup($post->{message});
 		push @posts,$post;
 	}
+
+	if (defined param('cmd') && param('cmd') eq 'Preview'){
+		push @posts,{message => parseMarkup(escapeHTML(param('message'))), unread => 1, username => 'PREVIEW', Time => 'Not submitted yet', NewPosts => $old ? 1 : 0};
+	}
 	$template->param(Posts => \@posts);
+	$template->param(Message => param('message'));
 
 	markThreadAsRead($thread->{id});
 

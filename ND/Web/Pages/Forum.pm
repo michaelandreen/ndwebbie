@@ -79,7 +79,7 @@ sub render {
 		$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 	}
 
-	if (defined param('cmd') && param('cmd') eq 'forumpost'){
+	if (defined param('cmd') && param('cmd') eq 'Submit'){
 		$DBH->begin_work;
 		if ($board && $board->{post}){
 			$thread = addForumThread $DBH,$board,$ND::UID,param('subject');
