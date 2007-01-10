@@ -19,8 +19,7 @@
 
 package ND::Web::Pages::Forum;
 use strict;
-use warnings FATAL => 'all';
-no warnings 'uninitialized';
+use warnings;
 use ND::Web::Forum;
 use CGI qw/:standard/;
 use ND::Web::Include;
@@ -42,6 +41,8 @@ sub render {
 	my ($DBH,$BODY) = @_;
 
 	$ND::TEMPLATE->param(TITLE => 'Forum');
+
+	$DBH->do(q{UPDATE users SET last_forum_visit = NOW() WHERE uid = $1},undef,$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 
 	my $board;
 	if(param('b')){

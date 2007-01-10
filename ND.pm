@@ -30,7 +30,9 @@ use ND::Include;
 use Tie::File;
 use Fcntl 'O_RDONLY';
 use strict;
-use warnings FATAL => 'all';
+use warnings;
+
+$SIG{__WARN__} = sub {$ND::ERROR .= p $_[0]};
 
 chdir '/var/www/ndawn/code';
 our %PAGES;
@@ -111,9 +113,13 @@ sub page {
 
 		$fleetupdate = 0 unless defined $fleetupdate;
 
-		my ($unread,$lastv) = $DBH->selectrow_array(unread_query,undef,$UID) or $ERROR .= p($DBH->errstr);
+		my ($last_forum_visit) = $DBH->selectrow_array(q{SELECT last_forum_visit FROM users WHERE uid = $1}
+			,undef,$UID) or $ERROR .= p($DBH->errstr);
+		my ($unread,$newposts) = $DBH->selectrow_array(unread_query,undef,$UID,$last_forum_visit)
+			or $ERROR .= p($DBH->errstr);
 		
 		$TEMPLATE->param(UnreadPosts => $unread);
+		$TEMPLATE->param(NewPosts => $newposts);
 		$TEMPLATE->param(Tick => $TICK);
 		$TEMPLATE->param(isMember => (($TICK - $fleetupdate < 24) || isScanner()) && $PLANET && isMember());
 		$TEMPLATE->param(isHC => isHC());

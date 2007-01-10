@@ -53,7 +53,7 @@ sub intel_log {
 
 sub unread_query {
 	return $ND::DBH->prepare_cached(q{
-			SELECT count(*) AS unread
+			SELECT count(*) AS unread, count(NULLIF(fp.time > $2,FALSE)) AS new
 FROM forum_boards fb NATURAL JOIN forum_threads ft 
 	JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN 
 		(SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid

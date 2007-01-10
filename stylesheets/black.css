@@ -195,3 +195,9 @@ td.HighestPrio{
 	background: green;
 	color: black;
 }
+span.newposts,span.unreadposts {
+	font-weight: bold;
+}
+span.newposts {
+	color: red;
+}

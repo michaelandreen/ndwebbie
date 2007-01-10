@@ -224,3 +224,9 @@ td.HighestPrio
 	background: #336666; 
 	color: white; 
 }
+span.newposts,span.unreadposts {
+	font-weight: bold;
+}
+span.newposts {
+	color: red;
+}
