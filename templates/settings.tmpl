@@ -3,7 +3,7 @@
 	<input type="hidden" name="cmd" value="stylesheet"/>
 	Stylesheet: <select name="stylesheet">
 				<TMPL_LOOP StyleSheets>
-					<option value="b:<TMPL_VAR NAME=Style>" <TMPL_IF NAME=Selected>selected="selected"</TMPL_IF>><TMPL_VAR NAME=Style></option>
+					<option value="<TMPL_VAR NAME=Style>" <TMPL_IF NAME=Selected>selected="selected"</TMPL_IF>><TMPL_VAR NAME=Style></option>
 				</TMPL_LOOP>
 				</select>
 	<br/><input type="submit" value="Change"/>
