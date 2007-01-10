@@ -28,6 +28,12 @@ a:hover {
 	background: white;
 }
 
+input,textarea {
+	color: black;
+	background: #B2B2B2;
+}
+
+
 legend {
 	color: black;
 	background: gray;
