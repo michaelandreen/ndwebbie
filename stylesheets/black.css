@@ -28,7 +28,7 @@ a:hover {
 	background: white;
 }
 
-input,textarea {
+input,textarea,select {
 	color: black;
 	background: #B2B2B2;
 }
