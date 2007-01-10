@@ -46,7 +46,7 @@ sub render {
 
 	my $board;
 	if(param('b')){
-		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post
+		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate
 			FROM forum_boards fb NATURAL JOIN forum_access fa
 			WHERE fb.fbid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 			WHERE uid = $2))
@@ -71,7 +71,7 @@ sub render {
 	}
 
 	my $thread;
-	my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post
+	my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate
 		FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft
 		WHERE ft.ftid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 		WHERE uid = $2))
@@ -80,18 +80,37 @@ sub render {
 		$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 	}
 
-	if (defined param('cmd') && param('cmd') eq 'Submit'){
-		$DBH->begin_work;
-		if ($board && $board->{post}){
-			$thread = addForumThread $DBH,$board,$ND::UID,param('subject');
+	if (defined param('cmd')){
+		if(param('cmd') eq 'Submit'){
+			$DBH->begin_work;
+			if ($board && $board->{post}){
+				$thread = addForumThread $DBH,$board,$ND::UID,param('subject');
+			}
+			if ($thread && $thread->{post}){
+				addForumPost($DBH,$thread,$ND::UID,param('message'));
+			}
+			$DBH->commit or $ND::ERROR .= p($DBH->errstr);
 		}
-		if ($thread && $thread->{post}){
-			addForumPost($DBH,$thread,$ND::UID,param('message'));
+		if(param('cmd') eq 'Move' && $board->{moderate}){
+			$DBH->begin_work;
+			my $moveThread = $DBH->prepare(q{UPDATE forum_threads SET fbid = $1 WHERE ftid = $2 AND fbid = $3});
+			for my $param (param()){
+				if ($param =~ /t:(\d+)/){
+					$moveThread->execute(param('board'),$1,$board->{id}) or $ND::ERROR .= p($DBH->errstr)
+				}
+			}
+			$DBH->commit or $ND::ERROR .= p($DBH->errstr);
 		}
-		$DBH->commit or $ND::ERROR .= p($DBH->errstr);
 	}
 
 	my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM forum_categories ORDER BY fcid});
+	my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post
+		FROM forum_boards fb NATURAL JOIN forum_access fa
+		WHERE fb.fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
+		WHERE uid = $2))
+		GROUP BY fb.fbid,fb.board
+		ORDER BY fb.fbid
+			});
 	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts, date_trunc('seconds',max(fp.time)::timestamp) as last_post
 		FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 		WHERE ft.fbid = $1
@@ -109,13 +128,6 @@ sub render {
 		$BODY->param(Date => $time);
 		$categories->execute or $ND::ERROR .= p($DBH->errstr);
 		my @categories;
-		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post
-			FROM forum_boards fb NATURAL JOIN forum_access fa
-			WHERE fb.fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
-			WHERE uid = $2))
-			GROUP BY fb.fbid,fb.board
-			ORDER BY fb.fbid
-			});
 		while (my $category = $categories->fetchrow_hashref){
 			$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 			my @boards;
@@ -141,6 +153,7 @@ sub render {
 	}elsif($board){ #List threads in this board
 		$BODY->param(Board => $board->{board});
 		$BODY->param(Post => $board->{post});
+		$BODY->param(Moderate => $board->{moderate});
 		$BODY->param(Id => $board->{id});
 		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
 		$BODY->param(Date => $time);
@@ -153,6 +166,24 @@ sub render {
 			push @threads,$thread;
 		}
 		$BODY->param(Threads => \@threads);
+
+		if ($board->{moderate}){
+			$categories->execute or $ND::ERROR .= p($DBH->errstr);
+			my @categories;
+			while (my $category = $categories->fetchrow_hashref){
+				$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+				my @boards;
+				while (my $b = $boards->fetchrow_hashref){
+					next if (not $b->{post} or $b->{id} == $board->{id});
+					delete $b->{post};
+					push @boards,$b;
+				}
+				$category->{Boards} = \@boards;
+				delete $category->{id};
+				push @categories,$category if @boards;
+			}
+			$BODY->param(Categories => \@categories);
+		}
 
 	}else{ #List boards
 		$BODY->param(Overview => 1);
