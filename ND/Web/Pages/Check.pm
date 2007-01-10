@@ -106,7 +106,7 @@ sub render {
 			$planet{PlanetStatus} = $planet_status;
 			$planet{Relationship} = $relationship;
 			$planet{isBC} = 1;
-			if ($z && $alliance eq 'NewDawn'){
+			if ($z && $alliance eq 'NewDawn' && not (isHC || isOfficer)){
 				log_message $ND::UID,"BC browsing ND planet $coords tick $ND::TICK";
 			}
 		}
