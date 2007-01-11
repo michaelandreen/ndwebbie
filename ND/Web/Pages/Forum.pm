@@ -23,6 +23,7 @@ use warnings;
 use ND::Web::Forum;
 use CGI qw/:standard/;
 use ND::Web::Include;
+use ND::Include;
 
 $ND::PAGES{forum} = {parse => \&parse, process => \&process, render=> \&render};
 
@@ -96,7 +97,10 @@ sub render {
 			my $moveThread = $DBH->prepare(q{UPDATE forum_threads SET fbid = $1 WHERE ftid = $2 AND fbid = $3});
 			for my $param (param()){
 				if ($param =~ /t:(\d+)/){
-					$moveThread->execute(param('board'),$1,$board->{id}) or $ND::ERROR .= p($DBH->errstr)
+					$moveThread->execute(param('board'),$1,$board->{id}) or $ND::ERROR .= p($DBH->errstr);
+					if ($moveThread->rows > 0){
+						log_message $ND::UID, qq{Moved thread: $1 to board: $board->{id}};
+					}
 				}
 			}
 			$DBH->commit or $ND::ERROR .= p($DBH->errstr);

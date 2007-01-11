@@ -19,7 +19,7 @@
 
 package ND::Web::Pages::Main;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use CGI qw/:standard/;
 use ND::Include;
 use ND::Web::Include;
