@@ -47,11 +47,11 @@ sub render {
 
 	my $board;
 	if(param('b')){
-		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate
+		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate,fb.fcid
 			FROM forum_boards fb NATURAL JOIN forum_access fa
 			WHERE fb.fbid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 			WHERE uid = $2))
-			GROUP BY fb.fbid,fb.board});
+			GROUP BY fb.fbid,fb.board,fb.fcid});
 		$board = $DBH->selectrow_hashref($boards,undef,param('b'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 	}
 	if (param('markAsRead')){
@@ -72,11 +72,11 @@ sub render {
 	}
 
 	my $thread;
-	my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate
+	my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate,ft.fbid,fb.board,fb.fcid
 		FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft
 		WHERE ft.ftid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 		WHERE uid = $2))
-		GROUP BY ft.ftid,ft.subject});
+		GROUP BY ft.ftid,ft.subject,ft.fbid,fb.board,fb.fcid});
 	if(param('t')){
 		$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 	}
@@ -99,7 +99,7 @@ sub render {
 				if ($param =~ /t:(\d+)/){
 					$moveThread->execute(param('board'),$1,$board->{id}) or $ND::ERROR .= p($DBH->errstr);
 					if ($moveThread->rows > 0){
-						log_message $ND::UID, qq{Moved thread: $1 to board: $board->{id}};
+						log_message $ND::UID, qq{Moved thread: $1 to board: }.param('board');
 					}
 				}
 			}
@@ -123,7 +123,13 @@ sub render {
 		ORDER BY last_post DESC});
 
 	if ($thread){ #Display the thread
+		$BODY->param(Title =>  $thread->{subject});
+		$BODY->param(FBID =>  $thread->{fbid});
+		$BODY->param(Board =>  $thread->{board});
 		$BODY->param(Thread => viewForumThread $thread);
+		my ($category) = $DBH->selectrow_array(q{SELECT category FROM forum_categories WHERE fcid = $1}
+			,undef,$thread->{fcid}) or $ND::ERROR .= p($DBH->errstr);
+		$BODY->param(Category =>  $category);
 
 	}elsif(defined param('allUnread')){ #List threads in this board
 		$BODY->param(AllUnread => 1);
@@ -155,10 +161,13 @@ sub render {
 		$BODY->param(Categories => \@categories);
 
 	}elsif($board){ #List threads in this board
-		$BODY->param(Board => $board->{board});
+		$BODY->param(ViewBoard => 1);
+		$BODY->param(Title => $board->{board});
 		$BODY->param(Post => $board->{post});
 		$BODY->param(Moderate => $board->{moderate});
 		$BODY->param(Id => $board->{id});
+		$BODY->param(FBID => $board->{id});
+		$BODY->param(Board => $board->{board});
 		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
 		$BODY->param(Date => $time);
 		$threads->execute($board->{id},$ND::UID,0) or $ND::ERROR .= p($DBH->errstr);
@@ -176,6 +185,10 @@ sub render {
 			my @categories;
 			while (my $category = $categories->fetchrow_hashref){
 				$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+				if ($category->{id} == $board->{fcid}){
+					$BODY->param(Category => $category->{category});
+				}
+
 				my @boards;
 				while (my $b = $boards->fetchrow_hashref){
 					next if (not $b->{post} or $b->{id} == $board->{id});

@@ -103,7 +103,7 @@ sub page {
 		$ND::BODY = HTML::Template->new(filename => "templates/$ND::PAGE.xml.tmpl", cache => 1);
 	}else{
 		$ND::BODY = HTML::Template->new(filename => "templates/$ND::PAGE.tmpl", global_vars => 1, cache => 1);
-		$ND::BODY->param(PAGE => '/'.$ND::PAGE);
+		$ND::BODY->param(PAGE => $ND::PAGE);
 	}
 
 	$ND::BODY = $PAGES{$PAGE}->{render}->($DBH,$ND::BODY);

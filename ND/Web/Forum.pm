@@ -34,7 +34,6 @@ sub viewForumThread {
 
 	my $template = HTML::Template->new(filename => "templates/viewthread.tmpl", global_vars => 1, cache => 1);
 
-	$template->param(Subject => $thread->{subject});
 	$template->param(Id => $thread->{id});
 	$template->param(Post => $thread->{post});
 

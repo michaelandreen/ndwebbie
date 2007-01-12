@@ -24,15 +24,15 @@
 <div class="leftinfo">
 <table>
 	<tr>
-		<th><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=coords">Coords</a></th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=coords">Coords</a></th>
 		<th>Nick</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=hit_us">Hit us</a></th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=hit_us">Hit us</a></th>
 		<th>Planet</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=race">Race</a></th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=size">Size (rank)</a></th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=score">Score (rank)</a></th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=value">Value (rank)</a></th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=xp">XP (rank)</a></th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=race">Race</a></th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=size">Size (rank)</a></th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=score">Score (rank)</a></th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=value">Value (rank)</a></th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=xp">XP (rank)</a></th>
 	</tr>
 	<TMPL_LOOP Members>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
@@ -80,16 +80,16 @@
 		<th>User</th>
 		<th>Known members</th>
 		<th>Total members</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?order=score">Score</a> (<a href="<TMPL_VAR NAME=PAGE>?order=kscore">known planets</a>)</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?order=scavg">Avg Score</a> (<a href="<TMPL_VAR NAME=PAGE>?order=kscavg">known planets</a>)</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?order=size">Size</a> (<a href="<TMPL_VAR NAME=PAGE>?order=ksize">known planets</a>)</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?order=siavg">Avg Size</a> (<a href="<TMPL_VAR NAME=PAGE>?order=ksiavg">known planets</a>)</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?order=kxp">XP</a> (<a href="<TMPL_VAR NAME=PAGE>?order=kxpavg">avg</a>)</th>
-		<th><a href="<TMPL_VAR NAME=PAGE>?order=kvalue">Value</a> (<a href="<TMPL_VAR NAME=PAGE>?order=kvalavg">avg</a>)</th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?order=score">Score</a> (<a href="/<TMPL_VAR NAME=PAGE>?order=kscore">known planets</a>)</th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?order=scavg">Avg Score</a> (<a href="/<TMPL_VAR NAME=PAGE>?order=kscavg">known planets</a>)</th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?order=size">Size</a> (<a href="/<TMPL_VAR NAME=PAGE>?order=ksize">known planets</a>)</th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?order=siavg">Avg Size</a> (<a href="/<TMPL_VAR NAME=PAGE>?order=ksiavg">known planets</a>)</th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?order=kxp">XP</a> (<a href="/<TMPL_VAR NAME=PAGE>?order=kxpavg">avg</a>)</th>
+		<th><a href="/<TMPL_VAR NAME=PAGE>?order=kvalue">Value</a> (<a href="/<TMPL_VAR NAME=PAGE>?order=kvalavg">avg</a>)</th>
 	</tr>
 <TMPL_LOOP Alliances>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td><a href="<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
+		<td><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
 		<td><TMPL_VAR NAME=kmem></td>
 		<td><TMPL_VAR NAME=members></td>
 		<td><TMPL_VAR NAME=score> (<TMPL_VAR NAME=kscore>)</td>
