@@ -33,6 +33,10 @@ input,textarea,select {
 	background: #B2B2B2;
 }
 
+img.graph {
+	background: gray;
+}
+
 
 legend {
 	color: black;

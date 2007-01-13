@@ -52,7 +52,7 @@ sub render {
 		$x = $1;
 		$y = $2;
 		$z = $3;
-		$BODY->param(Coords => param('coords'));
+		$BODY->param(Coords => "$x:$y".(defined $z ? ":$z" : ''));
 	}else{
 		$ND::ERROR .= p b q{Couldn't parse coords};
 		return $BODY;
@@ -156,7 +156,7 @@ sub render {
 		$scan .= q{</table>};
 		push @scans, {Scan => $scan};
 
-		$query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats WHERE id = ?});
+		$query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats WHERE id = ? ORDER BY tick ASC});
 		$scan = q{
 		<p>Previous Coords</p>
 		<table><tr><th>Tick</th><th>Value</th><th>Difference</th></tr>};

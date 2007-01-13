@@ -41,7 +41,7 @@ our $NOACCESS = HTML::Template->new(filename => 'templates/NoAccess.tmpl', globa
 sub handler {
 	local $ND::r = shift;
 	local $ND::req = Apache2::Request->new($ND::r, POST_MAX => "1M");
-	local $ND::DBH;
+	local $ND::DBH = ND::DB::DB();
 	local $ND::USER;
 	local $ND::UID;
 	local $ND::PLANET;
@@ -50,6 +50,7 @@ sub handler {
 	local $ND::TICK;
 	local %ND::GROUPS;
 	local $ND::ERROR;
+	local $ND::USETEMPLATE = 1;
 	local $ND::PAGE = $ND::req->param('page');
 
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
@@ -59,13 +60,17 @@ sub handler {
 
 	$PAGES{$ND::PAGE}->{parse}->($ENV{REQUEST_URI});
 
-	page($ND::PAGE);
+	if ($ND::USETEMPLATE){
+		page($ND::DBH,$ND::PAGE);
+	}else{
+		$PAGES{$ND::PAGE}->{render}->($ND::DBH,$ENV{REQUEST_URI});
+	}
+
 	return Apache2::Const::OK;
 }
 
 sub page {
-	my ($PAGE) = @_;
-	our $DBH = ND::DB::DB();
+	my ($DBH,$PAGE) = @_;
 	$DBH->do(q{SET timezone = 'GMT'});
 
 	our $ERROR;
