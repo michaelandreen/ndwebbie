@@ -1,35 +1,27 @@
 body {
+	padding-left: 15em;
+	/*padding-right: 12em;*/
 	font-family: sans-serif;
-	color: #B2B2B2;
-	background-color: black;
-}
-
-a {
-	color: white;
-	text-decoration:underline;
-}
-a:hover {
 	color: black;
-	background: white;
+	background-color: #D9D9D9;
 }
-
-input,textarea,select {
-	color: black;
-	background: #B2B2B2;
+#leftbar,#rightbar{
+	padding: 0;
+	margin: 0;
+	position: absolute;
+	width: 14em;
+	top: 1em;
 }
-
-img.graph {
-	background: gray;
+#leftbar{
+	left: 1em;
 }
-
-td.sticky {
-	font-weight: bold;
+#rightbar{
+	right: 1em;
 }
-
 
 legend {
 	color: black;
-	background: gray;
+	background: white;
 	border-style: solid;
 	border-width: 1px;
 	padding: 1px;
@@ -42,6 +34,9 @@ table.boards td {
 	border-spacing: 15pt;
 	font-size: larger;
 }
+table.boards td.sticky {
+	font-weight: bold;
+}
 table.boards{
 	border-collapse: separate;
 	border-spacing: 5px;
@@ -50,7 +45,7 @@ table.boards th {
 	font-size: larger;
 }
 
-table a {
+table.boards a {
 	text-decoration: none;
 	width: 100%;
 	display: block;
@@ -76,7 +71,7 @@ ul.linkbar {
 	margin: 0;
 }
 ul.linkbar li {
-	background: gray;
+	background: white;
 	color: black;
 	margin: 0.5em 0;
 	padding: 0.3em;
@@ -93,12 +88,8 @@ input.coordsinput {
 input.small {
 	width: 1.7em;
 }
-tr.even {
-	background: #B2B2B2;
-	color: black;
-}
 tr.odd {
-	background: gray;
+	background: white;
 	color: black;
 }
 tr.total {

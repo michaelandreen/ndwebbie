@@ -72,11 +72,11 @@ sub render {
 	}
 
 	my $thread;
-	my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate,ft.fbid,fb.board,fb.fcid
+	my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate,ft.fbid,fb.board,fb.fcid,ft.sticky
 		FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft
 		WHERE ft.ftid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
 		WHERE uid = $2))
-		GROUP BY ft.ftid,ft.subject,ft.fbid,fb.board,fb.fcid});
+		GROUP BY ft.ftid,ft.subject,ft.fbid,fb.board,fb.fcid,ft.sticky});
 	if(param('t')){
 		$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 	}
@@ -105,6 +105,20 @@ sub render {
 			}
 			$DBH->commit or $ND::ERROR .= p($DBH->errstr);
 		}
+		if($thread && param('cmd') eq 'Sticky' && $thread->{moderate}){
+			if ($DBH->do(q{UPDATE forum_threads SET sticky = TRUE WHERE ftid = ?}, undef,$thread->{id})){
+				$thread->{sticky} = 1;
+			}else{
+				$ND::ERROR .= p($DBH->errstr);
+			}
+		}
+		if($thread && param('cmd') eq 'Unsticky' && $thread->{moderate}){
+			if ($DBH->do(q{UPDATE forum_threads SET sticky = FALSE WHERE ftid = ?}, undef,$thread->{id})){
+				$thread->{sticky} = 0;
+			}else{
+				$ND::ERROR .= p($DBH->errstr);
+			}
+		}
 	}
 
 	my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM forum_categories ORDER BY fcid});
@@ -115,17 +129,20 @@ sub render {
 		GROUP BY fb.fbid,fb.board
 		ORDER BY fb.fbid
 			});
-	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts, date_trunc('seconds',max(fp.time)::timestamp) as last_post
+	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts, date_trunc('seconds',max(fp.time)::timestamp) as last_post, ft.sticky
 		FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 		WHERE ft.fbid = $1
-		GROUP BY ft.ftid, ft.subject
+		GROUP BY ft.ftid, ft.subject,ft.sticky
 		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= $3
-		ORDER BY last_post DESC});
+		ORDER BY sticky DESC,last_post DESC});
 
 	if ($thread){ #Display the thread
 		$BODY->param(Title =>  $thread->{subject});
 		$BODY->param(FBID =>  $thread->{fbid});
 		$BODY->param(Board =>  $thread->{board});
+		$BODY->param(FTID =>  $thread->{id});
+		$BODY->param(Moderate =>  $thread->{moderate});
+		$BODY->param(Sticky =>  $thread->{sticky} ? 'Unsticky' : 'Sticky');
 		$BODY->param(Thread => viewForumThread $thread);
 		my ($category) = $DBH->selectrow_array(q{SELECT category FROM forum_categories WHERE fcid = $1}
 			,undef,$thread->{fcid}) or $ND::ERROR .= p($DBH->errstr);
