@@ -52,7 +52,7 @@ sub render {
 	die "Not a proper type" unless defined $type;
 
 	my %graph_settings = (
-		line_width => 2,
+		line_width => 1,
 		y_number_format => sub { prettyValue abs $_[0]},
 		legend_placement => 'BL',
 		#x_label => 'tick',
