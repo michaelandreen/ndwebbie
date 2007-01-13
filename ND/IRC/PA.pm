@@ -20,6 +20,7 @@ package ND::IRC::PA;
 use strict;
 use warnings;
 use ND::DB;
+use ND::Include;
 use ND::IRC::Access;
 use ND::IRC::Misc;
 use POSIX;
@@ -136,39 +137,6 @@ FROM ship_stats WHERE name ILIKE ?
 		$ND::server->command("notice $ND::target $text");
 	}
 	#print $text;
-}
-
-sub parseValue {
-	if (defined $_[0] && $_[0] =~ /^(-?\d+(?:\.\d+)?)([khMG])?$/){
-		return $1 unless defined $2;
-		return $1*100 if $2 eq 'h';
-		return $1*1000 if $2 eq 'k';
-		return $1*1000000 if $2 eq 'M';
-		return $1*1000000000 if $2 eq 'G';
-	}
-	return $_[0];
-}
-
-sub prettyValue {
-	my ($value) = @_;
-	my $unit = '';
-	my @units = ('k','M','G','T');
-	for (my $i = 0; $value >= 1000;$i++){
-		$value /= 1000;
-		$unit = $units[$i];
-	}
-	return sprintf('%.2f%s', $value,$unit);
-}
-
-
-sub min {
-	my ($x,$y) = @_;
-	return ($x > $y ? $y : $x);
-}
-
-sub max {
-	my ($x,$y) = @_;
-	return ($x < $y ? $y : $x);
 }
 
 sub calcXp {

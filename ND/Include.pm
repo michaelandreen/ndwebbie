@@ -25,7 +25,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/min max log_message intel_log unread_query/;
+our @EXPORT = qw/min max parseValue prettyValue log_message intel_log unread_query/;
 
 sub min {
     my ($x,$y) = @_;
@@ -36,6 +36,30 @@ sub max {
     my ($x,$y) = @_;
     return ($x < $y ? $y : $x);
 }
+
+
+sub parseValue {
+	if (defined $_[0] && $_[0] =~ /^(-?\d+(?:\.\d+)?)([khMG])?$/){
+		return $1 unless defined $2;
+		return $1*100 if $2 eq 'h';
+		return $1*1000 if $2 eq 'k';
+		return $1*1000000 if $2 eq 'M';
+		return $1*1000000000 if $2 eq 'G';
+	}
+	return $_[0];
+}
+
+sub prettyValue {
+	my ($value) = @_;
+	my $unit = '';
+	my @units = ('k','M','G','T');
+	for (my $i = 0; $value >= 1000;$i++){
+		$value /= 1000;
+		$unit = $units[$i];
+	}
+	return sprintf('%.2f%s', $value,$unit);
+}
+
 
 sub log_message {
 	my ($uid, $message) = @_;
