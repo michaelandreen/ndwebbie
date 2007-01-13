@@ -11,6 +11,8 @@ DBI->install_driver("Pg");
 use DBI;
 use DBD::Pg qw(:pg_types);
 
+use GD::Graph:lines;
+
 use ND;
 use ND::DB;
 use ND::Include;
