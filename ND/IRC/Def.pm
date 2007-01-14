@@ -20,6 +20,7 @@ package ND::IRC::Def;
 use strict;
 use warnings;
 use ND::DB;
+use ND::Include;
 use ND::IRC::Access;
 use ND::IRC::Misc;
 require Exporter;
@@ -52,7 +53,7 @@ SQL
 sub setType {
 	my ($type,$id,$x,$y,$z) = @_;
 	DB();
-	if (dc()){
+	if (my $user = dc()){
 		my $fleet;
 		my $query = qq{
 			SELECT i.id,call,shiptype, coords(x,y,z),c.landing_tick - tick() FROM incomings i 
@@ -80,8 +81,7 @@ sub setType {
 		}	
 		while (my ($id,$call,$oldtype,$coords,$tick) = $fleet->fetchrow()){
 			if($ND::DBH->do(q{UPDATE incomings SET shiptype = ? WHERE id = ?},undef,$type,$id) == 1){
-				$ND::DBH->do(q{INSERT INTO log (uid,text) VALUES ((SELECT uid FROM
-					users WHERE hostmask ILIKE ?),?)},undef,$ND::address,"DC set fleet: $id to: $type");
+				log_message $user->{uid}, "DC set fleet: $id to: $type";
 				$ND::server->command("msg $ND::target Set fleet from $coords on call $call to $type (previosly $oldtype)");
 				if ($tick < 0 && not (defined $x && $x eq 'call')){
 					$ND::server->command("msg $ND::target This call is old, did you use the call id, instead of inc id by accident? You can use .settypeall callid to set the type on all incs in a call.");
