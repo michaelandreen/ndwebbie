@@ -191,3 +191,13 @@ span.newposts,span.unreadposts {
 span.newposts {
 	color: red;
 }
+
+div.bbcode-quote,div.bbcode-code {
+	border: solid;
+	border-width: 1px;
+	MARGIN: 5px 15px 15px 15px; PADDING: 8px;
+	line-height: 1.4;
+}
+div.bbcode-quote-head,div.bbcode-code-head {
+	font-weight: bold;
+}
