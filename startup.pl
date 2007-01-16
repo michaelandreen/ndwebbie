@@ -19,6 +19,7 @@ use ND::Include;
 use ND::Web::AuthHandler;
 use ND::Web::Include;
 use ND::Web::Forum;
+use ND::Web::Graph;
 
 use ND::Web::Pages::Main;
 use ND::Web::Pages::AddIntel;

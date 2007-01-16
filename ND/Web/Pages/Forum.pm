@@ -202,6 +202,7 @@ sub render {
 			my @categories;
 			while (my $category = $categories->fetchrow_hashref){
 				$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+				#TODO: really need to do this outside, so you don't need moderate access
 				if ($category->{id} == $board->{fcid}){
 					$BODY->param(Category => $category->{category});
 				}
