@@ -13,6 +13,8 @@ use DBD::Pg qw(:pg_types);
 
 use GD::Graph::lines;
 
+use BBCode::Parser;
+
 use ND;
 use ND::DB;
 use ND::Include;

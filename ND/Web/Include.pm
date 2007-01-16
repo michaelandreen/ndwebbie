@@ -22,6 +22,7 @@ use strict;
 use warnings FATAL => 'all';
 use CGI qw{:standard};
 require Exporter;
+use BBCode::Parser;
 
 our @ISA = qw/Exporter/;
 
@@ -63,11 +64,17 @@ sub isTech {
 sub parseMarkup {
 	my ($text) = @_;
 
-	$text =~ s{\n}{\n<br/>}g;
-	$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>}gi;
-	$text =~ s{\[I\](.*?)\[/I\]}{<i>$1</i>}gi;
-	$text =~ s{\[url\](.*?)\[/url\]}{<a href="$1">$1</a>}gi;
-	return $text;
+	#$text =~ s{\n}{\n<br/>}g;
+	#$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>}gi;
+	#$text =~ s{\[I\](.*?)\[/I\]}{<i>$1</i>}gi;
+	#$text =~ s{\[url\](.*?)\[/url\]}{<a href="$1">$1</a>}gi;
+	#$text =~ s{\[PRE\](.*?)\[/PRE\]}{<pre>$1</pre>}sgi;
+	#$text =~ s{\[PRE\](.*?)\[/PRE\]}{<pre>$1</pre>}sgi;
+	#$1 =~ s{<br/>}{}g;
+
+	my $tree = BBCode::Parser->DEFAULT->parse($text);
+
+	return scalar $tree->bodyHTML;;
 }
 
 
