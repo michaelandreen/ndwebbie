@@ -202,7 +202,6 @@ sub render {
 			my @categories;
 			while (my $category = $categories->fetchrow_hashref){
 				$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
-				#TODO: really need to do this outside, so you don't need moderate access
 
 				my @boards;
 				while (my $b = $boards->fetchrow_hashref){
@@ -216,8 +215,9 @@ sub render {
 			}
 			$BODY->param(Categories => \@categories);
 		}
-	my ($category) = $DBH->selectrow_array(q{SELECT category FROM forum_categories WHERE fcid = $1}
-		,undef,$board->{fcid}) or $ND::ERROR .= p($DBH->errstr);
+		my ($category) = $DBH->selectrow_array(q{SELECT category FROM forum_categories WHERE fcid = $1}
+			,undef,$board->{fcid}) or $ND::ERROR .= p($DBH->errstr);
+		$BODY->param(Category =>  $category);
 
 	}else{ #List boards
 		$BODY->param(Overview => 1);
