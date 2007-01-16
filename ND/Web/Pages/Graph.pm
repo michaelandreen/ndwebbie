@@ -72,20 +72,21 @@ sub render {
 			if ($type eq 'stats'){
 				$query = $DBH->prepare(q{SELECT tick,score,size,value,xp*60 AS "xp*60" FROM planets natural join planet_stats WHERE id = planetid($1,$2,$3,$4) ORDER BY tick ASC});
 			}elsif($type eq 'ranks'){
-				$query = $DBH->prepare(q{SELECT tick,scorerank,sizerank,valuerank,xprank FROM planets natural join planet_stats WHERE id = planetid($1,$2,$3,$4) ORDER BY tick ASC});
+				$query = $DBH->prepare(q{SELECT tick,-scorerank AS score,-sizerank AS size,-valuerank AS value,-xprank AS xp FROM planets natural join planet_stats WHERE id = planetid($1,$2,$3,$4) ORDER BY tick ASC});
 			}
 			$query->execute($x,$y,$z,$ND::TICK) or die $DBH->errstr;
 		}else{
 			if ($type eq 'stats'){
 				$query = $DBH->prepare(q{SELECT tick,score,size,value,xp*60 AS "xp*60" FROM galaxies WHERE x = $1 AND y = $2 ORDER BY tick ASC});
 			}elsif($type eq 'ranks'){
-				$query = $DBH->prepare(q{SELECT tick,scorerank,sizerank,valuerank,xprank FROM galaxies WHERE x = $1 AND y = $2  ORDER BY tick ASC});
+				$query = $DBH->prepare(q{SELECT tick,-scorerank AS score,-sizerank AS size,-valuerank AS value,-xprank AS xp FROM galaxies WHERE x = $1 AND y = $2  ORDER BY tick ASC});
 			}
 			$query->execute($x,$y) or die $DBH->errstr;
 		}
 		
 		$graph_settings{two_axes} = 1;
 		$graph_settings{use_axis} = [2,1,2,2];
+		$graph_settings{y_max_value} = 0 if $type eq 'ranks';
 		$img = graphFromQuery 500,300,\%graph_settings,$query;
 	}
 

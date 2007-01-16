@@ -14,6 +14,10 @@
 
 	</TMPL_LOOP>
 </table>
+<div class="leftinfo">
+<img class="graph" src="graph/stats/<TMPL_VAR NAME=Coords>" alt="stats" height="300" width="500"/>
+<img class="graph" src="graph/ranks/<TMPL_VAR NAME=Coords>" alt="ranks" height="300" width="500"/>
+</div>
 <TMPL_IF OnePlanet>
 <table border="1">
 	<tr><th>Target</th><th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th></tr>
@@ -24,10 +28,6 @@
 	</tr>
 	</TMPL_LOOP>
 </table>
-<div class="leftinfo">
-<img class="graph" src="graph/stats/<TMPL_VAR NAME=Coords>" alt="stats" height="300" width="500"/>
-<img class="graph" src="graph/ranks/<TMPL_VAR NAME=Coords>" alt="ranks" height="300" width="500"/>
-</div>
 <TMPL_LOOP Scans>
 <div class="leftinfo">
 <TMPL_VAR NAME=Scan>
