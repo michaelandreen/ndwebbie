@@ -19,7 +19,7 @@
 
 package ND::Web::Include;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use CGI qw{:standard};
 require Exporter;
 use BBCode::Parser;
@@ -72,9 +72,11 @@ sub parseMarkup {
 	#$text =~ s{\[PRE\](.*?)\[/PRE\]}{<pre>$1</pre>}sgi;
 	#$1 =~ s{<br/>}{}g;
 
-	my $tree = BBCode::Parser->DEFAULT->parse($text);
-
-	return scalar $tree->bodyHTML;;
+	eval{
+		my $tree = BBCode::Parser->DEFAULT->parse($text);
+		$text = $tree->toHTML;
+	};
+	return $text;
 }
 
 
