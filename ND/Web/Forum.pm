@@ -37,7 +37,7 @@ sub viewForumThread {
 	$template->param(Id => $thread->{id});
 	$template->param(Post => $thread->{post});
 
-	my $posts = $ND::DBH->prepare(q{SELECT u.username,date_trunc('minute',fp.time::timestamp) AS time,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
+	my $posts = $ND::DBH->prepare(q{SELECT u.username,date_trunc('seconds',fp.time::timestamp) AS time,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
 FROM forum_threads ft JOIN forum_posts fp USING (ftid) JOIN users u USING (uid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 WHERE ft.ftid = $1
 ORDER BY fp.time ASC

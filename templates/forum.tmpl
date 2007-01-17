@@ -21,6 +21,7 @@
 	<th>Unread</th>
 	<th>Total</th>
 	<th>Subject</th>
+	<th>Posted</th>
 	<th>Last post</th>
 </tr>
 <TMPL_LOOP Threads>
@@ -28,6 +29,7 @@
 		<td align="center"><TMPL_VAR NAME=Unread></td>
 		<td align="center"><TMPL_VAR NAME=Posts></td>
 		<td <TMPL_IF Sticky>class="sticky"</TMPL_IF>><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR NAME=Subject>&nbsp;</a></td>
+		<td align="center"><TMPL_VAR NAME=Posting_date></td>
 		<td align="center"><TMPL_VAR NAME=Last_post></td>
 		<TMPL_IF Moderate><td><input type="checkbox" name="t:<TMPL_VAR NAME=Id>"/></td></TMPL_IF>
 	</tr>
@@ -84,6 +86,7 @@ Move checked threads to: <select name="board">
 	<th>Unread</th>
 	<th>Total</th>
 	<th>Subject</th>
+	<th>Posted</th>
 	<th>Last post</th>
 </tr>
 <TMPL_LOOP Categories>
@@ -92,13 +95,14 @@ Move checked threads to: <select name="board">
 	<tr>
 		<th></th>
 		<th colspan="2"><a href="/<TMPL_VAR NAME=PAGE>?b=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Board></a></th>
-		<th><a href="/<TMPL_VAR NAME=PAGE>/allUnread?b=<TMPL_VAR NAME=Id>;markAsRead=<TMPL_VAR ESCAPE=URL NAME=DATE>">Mark threads as read</a></th>
+		<th colspan="2"><a href="/<TMPL_VAR NAME=PAGE>/allUnread?b=<TMPL_VAR NAME=Id>;markAsRead=<TMPL_VAR ESCAPE=URL NAME=DATE>">Mark threads as read</a></th>
 	</tr>
 		<TMPL_LOOP Threads>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td align="center"><TMPL_VAR NAME=Unread></td>
 		<td align="center"><TMPL_VAR NAME=Posts></td>
 		<td<TMPL_IF Sticky> class="sticky"</TMPL_IF>><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR NAME=Subject>&nbsp;</a></td>
+		<td align="center"><TMPL_VAR NAME=Posting_date></td>
 		<td align="center"><TMPL_VAR NAME=Last_post></td>
 	</tr>
 		</TMPL_LOOP>
