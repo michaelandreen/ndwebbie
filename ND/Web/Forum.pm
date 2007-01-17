@@ -55,7 +55,9 @@ ORDER BY fp.time ASC
 	}
 
 	if (defined param('cmd') && param('cmd') eq 'Preview'){
-		push @posts,{message => parseMarkup(escapeHTML(param('message'))), unread => 1, username => 'PREVIEW', Time => 'Not submitted yet', NewPosts => $old ? 1 : 0};
+		my $text = parseMarkup(escapeHTML(param('message')));
+		$text .= p b $@ if $@;
+		push @posts,{message => $text, unread => 1, username => 'PREVIEW', Time => 'Not submitted yet', NewPosts => $old ? 1 : 0};
 	}
 	$template->param(Posts => \@posts);
 	$template->param(Message => param('message'));

@@ -61,7 +61,7 @@ sub isTech {
 	return exists $ND::GROUPS{Tech};
 }
 
-sub parseMarkup {
+sub parseMarkup ($) {
 	my ($text) = @_;
 
 	#$text =~ s{\n}{\n<br/>}g;

@@ -82,12 +82,12 @@ sub render {
 	}
 
 	if (defined param('cmd')){
-		if(param('cmd') eq 'Submit'){
+		if(param('cmd') eq 'Submit' or param('cmd') eq 'Preview'){
 			$DBH->begin_work;
 			if ($board && $board->{post}){
 				$thread = addForumThread $DBH,$board,$ND::UID,param('subject');
 			}
-			if ($thread && $thread->{post}){
+			if (param('cmd') eq 'Submit' and $thread && $thread->{post}){
 				addForumPost($DBH,$thread,$ND::UID,param('message'));
 			}
 			$DBH->commit or $ND::ERROR .= p($DBH->errstr);
