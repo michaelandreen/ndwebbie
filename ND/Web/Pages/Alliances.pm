@@ -24,23 +24,18 @@ use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{alliances} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-}
+$ND::Web::Page::PAGES{alliances} = __PACKAGE__;
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Alliances';
+	my $DBH = $self->{DBH};
 	my $error;
 
-	$ND::TEMPLATE->param(TITLE => 'Alliances');
-
-	return $ND::NOACCESS unless isHC();
+	return $self->noAccess unless $self->isHC;
 
 	my $alliance;
 	if (defined param('alliance') && param('alliance') =~ /^(\d+)$/){
