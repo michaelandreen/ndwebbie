@@ -23,29 +23,28 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{top100} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
+
+$ND::Web::Page::PAGES{top100} = __PACKAGE__;
 
 sub parse {
-	my ($uri) = @_;
 	#TODO: Need to fix some links first
 	#if ($uri =~ m{^/[^/]+/(\w+)}){
 	#	param('order',$1);
 	#}
 }
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Top planets';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'Top100 ');
+	return $self->noAccess unless $self->isMember;
 
 	my $error = '';
 
-	$BODY->param(isHC => isHC());
-
-	return $ND::NOACCESS unless isMember();
+	$BODY->param(isHC => $self->isHC);
 
 	my $offset = 0;
 	if (defined param('offset') && param('offset') =~ /^(\d+)$/){
@@ -64,7 +63,7 @@ sub render {
 
 
 	my $extra_columns = '';
-	if (isHC()){
+	if ($self->isHC){
 		$extra_columns = ",planet_status,hit_us, alliance,relationship,nick";
 	}
 	my $query = $DBH->prepare(qq{SELECT coords(x,y,z),((ruler || ' OF ') || planet) as planet,race,
@@ -74,9 +73,6 @@ sub render {
 	my @planets;
 	my $i = 0;
 	while (my $planet = $query->fetchrow_hashref){
-		if (isHC){
-			$planet->{isHC} = 1;
-		}
 		$i++;
 		$planet->{ODD} = $i % 2;
 		push @planets,$planet;
