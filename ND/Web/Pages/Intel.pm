@@ -25,27 +25,26 @@ use ND::Web::Include;
 use ND::Include;
 use CGI qw/:standard/;
 
-$ND::PAGES{intel} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
+
+$ND::Web::Page::PAGES{intel} = __PACKAGE__;
 
 sub parse {
-	my ($uri) = @_;
-	if ($uri =~ m{^/.*/(\w+)$}){
-		param('list',$1);
+	my $self = shift;
+	if ($self->{URI} =~ m{^/.*/((\d+)(?: |:)(\d+)(?: |:)(\d+))$}){
+		param('coords',$1);
 	}
 }
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Intel';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
+	return $self->noAccess unless $self->isIntel || $self->isHC;
 
 	my $error;
-
-	$ND::TEMPLATE->param(TITLE => 'Intel');
-
-	return $ND::NOACCESS unless isIntel() || isHC();
 
 	my $planet;
 	if (defined param('coords') && param('coords') =~ /^(\d+)(?: |:)(\d+)(?: |:)(\d+)$/){

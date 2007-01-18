@@ -31,7 +31,6 @@ $ND::Web::Page::PAGES{check} = __PACKAGE__;
 
 sub parse {
 	my $self = shift;
-	#TODO: Improved apache conf needed
 	if ($self->{URI} =~ m{^/.*/((\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?(?: |:(\d+))?)$}){
 		param('coords',$1);
 	}
