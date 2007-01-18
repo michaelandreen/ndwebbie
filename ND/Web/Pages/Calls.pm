@@ -23,26 +23,19 @@ use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{calls} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-	#if ($uri =~ m{^/.*/(\w+)$}){
-	#	param('list',$1);
-	#}
-}
+$ND::Web::Page::PAGES{calls} = __PACKAGE__;
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Defense Calls';
+	my $DBH = $self->{DBH};
 
-}
+	return $self->noAccess unless $self->isDC;
 
-sub render {
-	my ($DBH,$BODY) = @_;
 	my $error;
-
-	$ND::TEMPLATE->param(TITLE => 'Defense Calls');
-
-	return $ND::NOACCESS unless isDC();
 
 	my $call;
 	if (defined param('call') && param('call') =~ /^(\d+)$/){
@@ -93,7 +86,7 @@ sub render {
 					,undef,$ND::UID,$call->{id})){
 				$call->{covered} = (param('cmd') eq 'Cover call');
 				$call->{open} = (param('cmd') =~ /^(Uncover|Open) call$/);
-				$call->{DC} = $ND::USER;
+				$call->{DC} = $self->{USER};
 			}else{
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
@@ -132,7 +125,7 @@ sub render {
 		$BODY->param(Coords => $call->{coords});
 		$BODY->param(DefensePoints => $call->{defense_points});
 		$BODY->param(LandingTick => $call->{landing_tick});
-		$BODY->param(ETA => $call->{landing_tick}-$ND::TICK);
+		$BODY->param(ETA => $call->{landing_tick}-$self->{TICK});
 		$BODY->param(Info => $call->{info});
 		$BODY->param(DC => $call->{dc});
 		if ($call->{covered}){
@@ -217,7 +210,7 @@ sub render {
 		$query->execute or $error .= $DBH->errstr;
 		my @calls;
 		my $i = 0;
-		my $tick = $ND::TICK;
+		my $tick = $self->{TICK};
 		while (my $call = $query->fetchrow_hashref){
 			if ($call->{defense_points} < $minpoints){
 				$call->{DefPrio} = 'LowestPrio';
