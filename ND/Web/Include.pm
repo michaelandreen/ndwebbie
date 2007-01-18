@@ -26,8 +26,8 @@ use BBCode::Parser;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/parseMarkup min max listTargets
-	alliances intelquery generateClaimXml/;
+our @EXPORT = qw/parseMarkup min max
+	alliances intelquery /;
 
 sub parseMarkup ($) {
 	my ($text) = @_;
@@ -58,28 +58,6 @@ sub max {
     return ($x < $y ? $y : $x);
 }
 
-sub listTargets {
-	my $query = $ND::DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, released_coords, coords(x,y,z),c.launched,c.wave,c.joinable
-FROM raid_claims c
-	JOIN raid_targets t ON c.target = t.id
-	JOIN raids r ON t.raid = r.id
-	JOIN current_planet_stats p ON t.planet = p.id
-WHERE c.uid = ? AND r.tick+c.wave > ? AND r.open AND not r.removed
-ORDER BY r.tick+c.wave,x,y,z});
-	$query->execute($ND::UID,$ND::TICK);
-	my @targets;
-	while (my $target = $query->fetchrow_hashref){
-		my $coords = "Target $target->{id}";
-		$coords = $target->{coords} if $target->{released_coords};
-		push @targets,{Coords => $coords, Launched => $target->{launched}, Raid => $target->{raid}
-			, Target => $target->{id}, Tick => $target->{landingtick}, Wave => $target->{wave}
-			, AJAX => $ND::AJAX, JoinName => $target->{joinable} ? 'N' : 'J'
-			, Joinable => $target->{joinable} ? 'FALSE' : 'TRUE'};
-	}
-	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl", cache => 1);
-	$template->param(Targets => \@targets);
-	return $template->output;
-}
 
 sub alliances {
 	my ($alliance) = @_;
@@ -107,72 +85,5 @@ ORDER BY i.tick DESC, i.mission};
 }
 
 
-sub generateClaimXml {
-	my ($raid, $from, $target) = @_;
-
-	my ($timestamp) = $ND::DBH->selectrow_array("SELECT MAX(modified)::timestamp AS modified FROM raid_targets");
-	$ND::BODY->param(Timestamp => $timestamp);
-	if ($target){
-		$target = "r.id = $target";
-		$_ = listTargets();
-		$ND::BODY->param(TargetList => $_);
-	}else{
-		$target = "r.raid = $raid->{id}";
-	}
-
-	if ($from){
-		$from = "AND modified > '$from'";
-	}else{
-		$from = '';
-	}
-	my $targets = $ND::DBH->prepare(qq{SELECT r.id,r.planet FROM raid_targets r WHERE $target $from});
-	$targets->execute or print p($ND::DBH->errstr);
-	my $claims =  $ND::DBH->prepare(qq{ SELECT username,joinable,launched FROM raid_claims
-		NATURAL JOIN users WHERE target = ? AND wave = ?});
-	my @targets;
-	while (my $target = $targets->fetchrow_hashref){
-		my %target;
-		$target{Id} = $target->{id};
-		$target{Coords} = $target->{id};
-		my @waves;
-		for (my $i = 1; $i <= $raid->{waves}; $i++){
-			my %wave;
-			$wave{Id} = $i;
-			$claims->execute($target->{id},$i);
-			my $joinable = 0;
-			my $claimers;
-			if ($claims->rows != 0){
-				my $owner = 0;
-				my @claimers;
-				while (my $claim = $claims->fetchrow_hashref){
-					$owner = 1 if ($ND::USER eq $claim->{username});
-					$joinable = 1 if ($claim->{joinable});
-					$claim->{username} .= '*' if ($claim->{launched});
-					push @claimers,$claim->{username};
-				}
-				$claimers = join '/', @claimers;
-				if ($owner){
-					$wave{Command} = 'Unclaim';
-					if ($raid->{released_coords}){
-						$target{Coords} = $ND::DBH->selectrow_array('SELECT coords(x,y,z) FROM current_planet_stats WHERE id = ?',undef,$target->{planet});
-					}
-				}elsif ($joinable){
-					$wave{Command} = 'Join';
-				}else{
-					$wave{Command} = 'none';
-				}
-			}else{
-				#if (!isset($planet) || ($target->value/$planet->value > 0.4 || $target->score/$planet->score > 0.4))
-				$wave{Command} = 'Claim';
-			}
-			$wave{Claimers} = $claimers;
-			$wave{Joinable} = $joinable;
-			push @waves,\%wave;
-		}
-		$target{Waves} = \@waves;
-		push @targets,\%target;
-	}
-	$ND::BODY->param(Targets => \@targets);
-}
 
 1;

@@ -25,21 +25,93 @@ use POSIX;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{raids} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-	#if ($uri =~ m{^/.*/(\w+)$}){
-	#	param('list',$1);
-	#}
-}
+$ND::Web::Page::PAGES{raids} = __PACKAGE__;
 
 sub process {
-	$ND::XML = 1 if param('xml');
+	my $self = shift;
+	$self->{XML} = 1 if param('xml');
 }
 
-sub render {
-	my ($DBH,$BODY) = @_;
+
+sub generateClaimXml : method {
+	my $self = shift;
+	my ($BODY,$raid, $from, $target) = @_;
+	my $DBH = $self->{DBH};
+
+	my ($timestamp) = $DBH->selectrow_array("SELECT MAX(modified)::timestamp AS modified FROM raid_targets");
+	$BODY->param(Timestamp => $timestamp);
+	if ($target){
+		$target = "r.id = $target";
+		$_ = $self->listTargets;
+		$BODY->param(TargetList => $_);
+	}else{
+		$target = "r.raid = $raid->{id}";
+	}
+
+	if ($from){
+		$from = "AND modified > '$from'";
+	}else{
+		$from = '';
+	}
+	my $targets = $DBH->prepare(qq{SELECT r.id,r.planet FROM raid_targets r WHERE $target $from});
+	$targets->execute or print p($DBH->errstr);
+	my $claims =  $DBH->prepare(qq{ SELECT username,joinable,launched FROM raid_claims
+		NATURAL JOIN users WHERE target = ? AND wave = ?});
+	my @targets;
+	while (my $target = $targets->fetchrow_hashref){
+		my %target;
+		$target{Id} = $target->{id};
+		$target{Coords} = $target->{id};
+		my @waves;
+		for (my $i = 1; $i <= $raid->{waves}; $i++){
+			my %wave;
+			$wave{Id} = $i;
+			$claims->execute($target->{id},$i);
+			my $joinable = 0;
+			my $claimers;
+			if ($claims->rows != 0){
+				my $owner = 0;
+				my @claimers;
+				while (my $claim = $claims->fetchrow_hashref){
+					$owner = 1 if ($self->{USER} eq $claim->{username});
+					$joinable = 1 if ($claim->{joinable});
+					$claim->{username} .= '*' if ($claim->{launched});
+					push @claimers,$claim->{username};
+				}
+				$claimers = join '/', @claimers;
+				if ($owner){
+					$wave{Command} = 'Unclaim';
+					if ($raid->{released_coords}){
+						$target{Coords} = $DBH->selectrow_array('SELECT coords(x,y,z) FROM current_planet_stats WHERE id = ?',undef,$target->{planet});
+					}
+				}elsif ($joinable){
+					$wave{Command} = 'Join';
+				}else{
+					$wave{Command} = 'none';
+				}
+			}else{
+				#if (!isset($planet) || ($target->value/$planet->value > 0.4 || $target->score/$planet->score > 0.4))
+				$wave{Command} = 'Claim';
+			}
+			$wave{Claimers} = $claimers;
+			$wave{Joinable} = $joinable;
+			push @waves,\%wave;
+		}
+		$target{Waves} = \@waves;
+		push @targets,\%target;
+	}
+	$BODY->param(Targets => \@targets);
+	return $BODY;
+}
+
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Raids';
+	my $DBH = $self->{DBH};
+
 
 	my $raid;
 	if (defined param('raid')){
@@ -54,7 +126,7 @@ sub render {
 		my $findtarget = $DBH->prepare("SELECT rt.id FROM raid_targets rt NATURAL JOIN raid_access ra NATURAL JOIN groupmembers where uid = ? AND id = ?");
 		my $result = $DBH->selectrow_array($findtarget,undef,$ND::UID,$target);
 		if ($result != $target){
-			return $ND::NOACCESS;	
+			return $self->noAccess;	
 		}
 
 		$DBH->begin_work;
@@ -94,34 +166,32 @@ sub render {
 			}
 		}
 		$DBH->commit;
-		if ($ND::XML && $raid){
-			generateClaimXml($raid,undef,$target);
+		if ($self->{XML} && $raid){
+			return $self->generateClaimXml($BODY,$raid,undef,$target);
 		}
 	}
-	if ($ND::XML && $raid && param('cmd') eq 'update' ){
+	if ($self->{XML} && $raid && param('cmd') eq 'update' ){
 		my $from;
 		if (param('from') =~ /^[-\d\ \:\.]+$/){
 			$from = param('from');
 		}
-		generateClaimXml($raid,$from);
+		return $self->generateClaimXml($BODY,$raid,$from);
 	}
-	if ($ND::XML && param('cmd') eq 'gettargets' ){
+	if ($self->{XML} && param('cmd') eq 'gettargets' ){
 		$_ = listTargets();
 		$BODY->param(TargetList => $_);
 	}
 
-	return $BODY if $ND::XML;
+	return $BODY if $self->{XML};
 
-	$ND::TEMPLATE->param(TITLE => 'Raids');
-	#$ND::TEMPLATE->param(HEADER => '<script type="text/javascript" src="raid.js"></script>');
 	if ($raid){#We have a raid, so list all targets
 		$BODY->param(Raid => $raid->{id});
-		$BODY->param(Ajax => $ND::AJAX);
+		$BODY->param(Ajax => $self->{AJAX});
 		my $noingal = '';
 		my $planet;
-		if ($ND::PLANET){
+		if ($self->{PLANET}){
 			my $query = $DBH->prepare("SELECT value, score,x,y FROM current_planet_stats WHERE id = ?");
-			$planet = $DBH->selectrow_hashref($query,undef,$ND::PLANET);
+			$planet = $DBH->selectrow_hashref($query,undef,$self->{PLANET});
 			$noingal = "AND NOT (x = $planet->{x} AND y = $planet->{y})";
 		}
 		$BODY->param(Message => parseMarkup($raid->{message}));
@@ -139,7 +209,6 @@ sub render {
 			my %target;
 			$target{Id} = $target->{id};
 			$target{Race} = $target->{race};
-			$target{Ajax} = $ND::AJAX;
 			my $num = pow(10,length($target->{score})-2);
 			$target{Score} = ceil($target->{score}/$num)*$num;
 			$num = pow(10,length($target->{value})-2);
@@ -167,7 +236,7 @@ sub render {
 			for my $type ('Planet','Unit','Military','Surface Analysis','Technology Analysis'){
 				next unless exists $scans{$type};
 				my $scan = $scans{$type};
-				if ($ND::TICK - $scan->{tick} > 5){
+				if ($self->{TICK} - $scan->{tick} > 5){
 					$scan->{scan} =~ s{<table( cellpadding="\d+")?>}{<table$1 class="old">};
 				}
 				if ($type eq 'Planet'){
@@ -189,7 +258,7 @@ sub render {
 					$xp = max(0,floor($roids * 10 * (min(2,$target{Score}/$planet->{score}) + min(2,$target{Value}/$planet->{value})-1)));
 				}
 				push @roids,{Wave => $i, Roids => $roids, XP => $xp};
-				if ($ND::AJAX){
+				if ($self->{AJAX}){
 					push @claims,{Wave => $i, Target => $target{Id}}
 				}else{
 					push @claims,{Wave => $i, Target => $target{Id}, Command => 'Claim'
@@ -208,11 +277,12 @@ sub render {
 		$query->execute($ND::UID);
 		my @raids;
 		while (my $raid = $query->fetchrow_hashref){
-			push @raids,{Raid => $raid->{id}, ReleasedCoords => $raid->{released_coords}, isBC => isBC()};
+			push @raids,{Raid => $raid->{id}, ReleasedCoords => $raid->{released_coords}};
 		}
 		$BODY->param(Raids => \@raids);
 
-		if (isBC()){
+		if ($self->isBC){
+			$BODY->param(isBC => 1);
 			my $query = $DBH->prepare(q{SELECT id,open FROM raids WHERE not removed AND (not open 
 				OR id NOT IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?))});
 			$query->execute($ND::UID);

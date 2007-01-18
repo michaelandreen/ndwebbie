@@ -36,6 +36,32 @@ sub noAccess () {
 sub process : method {
 }
 
+sub listTargets () : method {
+	my $self = shift;
+	my $DBH = $self->{DBH};
+	my $query = $DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, released_coords, coords(x,y,z),c.launched,c.wave,c.joinable
+FROM raid_claims c
+	JOIN raid_targets t ON c.target = t.id
+	JOIN raids r ON t.raid = r.id
+	JOIN current_planet_stats p ON t.planet = p.id
+WHERE c.uid = ? AND r.tick+c.wave > ? AND r.open AND not r.removed
+ORDER BY r.tick+c.wave,x,y,z});
+	$query->execute($ND::UID,$self->{TICK});
+	my @targets;
+	while (my $target = $query->fetchrow_hashref){
+		my $coords = "Target $target->{id}";
+		$coords = $target->{coords} if $target->{released_coords};
+		push @targets,{Coords => $coords, Launched => $target->{launched}, Raid => $target->{raid}
+			, Target => $target->{id}, Tick => $target->{landingtick}, Wave => $target->{wave}
+			, AJAX => $self->{AJAX}, JoinName => $target->{joinable} ? 'N' : 'J'
+			, Joinable => $target->{joinable} ? 'FALSE' : 'TRUE'};
+	}
+	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl", cache => 1);
+	$template->param(Targets => \@targets);
+	return $template->output;
+}
+
+
 sub render : method {
 	my $self = shift;
 	my $DBH = $self->{DBH};
@@ -86,7 +112,7 @@ sub render : method {
 		$template->param(isIntel => $self->isBC());
 		$template->param(isAttacker => $ATTACKER && (!$self->isMember() || ((($TICK - $fleetupdate < 24) || $self->isScanner()) && $self->{PLANET})));
 		if ($ATTACKER && (!$self->isMember() || ((($TICK - $fleetupdate < 24) || $self->isScanner()) && $self->{PLANET}))){
-			$template->param(Targets => listTargets());
+			$template->param(Targets => $self->listTargets);
 		}
 		$template->param(Coords => param('coords') ? param('coords') : '1:1:1');
 		my ($css) = $DBH->selectrow_array(q{SELECT css FROM users WHERE uid = $1},undef,$ND::UID);
