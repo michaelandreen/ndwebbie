@@ -38,7 +38,7 @@ use ND::Web::Pages::Check;
 use ND::Web::Pages::Raids;
 use ND::Web::Pages::EditRaid;
 use ND::Web::Pages::Calls;
-#use ND::Web::Pages::Users;
+use ND::Web::Pages::Users;
 #use ND::Web::Pages::Intel;
 #use ND::Web::Pages::Alliances;
 #use ND::Web::Pages::MemberIntel;

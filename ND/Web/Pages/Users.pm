@@ -24,25 +24,17 @@ use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{users} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-	#if ($uri =~ m{^/.*/(\w+)$}){
-	#	param('list',$1);
-	#}
-}
+$ND::Web::Page::PAGES{users} = __PACKAGE__;
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Users';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-
-	$ND::TEMPLATE->param(TITLE => 'Users');
-
-	return $ND::NOACCESS  unless isHC();
+	return $self->noAccess unless $self->isHC;
 
 	my $error = '';
 	my $user;
