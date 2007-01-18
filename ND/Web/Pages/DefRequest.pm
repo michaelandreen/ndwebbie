@@ -23,22 +23,19 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{defrequest} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-}
+$ND::Web::Page::PAGES{defrequest} = __PACKAGE__;
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Request Defense';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'Request Defense');
+	return $self->noAccess unless $self->isMember;
 
 	my $error;
-
-	return $ND::NOACCESS unless isMember();
 
 	if (defined param('cmd') && param('cmd') eq 'submit'){
 		my $insert = $DBH->prepare('INSERT INTO defense_requests (uid,message) VALUES (?,?)');
