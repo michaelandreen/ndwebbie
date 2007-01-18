@@ -1,4 +1,3 @@
-#!/usr/bin/perl -w -T
 #**************************************************************************
 #   Copyright (C) 2006 by Michael Andreen <harvATruinDOTnu>               *
 #                                                                         *
@@ -18,35 +17,29 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND;
-use CGI qw/:standard/;
-use DBI;
-use DBD::Pg qw(:pg_types);
-use Apache2::Request;
-use ND::DB;
-use ND::Web::Page;
+package ND::Web::Image;
 use strict;
 use warnings;
+use CGI qw/:standard/;
 
-$SIG{__WARN__} = sub {$ND::ERROR .= p $_[0]};
+our @ISA = qw/ND::Web::Page/;
 
-chdir '/var/www/ndawn/code';
 
-sub handler {
-	local $ND::r = shift;
-	local $ND::req = Apache2::Request->new($ND::r, POST_MAX => "1M");
-	local $ND::DBH = ND::DB::DB();
-	local $ND::UID;
-	local $ND::ERROR;
-	my $page = $ND::req->param('page');
+sub render {
+	my $self = shift;
 
-	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
-		$page = $1 unless $1 eq 'index' and $3 eq 'pl';
+	my $img;
+	eval {
+		$img =  $self->render_body;
+	};
+	if (defined $img){
+		print header(-type=> 'image/png', -Content_Length => length $img);
+		binmode STDOUT;
+		print $img;
+	}else{
+		print header;
+		print $@;
 	}
-	$page = ND::Web::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI});
-	$page->render;
-
-	return Apache2::Const::OK;
-}
+};
 
 1;

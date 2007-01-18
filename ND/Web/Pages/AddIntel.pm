@@ -24,22 +24,21 @@ use CGI qw/:standard/;
 use ND::Web::Forum;
 use ND::Web::Include;
 
-$ND::PAGES{addintel} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-}
+$ND::Web::Page::PAGES{addintel} = 'ND::Web::Pages::AddIntel';
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
 
-}
+	my $DBH = $self->{DBH};
 
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'Add Intel and Scans');
+	$self->{TITLE} = 'Add Intel and Scans';
 
 	my $error;
 
-	return $ND::NOACCESS unless isMember();
+	return $self->noAccess unless $self->isMember;
 
 	if (defined param('cmd')){
 		if (param('cmd') eq 'submit' || param('cmd') eq 'submit_message'){
@@ -66,7 +65,7 @@ sub render {
 				push @scans,\%scan;
 			}
 			$BODY->param(Scans => \@scans);
-			my $tick = $ND::TICK;
+			my $tick = $self->{TICK};
 			$tick = param('tick') if $tick =~ /^(\d+)$/;
 			my $addintel = $DBH->prepare(qq{SELECT add_intel(?,?,?,?,?,?,?,?,?,?,?)});
 			while ($intel =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\*?\s+.+(?:Ter|Cat|Xan|Zik)?\s+(\d+)\s+(Attack|Defend)\s+(\d+)/g){
@@ -87,7 +86,7 @@ sub render {
 			}
 		}
 	}
-	$BODY->param(Tick => $ND::TICK);
+	$BODY->param(Tick => $self->{TICK});
 	$BODY->param(Error => $error);
 	return $BODY;
 }

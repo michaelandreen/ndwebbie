@@ -24,18 +24,15 @@ use CGI qw/:standard/;
 use ND::Include;
 use ND::Web::Include;
 
-$ND::PAGES{main} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-}
+$ND::Web::Page::PAGES{main} = 'ND::Web::Pages::Main';
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'Main Page');
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Main Page';
+	my $DBH = $self->{DBH};
 
 	my $error;
 
@@ -46,7 +43,7 @@ sub render {
 			my ($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
 			unless ($id){
 				my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,'Full fleet',0,0,0,0)});
-				$insert->execute($ND::UID,$ND::PLANET);
+				$insert->execute($ND::UID,$self->{PLANET});
 				($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
 			}
 			my $delete = $DBH->prepare("DELETE FROM fleet_ships WHERE fleet = ?");
@@ -92,7 +89,7 @@ sub render {
 	if (param('sms')){ my $query = $DBH->prepare('UPDATE users SET sms = ? WHERE uid = ?');
 		$query->execute(escapeHTML(param('sms')),$ND::UID);
 	}
-	if (isMember() && !$ND::PLANET && defined param('planet') && (param('planet') =~ m/(\d+)(?: |:)(\d+)(?: |:)(\d+)/)){
+	if ($self->isMember() && !$self->{PLANET} && defined param('planet') && (param('planet') =~ m/(\d+)(?: |:)(\d+)(?: |:)(\d+)/)){
 		my $query = $DBH->prepare(q{
 			UPDATE users SET planet = 
 			(SELECT id from current_planet_stats where x = ? AND y = ? AND z = ?)
@@ -107,10 +104,10 @@ sub render {
 	my ($motd) = $DBH->selectrow_array("SELECT value FROM misc WHERE id='MOTD'");
 
 	$BODY->param(MOTD => parseMarkup($motd));
-	$BODY->param(Username => $ND::USER);
-	$BODY->param(isMember => isMember());
-	$BODY->param(isHC => isHC());
-	my @groups = map {name => $_}, sort keys %ND::GROUPS;
+	$BODY->param(Username => $self->{USER});
+	$BODY->param(isMember => $self->isMember());
+	$BODY->param(isHC => $self->isHC());
+	my @groups = map {name => $_}, sort keys %{$self->{GROUPS}};
 	$BODY->param(Groups => \@groups);
 
 
@@ -118,7 +115,7 @@ sub render {
 
 	my ($planet,$defense_points,$attack_points,$scan_points,$humor_points,$total_points,$sms,$rank) = $DBH->selectrow_array($query,undef,$ND::UID);
 
-	$ND::PLANET = $planet unless $ND::PLANET;
+	$self->{PLANET} = $planet unless $self->{PLANET};
 
 	$BODY->param(NDRank => $rank);
 	$BODY->param(DefensePoints => $defense_points);
@@ -150,7 +147,7 @@ GROUP BY f.fleet,f.id, x,y,z, mission, landing_tick,back
 ORDER BY f.fleet
 		});
 
-	$query->execute($ND::UID,$ND::TICK) or $error .= '<p>'.$DBH->errstr.'</p>';
+	$query->execute($ND::UID,$self->{TICK}) or $error .= '<p>'.$DBH->errstr.'</p>';
 	my @fleets;
 	my $i = 0;
 	while (my $fleet = $query->fetchrow_hashref){

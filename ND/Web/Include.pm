@@ -26,40 +26,8 @@ use BBCode::Parser;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/isMember isHC isDC isBC isOfficer isScanner isIntel isTech parseMarkup min max listTargets
+our @EXPORT = qw/parseMarkup min max listTargets
 	alliances intelquery generateClaimXml/;
-
-sub isMember {
-	return exists $ND::GROUPS{Members} || isTech();
-}
-
-sub isHC {
-	return exists $ND::GROUPS{HC} || isTech();
-}
-
-sub isDC {
-	return exists $ND::GROUPS{DC} || isTech();
-}
-
-sub isBC {
-	return exists $ND::GROUPS{BC} || isTech();
-}
-
-sub isOfficer {
-	return exists $ND::GROUPS{Officers} || isTech();
-}
-
-sub isScanner {
-	return exists $ND::GROUPS{Scanners} || isTech();
-}
-
-sub isIntel {
-	return exists $ND::GROUPS{Intel} || isTech();
-}
-
-sub isTech {
-	return exists $ND::GROUPS{Tech};
-}
 
 sub parseMarkup ($) {
 	my ($text) = @_;

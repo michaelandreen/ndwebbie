@@ -24,23 +24,17 @@ use CGI qw/:standard/;
 use ND::Include;
 use ND::Web::Graph;
 
-$ND::PAGES{graph} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::Image/;
 
-sub parse {
-	my ($uri) = @_;
-	$ND::USETEMPLATE = 0;
-}
+$ND::Web::Page::PAGES{graph} = 'ND::Web::Pages::Graph';
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$uri) = @_;
+sub render_body {
+	my $self = shift;
+	my $DBH = $self->{DBH};
 
 	my $type;
 	my ($x,$y,$z);
-	if ($uri =~ m{^/\w+/(stats|ranks)/(.*)}){
+	if ($self->{URI} =~ m{^/\w+/(stats|ranks)/(.*)}){
 		$type = $1;
 		if ($2 =~ m{(\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?$}){
 			$x = $1;
@@ -92,9 +86,7 @@ sub render {
 
 	die 'no image' unless defined $img;
 
-	print header(-type=> 'image/png', -Content_Length => length $img);
-	binmode STDOUT;
-	print $img;
-}
+	return $img;
+};
 
 1;
