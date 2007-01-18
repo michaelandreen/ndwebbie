@@ -23,26 +23,18 @@ use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{editRaid} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-	#if ($uri =~ m{^/.*/(\w+)$}){
-	#	param('list',$1);
-	#}
-}
+$ND::Web::Page::PAGES{editRaid} = __PACKAGE__;
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Create/Edit Raids';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
+	return $self->noAccess unless $self->isBC;
 	my $error;
-
-	$ND::TEMPLATE->param(TITLE => 'Create/Edit Raids');
-
-	return $ND::NOACCESS unless isBC();
 
 	my @alliances = alliances();
 	$BODY->param(Alliances => \@alliances);
@@ -205,7 +197,7 @@ sub render {
 		$BODY->param(Targets => \@targets);
 	}else{
 		$BODY->param(Waves => 3);
-		$BODY->param(LandingTick => $ND::TICK+12);
+		$BODY->param(LandingTick => $self->{TICK}+12);
 	}
 	$BODY->param(Error => $error);
 	return $BODY;
