@@ -47,7 +47,7 @@ use ND::Web::Pages::AddIntel;
 #use ND::Web::Pages::Motd;
 #use ND::Web::Pages::Forum;
 #use ND::Web::Pages::Settings;
-#use ND::Web::Pages::Graph;
+use ND::Web::Pages::Graph;
 
 
 
