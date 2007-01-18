@@ -23,7 +23,9 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{covop} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
+
+$ND::Web::Page::PAGES{covop} = __PACKAGE__;
 
 sub parse {
 	my ($uri) = @_;
@@ -32,15 +34,13 @@ sub parse {
 	}
 }
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'CovOp Targets';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'CovOp Targets');
-
-	return $ND::NOACCESS unless isMember();
+	return $self->noAccess unless $self->isMember;
 
 	my $show = q{AND ((planet_status IS NULL OR NOT planet_status IN ('Friendly','NAP')) AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP')))};
 	$show = '' if defined param('show') && param('show') eq 'all';
@@ -69,7 +69,7 @@ sub render {
 		FROM covop_targets c JOIN current_planet_stats p ON p.id = c.planet
 		LEFT OUTER JOIN users u ON u.uid = c.covop_by) AS foo
 		$where});
-	$query->execute($ND::PLANET);
+	$query->execute($self->{PLANET});
 
 	my @targets;
 	my $i = 0;
