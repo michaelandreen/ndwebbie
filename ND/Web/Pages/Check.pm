@@ -25,27 +25,27 @@ use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{check} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
+
+$ND::Web::Page::PAGES{check} = __PACKAGE__;
 
 sub parse {
-	my ($uri) = @_;
+	my $self = shift;
 	#TODO: Improved apache conf needed
-	#if ($uri =~ m{^/.*/((\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?(?: |:(\d+))?)$}){
-	#	param('coords',$1);
-	#}
+	if ($self->{URI} =~ m{^/.*/((\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?(?: |:(\d+))?)$}){
+		param('coords',$1);
+	}
 }
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Check planets and galaxies';
+	my $DBH = $self->{DBH};
 
-}
+	return $self->noAccess unless $self->{ATTACKER};
 
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'Check planets and galaxies');
-
-	$BODY->param(isBC => isMember() && (isOfficer() || isBC));
-
-	return $ND::NOACCESS unless $ND::ATTACKER;
+	$BODY->param(isBC => $self->isMember && ($self->isOfficer || $self->isBC));
 
 	my ($x,$y,$z);
 	if (param('coords') =~ /(\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?(?: |:(\d+))?/){
@@ -58,7 +58,7 @@ sub render {
 		return $BODY;
 	}
 
-	if (isMember() && param('cmd') eq 'arbiter'){
+	if ($self->isMember && param('cmd') eq 'arbiter'){
 		my $query = $DBH->prepare(q{SELECT count(*) AS friendlies FROM current_planet_stats WHERE x = ? AND y = ? 
 			AND (planet_status IN ('Friendly','NAP') OR relationship IN ('Friendly','NAP'))});
 		my ($count) = $DBH->selectrow_array($query,undef,$x,$y);
@@ -74,9 +74,9 @@ sub render {
 	my $extra_columns = '';
 
 	$where = 'AND z = ?' if defined $z;
-	if (isMember() && isOfficer()){
+	if ($self->isMember && $self->isOfficer){
 		$extra_columns = ",planet_status,hit_us, alliance,relationship,nick";
-	}elsif (isMember() && isBC()){
+	}elsif ($self->isMember && $self->isBC){
 		$extra_columns = ", planet_status,hit_us, alliance,relationship";
 	}
 
@@ -86,7 +86,7 @@ sub render {
 		$query->execute($x,$y,$z);
 	}else{
 		$query->execute($x,$y);
-		if (isMember() && (isBC() || isOfficer()) && !isHC()){
+		if ($self->isMember && ($self->isBC || $self->isOfficer) && !$self->isHC){
 			log_message $ND::UID,"BC browsing $x:$y";
 		}
 	}
@@ -99,15 +99,15 @@ sub render {
 		my %planet = (Coords => $coords, Planet => $planet, Race => $race, Size => "$size ($sizerank)"
 			, Score => "$score ($scorerank)", Value => "$value ($valuerank)", XP => "$xp ($xprank)"
 			, FleetValue => "$fleetvalue ($resvalue)");
-		if (isMember() && (isOfficer() || isBC())){
+		if ($self->isMember && ($self->isOfficer || $self->isBC)){
 			$planet{HitUs} = $hit_us;
 			$planet{Alliance} = "$alliance ($relationship)";
 			$planet{Nick} = "$nick ($planet_status)";
 			$planet{PlanetStatus} = $planet_status;
 			$planet{Relationship} = $relationship;
-			$planet{isBC} = 1;
-			if ($z && $alliance eq 'NewDawn' && not (isHC || isOfficer)){
-				log_message $ND::UID,"BC browsing ND planet $coords tick $ND::TICK";
+			#$planet{isBC} = 1;
+			if ($z && $alliance eq 'NewDawn' && not ($self->isHC || $self->isOfficer)){
+				log_message $ND::UID,"BC browsing ND planet $coords tick $self->{TICK}";
 			}
 		}
 		$i++;
@@ -185,7 +185,7 @@ sub render {
 			my $scan_id = $scans{$type}->[0];
 			my $tick = $scans{$type}->[1];
 			my $scan = $scans{$type}->[2];
-			if ($ND::TICK - $tick > 10){
+			if ($self->{TICK} - $tick > 10){
 				$scan =~ s{<table( cellpadding="\d+")?>}{<table$1 class="old">};
 			}
 			push @scans,{Scan => qq{
