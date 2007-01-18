@@ -24,23 +24,20 @@ use CGI qw/:standard/;
 use ND::Web::Include;
 use ND::Include;
 
-$ND::PAGES{launchConfirmation} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
+$ND::Web::Page::PAGES{launchConfirmation} = __PACKAGE__;
 
-sub parse {
-}
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Launch Confirmation';
+	my $DBH = $self->{DBH};
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'Launch Confirmation');
+	return $self->noAccess unless $self->isMember;
 
 	my $error;
 
-	return $ND::NOACCESS unless isMember();
 
 	if (defined param('cmd') && param('cmd') eq 'submit'){
 		my $missions = param('mission');
@@ -57,33 +54,33 @@ sub render {
 		my $addships = $DBH->prepare('INSERT INTO fleet_ships (fleet,ship,amount) VALUES (?,?,?)');
 
 		my $fleet = $DBH->prepare("SELECT id FROM fleets WHERE uid = ? AND fleet = 0");
-		my ($basefleet) = $DBH->selectrow_array($fleet,undef,$ND::UID);
+		my ($basefleet) = $DBH->selectrow_array($fleet,undef,$ND::UID) or $ND::ERROR .= p $DBH->errstr;;
 		unless ($basefleet){
 			my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,'Full fleet',0,0,0,0)});
-			$insert->execute($ND::UID,$ND::PLANET);
+			$insert->execute($ND::UID,$self->{PLANET}) or $ND::ERROR .= p $DBH->errstr;;
 		}
 		my @missions;
 		$DBH->begin_work;
 		while ($missions =~ m/\S+\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((?:(\d+)\+)?(\d+)\).*?(?:\d+hrs\s+)?\d+mins\s+(Attack|Defend|Return|Fake Attack|Fake Defend)(.*?)(?:Launching in tick (\d+), arrival in tick (\d+)|ETA: \d+, Return ETA: (\d+))/sg){
 			my %mission;
 
-			my $tick = $ND::TICK+$8;
+			my $tick = $self->{TICK}+$8;
 			$tick += $7 if defined $7;
 			my $eta = $8;
 			my $mission = $9;
 			my $x = $4;
 			my $y = $5;
 			my $z = $6;
-			$mission{Tick} = $tick;
-			$mission{Mission} = $mission;
-			$mission{Target} = "$x:$y:$z";
 			if ($12){
 				$tick = $12;
 			}elsif ($13){
 				$eta += $13;
 			}
+			$mission{Tick} = $tick;
+			$mission{Mission} = $mission;
+			$mission{Target} = "$x:$y:$z";
 
-			my ($planet_id) = $DBH->selectrow_array($findplanet,undef,$x,$y,$z,$ND::TICK);
+			my ($planet_id) = $DBH->selectrow_array($findplanet,undef,$x,$y,$z,$self->{TICK});
 
 			my $findtarget = $finddefensetarget;
 			if ($mission eq 'Attack'){
@@ -92,7 +89,7 @@ sub render {
 				$findtarget = $finddefensetarget;
 			}
 
-			$findtarget->execute($ND::UID,$tick,$planet_id);
+			$findtarget->execute($ND::UID,$tick,$planet_id) or $ND::ERROR .= p $DBH->errstr;;
 
 			if ($findtarget->rows == 0){
 				$mission{Warning} = "YOU DON'T HAVE A TARGET WITH THAT LANDING TICK";
@@ -101,8 +98,8 @@ sub render {
 				if ($claim->{launched}){
 					$mission{Warning} = "Already launched on this target:$claim->{target},$claim->{wave},$claim->{launched}";
 				}else{
-					$addattackpoint->execute($ND::UID);
-					$launchedtarget->execute($ND::UID,$claim->{target},$claim->{wave});
+					$addattackpoint->execute($ND::UID) or $ND::ERROR .= p $DBH->errstr;
+					$launchedtarget->execute($ND::UID,$claim->{target},$claim->{wave}) or $ND::ERROR .= p $DBH->errstr;
 					$mission{Warning} = "OK:$claim->{target},$claim->{wave},$claim->{launched}";
 					log_message $ND::UID,"Gave attack point for confirmation on $mission mission to $x:$y:$z, landing tick $tick";
 				}
@@ -115,7 +112,7 @@ sub render {
 			my $ships = $10;
 			my @ships;
 			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+\w+\s+(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Struc)\s+(\d+)/g){
-				$addships->execute($fleet,$1,$2);
+				$addships->execute($fleet,$1,$2) or $ND::ERROR .= p $DBH->errstr;
 				push @ships,{Ship => $1, Amount => $2};
 			}
 			$mission{Ships} = \@ships;

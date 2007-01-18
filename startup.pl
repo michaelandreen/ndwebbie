@@ -30,7 +30,7 @@ use ND::Web::XMLPage;
 use ND::Web::Pages::Main;
 use ND::Web::Pages::AddIntel;
 use ND::Web::Pages::Points;
-#use ND::Web::Pages::LaunchConfirmation;
+use ND::Web::Pages::LaunchConfirmation;
 #use ND::Web::Pages::CovOp;
 #use ND::Web::Pages::Top100;
 #use ND::Web::Pages::DefRequest;

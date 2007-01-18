@@ -25,7 +25,7 @@ use ND::Web::Include;
 
 our @ISA = qw/ND::Web::XMLPage/;
 
-$ND::Web::Page::PAGES{points} = 'ND::Web::Pages::Points';
+$ND::Web::Page::PAGES{points} = __PACKAGE__;
 
 
 sub render_body {
