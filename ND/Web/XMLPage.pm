@@ -29,7 +29,7 @@ use ND::Web::Include;
 
 our @ISA = qw/ND::Web::Page/;
 
-sub noAccess {
+sub noAccess () {
 	HTML::Template->new(filename => 'templates/NoAccess.tmpl', global_vars => 1, cache => 1);
 };
 

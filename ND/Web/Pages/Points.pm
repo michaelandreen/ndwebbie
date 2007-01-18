@@ -23,20 +23,18 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{points} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-}
+$ND::Web::Page::PAGES{points} = 'ND::Web::Pages::Points';
 
-sub process {
 
-}
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Top Members';
+	my $DBH = $self->{DBH};
 
-sub render {
-	my ($DBH,$BODY) = @_;
-	$ND::TEMPLATE->param(TITLE => 'Top Members');
-
-	return $ND::NOACCESS unless isMember();
+	return $self->noAccess unless $self->isMember;
 
 	my $type = "total";
 	if (defined param('type') && param('type') =~ /^(defense|attack|total|humor|scan|rank)$/){
@@ -48,7 +46,7 @@ sub render {
 	$order = 'ASC' if ($type eq 'rank');
 
 	my $limit = 'LIMIT 10';
-	$limit = '' if isHC();
+	$limit = '' if $self->isHC;
 
 	my $query = $DBH->prepare("SELECT username,defense_points,attack_points,scan_points,humor_points, (attack_points+defense_points+scan_points/20) as total_points, rank FROM users WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2) ORDER BY $type $order $limit");
 	$query->execute;
