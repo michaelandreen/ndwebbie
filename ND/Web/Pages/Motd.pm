@@ -24,23 +24,17 @@ use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{motd} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-}
+$ND::Web::Page::PAGES{motd} = __PACKAGE__;
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Edit MOTD';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-
-	$ND::TEMPLATE->param(TITLE => 'Edit MOTD');
-
-
-	return $ND::NOACCESS unless isHC();
+	return $self->noAccess unless $self->isHC;
 
 	if (defined param 'cmd' and param('cmd') eq 'change'){
 		$DBH->begin_work;
