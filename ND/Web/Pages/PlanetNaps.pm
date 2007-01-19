@@ -23,23 +23,18 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{planetNaps} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-}
+$ND::Web::Page::PAGES{planetNaps} = __PACKAGE__;
 
-sub process {
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'List planet naps';
+	my $DBH = $self->{DBH};
 
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
+	return $self->noAccess unless $self->isHC;
 	my $error;
-
-	$ND::TEMPLATE->param(TITLE => 'List planet naps');
-
-	return $ND::NOACCESS unless isHC();
 
 	my $query = $DBH->prepare(qq{Select coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race, size, score, value, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 - coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue, planet_status,hit_us, alliance,relationship,nick from current_planet_stats p LEFT OUTER JOIN covop_targets c ON p.id = c.planet WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc});
 

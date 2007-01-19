@@ -43,7 +43,7 @@ use ND::Web::Pages::Intel;
 use ND::Web::Pages::Alliances;
 use ND::Web::Pages::MemberIntel;
 use ND::Web::Pages::Resources;
-#use ND::Web::Pages::PlanetNaps;
+use ND::Web::Pages::PlanetNaps;
 #use ND::Web::Pages::Motd;
 #use ND::Web::Pages::Forum;
 #use ND::Web::Pages::Settings;
