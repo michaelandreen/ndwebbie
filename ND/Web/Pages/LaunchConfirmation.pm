@@ -24,7 +24,7 @@ use CGI qw/:standard/;
 use ND::Web::Include;
 use ND::Include;
 
-our @ISA = qw/ND::Web::XMLPage/;
+use base qw/ND::Web::XMLPage/;
 
 $ND::Web::Page::PAGES{launchConfirmation} = __PACKAGE__;
 

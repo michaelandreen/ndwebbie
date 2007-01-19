@@ -24,7 +24,7 @@ use CGI qw/:standard/;
 use ND::Web::Forum;
 use ND::Web::Include;
 
-our @ISA = qw/ND::Web::XMLPage/;
+use base qw/ND::Web::XMLPage/;
 
 $ND::Web::Page::PAGES{addintel} = 'ND::Web::Pages::AddIntel';
 

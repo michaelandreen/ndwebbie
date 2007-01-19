@@ -24,7 +24,7 @@ use CGI qw/:standard/;
 use ND::Include;
 use ND::Web::Graph;
 
-our @ISA = qw/ND::Web::Image/;
+use base qw/ND::Web::Image/;
 
 $ND::Web::Page::PAGES{graph} = 'ND::Web::Pages::Graph';
 

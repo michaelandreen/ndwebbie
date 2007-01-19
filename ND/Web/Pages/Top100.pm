@@ -23,7 +23,7 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-our @ISA = qw/ND::Web::XMLPage/;
+use base qw/ND::Web::XMLPage/;
 
 $ND::Web::Page::PAGES{top100} = __PACKAGE__;
 

@@ -22,7 +22,7 @@ use strict;
 use warnings;
 use CGI qw/:standard/;
 
-our @ISA = qw/ND::Web::Page/;
+use base qw/ND::Web::Page/;
 
 
 sub render {

@@ -27,7 +27,7 @@ use ND::Include;
 use ND::Web::Page;
 use ND::Web::Include;
 
-our @ISA = qw/ND::Web::Page/;
+use base qw/ND::Web::Page/;
 
 sub noAccess () {
 	HTML::Template->new(filename => 'templates/NoAccess.tmpl', global_vars => 1, cache => 1);
