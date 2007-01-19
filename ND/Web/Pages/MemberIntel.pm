@@ -23,26 +23,18 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{memberIntel} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-	if ($uri =~ m{^/.*/(\w+)$}){
-		param('list',$1);
-	}
-}
+$ND::Web::Page::PAGES{memberIntel} = __PACKAGE__;
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Member Intel';
+	my $DBH = $self->{DBH};
 	my $error;
 
-	$ND::TEMPLATE->param(TITLE => 'Member Intel');
-
-	return $ND::NOACCESS unless isHC();
+	return $self->noAccess unless $self->isHC;
 
 	my $showticks = 'AND i.tick > tick()';
 	if (defined param('show')){
