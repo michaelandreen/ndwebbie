@@ -1,12 +1,12 @@
-<h2><TMPL_VAR NAME=Title></h2>
-<h3>
+<TMPL_IF Title><h2><TMPL_VAR NAME=Title></h2></TMPL_IF>
 <TMPL_IF Category>
+<h3>
 <a href="/<TMPL_VAR NAME=Page>"><TMPL_VAR NAME=Category></a>
-</TMPL_IF>
 <TMPL_IF FBID>
 - <a href="/<TMPL_VAR NAME=Page>?b=<TMPL_VAR NAME=FBID>"><TMPL_VAR NAME=Board></a>
 </TMPL_IF>
 </h3>
+</TMPL_IF>
 <TMPL_IF Thread>
 
 <TMPL_IF Moderate><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=FTID>;cmd=<TMPL_VAR NAME=Sticky>">Make this thread <TMPL_VAR NAME=Sticky></a></TMPL_IF>

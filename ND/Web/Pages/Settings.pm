@@ -41,7 +41,7 @@ sub render_body {
 		}
 	}
 	my ($css) = $DBH->selectrow_array(q{SELECT css FROM users WHERE uid = $1},undef,$ND::UID);
-	my @stylesheets = ({Style => ''});
+	my @stylesheets = ({Style => '&nbsp;'});
 	$css = '' unless defined $css;
 	while (<stylesheets/*.css>){
 		if(m{stylesheets/(\w+)\.css}){
