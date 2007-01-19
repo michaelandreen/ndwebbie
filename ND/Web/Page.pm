@@ -21,7 +21,7 @@ use strict;
 use warnings;
 use CGI qw/:standard/;
 
-our %PAGES = {};
+our %PAGES;
 
 sub new {
 	my $invocant = shift;

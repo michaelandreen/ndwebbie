@@ -23,23 +23,18 @@ use warnings FATAL => 'all';
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{resources} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-}
+$ND::Web::Page::PAGES{resources} = __PACKAGE__;
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Alliance Resources';
+	my $DBH = $self->{DBH};
 	my $error;
 
-	$ND::TEMPLATE->param(TITLE => 'Alliance Resources');
-
-	return $ND::NOACCESS unless isHC();
+	return $self->noAccess unless $self->isHC;
 
 	my $order = "respplanet DESC";
 	if (defined param('order') && param('order') =~ /^(size|score|resources|respplanet|nscore|nscore2|nscore3)$/){
