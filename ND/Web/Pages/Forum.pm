@@ -25,23 +25,22 @@ use CGI qw/:standard/;
 use ND::Web::Include;
 use ND::Include;
 
-$ND::PAGES{forum} = {parse => \&parse, process => \&process, render=> \&render};
+use base qw/ND::Web::XMLPage/;
+
+$ND::Web::Page::PAGES{forum} = __PACKAGE__;
 
 sub parse {
-	my ($uri) = @_;
-	if ($uri =~ m{^/.*/allUnread}){
+	my $self = shift;
+	if ($self->{URI} =~ m{^/.*/allUnread}){
 		param('allUnread',1);
 	}
 }
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-
-	$ND::TEMPLATE->param(TITLE => 'Forum');
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Forum';
+	my $DBH = $self->{DBH};
 
 	$DBH->do(q{UPDATE users SET last_forum_visit = NOW() WHERE uid = $1},undef,$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 
