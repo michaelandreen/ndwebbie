@@ -24,20 +24,15 @@ use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
 
-$ND::PAGES{settings} = {parse => \&parse, process => \&process, render=> \&render};
+our @ISA = qw/ND::Web::XMLPage/;
 
-sub parse {
-	my ($uri) = @_;
-}
+$ND::Web::Page::PAGES{settings} = __PACKAGE__;
 
-sub process {
-
-}
-
-sub render {
-	my ($DBH,$BODY) = @_;
-
-	$ND::TEMPLATE->param(TITLE => 'Edit site preferences');
+sub render_body {
+	my $self = shift;
+	my ($BODY) = @_;
+	$self->{TITLE} = 'Edit site preferences';
+	my $DBH = $self->{DBH};
 
 	if (defined param 'cmd'){
 		if(param('cmd') eq 'stylesheet'){
