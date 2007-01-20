@@ -201,3 +201,9 @@ div.bbcode-quote,div.bbcode-code {
 div.bbcode-quote-head,div.bbcode-code-head {
 	font-weight: bold;
 }
+
+fieldset.incluster {
+	border: solid;
+	border-width: 2px;
+	border-color: red;
+}

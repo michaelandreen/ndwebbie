@@ -41,8 +41,8 @@
 </form>
 </TMPL_IF>
 <TMPL_LOOP Targets>
-<fieldset> <legend>Target: #<TMPL_VAR NAME=Id></legend>
-<a name="target<TMPL_VAR NAME=Id>"/>
+<fieldset class="<TMPL_VAR Name=Style>"> <legend><a name="target<TMPL_VAR NAME=Id>">Target: #<TMPL_VAR NAME=Id></a></legend>
+
 	<div class="leftinfo"><ul>
 		<li>Size: <TMPL_VAR NAME=Size></li>
 		<li class="<TMPL_VAR NAME=ScoreBash>">Score: <TMPL_VAR NAME=Score></li>

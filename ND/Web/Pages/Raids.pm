@@ -196,7 +196,7 @@ sub render_body {
 		}
 		$BODY->param(Message => parseMarkup($raid->{message}));
 		$BODY->param(LandingTick => parseMarkup($raid->{tick}));
-		my $targetquery = $DBH->prepare(qq{SELECT r.id, r.planet, size, score, value, coords(p.x,p.y,p.z), race, p.value - p.size*200 -coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue, comment
+		my $targetquery = $DBH->prepare(qq{SELECT r.id, r.planet, size, score, value, p.x,p.y,p.z, race, p.value - p.size*200 -coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue, comment
 			FROM current_planet_stats p 
 			JOIN raid_targets r ON p.id = r.planet 
 			LEFT OUTER JOIN covop_targets c ON p.id = c.planet
@@ -247,6 +247,12 @@ sub render_body {
 			}
 			$target{Scans} = \@scans;
 
+			if ($planet){
+				if ($planet->{x} == $target->{x}){
+					$target{style} = 'incluster';
+				}
+			}
+
 			my @roids;
 			my @claims;
 			my $size = $target{Size};
@@ -270,6 +276,8 @@ sub render_body {
 
 			push @targets,\%target;
 		}
+		@targets = sort {$b->{Roids}[0]{XP} <=> $a->{Roids}[0]{XP} or $b->{Size} <=> $a->{Size}} @targets;
+
 		$BODY->param(Targets => \@targets);
 	}else{#list raids if we haven't chosen one yet
 		my $query = $DBH->prepare(q{SELECT id,released_coords FROM raids WHERE open AND not removed AND
