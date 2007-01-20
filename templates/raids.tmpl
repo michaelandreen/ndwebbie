@@ -27,7 +27,7 @@
 	<p><b>REMEMBER TO PASTE LAUNCH CONFIRMATION IF YOU WANT AN ATTACK POINT</b></p>
 	<p><b style="color: red;">DO NOT JOIN A WAVE UNLESS YOU HAVE PERMISSION FROM THE PERSON WHO CLAIMED IT</b></p>
 	<p>Landing tick first wave: <TMPL_VAR NAME=LandingTick></p>
-	<p><TMPL_VAR NAME=Message></p>
+	<TMPL_VAR NAME=Message>
 </fieldset>
 
 <TMPL_IF Ajax>
@@ -56,7 +56,7 @@
 	</ul>
 	<TMPL_IF Comment>
 		<fieldset> <legend>Comment</legend>
-			<p><TMPL_VAR NAME=Comment></p>
+			<TMPL_VAR NAME=Comment>
 		</fieldset>
 	</TMPL_IF>
 	<TMPL_VAR NAME=PlanetScan>

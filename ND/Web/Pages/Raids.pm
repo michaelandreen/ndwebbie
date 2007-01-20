@@ -195,7 +195,7 @@ sub render_body {
 			$noingal = "AND NOT (x = $planet->{x} AND y = $planet->{y})";
 		}
 		$BODY->param(Message => parseMarkup($raid->{message}));
-		$BODY->param(LandingTick => parseMarkup($raid->{tick}));
+		$BODY->param(LandingTick => $raid->{tick});
 		my $targetquery = $DBH->prepare(qq{SELECT r.id, r.planet, size, score, value, p.x,p.y,p.z, race, p.value - p.size*200 -coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue, comment
 			FROM current_planet_stats p 
 			JOIN raid_targets r ON p.id = r.planet 
