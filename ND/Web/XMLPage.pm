@@ -125,11 +125,6 @@ sub render : method {
 	my $output = $template->output;
 	print header(-type=> $type, -charset => 'utf-8', -Content_Length => length $output);
 	print $output;
-
-
-	$DBH->rollback unless $DBH->{AutoCommit};
-	$DBH->disconnect;
-
 };
 
 1;

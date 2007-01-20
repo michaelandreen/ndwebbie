@@ -46,6 +46,9 @@ sub handler {
 	$page = ND::Web::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI});
 	$page->render;
 
+	$ND::DBH->rollback unless $ND::DBH->{AutoCommit};
+	$ND::DBH->disconnect;
+
 	return Apache2::Const::OK;
 }
 
