@@ -79,8 +79,10 @@ sub render : method {
 
 	$self->process;
 
-	my $type = 'application/xhtml+xml';
-	$type = 'text/html' if $self->{USER_AGENT} =~ /MSIE/;
+	my $type = 'text/html';
+	if ($self->{HTTP_ACCEPT} =~ m{application/xhtml\+xml}){
+		$type = 'application/xhtml+xml'
+	}
 	my $body;
 	if ($self->{XML}){
 		$type = 'text/xml';
@@ -119,7 +121,6 @@ sub render : method {
 		my ($css) = $DBH->selectrow_array(q{SELECT css FROM users WHERE uid = $1},undef,$ND::UID);
 		$template->param(CSS => $css);
 		$template->param(TITLE => $self->{TITLE});
-
 	}
 	$template->param(Error => $ND::ERROR);
 	$template->param(BODY => $body->output);
