@@ -43,7 +43,7 @@ sub handler {
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
 		$page = $1 unless $1 eq 'index' and $3 eq 'pl';
 	}
-	$page = ND::Web::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI});
+	$page = ND::Web::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI}, USER_AGENT => $ENV{HTTP_USER_AGENT});
 	$page->render;
 
 	$ND::DBH->rollback unless $ND::DBH->{AutoCommit};

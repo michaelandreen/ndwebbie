@@ -80,6 +80,7 @@ sub render : method {
 	$self->process;
 
 	my $type = 'application/xhtml+xml';
+	$type = 'text/html' if $self->{USER_AGENT} =~ /MSIE/;
 	my $body;
 	if ($self->{XML}){
 		$type = 'text/xml';
