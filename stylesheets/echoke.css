@@ -1,6 +1,5 @@
-body 
+body,html
 { 
-	padding-left: 15em; 
 	font-size: medium; 
 	color: gray; 
 	font-family: Arial; 

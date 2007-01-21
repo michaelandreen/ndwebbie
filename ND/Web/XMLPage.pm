@@ -79,7 +79,7 @@ sub render : method {
 
 	$self->process;
 
-	my $type = 'text/html';
+	my $type = 'application/xhtml+xml';
 	my $body;
 	if ($self->{XML}){
 		$type = 'text/xml';

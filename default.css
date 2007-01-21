@@ -1,9 +1,11 @@
-body {
-	padding-left: 15em;
-	/*padding-right: 12em;*/
-	font-family: sans-serif;
+body,html {
 	color: black;
 	background-color: #D9D9D9;
+	font-family: sans-serif;
+}
+#body {
+	padding-left: 15em;
+	/*padding-right: 12em;*/
 }
 #leftbar,#rightbar{
 	padding: 0;
