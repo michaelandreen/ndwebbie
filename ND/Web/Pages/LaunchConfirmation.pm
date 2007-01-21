@@ -48,7 +48,7 @@ sub render_body {
 			WHERE c.uid = ? AND r.tick+c.wave-1 = ? AND t.planet = ?
 			AND r.open AND not r.removed});
 		my $finddefensetarget = $DBH->prepare(q{SELECT c.id FROM calls c JOIN users u ON c.member = u.uid WHERE u.planet = $1 AND c.landing_tick = $2});
-		my $informDefChannel = $DBH->prepare(q{INSERT INTO defense_requests (uid,message) VALUES (?,?)});
+		my $informDefChannel = $DBH->prepare(q{INSERT INTO defense_missions (fleet,call) VALUES (?,?)});
 		my $addattackpoint = $DBH->prepare('UPDATE users SET attack_points = attack_points + 1 WHERE uid = ?');
 		my $launchedtarget = $DBH->prepare('UPDATE raid_claims SET launched = True WHERE uid = ? AND target = ? AND wave = ?');
 		my $addfleet = $DBH->prepare(qq{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,?,?,(SELECT max(fleet)+1 from fleets WHERE uid = ?),?,?)});
@@ -92,6 +92,17 @@ sub render_body {
 				$findtarget->execute($planet_id,$tick) or $ND::ERROR .= p $DBH->errstr;;
 			}
 
+			$addfleet->execute($ND::UID,$planet_id,$mission,$tick,$ND::UID,$eta,$tick+$eta-1) or $error .= '<p>'.$DBH->errstr.'</p>';
+			my $fleet = $DBH->last_insert_id(undef,undef,undef,undef,"fleets_id_seq");
+			$mission{Fleet} = $fleet;
+			$mission{Back} = $tick+$eta-1;
+			my $ships = $10;
+			my @ships;
+			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+\w+\s+(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Struc)\s+(\d+)/g){
+				$addships->execute($fleet,$1,$2) or $ND::ERROR .= p $DBH->errstr;
+				push @ships,{Ship => $1, Amount => $2};
+			}
+			$mission{Ships} = \@ships;
 
 			if ($findtarget->rows == 0){
 				$mission{Warning} = p b 'No matching target!';
@@ -107,20 +118,9 @@ sub render_body {
 				}
 			}elsif ($mission eq 'Defend'){
 				my $call = $findtarget->fetchrow_hashref;
-				$informDefChannel->execute($ND::UID,"Def mission sent to call $call->{id} ($x:$y:$z tick $tick)  https://nd.ruin.nu/calls?call=$call->{id}") or $ND::ERROR .= p $DBH->errstr;
+				$informDefChannel->execute($fleet,$call->{id}) or $ND::ERROR .= p $DBH->errstr;
 			}
 
-			$addfleet->execute($ND::UID,$planet_id,$mission,$tick,$ND::UID,$eta,$tick+$eta-1) or $error .= '<p>'.$DBH->errstr.'</p>';
-			my $fleet = $DBH->last_insert_id(undef,undef,undef,undef,"fleets_id_seq");
-			$mission{Fleet} = $fleet;
-			$mission{Back} = $tick+$eta-1;
-			my $ships = $10;
-			my @ships;
-			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+\w+\s+(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Struc)\s+(\d+)/g){
-				$addships->execute($fleet,$1,$2) or $ND::ERROR .= p $DBH->errstr;
-				push @ships,{Ship => $1, Amount => $2};
-			}
-			$mission{Ships} = \@ships;
 			log_message $ND::UID,"Pasted confirmation for $mission mission to $x:$y:$z, landing tick $tick";
 			push @missions,\%mission;
 		}
