@@ -40,7 +40,7 @@ sub render_body {
 	my $call;
 	if (defined param('call') && param('call') =~ /^(\d+)$/){
 		my $query = $DBH->prepare(q{
-			SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member
+			SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member,u.planet
 			FROM calls c 
 			JOIN users u ON c.member = u.uid
 			LEFT OUTER JOIN users dc ON c.dc = dc.uid
@@ -160,6 +160,28 @@ sub render_body {
 			push @fleets, $fleet;
 		}
 		$BODY->param(Fleets => \@fleets);
+
+
+		$fleets = $DBH->prepare(q{
+			SELECT username, id FROM fleets f JOIN users u USING (uid) WHERE target = $1 and landing_tick = $2
+			AND back = landing_tick + eta - 1
+			});
+		$fleets->execute($call->{planet},$call->{landing_tick}) or $ND::ERROR .= p $DBH->errstr;
+		my @defenders;
+		$i = 0;
+		while (my $fleet = $fleets->fetchrow_hashref){
+			$ships->execute($fleet->{id});
+			my @ships;
+			while (my $ship = $ships->fetchrow_hashref){
+				$i++;
+				$ship->{ODD} = $i % 2;
+				push @ships,$ship;
+			}
+			$fleet->{Ships} = \@ships;
+			delete $fleet->{id};
+			push @defenders, $fleet;
+		}
+		$BODY->param(Defenders => \@defenders);
 
 		my $attackers = $DBH->prepare(q{
 			SELECT coords(p.x,p.y,p.z), p.planet_status, p.race,i.eta,i.amount,i.fleet,i.shiptype,p.relationship,p.alliance,i.id

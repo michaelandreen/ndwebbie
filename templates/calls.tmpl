@@ -25,6 +25,21 @@
 	</div>
 	</TMPL_LOOP Fleets>
 	</fieldset>
+	<fieldset><legend>Defenders</legend>
+	<TMPL_LOOP Defenders>
+	<div class="leftinfo">
+		<p>Member: <TMPL_VAR NAME=Username></p>
+		<table>
+			<tr><th>Ship</th><th>Amount</th></tr>
+			<TMPL_LOOP Ships>
+				<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+					<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+				</tr>
+			</TMPL_LOOP>
+		</table>
+	</div>
+	</TMPL_LOOP>
+	</fieldset>
 	<p>Userful information. Change?<input type="checkbox" name="cinfo"/></p>
 	<textarea rows="15" cols="80" name="info"><TMPL_VAR NAME=Info></textarea>
 	<p>

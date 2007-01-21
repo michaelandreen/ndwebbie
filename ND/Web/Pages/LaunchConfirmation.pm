@@ -47,7 +47,8 @@ sub render_body {
 			JOIN raids r ON t.raid = r.id
 			WHERE c.uid = ? AND r.tick+c.wave-1 = ? AND t.planet = ?
 			AND r.open AND not r.removed});
-		my $finddefensetarget = $DBH->prepare(q{SELECT NULL});
+		my $finddefensetarget = $DBH->prepare(q{SELECT c.id FROM calls c JOIN users u ON c.member = u.uid WHERE u.planet = $1 AND c.landing_tick = $2});
+		my $informDefChannel = $DBH->prepare(q{INSERT INTO defense_requests (uid,message) VALUES (?,?)});
 		my $addattackpoint = $DBH->prepare('UPDATE users SET attack_points = attack_points + 1 WHERE uid = ?');
 		my $launchedtarget = $DBH->prepare('UPDATE raid_claims SET launched = True WHERE uid = ? AND target = ? AND wave = ?');
 		my $addfleet = $DBH->prepare(qq{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,?,?,(SELECT max(fleet)+1 from fleets WHERE uid = ?),?,?)});
@@ -85,14 +86,15 @@ sub render_body {
 			my $findtarget = $finddefensetarget;
 			if ($mission eq 'Attack'){
 				$findtarget = $findattacktarget;
+				$findtarget->execute($ND::UID,$tick,$planet_id) or $ND::ERROR .= p $DBH->errstr;;
 			}elsif ($mission eq 'Defend'){
 				$findtarget = $finddefensetarget;
+				$findtarget->execute($planet_id,$tick) or $ND::ERROR .= p $DBH->errstr;;
 			}
 
-			$findtarget->execute($ND::UID,$tick,$planet_id) or $ND::ERROR .= p $DBH->errstr;;
 
 			if ($findtarget->rows == 0){
-				$mission{Warning} = "YOU DON'T HAVE A TARGET WITH THAT LANDING TICK";
+				$mission{Warning} = p b 'No matching target!';
 			}elsif ($mission eq 'Attack'){
 				my $claim = $findtarget->fetchrow_hashref;
 				if ($claim->{launched}){
@@ -103,6 +105,9 @@ sub render_body {
 					$mission{Warning} = "OK:$claim->{target},$claim->{wave},$claim->{launched}";
 					log_message $ND::UID,"Gave attack point for confirmation on $mission mission to $x:$y:$z, landing tick $tick";
 				}
+			}elsif ($mission eq 'Defend'){
+				my $call = $findtarget->fetchrow_hashref;
+				$informDefChannel->execute($ND::UID,"Def mission sent to call $call->{id} ($x:$y:$z tick $tick)  https://nd.ruin.nu/calls?call=$call->{id}") or $ND::ERROR .= p $DBH->errstr;
 			}
 
 			$addfleet->execute($ND::UID,$planet_id,$mission,$tick,$ND::UID,$eta,$tick+$eta-1) or $error .= '<p>'.$DBH->errstr.'</p>';
