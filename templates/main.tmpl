@@ -34,7 +34,6 @@
 </fieldset>
 <fieldset> <legend>Fleets</legend>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
-	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<table>
 	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
 	<TMPL_LOOP Fleets>
@@ -47,6 +46,7 @@
 	</TMPL_LOOP>
 	</table>
 	<p>
+		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 		<input type="submit" name="cmd" value="Change Fleets"/>
 		<input type="submit" name="cmd" value="Recall Fleets"/>
 	</p>
