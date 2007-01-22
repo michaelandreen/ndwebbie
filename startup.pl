@@ -15,6 +15,8 @@ use GD::Graph::lines;
 
 use BBCode::Parser;
 
+use Mail::Sendmail;
+
 use ND;
 use ND::DB;
 use ND::Include;
@@ -48,6 +50,7 @@ use ND::Web::Pages::Motd;
 use ND::Web::Pages::Forum;
 use ND::Web::Pages::Settings;
 use ND::Web::Pages::Graph;
+use ND::Web::Pages::Mail;
 
 
 
