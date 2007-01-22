@@ -144,13 +144,13 @@ sub render_body {
 		my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE fleet = ?');
 		$fleets->execute($call->{member},$call->{landing_tick},$call->{landing_tick});
 		my @fleets;
-		my $i = 0;
 		while (my $fleet = $fleets->fetchrow_hashref){
 			if ($fleet->{back} == $call->{landing_tick}){
 				$fleet->{Fleetcatch} = 1;
 			}
 			$ships->execute($fleet->{id});
 			my @ships;
+			my $i = 0;
 			while (my $ship = $ships->fetchrow_hashref){
 				$i++;
 				$ship->{ODD} = $i % 2;
@@ -163,15 +163,14 @@ sub render_body {
 
 
 		$fleets = $DBH->prepare(q{
-			SELECT username, id FROM fleets f JOIN users u USING (uid) WHERE target = $1 and landing_tick = $2
-			AND back = landing_tick + eta - 1
+			SELECT username, id,back - (landing_tick + eta - 1) AS recalled FROM fleets f JOIN users u USING (uid) WHERE target = $1 and landing_tick = $2
 			});
 		$fleets->execute($call->{planet},$call->{landing_tick}) or $ND::ERROR .= p $DBH->errstr;
 		my @defenders;
-		$i = 0;
 		while (my $fleet = $fleets->fetchrow_hashref){
 			$ships->execute($fleet->{id});
 			my @ships;
+			my $i = 0;
 			while (my $ship = $ships->fetchrow_hashref){
 				$i++;
 				$ship->{ODD} = $i % 2;
@@ -191,7 +190,7 @@ sub render_body {
 			ORDER BY p.x,p.y,p.z});
 		$attackers->execute($call->{id});
 		my @attackers;
-		$i = 0;
+		my $i = 0;
 		while(my $attacker = $attackers->fetchrow_hashref){
 			$i++;
 			$attacker->{ODD} = $i % 2;

@@ -29,6 +29,7 @@
 	<TMPL_LOOP Defenders>
 	<div class="leftinfo">
 		<p>Member: <TMPL_VAR NAME=Username></p>
+		<TMPL_IF Recalled><p style="color:red;">RECALLED!</p></TMPL_IF>	
 		<table>
 			<tr><th>Ship</th><th>Amount</th></tr>
 			<TMPL_LOOP Ships>
