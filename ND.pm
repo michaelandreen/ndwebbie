@@ -49,6 +49,13 @@ sub handler {
 	$ND::DBH->rollback unless $ND::DBH->{AutoCommit};
 	$ND::DBH->disconnect;
 
+	if ($page->{RETURN}){
+		if($page->{RETURN} eq 'REDIRECT'){
+			$ND::r->headers_out->set(Location => $page->{REDIR_LOCATION});
+			$ND::r->status(Apache2::Const::REDIRECT);
+			$ND::r->rflush;
+		}
+	}
 	return Apache2::Const::OK;
 }
 

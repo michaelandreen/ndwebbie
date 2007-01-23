@@ -95,6 +95,10 @@ sub render : method {
 
 	$body = $self->render_body($body);
 
+	unless ($body){
+		return;
+	}
+
 	unless ($self->{XML}){
 		my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$self->{UID});
 

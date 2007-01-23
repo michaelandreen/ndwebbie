@@ -88,8 +88,11 @@ sub render_body {
 			}
 			if (param('cmd') eq 'Submit' and $thread && $thread->{post}){
 				addForumPost($DBH,$thread,$ND::UID,param('message'));
+				$self->{RETURN} = 'REDIRECT';
+				$self->{REDIR_LOCATION} = "/forum?t=$thread->{id}#NewPosts";
 			}
 			$DBH->commit or $ND::ERROR .= p($DBH->errstr);
+			return if $self->{RETURN};
 		}
 		if(param('cmd') eq 'Move' && $board->{moderate}){
 			$DBH->begin_work;
