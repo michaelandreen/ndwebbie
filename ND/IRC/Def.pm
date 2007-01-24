@@ -130,17 +130,19 @@ sub defcall {
 		my $call = "";
 		if ($callnr){
 			my $st = $ND::DBH->prepare(q{
-	SELECT c.landing_tick - (SELECT value::integer FROM misc WHERE id = 'TICK'), concat(i.shiptype||'/') AS shiptype, dc.username
+	SELECT c.landing_tick - (SELECT value::integer FROM misc WHERE id = 'TICK'), concat(i.shiptype||'/') AS shiptype, p.x
 	FROM calls c 
 		JOIN incomings i ON i.call = c.id
 		LEFT OUTER JOIN users dc ON dc.uid = c.dc
+		JOIN users u ON u.uid = c.member
+		JOIN current_planet_stats p ON u.planet = p.id
 	WHERE not covered AND c.id = ?
-	GROUP BY c.id,c.landing_tick,dc.username
+	GROUP BY c.id,c.landing_tick,p.x
 	ORDER BY c.landing_tick;
 			});
 			if (my @row = $ND::DBH->selectrow_array($st,undef,$callnr)){
 				chop($row[1]);
-				$call = "(Anti $row[1] ETA: $row[0])"
+				$call = "(Anti $row[1] ETA: $row[0] Cluster: $row[2])"
 			}
 		}
 		$ND::server->command("notice $ND::memchan DEFENSE REQUIRED!! WAKE UP!!");
