@@ -44,6 +44,7 @@ sub parseMarkup ($) {
 		my $tree = BBCode::Parser->DEFAULT->parse($text);
 		$text = $tree->toHTML;
 	};
+	$text =~ s/\x{3}\d\d?//g; #mirc color TODO: possibly match until \x{0F} and change to [color] block
 	$text =~ s/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]//g;
 	return $text;
 }
