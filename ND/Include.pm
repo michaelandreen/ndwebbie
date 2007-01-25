@@ -50,14 +50,20 @@ sub parseValue {
 }
 
 sub prettyValue {
-	my ($value) = @_;
+	my ($value,$decimals) = @_;
 	my $unit = '';
 	my @units = ('k','M','G','T');
 	for (my $i = 0; $value >= 1000;$i++){
 		$value /= 1000;
 		$unit = $units[$i];
 	}
-	return sprintf('%.2f%s', $value,$unit);
+	unless (defined $decimals){
+		$decimals = '.0';
+		$decimals = '.1' if $value < 100 && $unit;
+		$decimals = '.2' if $value < 10 && $unit;
+	}
+
+	return sprintf('%'.$decimals.'f%s', $value,$unit);
 }
 
 

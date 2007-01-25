@@ -79,7 +79,16 @@ sub render_body {
 		$extra_columns = ", planet_status,hit_us, alliance,relationship";
 	}
 
-	my $query = $DBH->prepare(qq{Select id,coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race, size, score, value, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 - coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue  $extra_columns from current_planet_stats p LEFT OUTER JOIN covop_targets c ON p.id = c.planet where x = ? AND y = ? $where order by x,y,z asc});
+	my $query = $DBH->prepare(qq{Select id,coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race,
+		size, size_gain, size_gain_day,
+		score,score_gain,score_gain_day,
+		value,value_gain,value_gain_day,
+		xp,xp_gain,xp_gain_day,
+		sizerank,sizerank_gain,sizerank_gain_day,
+		scorerank,scorerank_gain,scorerank_gain_day,
+		valuerank,valuerank_gain,valuerank_gain_day,
+		xprank,xprank_gain,xprank_gain_day,
+		p.value - p.size*200 - coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue  $extra_columns from current_planet_stats_full p LEFT OUTER JOIN covop_targets c ON p.id = c.planet where x = ? AND y = ? $where order by x,y,z asc});
 
 	if (defined $z){
 		$query->execute($x,$y,$z);
@@ -92,26 +101,27 @@ sub render_body {
 	my @planets;
 	my $planet_id = undef;
 	my $i = 0;
-	while (my ($id,$coords,$planet,$race,$size,$score,$value,$xp,$sizerank,$scorerank,$valuerank,$xprank
-			,$fleetvalue,$resvalue,$planet_status,$hit_us,$alliance,$relationship,$nick) = $query->fetchrow){
-		$planet_id = $id;
-		my %planet = (Coords => $coords, Planet => $planet, Race => $race, Size => "$size ($sizerank)"
-			, Score => "$score ($scorerank)", Value => "$value ($valuerank)", XP => "$xp ($xprank)"
-			, FleetValue => "$fleetvalue ($resvalue)");
+	while (my $planet = $query->fetchrow_hashref){
+		$planet_id = $planet->{id};
+		for my $type (qw/size score value xp/){
+			#$planet->{$type} = prettyValue($planet->{$type});
+			$planet->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+			$planet->{"${type}img"} = 'stay';
+			$planet->{"${type}img"} = 'up' if $planet->{"${type}_gain_day"} > 0;
+			$planet->{"${type}img"} = 'down' if $planet->{"${type}_gain_day"} < 0;
+			$planet->{"${type}rankimg"} = 'stay';
+			$planet->{"${type}rankimg"} = 'up' if $planet->{"${type}rank_gain_day"} < 0;
+			$planet->{"${type}rankimg"} = 'down' if $planet->{"${type}rank_gain_day"} > 0;
+		}
 		if ($self->isMember && ($self->isOfficer || $self->isBC)){
-			$planet{HitUs} = $hit_us;
-			$planet{Alliance} = "$alliance ($relationship)";
-			$planet{Nick} = "$nick ($planet_status)";
-			$planet{PlanetStatus} = $planet_status;
-			$planet{Relationship} = $relationship;
-			#$planet{isBC} = 1;
-			if ($z && $alliance eq 'NewDawn' && not ($self->isHC || $self->isOfficer)){
-				log_message $ND::UID,"BC browsing ND planet $coords tick $self->{TICK}";
+			if ($z && $planet->{alliance} eq 'NewDawn' && not ($self->isHC || $self->isOfficer)){
+				log_message $ND::UID,"BC browsing ND planet $planet->{coords} tick $self->{TICK}";
 			}
 		}
 		$i++;
-		$planet{ODD} = $i % 2;
-		push @planets,\%planet;
+		$planet->{ODD} = $i % 2;
+		delete $planet->{id};
+		push @planets,$planet;
 	}
 	$BODY->param(Planets => \@planets);
 
