@@ -68,7 +68,7 @@ sub render_body {
 			my $tick = $self->{TICK};
 			$tick = param('tick') if $tick =~ /^(\d+)$/;
 			my $addintel = $DBH->prepare(qq{SELECT add_intel(?,?,?,?,?,?,?,?,?,?,?)});
-			while ($intel =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\*?\s+.+(?:Ter|Cat|Xan|Zik)?\s+(\d+)\s+(Attack|Defend)\s+(\d+)/g){
+			while ($intel =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\*?\s+.+(?:Ter|Cat|Xan|Zik|Etd)?\s+(\d+)\s+(Attack|Defend)\s+(\d+)/g){
 				$addintel->execute($tick,$9, $1,$2,$3,$4,$5,$6,$7,$8,$ND::UID) or $error .= $DBH->errstr;
 			}
 		}
