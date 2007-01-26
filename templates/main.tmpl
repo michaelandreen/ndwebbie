@@ -1,8 +1,13 @@
 <TMPL_VAR NAME=Error>
 <p>Hello <TMPL_VAR NAME=Username>.</p>
+<div class="leftinfo">
 <fieldset> <legend>Message from HC<TMPL_IF isHC> <a href="motd?">EDIT</a></TMPL_IF></legend>
 	<TMPL_VAR NAME=MOTD>
 </fieldset>
+</div>
+<TMPL_IF PLANET>
+<img class="graph" src="/graph/planetvsnd/<TMPL_VAR NAME=PLANET>" alt="Your planet vs ND avg" height="300" width="500"/>
+</TMPL_IF>
 <fieldset> <legend>Planet/account details</legend>
 	<ul>
 	<TMPL_IF isMEMBER>
@@ -14,8 +19,8 @@
 	<li> Total points: <TMPL_VAR NAME=TotalPoints> </li>
 	</TMPL_IF>
 	<li> Member of the following groups: <TMPL_LOOP Groups><TMPL_VAR NAME=Name><TMPL_UNLESS __last__>, </TMPL_UNLESS></TMPL_LOOP></li>
-	<TMPL_IF hasPLANET>
-	<li>Planet: <TMPL_VAR NAME=PlanetName></li>
+	<TMPL_IF PLANET>
+	<li>Planet: <TMPL_VAR NAME=PlanetName> (<TMPL_VAR NAME=PlanetCoords>)</li>
 	<li>Size: <TMPL_VAR NAME=PlanetSize></li>
 	<li>Score: <TMPL_VAR NAME=PlanetScore></li>
 	<li>Value: <TMPL_VAR NAME=PlanetValue></li>

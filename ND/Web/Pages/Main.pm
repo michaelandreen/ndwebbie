@@ -124,13 +124,15 @@ sub render_body {
 	$BODY->param(HumorPoints => $humor_points);
 	$BODY->param(TotalPoints => $total_points);
 
-	$BODY->param(hasPlanet => $planet);
+	$BODY->param(Planet => $planet);
 
 	if ($planet){
 		my @row = $DBH->selectrow_array('SELECT ruler,planet,coords(x,y,z),size,sizerank
 			,score,scorerank,value,valuerank,xp,xprank FROM current_planet_stats
 			WHERE id = ?',undef,$planet);
 		$BODY->param(PlanetName => "$row[0] OF $row[1] ($row[2])");
+		$BODY->param(PlanetName => "$row[0] OF $row[1]");
+		$BODY->param(PlanetCoords =>  $row[2]);
 		$BODY->param(PlanetSize => "$row[3] ($row[4])");
 		$BODY->param(PlanetScore => "$row[5] ($row[6])");
 		$BODY->param(PlanetValue => "$row[7] ($row[8])");
