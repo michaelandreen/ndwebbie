@@ -122,23 +122,6 @@
 </table>
 </TMPL_LOOP>
 
-<table border="1">
-	<tr>
-	<th>Reported by</th>
-	<th>Report time</th>
-	<th>Message</th>
-	<th></th>
-	</tr>
-	<TMPL_LOOP IntelMessages>
-	<tr>
-		<td><TMPL_VAR NAME=Username></td>
-		<td><TMPL_VAR NAME=Report_date></td>
-		<td><TMPL_VAR NAME=Message></td>
-		<td><a href="/<TMPL_VAR NAME=PAGE>?handle=<TMPL_VAR NAME=Id>">remove</a></td>
-	</tr>
-	</TMPL_LOOP>
-</table>
-
 	<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Coords</legend>
 	<p>Paste a list of coords here</p>
 	<textarea rows="25" cols="80" name="coords"></textarea>

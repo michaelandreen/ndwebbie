@@ -226,16 +226,6 @@ sub render_body {
 		push @intellists,{Message => q{Intel where alliances doesn't match}, Intel => \@intel, Origin => 1, Target => 1};
 		$BODY->param(IntelLIsts => \@intellists);
 	}
-	my $query = $DBH->prepare(q{SELECT i.id, u.username, i.message, report_date FROM intel_messages i
-		JOIN users u ON u.uid = i.uid
-		WHERE NOT handled ORDER BY report_date});
-	$query->execute;
-	my @messages;
-	while (my $message = $query->fetchrow_hashref){
-		$message->{message} = parseMarkup($message->{message});
-		push @messages,$message;
-	}
-	#$BODY->param(IntelMessages => \@messages);
 	$BODY->param(Error => $error);
 	return $BODY;
 }
