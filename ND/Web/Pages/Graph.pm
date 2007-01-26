@@ -89,28 +89,30 @@ sub render_body {
 		my $query;
 		if ($type eq 'stats'){
 				$query = $DBH->prepare(q{SELECT tick,score,size,value,xp*60 AS "xp*60" FROM planets natural join planet_stats WHERE id = planetid($1,$2,$3,$4) ORDER BY tick ASC});
+			$graph_settings{y_min_value} = 0;
 		}elsif($type eq 'ranks'){
 			$query = $DBH->prepare(q{SELECT tick,-scorerank AS score,-sizerank AS size,-valuerank AS value,-xprank AS xp FROM planets natural join planet_stats WHERE id = planetid($1,$2,$3,$4) ORDER BY tick ASC});
+			$graph_settings{y_max_value} = 0;
 		}
 		$query->execute($x,$y,$z,$ND::TICK) or die $DBH->errstr;
 		$graph_settings{title} = $type;
 		$graph_settings{two_axes} = 1;
 		$graph_settings{use_axis} = [2,1,2,2];
-		$graph_settings{y_max_value} = 0 if $type eq 'ranks';
 		$img = graphFromQuery 500,300,\%graph_settings,$query;
 	}elsif ($type eq 'galstats' || $type eq 'galranks'){
 		my $query;
 		my ($x,$y) = ($req{x},$req{y});
 		if ($type eq 'galstats'){
 			$query = $DBH->prepare(q{SELECT tick,score,size,value,xp*60 AS "xp*60" FROM galaxies WHERE x = $1 AND y = $2 ORDER BY tick ASC});
+			$graph_settings{y_min_value} = 0;
 		}elsif($type eq 'galranks'){
 			$query = $DBH->prepare(q{SELECT tick,-scorerank AS score,-sizerank AS size,-valuerank AS value,-xprank AS xp FROM galaxies WHERE x = $1 AND y = $2  ORDER BY tick ASC});
+			$graph_settings{y_max_value} = 0;
 		}
 		$query->execute($x,$y) or die $DBH->errstr;
 		$graph_settings{title} = $type;
 		$graph_settings{two_axes} = 1;
 		$graph_settings{use_axis} = [2,1,2,2];
-		$graph_settings{y_max_value} = 0 if $type eq 'ranks';
 		$img = graphFromQuery 500,300,\%graph_settings,$query;
 	}elsif ($type eq 'alliance' || $type eq 'allianceavg'){
 
