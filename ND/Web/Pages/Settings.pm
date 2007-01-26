@@ -36,12 +36,12 @@ sub render_body {
 
 	if (defined param 'cmd'){
 		if(param('cmd') eq 'stylesheet'){
-			my $query = $DBH->prepare(q{UPDATE users SET css = NULLIF($2,'') WHERE uid = $1});
+			my $query = $DBH->prepare(q{UPDATE users SET css = NULLIF($2,'Default') WHERE uid = $1});
 			$query->execute($ND::UID,escapeHTML(param 'stylesheet')) or $ND::ERROR .= p $DBH->errstr;
 		}
 	}
 	my ($css) = $DBH->selectrow_array(q{SELECT css FROM users WHERE uid = $1},undef,$ND::UID);
-	my @stylesheets = ({Style => '&nbsp;'});
+	my @stylesheets = ({Style => 'Default'});
 	$css = '' unless defined $css;
 	while (<stylesheets/*.css>){
 		if(m{stylesheets/(\w+)\.css}){
