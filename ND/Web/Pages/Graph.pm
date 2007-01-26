@@ -121,7 +121,7 @@ sub render_body {
 		$graph_settings{y2_label} = 'score';
 
 		my $query;
-		unless (defined $1){
+		if ($type eq 'alliance'){
 			$query = $DBH->prepare(q{SELECT a.tick,a.size,a.score,memsize, memscore FROM (SELECT tick,SUM(size) AS memsize,SUM(score) AS memscore FROM planets p JOIN planet_stats ps USING (id) WHERE p.alliance_id = $1 GROUP BY tick) p JOIN alliance_stats a ON a.tick = p.tick
 WHERE a.id = $1 ORDER BY tick});
 		}else{
