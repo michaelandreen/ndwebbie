@@ -105,7 +105,7 @@ WHERE a.id = $1 ORDER BY tick});
 		$graph_settings{y2_label} = 'score';
 
 		my $query = $DBH->prepare(q{SELECT a.tick,a.size/members as NDsize,a.score/members AS NDscore,memsize, memscore FROM (SELECT tick,size AS memsize,score AS memscore FROM planets p JOIN planet_stats ps USING (id) WHERE p.id = $1) p JOIN alliance_stats a ON a.tick = p.tick
-WHERE a.id = 1});
+WHERE a.id = 1 ORDER BY tick});
 		$query->execute($1) or die $DBH->errstr;
 
 		$img = graphFromQuery 500,300,\%graph_settings,$query;
