@@ -20,7 +20,6 @@
 package ND::Web::Image;
 use strict;
 use warnings;
-use CGI qw/:standard/;
 
 use base qw/ND::Web::Page/;
 
@@ -33,11 +32,17 @@ sub render {
 		$img =  $self->render_body;
 	};
 	if (defined $img){
-		print header(-type=> 'image/png', -Content_Length => length $img);
-		binmode STDOUT;
-		print $img;
-	}else{
-		print header;
+		if ((my $rc = $self->{R}->meets_conditions) != Apache2::Const::OK){
+			$self->{R}->status($rc);
+		}else{
+			$self->{R}->headers_out->set(Content_Length => length $img);
+			$self->{R}->content_type('image/png');
+			$self->{R}->rflush;
+			binmode STDOUT;
+			print $img;
+		}
+	}elsif(defined $@){
+		$self->{R}->content_type('text/plain');
 		print $@;
 	}
 };

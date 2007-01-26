@@ -23,6 +23,8 @@ use CGI qw/:standard/;
 use DBI;
 use DBD::Pg qw(:pg_types);
 use Apache2::Request;
+use Apache2::Response;
+use Apache2::RequestUtil;
 use ND::DB;
 use ND::Web::Page;
 use strict;
@@ -33,17 +35,18 @@ $SIG{__WARN__} = sub {$ND::ERROR .= p $_[0]};
 chdir '/var/www/ndawn/code';
 
 sub handler {
-	local $ND::r = shift;
-	local $ND::req = Apache2::Request->new($ND::r, POST_MAX => "1M");
+	my $r = shift;
+	my $req = Apache2::Request->new($r, POST_MAX => "1M");
 	local $ND::DBH = ND::DB::DB();
 	local $ND::UID;
 	local $ND::ERROR;
-	my $page = $ND::req->param('page');
+	my $page = $req->param('page');
+	$r->no_cache;
 
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
 		$page = $1 unless $1 eq 'index' and $3 eq 'pl';
 	}
-	$page = ND::Web::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI}, USER_AGENT => $ENV{HTTP_USER_AGENT}, HTTP_ACCEPT => $ENV{HTTP_ACCEPT});
+	$page = ND::Web::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI}, USER_AGENT => $ENV{HTTP_USER_AGENT}, HTTP_ACCEPT => $ENV{HTTP_ACCEPT}, R => $r);
 	$page->render;
 
 	$ND::DBH->rollback unless $ND::DBH->{AutoCommit};
@@ -51,9 +54,9 @@ sub handler {
 
 	if ($page->{RETURN}){
 		if($page->{RETURN} eq 'REDIRECT'){
-			$ND::r->headers_out->set(Location => $page->{REDIR_LOCATION});
-			$ND::r->status(Apache2::Const::REDIRECT);
-			$ND::r->rflush;
+			$r->headers_out->set(Location => $page->{REDIR_LOCATION});
+			$r->status(Apache2::Const::REDIRECT);
+			$r->rflush;
 		}
 	}
 	return Apache2::Const::OK;
