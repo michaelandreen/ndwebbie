@@ -17,7 +17,7 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::Top100;
+package ND::Web::Pages::PlanetRankings;
 use strict;
 use warnings FATAL => 'all';
 use CGI qw/:standard/;
@@ -25,7 +25,7 @@ use ND::Web::Include;
 
 use base qw/ND::Web::XMLPage/;
 
-$ND::Web::Page::PAGES{top100} = __PACKAGE__;
+$ND::Web::Page::PAGES{planetrankings} = __PACKAGE__;
 
 sub parse {
 	#TODO: Need to fix some links first
@@ -67,12 +67,31 @@ sub render_body {
 		$extra_columns = ",planet_status,hit_us, alliance,relationship,nick";
 	}
 	my $query = $DBH->prepare(qq{SELECT coords(x,y,z),((ruler || ' OF ') || planet) as planet,race,
-		size, score, value, xp, sizerank, scorerank, valuerank, xprank
-		$extra_columns FROM current_planet_stats ORDER BY $order LIMIT 100 OFFSET ?});
+		size, size_gain, size_gain_day,
+		score,score_gain,score_gain_day,
+		value,value_gain,value_gain_day,
+		xp,xp_gain,xp_gain_day,
+		sizerank,sizerank_gain,sizerank_gain_day,
+		scorerank,scorerank_gain,scorerank_gain_day,
+		valuerank,valuerank_gain,valuerank_gain_day,
+		xprank,xprank_gain,xprank_gain_day
+		$extra_columns FROM current_planet_stats_full ORDER BY $order LIMIT 100 OFFSET ?});
 	$query->execute($offset) or $error .= p($DBH->errstr);
 	my @planets;
 	my $i = 0;
 	while (my $planet = $query->fetchrow_hashref){
+		for my $type (qw/size score value xp/){
+			#$planet->{$type} = prettyValue($planet->{$type});
+			$planet->{"${type}img"} = 'stay';
+			$planet->{"${type}img"} = 'up' if $planet->{"${type}_gain_day"} > 0;
+			$planet->{"${type}img"} = 'down' if $planet->{"${type}_gain_day"} < 0;
+			$planet->{"${type}rankimg"} = 'stay';
+			$planet->{"${type}rankimg"} = 'up' if $planet->{"${type}rank_gain_day"} < 0;
+			$planet->{"${type}rankimg"} = 'down' if $planet->{"${type}rank_gain_day"} > 0;
+			for my $type ($type,"${type}_gain","${type}_gain_day"){
+				$planet->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+			}
+		}
 		$i++;
 		$planet->{ODD} = $i % 2;
 		push @planets,$planet;
