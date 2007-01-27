@@ -40,6 +40,7 @@ sub render_body {
 		y2_label => 'rest',
 	);
 
+	my ($tick) = $DBH->selectrow_array(q{SELECT max(tick) from planet_stats});
 	my %req;
 	my $type;
 	if ($self->{URI} =~ m{^/\w+/(stats|ranks)/(.*)}){
@@ -49,7 +50,7 @@ sub render_body {
 			$req{y} = $2;
 			$req{z} = $3;
 			if (defined $3){
-				($req{id}) = $DBH->selectrow_array(q{SELECT planetid($1,$2,$3,$4)},undef,$1,$2,$3,$self->{TICK});
+				($req{id}) = $DBH->selectrow_array(q{SELECT planetid($1,$2,$3,$4)},undef,$1,$2,$3,$tick);
 			}else{
 				$type = "gal$type";
 				$req{id} = 100*$2+$2;
@@ -66,7 +67,7 @@ sub render_body {
 	die 'no real type' unless $type;
 
 	my $findGraph = $DBH->prepare(q{SELECT EXTRACT(EPOCH FROM last_modified) AS last_modified FROM graphs WHERE id = $1 AND tick = $2 AND type = $3});
-	$findGraph->execute($req{id},$self->{TICK},$type) or die $DBH->errstr;
+	$findGraph->execute($req{id},$tick,$type) or die $DBH->errstr;
 	if (my $graph = $findGraph->fetchrow_hashref){
 		$self->{R}->set_last_modified($graph->{last_modified});
 		if ((my $rc = $self->{R}->meets_conditions) != Apache2::Const::OK){
@@ -74,7 +75,7 @@ sub render_body {
 			return;
 		}
 		my $findGraph = $DBH->prepare(q{SELECT img FROM graphs WHERE id = $1 AND tick = $2 AND type = $3});
-		$findGraph->execute($req{id},$self->{TICK},$type) or die $DBH->errstr;
+		$findGraph->execute($req{id},$tick,$type) or die $DBH->errstr;
 		$graph = $findGraph->fetchrow_hashref;
 		return $graph->{img}
 	}
@@ -94,7 +95,7 @@ sub render_body {
 			$query = $DBH->prepare(q{SELECT tick,-scorerank AS score,-sizerank AS size,-valuerank AS value,-xprank AS xp FROM planets natural join planet_stats WHERE id = planetid($1,$2,$3,$4) ORDER BY tick ASC});
 			$graph_settings{y_max_value} = 0;
 		}
-		$query->execute($x,$y,$z,$ND::TICK) or die $DBH->errstr;
+		$query->execute($x,$y,$z,$tick) or die $DBH->errstr;
 		$graph_settings{title} = $type;
 		$graph_settings{two_axes} = 1;
 		$graph_settings{use_axis} = [2,1,2,2];
@@ -152,7 +153,7 @@ WHERE a.id = $1 ORDER BY tick});
 	$delGraph->execute($req{id},$type) or die $DBH->errstr;
 	$addGraph->bind_param('$1',$type,{TYPE => DBI::SQL_VARCHAR }) or die $DBH->errstr;
 	$addGraph->bind_param('$2',$req{id},{TYPE => DBI::SQL_INTEGER }) or die $DBH->errstr;
-	$addGraph->bind_param('$3',$self->{TICK},{TYPE => DBI::SQL_INTEGER }) or die $DBH->errstr;
+	$addGraph->bind_param('$3',$tick,{TYPE => DBI::SQL_INTEGER }) or die $DBH->errstr;
 	$addGraph->bind_param('$4',$img,{TYPE => DBI::SQL_VARBINARY }) or die $DBH->errstr;
 	$addGraph->execute or die $DBH->errstr;
 	$self->{R}->set_last_modified(time);
