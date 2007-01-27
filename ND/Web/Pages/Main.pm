@@ -96,10 +96,6 @@ sub render_body {
 			WHERE uid = ? });
 		$query->execute($1,$2,$3,$ND::UID);
 	}
-	if(param('oldpass') && param('pass')){
-		my $query = $DBH->prepare('UPDATE users SET password = MD5(?) WHERE password = MD5(?) AND uid = ?');
-		$query->execute(param('pass'),param('oldpass'),$ND::UID);
-	}
 
 	my ($motd) = $DBH->selectrow_array("SELECT value FROM misc WHERE id='MOTD'");
 
@@ -126,17 +122,34 @@ sub render_body {
 
 	$BODY->param(Planet => $planet);
 
-	if ($planet){
-		my @row = $DBH->selectrow_array('SELECT ruler,planet,coords(x,y,z),size,sizerank
-			,score,scorerank,value,valuerank,xp,xprank FROM current_planet_stats
-			WHERE id = ?',undef,$planet);
-		$BODY->param(PlanetName => "$row[0] OF $row[1] ($row[2])");
-		$BODY->param(PlanetName => "$row[0] OF $row[1]");
-		$BODY->param(PlanetCoords =>  $row[2]);
-		$BODY->param(PlanetSize => "$row[3] ($row[4])");
-		$BODY->param(PlanetScore => "$row[5] ($row[6])");
-		$BODY->param(PlanetValue => "$row[7] ($row[8])");
-		$BODY->param(PlanetXP => "$row[9] ($row[10])");
+
+	my $planetstats= $DBH->selectrow_hashref(q{Select coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race,
+		size, size_gain, size_gain_day,
+		score,score_gain,score_gain_day,
+		value,value_gain,value_gain_day,
+		xp,xp_gain,xp_gain_day,
+		sizerank,sizerank_gain,sizerank_gain_day,
+		scorerank,scorerank_gain,scorerank_gain_day,
+		valuerank,valuerank_gain,valuerank_gain_day,
+		xprank,xprank_gain,xprank_gain_day
+		from current_planet_stats_full p
+			WHERE id = ?},undef,$planet) if $planet;
+	if ($planetstats){
+		my $planet = $planetstats;
+		for my $type (qw/size score value xp/){
+			$planet->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+			$planet->{"${type}img"} = 'stay';
+			$planet->{"${type}img"} = 'up' if $planet->{"${type}_gain_day"} > 0;
+			$planet->{"${type}img"} = 'down' if $planet->{"${type}_gain_day"} < 0;
+			$planet->{"${type}rankimg"} = 'stay';
+			$planet->{"${type}rankimg"} = 'up' if $planet->{"${type}rank_gain_day"} < 0;
+			$planet->{"${type}rankimg"} = 'down' if $planet->{"${type}rank_gain_day"} > 0;
+			for my $type ($type,"${type}_gain","${type}_gain_day"){
+				$planet->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+			}
+		}
+		$BODY->param(Planets => [$planet]);
+		$BODY->param(PlanetCoords => $planet->{coords});
 	}
 
 

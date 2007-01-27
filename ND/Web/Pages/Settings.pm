@@ -40,6 +40,10 @@ sub render_body {
 			$query->execute($ND::UID,escapeHTML(param 'stylesheet')) or $ND::ERROR .= p $DBH->errstr;
 		}
 	}
+	if(param('oldpass') && param('pass')){
+		my $query = $DBH->prepare('UPDATE users SET password = MD5(?) WHERE password = MD5(?) AND uid = ?');
+		$query->execute(param('pass'),param('oldpass'),$ND::UID);
+	}
 	my ($css) = $DBH->selectrow_array(q{SELECT css FROM users WHERE uid = $1},undef,$ND::UID);
 	my @stylesheets = ({Style => 'Default'});
 	$css = '' unless defined $css;

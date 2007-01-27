@@ -1,4 +1,4 @@
-<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Style</legend>
+<form action="/<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Style</legend>
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<input type="hidden" name="cmd" value="stylesheet"/>
 	Stylesheet: <select name="stylesheet">
@@ -8,3 +8,14 @@
 				</select>
 	<br/><input type="submit" value="Change"/>
 </fieldset></form>
+<form action="/<TMPL_VAR NAME=PAGE>" method="post"> <fieldset> <legend>Change password</legend>
+	<input type="hidden" name="cmd" value="password"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	<p>Old password: 
+	<input type="password" name="oldpass" value=""/>
+	New password: 
+	<input type="password" name="pass" value=""/>
+	<input type="submit" value="Submit"/>
+	</p>
+</fieldset>
+</form>

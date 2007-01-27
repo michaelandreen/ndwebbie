@@ -1,7 +1,7 @@
 <TMPL_VAR NAME=Error>
 <p>Hello <TMPL_VAR NAME=Username>.</p>
 <div class="leftinfo">
-<fieldset> <legend>Message from HC<TMPL_IF isHC> <a href="motd?">EDIT</a></TMPL_IF></legend>
+<fieldset class="forum-post"> <legend>Message from HC<TMPL_IF isHC> <a href="motd?">EDIT</a></TMPL_IF></legend>
 	<TMPL_VAR NAME=MOTD>
 </fieldset>
 </div>
@@ -9,7 +9,35 @@
 <img class="graph" src="/graph/planetvsnd/<TMPL_VAR NAME=PLANET>" alt="Your planet vs ND avg" height="300" width="500"/>
 </TMPL_IF>
 <div class="clear"></div>
-<fieldset> <legend>Planet/account details</legend>
+
+<TMPL_IF PLANET>
+<table>
+	<tr align="center"><th colspan="4">Rank</th>
+	</tr>
+	<tr><th>Size</th><th>Score</th><th>Value </th> <th>XP</th><th>Coords</th><th>Planet</th><th>Race</th><th>Size</th><th>Score</th><th>Value</th>
+		<th>XP</th>
+	</tr>
+<TMPL_LOOP Planets>
+	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=ValueRank_Gain_day> Today | <TMPL_VAR NAME=ValueRank_Gain> Tick"><TMPL_VAR NAME=ValueRank> <img src="/images/<TMPL_VAR NAME=ValueRankImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=XPRank_Gain_day> Today | <TMPL_VAR NAME=XPRank_Gain> Tick"><TMPL_VAR NAME=XPRank> <img src="/images/<TMPL_VAR NAME=XPRankImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
+
+		<td align="left"><a href="/check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+		<td align="center"><TMPL_VAR NAME=Planet></td>
+		<td align="center"><TMPL_VAR NAME=Race></td>
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Size_Gain_day> Today | <TMPL_VAR NAME=Size_Gain> Tick"><TMPL_VAR NAME=Size> <img src="/images/<TMPL_VAR NAME=SizeImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Score_Gain_day> Today | <TMPL_VAR NAME=Score_Gain> Tick"><TMPL_VAR NAME=Score> <img src="/images/<TMPL_VAR NAME=ScoreImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Value_Gain_day> Today | <TMPL_VAR NAME=Value_Gain> Tick"><TMPL_VAR NAME=Value> <img src="/images/<TMPL_VAR NAME=ValueImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
+		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=XP_Gain_day> Today | <TMPL_VAR NAME=XP_Gain> Tick"><TMPL_VAR NAME=XP> <img src="/images/<TMPL_VAR NAME=XPImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
+		</tr>
+	</TMPL_LOOP>
+	</table>
+</TMPL_IF>
+<div class="leftinfo">
+<fieldset class="forum-post"> <legend>Account details</legend>
 	<ul>
 	<TMPL_IF isMEMBER>
 	<li> ND rank (by score): <TMPL_VAR NAME=NDRank> </li>
@@ -20,13 +48,8 @@
 	<li> Total points: <TMPL_VAR NAME=TotalPoints> </li>
 	</TMPL_IF>
 	<li> Member of the following groups: <TMPL_LOOP Groups><TMPL_VAR NAME=Name><TMPL_UNLESS __last__>, </TMPL_UNLESS></TMPL_LOOP></li>
-	<TMPL_IF PLANET>
-	<li>Planet: <TMPL_VAR NAME=PlanetName> (<TMPL_VAR NAME=PlanetCoords>)</li>
-	<li>Size: <TMPL_VAR NAME=PlanetSize></li>
-	<li>Score: <TMPL_VAR NAME=PlanetScore></li>
-	<li>Value: <TMPL_VAR NAME=PlanetValue></li>
-	<li>XP: <TMPL_VAR NAME=PlanetXP></li>	
-	<TMPL_ELSE>
+	</ul>
+	<TMPL_UNLESS PLANET>
 		<TMPL_IF isMEMBER>
 		<form action="<TMPL_VAR NAME=PAGE>" method="post">
 			<p>We need your planet's coordinates: 
@@ -35,10 +58,10 @@
 			</p>
 		</form>
 		</TMPL_IF>
-	</TMPL_IF>
-	</ul>
+	</TMPL_UNLESS>
 </fieldset>
-<fieldset> <legend>Fleets</legend>
+
+<fieldset class="forum-post"> <legend>Fleets</legend>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<table>
 	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
@@ -59,7 +82,7 @@
 </form>
 </fieldset>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
-<fieldset> <legend>SMS</legend>
+<fieldset class="forum-post"> <legend>SMS</legend>
 	<p>Number: 
 	<input type="text" name="sms" value="<TMPL_VAR NAME=SMS>"/>
 	<input type="submit" value="Submit"/>
@@ -67,7 +90,7 @@
 </fieldset>
 </form>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
-<fieldset> <legend>Fleet</legend>
+<fieldset class="forum-post"> <legend>Fleet</legend>
 	<p>Paste your total fleet from ships section on overview here (do it daily to see the menus):</p>
 	<textarea rows="15" cols="50" name="fleet"></textarea>
 	<input type="hidden" name="cmd" value="fleet"/>
@@ -75,14 +98,8 @@
 	<br/><input type="submit" value="Submit"/>
 </fieldset>
 </form>
-<form action="<TMPL_VAR NAME=PAGE>" method="post">
-<fieldset> <legend>Change password</legend>
-	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
-	<p>Old password: 
-	<input type="password" name="oldpass" value=""/>
-	New password: 
-	<input type="password" name="pass" value=""/>
-	<input type="submit" value="Submit"/>
-	</p>
-</fieldset>
-</form>
+</div>
+<TMPL_IF PlanetCoords>
+<img class="graph" src="/graph/stats/<TMPL_VAR NAME=PlanetCoords>" alt="stats for your planet" height="300" width="500"/>
+<img class="graph" src="/graph/ranks/<TMPL_VAR NAME=PlanetCoords>" alt="ranks for your planet" height="300" width="500"/>
+</TMPL_IF>

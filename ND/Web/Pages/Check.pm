@@ -104,14 +104,15 @@ sub render_body {
 	while (my $planet = $query->fetchrow_hashref){
 		$planet_id = $planet->{id};
 		for my $type (qw/size score value xp/){
-			#$planet->{$type} = prettyValue($planet->{$type});
-			$planet->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
 			$planet->{"${type}img"} = 'stay';
 			$planet->{"${type}img"} = 'up' if $planet->{"${type}_gain_day"} > 0;
 			$planet->{"${type}img"} = 'down' if $planet->{"${type}_gain_day"} < 0;
 			$planet->{"${type}rankimg"} = 'stay';
 			$planet->{"${type}rankimg"} = 'up' if $planet->{"${type}rank_gain_day"} < 0;
 			$planet->{"${type}rankimg"} = 'down' if $planet->{"${type}rank_gain_day"} > 0;
+			for my $type ($type,"${type}_gain","${type}_gain_day"){
+				$planet->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+			}
 		}
 		if ($self->isMember && ($self->isOfficer || $self->isBC)){
 			if ($z && $planet->{alliance} eq 'NewDawn' && not ($self->isHC || $self->isOfficer)){
