@@ -66,7 +66,7 @@ sub render_body {
 	if ($self->isHC){
 		$extra_columns = ",planet_status,hit_us, alliance,relationship,nick";
 	}
-	my $query = $DBH->prepare(qq{SELECT coords(x,y,z),((ruler || ' OF ') || planet) as planet,race,
+	my $query = $DBH->prepare(qq{SELECT x,y,z,((ruler || ' OF ') || planet) as planet,race,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,

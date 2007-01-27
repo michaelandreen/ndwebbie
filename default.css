@@ -175,6 +175,10 @@ div.clear {
 	font-size: 1px;
 }
 
+table.stats tr td{
+	padding-left: 0.5em;
+}
+
 td.LowestPrio{
 	background: red;
 	color: black;

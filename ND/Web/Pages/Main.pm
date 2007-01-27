@@ -123,7 +123,7 @@ sub render_body {
 	$BODY->param(Planet => $planet);
 
 
-	my $planetstats= $DBH->selectrow_hashref(q{Select coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race,
+	my $planetstats= $DBH->selectrow_hashref(q{SELECT x,y,z, ((ruler || ' OF ') || p.planet) as planet,race,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,
@@ -149,7 +149,7 @@ sub render_body {
 			}
 		}
 		$BODY->param(Planets => [$planet]);
-		$BODY->param(PlanetCoords => $planet->{coords});
+		$BODY->param(PlanetCoords => "$planet->{x}:$planet->{y}:$planet->{z}");
 	}
 
 

@@ -1,7 +1,7 @@
 <TMPL_VAR NAME=Error>
 <p><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
 	<a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
-<table>
+<table class="stats">
 	<tr align="center"><th colspan="4">Rank</th>
 	</tr>
 	<tr>
@@ -9,7 +9,7 @@
 	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score</a></th>
 	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=valuerank">Value</a></th>
 	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=xprank">XP</a></th>
-	<th>Coords</th><th>Planet</th><th>Race</th>
+	<th>X</th><th>Y</th><th>Z</th><th>Planet</th><th>Race</th>
 	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size</a></th>
 	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score</a></th>
 	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=valuerank">Value</a></th>
@@ -22,23 +22,25 @@
 	</tr>
 	<TMPL_LOOP Planets>
 	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=ValueRank_Gain_day> Today | <TMPL_VAR NAME=ValueRank_Gain> Tick"><TMPL_VAR NAME=ValueRank> <img src="/images/<TMPL_VAR NAME=ValueRankImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=XPRank_Gain_day> Today | <TMPL_VAR NAME=XPRank_Gain> Tick"><TMPL_VAR NAME=XPRank> <img src="/images/<TMPL_VAR NAME=XPRankImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
+		<td title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+		<td title="<TMPL_VAR NAME=ValueRank_Gain_day> Today | <TMPL_VAR NAME=ValueRank_Gain> Tick"><TMPL_VAR NAME=ValueRank> <img src="/images/<TMPL_VAR NAME=ValueRankImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
+		<td title="<TMPL_VAR NAME=XPRank_Gain_day> Today | <TMPL_VAR NAME=XPRank_Gain> Tick"><TMPL_VAR NAME=XPRank> <img src="/images/<TMPL_VAR NAME=XPRankImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
 
-		<td align="left"><a href="/check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
+		<td><TMPL_VAR NAME=X></td>
+		<td><a href="/check?coords=<TMPL_VAR NAME=X>:<TMPL_VAR NAME=Y>"><TMPL_VAR NAME=Y></a></td>
+		<td><a href="/check?coords=<TMPL_VAR NAME=X>:<TMPL_VAR NAME=Y>:<TMPL_VAR NAME=Z>"><TMPL_VAR NAME=Z></a></td>
 		<td align="center"><TMPL_VAR NAME=Planet></td>
 		<td align="center"><TMPL_VAR NAME=Race></td>
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Size_Gain_day> Today | <TMPL_VAR NAME=Size_Gain> Tick"><TMPL_VAR NAME=Size> <img src="/images/<TMPL_VAR NAME=SizeImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Score_Gain_day> Today | <TMPL_VAR NAME=Score_Gain> Tick"><TMPL_VAR NAME=Score> <img src="/images/<TMPL_VAR NAME=ScoreImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Value_Gain_day> Today | <TMPL_VAR NAME=Value_Gain> Tick"><TMPL_VAR NAME=Value> <img src="/images/<TMPL_VAR NAME=ValueImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
-		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=XP_Gain_day> Today | <TMPL_VAR NAME=XP_Gain> Tick"><TMPL_VAR NAME=XP> <img src="/images/<TMPL_VAR NAME=XPImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Size_Gain_day> Today | <TMPL_VAR NAME=Size_Gain> Tick"><TMPL_VAR NAME=Size> <img src="/images/<TMPL_VAR NAME=SizeImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Score_Gain_day> Today | <TMPL_VAR NAME=Score_Gain> Tick"><TMPL_VAR NAME=Score> <img src="/images/<TMPL_VAR NAME=ScoreImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Value_Gain_day> Today | <TMPL_VAR NAME=Value_Gain> Tick"><TMPL_VAR NAME=Value> <img src="/images/<TMPL_VAR NAME=ValueImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
+		<td title="<TMPL_VAR NAME=XP_Gain_day> Today | <TMPL_VAR NAME=XP_Gain> Tick"><TMPL_VAR NAME=XP> <img src="/images/<TMPL_VAR NAME=XPImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
 
 	<TMPL_IF isHC>
-	<td class="<TMPL_VAR NAME=Planet_Status>"><a href="/intel?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick>(<TMPL_VAR NAME=Planet_Status>)</a></td>
+	<td align="center" class="<TMPL_VAR NAME=Planet_Status>"><a href="/intel?coords=<TMPL_VAR NAME=X>:<TMPL_VAR NAME=Y>:<TMPL_VAR NAME=Z>"><TMPL_VAR NAME=Nick>(<TMPL_VAR NAME=Planet_Status>)</a></td>
 	<td><TMPL_VAR NAME=Hit_Us></td>
-	<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td>
+	<td align="center" class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance></td>
 	</TMPL_IF>
 	</tr>
 	</TMPL_LOOP>
