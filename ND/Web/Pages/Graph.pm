@@ -137,10 +137,10 @@ WHERE a.id = $1 ORDER BY tick});
 	}elsif ($type eq 'planetvsnd'){
 		$graph_settings{title} = 'You vs ND AVG';
 		$graph_settings{two_axes} = 1;
-		$graph_settings{use_axis} = [1,2,1,2];
+		$graph_settings{use_axis} = [2,1,1,2];
 		$graph_settings{y2_label} = 'score';
 
-		my $query = $DBH->prepare(q{SELECT a.tick,a.size/members as NDsize,a.score/members AS NDscore,memsize, memscore FROM (SELECT tick,size AS memsize,score AS memscore FROM planets p JOIN planet_stats ps USING (id) WHERE p.id = $1) p JOIN alliance_stats a ON a.tick = p.tick
+		my $query = $DBH->prepare(q{SELECT a.tick,a.score/members AS NDscore,a.size/members as NDsize,memsize, memscore FROM (SELECT tick,size AS memsize,score AS memscore FROM planets p JOIN planet_stats ps USING (id) WHERE p.id = $1) p JOIN alliance_stats a ON a.tick = p.tick
 			WHERE a.id = 1 ORDER BY tick});
 		$query->execute($req{id}) or die $DBH->errstr;
 
