@@ -130,7 +130,7 @@ sub render_body {
 			$order = "$1 DESC";
 		}
 		my $query = $DBH->prepare(qq{
-			SELECT DISTINCT a.id,name,COALESCE(s.score,SUM(p.score)) AS score,COALESCE(s.size,SUM(p.size)) AS size,s.members,count(*) AS kmem,
+			SELECT DISTINCT a.id,name,COALESCE(s.score,SUM(p.score)) AS score,COALESCE(s.size,SUM(p.size)) AS size,s.members,count(p.score) AS kmem,
 			COALESCE(SUM(p.score),-1) AS kscore, COALESCE(SUM(p.size),-1) AS ksize, COALESCE(SUM(p.xp),-1) AS kxp,COALESCE(SUM(p.value),-1) AS kvalue,
 			COALESCE(s.score/LEAST(s.members,60),-1) AS scavg, COALESCE(AVG(p.score)::int,-1) AS kscavg, COALESCE(s.size/s.members,-1) AS siavg,
 			COALESCE(AVG(p.size)::int,-1) AS ksiavg, COALESCE(AVG(p.xp)::int,-1) AS kxpavg, COALESCE(AVG(p.value)::int,-1) AS kvalavg
