@@ -58,7 +58,7 @@ ORDER BY fp.time ASC
 		my $text = parseMarkup(escapeHTML(param('message')));
 		$text .= p b $@ if $@;
 		push @posts,{message => $text, unread => 1, username => 'PREVIEW', Time => 'Not submitted yet', NewPosts => $old ? 1 : 0};
-		$template->param(Message => param('message'));
+		$template->param(Message => escapeHTML param('message'));
 	}
 	$template->param(Posts => \@posts);
 
