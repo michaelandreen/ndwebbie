@@ -6,8 +6,7 @@
 	<tr><th>Target</th><th>Tick</th></tr>
 	<TMPL_LOOP Targets>
 	<tr>
-		<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a>
-			<TMPL_IF Launched>*</TMPL_IF></td>
+		<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords><TMPL_IF Launched>*</TMPL_IF></a></td>
 		<td><a href="raids?raid=<TMPL_VAR NAME=Raid>#target<TMPL_VAR NAME=Target>">
 			<TMPL_VAR NAME=Tick></a></td>
 		<td><TMPL_UNLESS AJAX><a href="raids?raid=<TMPL_VAR NAME=Raid>&amp;cmd=Unclaim&amp;target=<TMPL_VAR NAME=Target>&amp;wave=<TMPL_VAR NAME=Wave>" >U</a>
