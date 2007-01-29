@@ -80,7 +80,7 @@ sub render_body {
 				,undef,escapeHTML(param('comment')),param('target'))
 				or $error .= p($DBH->errstr);
 
-		}elsif (param('cmd') eq 'change'){
+		}elsif (param('cmd') eq 'change' || param('cmd') eq 'submit'){
 			$DBH->begin_work;
 			my $message = escapeHTML(param('message'));
 			$raid->{message} = $message;
