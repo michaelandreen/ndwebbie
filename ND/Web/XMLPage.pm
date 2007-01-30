@@ -129,6 +129,7 @@ sub render : method {
 	$template->param(Error => $ND::ERROR);
 	$template->param(BODY => $body->output);
 	my $output = $template->output;
+	$output =~ s/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]//g;
 	print header(-type=> $type, -charset => 'utf-8', -Content_Length => length $output);
 	print $output;
 };

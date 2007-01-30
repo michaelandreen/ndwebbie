@@ -58,7 +58,11 @@ ORDER BY fp.time ASC
 		my $text = parseMarkup(escapeHTML(param('message')));
 		$text .= p b $@ if $@;
 		push @posts,{message => $text, unread => 1, username => 'PREVIEW', Time => 'Not submitted yet', NewPosts => $old ? 1 : 0};
-		$template->param(Message => escapeHTML param('message'));
+
+		$text = escapeHTML param('message');
+		$text =~ s/\x{3}\d\d?//g; #mirc color TODO: possibly match until \x{0F} and change to [color] block
+		$text =~ s/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]//g;
+		$template->param(Message => $text);
 	}
 	$template->param(Posts => \@posts);
 
