@@ -52,7 +52,7 @@ sub graphFromQuery {
 		}
 
 	}
-	$graph_settings{x_label_skip} = int(1+(scalar @{$fields[0]}) / 10);
+	$graph_settings{x_label_skip} = int(1+(scalar @{$fields[0]}) / 6);
 
 	my $graph = GD::Graph::lines->new($x,$y);
 	$graph->set_legend(@{$query->{NAME}}[1..$fields]) or die $graph->error;
