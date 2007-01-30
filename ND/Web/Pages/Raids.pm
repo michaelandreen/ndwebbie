@@ -19,7 +19,7 @@
 
 package ND::Web::Pages::Raids;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use ND::Include;
 use POSIX;
 use CGI qw/:standard/;
@@ -224,7 +224,7 @@ sub render_body {
 			$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
 
 			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) type, tick, scan FROM scans 
-				WHERE planet = ? AND type ~ 'Unit|Planet|Military|.* Analysis' AND tick + 24 > tick()
+				WHERE planet = ? AND type ~ 'Unit|Planet|Military|.* Analysis' AND tick + 24 > tick() AND scan is not null
 				GROUP BY type, tick, scan ORDER BY type ,tick DESC});
 			$scans->execute($target->{planet});
 			my %scans;
@@ -237,7 +237,7 @@ sub render_body {
 				next unless exists $scans{$type};
 				my $scan = $scans{$type};
 				if ($self->{TICK} - $scan->{tick} > 5){
-					$scan->{scan} =~ s{<table( cellpadding="\d+")?>}{<table$1 class="old">};
+					$scan->{scan} =~ s{<table( cellpadding="\d+")?>}{<table class="old">};
 				}
 				if ($type eq 'Planet'){
 					$target{PlanetScan} = $scan->{scan};
