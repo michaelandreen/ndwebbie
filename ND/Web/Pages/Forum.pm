@@ -164,6 +164,7 @@ sub render_body {
 			$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 			my @boards;
 			while (my $board = $boards->fetchrow_hashref){
+				next if $board->{id} < 0;
 				$threads->execute($board->{id},$ND::UID,1) or $ND::ERROR .= p($DBH->errstr);
 				my $i = 0;
 				my @threads;
