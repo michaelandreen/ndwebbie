@@ -178,7 +178,7 @@ sub render_body {
 		return $self->generateClaimXml($BODY,$raid,$from);
 	}
 	if ($self->{XML} && param('cmd') eq 'gettargets' ){
-		$_ = listTargets();
+		$_ = $self->listTargets();
 		$BODY->param(TargetList => $_);
 	}
 

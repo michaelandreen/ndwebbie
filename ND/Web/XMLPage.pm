@@ -54,7 +54,7 @@ ORDER BY r.tick+c.wave,x,y,z});
 		push @targets,{Coords => $coords, Launched => $target->{launched}, Raid => $target->{raid}
 			, Target => $target->{id}, Tick => $target->{landingtick}, Wave => $target->{wave}
 			, AJAX => $self->{AJAX}, JoinName => $target->{joinable} ? 'N' : 'J'
-			, Joinable => $target->{joinable} ? 'FALSE' : 'TRUE'};
+			, Joinable => $target->{joinable} ? 'FALSE' : 'TRUE', JoinableTitle => $target->{joinable} ? 'Disable join' : 'Make target joinable'};
 	}
 	my $template = HTML::Template->new(filename => "templates/targetlist.tmpl", cache => 1);
 	$template->param(Targets => \@targets);

@@ -129,9 +129,11 @@ function updateClaims(dataSource,xmlthingy,timestamp){
 				var b = document.createElement("input");
 				b.type = 'button';
 				b.value = 'J';
+				b.title = 'Make target joinable';
 				command = 'set&joinable=TRUE';
 				if (joinable == 1){
 					b.value = 'N';
+					b.title = 'Disable join';
 					command = 'set&joinable=FALSE';
 				}
 				b.setAttribute("onclick", "claim('"+dataSource+"',"+target+","+wave+",'"+command+"');");
