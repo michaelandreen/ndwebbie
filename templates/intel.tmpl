@@ -9,7 +9,7 @@
 <p><a href="/<TMPL_VAR NAME=PAGE>?<TMPL_IF Coords>&amp;coords=<TMPL_VAR NAME=Coords></TMPL_IF>&amp;show=all">Show all ticks</a></p>
 
 <TMPL_IF CoordList>
-<table>
+<table class="stats">
 	<tr><th>Coords</th><th>Alliance</th></tr>
 	<TMPL_LOOP CoordList>
 	<tr>
@@ -63,7 +63,7 @@
 </TMPL_IF>
 <TMPL_IF ChannelUsers>
 <p>Planets sharing this channel</p>
-<table>
+<table class="stats">
 	<tr>
 	<th>Coords</th><th>Alliance</th><th>Nick</th><th>Channel</th>
 	</tr>
@@ -94,7 +94,7 @@
 
 <TMPL_LOOP IntelLists>
 <TMPL_IF Message><p><TMPL_VAR NAME=Message></p></TMPL_IF>
-<table>
+<table class="stats">
 	<tr>
 		<TMPL_IF Origin><th>Alliance</th><th>Sender</th></TMPL_IF>
 		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>

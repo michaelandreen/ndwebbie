@@ -26,7 +26,7 @@
 <img class="graph" src="/graph/allianceavg/<TMPL_VAR NAME=Id>" alt="Avg alliance size and score vs members" height="300" width="500"/>
 </div>
 <div class="leftinfo">
-<table>
+<table class="stats">
 	<tr>
 		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=coords">Coords</a></th>
 		<th>Nick</th>
@@ -54,7 +54,7 @@
 </table>
 </div>
 <div class="leftinfo">
-<table>
+<table class="stats">
 	<tr>
 		<th>Alliance</th><th>Sender</th>
 		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>
@@ -79,7 +79,7 @@
 </div>
 
 <TMPL_ELSE>
-<table>
+<table class="stats">
 	<tr>
 		<th>User</th>
 		<th>Known members</th>
