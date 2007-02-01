@@ -6,15 +6,15 @@
 	<tr><th>Target</th><th>Tick</th></tr>
 	<TMPL_LOOP Targets>
 	<tr>
-		<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords><TMPL_IF Launched>*</TMPL_IF></a></td>
-		<td><a href="raids?raid=<TMPL_VAR NAME=Raid>#target<TMPL_VAR NAME=Target>">
+		<td><a href="/check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords><TMPL_IF Launched>*</TMPL_IF></a></td>
+		<td><a href="/raids?raid=<TMPL_VAR NAME=Raid>#target<TMPL_VAR NAME=Target>">
 			<TMPL_VAR NAME=Tick></a></td>
 		<td><TMPL_UNLESS AJAX><a href="raids?raid=<TMPL_VAR NAME=Raid>&amp;cmd=Unclaim&amp;target=<TMPL_VAR NAME=Target>&amp;wave=<TMPL_VAR NAME=Wave>" >U</a>
 			<TMPL_ELSE>
 				<input title="Unclaim target" type="button" value="U" class="small" onclick = 
-				"claim('raids?xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'Unclaim')"/>
+				"claim('/raids?xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'Unclaim')"/>
 				<input title="<TMPL_VAR NAME=JoinableTitle>" type="button" class="small" value="<TMPL_VAR NAME=JoinName>" onclick = 
-				"claim('raids?xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'set&amp;joinable=<TMPL_VAR NAME=Joinable>')"/>
+				"claim('/raids?xml=1&amp;raid=<TMPL_VAR NAME=Raid>',<TMPL_VAR NAME=Target>,<TMPL_VAR NAME=Wave>,'set&amp;joinable=<TMPL_VAR NAME=Joinable>')"/>
 			</TMPL_UNLESS>
 		</td>
 	</tr>
