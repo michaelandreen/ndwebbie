@@ -32,12 +32,14 @@ sub currentCalls {
 	DB();
 	if (1){ #TODO: add check for member
 		my $f = $ND::DBH->prepare(<<SQL
-	SELECT (c.landing_tick - tick()) AS eta, concat(i.shiptype||'/') AS shiptype, dc.username
+	SELECT (c.landing_tick - tick()) AS eta, concat(i.shiptype||'/') AS shiptype, dc.username,p.x
 	FROM calls c 
 		JOIN incomings i ON i.call = c.id
 		LEFT OUTER JOIN users dc ON dc.uid = c.dc
+		JOIN users u ON u.uid = c.member
+		JOIN current_planet_stats p ON u.planet = p.id
 	WHERE open AND (c.landing_tick - tick()) >= 7
-	GROUP BY c.id,c.landing_tick,dc.username
+	GROUP BY c.id,c.landing_tick,dc.username,p.x
 	ORDER BY c.landing_tick;
 SQL
 );
@@ -46,7 +48,7 @@ SQL
 		while (my @row = $f->fetchrow()){
 			chop($row[1]);
 			my $dc = defined $row[2] ? $row[2] : '';
-			$calls .= " (Anti $row[1] ETA: $row[0] DC: $dc) |"
+			$calls .= " (Anti $row[1] ETA: $row[0] Cluster: $row[3] DC: $dc) |"
 		}
 		chop($calls);
 		if (defined $verbose || length $calls > 0){
