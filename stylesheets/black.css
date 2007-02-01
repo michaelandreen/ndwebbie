@@ -50,7 +50,7 @@ table.boards th {
 	font-size: larger;
 }
 
-table a {
+table.boards a {
 	text-decoration: none;
 	width: 100%;
 	display: block;
