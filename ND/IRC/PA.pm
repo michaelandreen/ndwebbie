@@ -28,7 +28,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/checkPlanet checkGal shipEff shipStop parseValue prettyValue/;
+our @EXPORT = qw/checkPlanet checkGal shipEff shipStop parseValue prettyValue calcXp/;
 
 sub checkPlanet {
 	my ($x,$y,$z,$intel) = @_;
