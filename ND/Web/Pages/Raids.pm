@@ -224,7 +224,7 @@ sub render_body {
 			$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
 
 			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) type, tick, scan FROM scans 
-				WHERE planet = ? AND type ~ 'Unit|Planet|Military|.* Analysis' AND tick + 24 > tick() AND scan is not null
+				WHERE planet = ? AND type ~ 'Unit|Planet|Advanced Unit|.* Analysis' AND tick + 24 > tick() AND scan is not null
 				GROUP BY type, tick, scan ORDER BY type ,tick DESC});
 			$scans->execute($target->{planet});
 			my %scans;
@@ -233,7 +233,7 @@ sub render_body {
 			}
 
 			my @scans;
-			for my $type ('Planet','Unit','Military','Surface Analysis','Technology Analysis'){
+			for my $type ('Planet','Unit','Advanced Unit','Surface Analysis','Technology Analysis'){
 				next unless exists $scans{$type};
 				my $scan = $scans{$type};
 				if ($self->{TICK} - $scan->{tick} > 5){

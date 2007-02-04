@@ -190,7 +190,7 @@ sub render_body {
 		while (my($type,$scan_id,$tick,$scan) = $query->fetchrow){
 			$scans{$type} = [$scan_id,$tick,$scan];
 		}
-		for my $type ('Planet','Jumpgate','Unit','Military','Fleet Analysis','Surface Analysis','Technology Analysis','News'){
+		for my $type ('Planet','Jumpgate','Unit','Advanced Unit','Fleet Analysis','Surface Analysis','Technology Analysis','News'){
 			next unless exists $scans{$type};
 			my $scan_id = $scans{$type}->[0];
 			my $tick = $scans{$type}->[1];
