@@ -116,7 +116,7 @@ sub render : method {
 		$template->param(isHC => $self->isHC);
 		$template->param(isDC => $self->isDC());
 		$template->param(isBC => $self->isBC());
-		$template->param(isIntel => $self->isBC());
+		$template->param(isIntel => $self->isIntel());
 		$template->param(isAttacker => $ATTACKER && (!$self->isMember() || ((($TICK - $fleetupdate < 24) || $self->isScanner()) && $self->{PLANET})));
 		if ($ATTACKER && (!$self->isMember() || ((($TICK - $fleetupdate < 24) || $self->isScanner()) && $self->{PLANET}))){
 			$template->param(Targets => $self->listTargets);
