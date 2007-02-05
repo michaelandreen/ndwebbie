@@ -103,12 +103,12 @@ sub render_body {
 		}
 		$BODY->param(Members => \@members);
 
-		my $query = $DBH->prepare(intelquery('o.alliance AS oalliance,coords(o.x,o.y,o.z) AS origin, t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',qq{not ingal AND (t.alliance_id = ? OR t.alliance_id = ?)
+		my $query = $DBH->prepare(intelquery('o.alliance AS oalliance,coords(o.x,o.y,o.z) AS origin, t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',q{not ingal AND (o.alliance_id = $1 OR t.alliance_id = $1)
 				AND (i.mission = 'Defend' OR i.mission = 'AllyDef')
-				AND (t.alliance_id != ? OR t.alliance_id IS NULL OR o.alliance_id != ? OR o.alliance_id IS NULL)
+				AND ((( t.alliance_id != o.alliance_id OR t.alliance_id IS NULL OR o.alliance_id IS NULL)))
 				AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
 				}));
-		$query->execute($alliance->{id},$alliance->{id},$alliance->{id},$alliance->{id}) or $error .= $DBH->errstr;
+		$query->execute($alliance->{id}) or $error .= $DBH->errstr;
 
 		my @intel;
 		$i = 0;

@@ -225,6 +225,7 @@ sub render_body {
 			,undef,$board->{fcid}) or $ND::ERROR .= p($DBH->errstr);
 		$BODY->param(Category =>  $category);
 
+	}elsif($self->{URI} =~ m{^/.*/search/(.*)}){ #List threads in this board
 	}else{ #List boards
 		$BODY->param(Overview => 1);
 		$categories->execute or $ND::ERROR .= p($DBH->errstr);
