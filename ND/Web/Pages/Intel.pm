@@ -155,7 +155,7 @@ sub render_body {
 	if ($planet){
 		$BODY->param(Coords => $planet->{coords});
 		$BODY->param(Planet => $planet->{id});
-		$BODY->param(Nick => $planet->{nick});
+		$BODY->param(Nick => escapeHTML($planet->{nick}));
 		$BODY->param(Channel => $planet->{channel});
 		my @status;
 		for my $status ("&nbsp;","Friendly", "NAP", "Hostile"){
