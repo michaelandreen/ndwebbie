@@ -1,0 +1,54 @@
+body,html {
+	color: white;
+	background-color: black;
+	font-family: sans-serif;
+        font-size: 10px;
+}
+input, textarea {
+	font-size: 10px;
+	background: #003333;
+	color: white;
+}
+a:link, a:hover, a:visited {
+	color: white;
+	text-decoration: none;
+}
+legend {
+	color: white;
+	background: #660000;
+	border-style: solid;
+	border-width: 1px;
+	border-color: white;
+	padding: 1px;
+}
+table.boards td {
+	/*border-style: solid;
+	border-width: 1px;*/
+	border-color: white;
+	padding: 2px;
+	border-collapse: separate;
+	border-spacing: 15pt;
+	font-size: 10px;
+}
+table.boards th {
+	font-size: 10px;
+}
+fieldset.forum-post legend b {
+	font-size: 10px;
+}
+ul.linkbar li {
+	background: #000044;
+	color: white;
+	margin: 0.5em 0;
+	padding: 0.3em;
+	/*border-right: 1em solid black;*/
+}
+tr.odd {
+	background: #660000;
+	color: white;
+}
+table.old{
+	border: outset 1pt;
+	border-collapse: separate;
+	border-color: grey;
+}
