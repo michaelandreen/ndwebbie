@@ -41,6 +41,7 @@ ul.linkbar li {
 	color: white;
 	margin: 0.5em 0;
 	padding: 0.3em;
+	border: 1px solid white;
 	/*border-right: 1em solid black;*/
 }
 tr.odd {
@@ -51,4 +52,7 @@ table.old{
 	border: outset 1pt;
 	border-collapse: separate;
 	border-color: grey;
+}
+img.graph{
+	background: #999999;
 }
