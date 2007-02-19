@@ -251,6 +251,8 @@ sub render_body {
 				if ($planet->{x} == $target->{x}){
 					$target{style} = 'incluster';
 				}
+				$target{ScoreBash} = 'bash' if ($target->{score}/$planet->{score} < 0.4);
+				$target{ValueBash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
 			}
 
 			my @roids;
