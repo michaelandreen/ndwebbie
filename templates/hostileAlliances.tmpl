@@ -1,0 +1,24 @@
+<form action="/<TMPL_VAR NAME=PAGE>" method="post"><p>
+	Show last <input style="width: 4em" type="text" name="ticks" value="<TMPL_VAR NAME=Ticks>"/> ticks
+	<input type="submit" value="Submit"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	</p>
+</form>
+<form action="/<TMPL_VAR NAME=PAGE>" method="post"><p>
+	Show hostile counts between <input style="width: 4em" type="text" name="begintick" value="<TMPL_VAR NAME=BeginTick>"/> and <input style="width: 4em" type="text" name="endtick" value="<TMPL_VAR NAME=EndTick>"/>
+	<input type="submit" value="Submit"/>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	</p>
+</form>
+<table class="stats">
+	<tr>
+		<th>Alliance</th>
+		<th>Hostile Counts</th>
+	</tr>
+<TMPL_LOOP Alliances>
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td><a href="/alliances?alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
+		<td><TMPL_VAR NAME=HostileCount></td>
+	</tr>
+</TMPL_LOOP>
+</table>

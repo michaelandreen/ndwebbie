@@ -51,6 +51,7 @@ use ND::Web::Pages::Forum;
 use ND::Web::Pages::Settings;
 use ND::Web::Pages::Graph;
 use ND::Web::Pages::Mail;
+use ND::Web::Pages::HostileAlliances;
 
 
 
