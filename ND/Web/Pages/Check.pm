@@ -166,6 +166,14 @@ sub render_body {
 		$scan .= q{</table>};
 		push @scans, {Scan => $scan};
 
+		$query = $DBH->prepare(q{SELECT DISTINCT ON (type) type,scan_id, tick, scan FROM scans WHERE planet = ?
+			GROUP BY type,scan_id, tick, scan ORDER BY type,tick DESC});
+		$query->execute($planet_id);
+		my %scans;
+		while (my($type,$scan_id,$tick,$scan) = $query->fetchrow){
+			$scans{$type} = [$scan_id,$tick,$scan];
+		}
+
 		$query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats WHERE id = ? ORDER BY tick ASC});
 		$scan = q{
 		<p>Previous Coords</p>
@@ -181,16 +189,10 @@ sub render_body {
 			}
 		}
 		$scan .= q{</table>};
+		$scan .= $scans{'Ship Classes'}->[2] if $scans{'Ship Classes'};
 		push @scans, {Scan => $scan};
 
-		$query = $DBH->prepare(q{SELECT DISTINCT ON (type) type,scan_id, tick, scan FROM scans WHERE planet = ?
-			GROUP BY type,scan_id, tick, scan ORDER BY type,tick DESC});
-		$query->execute($planet_id);
-		my %scans;
-		while (my($type,$scan_id,$tick,$scan) = $query->fetchrow){
-			$scans{$type} = [$scan_id,$tick,$scan];
-		}
-		for my $type ('Planet','Jumpgate','Unit','Advanced Unit','Fleet Analysis','Surface Analysis','Technology Analysis','News'){
+		for my $type ('Planet','Jumpgate','Unit','Advanced Unit','Surface Analysis','Technology Analysis','Fleet Analysis','News'){
 			next unless exists $scans{$type};
 			my $scan_id = $scans{$type}->[0];
 			my $tick = $scans{$type}->[1];

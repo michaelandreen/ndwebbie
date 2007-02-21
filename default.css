@@ -187,6 +187,10 @@ td.MediumPrio{
 	background: yellow;
 	color: black;
 }
+td.MediumPrio a{
+	background: yellow;
+	color: black;
+}
 td.HighestPrio{
 	background: green;
 	color: black;

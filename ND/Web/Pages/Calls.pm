@@ -245,6 +245,7 @@ sub render_body {
 				push @calls,{};
 				$i = 0;
 			}
+			$call->{attackers} =~ s{(\d+:\d+:\d+)}{<a href="/check?coords=$1">$1</a>}g;
 			$call->{dc} = 'Hostile' unless defined $call->{dc};
 			$i++;
 			$call->{ODD} = $i % 2;
