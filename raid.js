@@ -139,12 +139,16 @@ function updateClaims(dataSource,xmlthingy,timestamp){
 				b.setAttribute("onclick", "claim('"+dataSource+"',"+target+","+wave+",'"+command+"');");
 				obj.appendChild(b);
 			}
+  			/*@cc_on
 			obj.innerHTML = obj.innerHTML; // IE doesn't understand unless you tell it twice
+  			@*/
 		}
+		/*
 		obj = document.getElementById("coords"+target);
 		var coords = targets[i].getElementsByTagName("coords");;
 		if (obj)
 			obj.innerHTML = coords[0].firstChild.nodeValue;
+		*/
 	}
 	if (timestamp){
 		timestamp = xmlthingy.getElementsByTagName("timestamp");

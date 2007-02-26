@@ -39,7 +39,8 @@ sub process : method {
 sub listTargets () : method {
 	my $self = shift;
 	my $DBH = $self->{DBH};
-	my $query = $DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, released_coords, coords(x,y,z),c.launched,c.wave,c.joinable
+	my $query = $DBH->prepare(qq{SELECT t.id, r.id AS raid, r.tick+c.wave-1 AS landingtick, 
+		(released_coords AND old_claim(timestamp)) AS released_coords, coords(x,y,z),c.launched,c.wave,c.joinable
 FROM raid_claims c
 	JOIN raid_targets t ON c.target = t.id
 	JOIN raids r ON t.raid = r.id

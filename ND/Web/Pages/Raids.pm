@@ -63,7 +63,6 @@ sub generateClaimXml : method {
 	while (my $target = $targets->fetchrow_hashref){
 		my %target;
 		$target{Id} = $target->{id};
-		$target{Coords} = $target->{id};
 		my @waves;
 		for (my $i = 1; $i <= $raid->{waves}; $i++){
 			my %wave;
@@ -83,9 +82,6 @@ sub generateClaimXml : method {
 				$claimers = join '/', @claimers;
 				if ($owner){
 					$wave{Command} = 'Unclaim';
-					if ($raid->{released_coords}){
-						$target{Coords} = $DBH->selectrow_array('SELECT coords(x,y,z) FROM current_planet_stats WHERE id = ?',undef,$target->{planet});
-					}
 				}elsif ($joinable){
 					$wave{Command} = 'Join';
 				}else{
@@ -261,7 +257,7 @@ sub render_body {
 			for (my $i = 1; $i <= $raid->{waves}; $i++){
 				my $roids = floor(0.25*$size);
 				$size -= $roids;
-				my $xp;
+				my $xp = 0;
 				if ($planet){
 					$xp = max(0,floor($roids * 10 * (min(2,$target{Score}/$planet->{score}) + min(2,$target{Value}/$planet->{value})-1)));
 				}
