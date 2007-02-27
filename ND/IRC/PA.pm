@@ -140,16 +140,26 @@ FROM ship_stats WHERE name ILIKE ?
 }
 
 sub calcXp {
-	my ($x,$y,$z,$roids) = @_;
+	my ($x,$y,$z,$roids,$cap) = @_;
+
+	print "$roids:$cap:";
 
 	my ($avalue,$ascore) = $ND::DBH->selectrow_array(q{
 		SELECT value,score FROM current_planet_stats WHERE 
 			id = (SELECT planet FROM users WHERE hostmask ILIKE ?);
 		}, undef, $ND::address);
-	my ($tvalue,$tscore) = $ND::DBH->selectrow_array(q{
-		SELECT value,score FROM current_planet_stats WHERE 
-			x = ? AND y = ? and z = ?;
+	my ($tvalue,$tscore,$tsize) = $ND::DBH->selectrow_array(q{
+		SELECT value,score,size FROM current_planet_stats WHERE 
+		x = ? AND y = ? and z = ?;
 		}, undef, $x,$y,$z);
+	$cap = 0.25 unless $cap;
+	unless($roids){
+		$roids = int($tsize*$cap);
+	}elsif ($roids < 10){
+		$tsize *= .75**($roids-1);
+		$roids = int($cap*$tsize);
+	}
+	$tsize -= $roids;
 	unless (defined $avalue && defined $ascore){
 		$ND::server->command("notice $ND::target You don't have a planet specified");
 		return;
@@ -160,7 +170,9 @@ sub calcXp {
 	}
 	my $xp = int(max($roids * 10 * (min(2,$tscore/$ascore) + min(2,$tvalue/$avalue) - 1),0));
 	my $score = 60 * $xp;
-	$ND::server->command("notice $ND::target You will gain $ND::B$xp$ND::B XP, $ND::B$score$ND::B score, if you steal $roids roids from $x:$y:$z");
+	my $value = $roids*200;
+	my $totscore = prettyValue($score + $value);
+	$ND::server->command("notice $ND::target You will gain $ND::B$xp$ND::B XP, $ND::B$score$ND::B score, if you steal $roids roids ($ND::B$value$ND::B value), from $ND::B$x:$y:$z$ND::B, who will have $ND::B$tsize$ND::B roids left, total score gain will be: $ND::B$totscore$ND::B in total,");
 }
 
 1;
