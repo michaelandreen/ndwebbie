@@ -1,0 +1,37 @@
+<TMPL_VAR NAME=Error>
+<p><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
+	<a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
+<table class="stats">
+	<tr align="center"><th colspan="2">Rank</th>
+	</tr>
+	<tr>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score</a></th>
+	<th>Name</th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=members">Members</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=avgsize">Avg Size</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=avgscore">Avg Score</a></th>
+	<TMPL_IF isHC>
+	</TMPL_IF>
+	</tr>
+	<TMPL_LOOP Alliances>
+	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+
+		<td align="center"><TMPL_VAR NAME=Name></td>
+		<td title="<TMPL_VAR NAME=Members_Gain_day> Today | <TMPL_VAR NAME=Members_Gain> Tick"><TMPL_VAR NAME=Members> <img src="/images/<TMPL_VAR NAME=MembersImg>.png" alt="<TMPL_VAR NAME=MembersImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Size_Gain_day> Today | <TMPL_VAR NAME=Size_Gain> Tick"><TMPL_VAR NAME=Size> <img src="/images/<TMPL_VAR NAME=SizeImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Score_Gain_day> Today | <TMPL_VAR NAME=Score_Gain> Tick"><TMPL_VAR NAME=Score> <img src="/images/<TMPL_VAR NAME=ScoreImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+		<td title="<TMPL_VAR NAME=AvgSize_Gain_day> Today | <TMPL_VAR NAME=AvgSize_Gain> Tick"><TMPL_VAR NAME=AvgSize> <img src="/images/<TMPL_VAR NAME=AvgSizeImg>.png" alt="<TMPL_VAR NAME=AvgSizeImg>"/> </td>
+		<td title="<TMPL_VAR NAME=AvgScore_Gain_day> Today | <TMPL_VAR NAME=AvgScore_Gain> Tick"><TMPL_VAR NAME=AvgScore> <img src="/images/<TMPL_VAR NAME=AvgScoreImg>.png" alt="<TMPL_VAR NAME=AvgScoreImg>"/> </td>
+
+	<TMPL_IF isHC>
+	</TMPL_IF>
+	</tr>
+	</TMPL_LOOP>
+</table>
+<p><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=PrevOffset>&amp;order=<TMPL_VAR NAME=Order>">Previous 100</a>
+	<a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=NextOffset>&amp;order=<TMPL_VAR NAME=Order>">Next 100</a></p>
