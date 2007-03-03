@@ -142,8 +142,6 @@ FROM ship_stats WHERE name ILIKE ?
 sub calcXp {
 	my ($x,$y,$z,$roids,$cap) = @_;
 
-	print "$roids:$cap:";
-
 	my ($avalue,$ascore) = $ND::DBH->selectrow_array(q{
 		SELECT value,score FROM current_planet_stats WHERE 
 			id = (SELECT planet FROM users WHERE hostmask ILIKE ?);
@@ -156,7 +154,7 @@ sub calcXp {
 	unless($roids){
 		$roids = int($tsize*$cap);
 	}elsif ($roids < 10){
-		$tsize *= .75**($roids-1);
+		$tsize *= int(.75**($roids-1));
 		$roids = int($cap*$tsize);
 	}
 	$tsize -= $roids;
