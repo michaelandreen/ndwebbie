@@ -124,7 +124,7 @@ sub render_body {
 		delete $planet->{id};
 		push @planets,$planet;
 	}
-	$BODY->param(Planets => \@planets);
+	$BODY->param(GPlanets => \@planets);
 
 	if ($z && $planet_id){
 		$BODY->param(OnePlanet => 1);
@@ -207,6 +207,46 @@ sub render_body {
 
 		$BODY->param(Scans => \@scans);
 	}
+	$query = $DBH->prepare(q{SELECT x,y,
+		size, size_gain, size_gain_day,
+		score,score_gain,score_gain_day,
+		value,value_gain,value_gain_day,
+		xp,xp_gain,xp_gain_day,
+		sizerank,sizerank_gain,sizerank_gain_day,
+		scorerank,scorerank_gain,scorerank_gain_day,
+		valuerank,valuerank_gain,valuerank_gain_day,
+		xprank,xprank_gain,xprank_gain_day,
+		planets,planets_gain,planets_gain_day
+	FROM galaxies g 
+	WHERE tick = ( SELECT max(tick) AS max FROM galaxies)
+		AND x = $1 AND y = $2
+		});
+	$query->execute($x,$y) or $ND::ERROR .= p($DBH->errstr);
+
+	my @galaxies;
+	$i = 0;
+	while (my $galaxy = $query->fetchrow_hashref){
+		for my $type (qw/planets size score xp value/){
+			#$galaxy->{$type} = prettyValue($galaxy->{$type});
+			next unless defined $galaxy->{"${type}_gain_day"};
+			$galaxy->{"${type}img"} = 'stay';
+			$galaxy->{"${type}img"} = 'up' if $galaxy->{"${type}_gain_day"} > 0;
+			$galaxy->{"${type}img"} = 'down' if $galaxy->{"${type}_gain_day"} < 0;
+			unless( $type eq 'planets'){
+				$galaxy->{"${type}rankimg"} = 'stay';
+				$galaxy->{"${type}rankimg"} = 'up' if $galaxy->{"${type}rank_gain_day"} < 0;
+				$galaxy->{"${type}rankimg"} = 'down' if $galaxy->{"${type}rank_gain_day"} > 0;
+			}
+			for my $type ($type,"${type}_gain","${type}_gain_day"){
+				$galaxy->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+			}
+		}
+		$i++;
+		$galaxy->{ODD} = $i % 2;
+		push @galaxies,$galaxy;
+	}
+	$BODY->param(Galaxies => \@galaxies);
+
 	return $BODY;
 }
 

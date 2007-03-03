@@ -1,11 +1,45 @@
 <p><TMPL_IF Arbiter><TMPL_VAR NAME=Arbiter><TMPL_ELSE><a href="/<TMPL_VAR NAME=PAGE>?cmd=arbiter&amp;coords=<TMPL_VAR ESCAPE=URL NAME=Coords>">Do arbiter check on gal</a></TMPL_IF></p>
+
+<table class="stats">
+	<tr align="center"><th colspan="4">Rank</th>
+	</tr>
+	<tr>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=valuerank">Value</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=xprank">XP</a></th>
+	<th>Coords</th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=planets">Planets</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=sizerank">Size</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=scorerank">Score</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=valuerank">Value</a></th>
+	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=xprank">XP</a></th>
+	</tr>
+	<TMPL_LOOP Galaxies>
+	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+		<td title="<TMPL_VAR NAME=ValueRank_Gain_day> Today | <TMPL_VAR NAME=ValueRank_Gain> Tick"><TMPL_VAR NAME=ValueRank> <img src="/images/<TMPL_VAR NAME=ValueRankImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
+		<td title="<TMPL_VAR NAME=XPRank_Gain_day> Today | <TMPL_VAR NAME=XPRank_Gain> Tick"><TMPL_VAR NAME=XPRank> <img src="/images/<TMPL_VAR NAME=XPRankImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
+
+		<td><a href="/check?coords=<TMPL_VAR NAME=X>:<TMPL_VAR NAME=Y>"><TMPL_VAR NAME=X>:<TMPL_VAR NAME=Y></a></td>
+		<td title="<TMPL_VAR NAME=Planets_Gain_day> Today | <TMPL_VAR NAME=Planets_Gain> Tick"><TMPL_VAR NAME=Planets> <img src="/images/<TMPL_VAR NAME=PlanetsImg>.png" alt="<TMPL_VAR NAME=PlanetsImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Size_Gain_day> Today | <TMPL_VAR NAME=Size_Gain> Tick"><TMPL_VAR NAME=Size> <img src="/images/<TMPL_VAR NAME=SizeImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Score_Gain_day> Today | <TMPL_VAR NAME=Score_Gain> Tick"><TMPL_VAR NAME=Score> <img src="/images/<TMPL_VAR NAME=ScoreImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
+		<td title="<TMPL_VAR NAME=Value_Gain_day> Today | <TMPL_VAR NAME=Value_Gain> Tick"><TMPL_VAR NAME=Value> <img src="/images/<TMPL_VAR NAME=ValueImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
+		<td title="<TMPL_VAR NAME=XP_Gain_day> Today | <TMPL_VAR NAME=XP_Gain> Tick"><TMPL_VAR NAME=XP> <img src="/images/<TMPL_VAR NAME=XPImg>.png" alt="<TMPL_VAR NAME=XPImg>"/> </td>
+
+	</tr>
+	</TMPL_LOOP>
+</table>
+
 <table>
 	<tr align="center"><th colspan="4">Rank</th>
 	</tr>
 	<tr><th>Size</th><th>Score</th><th>Value </th> <th>XP</th><th>Coords</th><th>Planet</th><th>Race</th><th>Size</th><th>Score</th><th>Value </th>
 		<th>XP</th><th>Fleet (Resouce) value</th><TMPL_IF isBC><th>Nick</th><th>Hit us</th><th>Alliance</th></TMPL_IF>
 	</tr>
-	<TMPL_LOOP Planets>
+	<TMPL_LOOP GPlanets>
 	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 
 		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
