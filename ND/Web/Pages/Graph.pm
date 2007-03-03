@@ -53,7 +53,7 @@ sub render_body {
 				($req{id}) = $DBH->selectrow_array(q{SELECT planetid($1,$2,$3,$4)},undef,$1,$2,$3,$tick);
 			}else{
 				$type = "gal$type";
-				$req{id} = 100*$2+$2;
+				$req{id} = 100*$1+$2;
 			}
 		}
 	}elsif($self->{URI} =~ m{^/\w+/(alliance(?:avg)?)/(\d+)}){
@@ -96,7 +96,7 @@ sub render_body {
 			$graph_settings{y_max_value} = 0;
 		}
 		$query->execute($x,$y,$z,$tick) or die $DBH->errstr;
-		$graph_settings{title} = $type;
+		$graph_settings{title} = "$type: $x:$y:$z";
 		$graph_settings{two_axes} = 1;
 		$graph_settings{use_axis} = [2,1,2,2];
 		$img = graphFromQuery 500,300,\%graph_settings,$query;
@@ -111,7 +111,7 @@ sub render_body {
 			$graph_settings{y_max_value} = 0;
 		}
 		$query->execute($x,$y) or die $DBH->errstr;
-		$graph_settings{title} = $type;
+		$graph_settings{title} = "$type: $x:$y";
 		$graph_settings{two_axes} = 1;
 		$graph_settings{use_axis} = [2,1,2,2];
 		$img = graphFromQuery 500,300,\%graph_settings,$query;
