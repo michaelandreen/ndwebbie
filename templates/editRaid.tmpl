@@ -90,6 +90,14 @@
 		</p>
 	</form>
 	<div class="clear">&nbsp;</div>
+	<TMPL_LOOP Waves>
+		<TMPL_IF Claimers>
+			<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;target=<TMPL_VAR NAME=Id>&amp;unclaim=<TMPL_VAR NAME=Wave>">Unclaim wave <TMPL_VAR NAME=Wave> (<TMPL_VAR NAME=Claimers>)</a></p>
+		<TMPL_ELSE>
+			<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;target=<TMPL_VAR NAME=Id>&amp;block=<TMPL_VAR NAME=Wave>">Block wave <TMPL_VAR NAME=Wave></a></p>
+		</TMPL_IF>
+	</TMPL_LOOP>
+	<div class="clear">&nbsp;</div>
 	<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;removeTarget=<TMPL_VAR NAME=Id>">Remove</a></p>
 	</fieldset>
 </TMPL_LOOP>

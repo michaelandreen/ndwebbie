@@ -144,6 +144,15 @@ sub render_body {
 			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
 	}
+	if ($raid && param('block') && param('target')){
+		$DBH->do(q{INSERT INTO raid_claims (target,uid,wave) VALUES(?,-2,?)}
+			,undef,param('target'),param('block'));
+	}
+	if ($raid && param('unclaim') && param('target')){
+		$DBH->do(q{DELETE FROM raid_claims WHERE target = ? AND wave = ?}
+			,undef,param('target'),param('unclaim'));
+		log_message $ND::UID,"BC unclaimed target ".param('target')." wave ".param('unclaim').".";
+	}
 
 	my $groups = $DBH->prepare(q{SELECT g.gid,g.groupname,raid FROM groups g LEFT OUTER JOIN (SELECT gid,raid FROM raid_access WHERE raid = ?) AS ra ON g.gid = ra.gid WHERE g.attack});
 	$groups->execute($raid ? $raid->{id} : undef);
@@ -189,9 +198,27 @@ sub render_body {
 			FROM current_planet_stats p JOIN raid_targets r ON p.id = r.planet 
 			WHERE r.raid = ?
 			ORDER BY $order});
+		my $claims =  $DBH->prepare(qq{ SELECT username,launched FROM raid_claims
+			NATURAL JOIN users WHERE target = ? AND wave = ?});
 		$targetquery->execute($raid->{id}) or $error .= $DBH->errstr;
 		my @targets;
 		while (my $target = $targetquery->fetchrow_hashref){
+			my @waves;
+			for my $i (1 .. $raid->{waves}){
+				$claims->execute($target->{id},$i);
+				my $claimers;
+				if ($claims->rows != 0){
+					my $owner = 0;
+					my @claimers;
+					while (my $claim = $claims->fetchrow_hashref){
+						$claim->{username} .= '*' if ($claim->{launched});
+						push @claimers,$claim->{username};
+					}
+					$claimers = join '/', @claimers;
+				}
+				push @waves,{Wave => $i, Claimers => $claimers};
+			}
+			$target->{waves} = \@waves;
 			push @targets,$target;
 		}
 		$BODY->param(Targets => \@targets);
