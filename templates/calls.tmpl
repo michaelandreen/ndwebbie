@@ -50,7 +50,7 @@
 		<input type="submit" name="cmd" value="<TMPL_VAR NAME=Ignore> call"/>
 	</p>
 </fieldset></form>
-<p>Attackers:</p>
+<fieldset><legend>Attackers:</legend>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<input type="hidden" name="call" value="<TMPL_VAR NAME=Call>"/>
@@ -84,7 +84,8 @@
 	<input type="submit" name="cmd" value="Change"/>
 	<input type="submit" name="cmd" value="Remove"/>
 	</p>
-	</form>
+</form>
+</fieldset>
 <TMPL_ELSE>
 <table>
 	<tr><th>Call</th><th>Member (def points)</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>Current eta</th><th>Inital eta</th><th>Alliance</th><th>Attackers</th></tr>
