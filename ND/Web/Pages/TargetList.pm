@@ -17,61 +17,63 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::Mail;
+package ND::Web::Pages::TargetList;
 use strict;
 use warnings FATAL => 'all';
+use ND::Include;
 use CGI qw/:standard/;
-use Mail::Sendmail;
-
-use ND::Web::Forum;
 use ND::Web::Include;
 
 use base qw/ND::Web::XMLPage/;
 
-$ND::Web::Page::PAGES{mail} = __PACKAGE__;
+$ND::Web::Page::PAGES{targetList} = __PACKAGE__;
 
 sub render_body {
 	my $self = shift;
 	my ($BODY) = @_;
-
+	$self->{TITLE} = 'NF Value';
 	my $DBH = $self->{DBH};
-
-	$self->{TITLE} = 'Mail members';
 
 	return $self->noAccess unless $self->isHC;
 
-	my $groups = $DBH->prepare(q{SELECT gid,groupname FROM groups ORDER BY gid});
-	$groups->execute;
-	my @groups;
-	while (my $group = $groups->fetchrow_hashref){
-		push @groups,$group;
-	}
-	$BODY->param(Groups => \@groups);
-
-	if (defined param('cmd')){
-		my $emails = $DBH->prepare(q{SELECT email FROM users WHERE (uid IN (SELECT uid FROM groupmembers WHERE gid = $1) OR $1 = -1) AND email is not null});
-		$emails->execute(param('group'));
-		my @emails;
-		while (my $email = $emails->fetchrow_hashref){
-			push @emails,$email->{email};
-		}
-		$ND::ERROR .= p (join ', ',@emails);
-
-		my %mail = (
-			smtp => 'ruin.nu',
-			BCC      => (join ',',@emails),
-			From    => 'NewDawn Command <nd@ruin.nu>',
-			'Content-type' => 'text/plain; charset="UTF-8"',
-			Subject => param('subject'),
-			Message => param('message'),
-		);
-
-		if (sendmail %mail) {
-			$ND::ERROR .= p "Mail sent OK.\n" 
-		}else {
-			$ND::ERROR .= p $Mail::Sendmail::error;
+	my $order = 'nfvalue';
+	if (local $_ = param('order')){
+		if (/^(size|value|score|xp)$/){
+			$order = "$1 DESC";
+		}elsif (/^(nfvalue|nfvalue2)$/){
+			$order = "$1 ASC";
 		}
 	}
+
+	my $alliances = '15';
+	if (param('alliances') && param('alliances') =~ /^([\d,]+)$/){
+		$alliances = $1;
+	}
+	my $query = $DBH->prepare(qq{
+SELECT coords(p.x,p.y,p.z),p.alliance, p.score, p.value, p.size, p.xp,nfvalue, nfvalue - sum(pa.value) AS nfvalue2, p.race
+FROM current_planet_stats p
+	JOIN (SELECT g.x,g.y, sum(p.value) AS nfvalue
+	FROM galaxies g join current_planet_stats p on g.x = p.x AND g.y = p.y 
+	WHERE g.tick = (SELECT max(tick) from galaxies)
+		AND ((planet_status IS NULL OR NOT planet_status IN ('Friendly','NAP')) AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP'))) 
+	GROUP BY g.x,g.y
+	) g ON p.x = g.x AND p.y = g.y
+	JOIN current_planet_stats pa ON pa.x = g.x AND pa.y = g.y
+WHERE p.alliance_id IN ($alliances)
+	AND pa.alliance_id IN ($alliances)
+GROUP BY p.x,p.y,p.z,p.alliance, p.score, p.value, p.size, p.xp, nfvalue,p.race
+ORDER BY $order
+		});
+	$query->execute;
+	my @alliances;
+	my $i = 0;
+	while (my $alliance = $query->fetchrow_hashref){
+		$i++;
+		$alliance->{ODD} = $i % 2;
+		push @alliances,$alliance;
+	}
+	$BODY->param(Alliances => \@alliances);
+
 	return $BODY;
 }
 1;
