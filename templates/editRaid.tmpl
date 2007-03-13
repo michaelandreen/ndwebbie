@@ -62,6 +62,10 @@
 		<a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;order=value">Value</a>
 		<a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;order=xp">XP</a>
 	</p>
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
+<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+<input type="hidden" name="raid" value="<TMPL_VAR NAME=Raid>"/>
+<input type="hidden" name="cmd" value="targets"/>
 <TMPL_LOOP Targets>
 	<fieldset> <legend>Target: #<TMPL_VAR NAME=Id> <TMPL_VAR NAME=Coords></legend>
 	<div class="leftinfo">
@@ -78,27 +82,28 @@
 				<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Relationship></td>
 			</tr>
 		</table>
-	</div>
-	<form action="<TMPL_VAR NAME=PAGE>" method="post">
-		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
-		<input type="hidden" name="target" value="<TMPL_VAR NAME=Id>"/>
-		<input type="hidden" name="cmd" value="comment"/>
-		<input type="hidden" name="raid" value="<TMPL_VAR NAME=Raid>"/>
-		<p>	Comment:<br/>
-			<textarea rows="5" cols="20" name="comment"><TMPL_VAR NAME=Comment></textarea>
-			<br/><input type="submit" value="Submit"/>
-		</p>
-	</form>
-	<div class="clear">&nbsp;</div>
 	<TMPL_LOOP Waves>
 		<TMPL_IF Claimers>
-			<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;target=<TMPL_VAR NAME=Id>&amp;unclaim=<TMPL_VAR NAME=Wave>">Unclaim wave <TMPL_VAR NAME=Wave> (<TMPL_VAR NAME=Claimers>)</a></p>
+			<p>Unclaim wave <TMPL_VAR NAME=Wave> (<TMPL_VAR NAME=Claimers>): <input type="checkbox" name="unclaim:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value="unclaim"/></p>
 		<TMPL_ELSE>
-			<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;target=<TMPL_VAR NAME=Id>&amp;block=<TMPL_VAR NAME=Wave>">Block wave <TMPL_VAR NAME=Wave></a></p>
+			<p>Block wave <TMPL_VAR NAME=Wave>: <input type="checkbox" name="block:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value="block"/></p>
 		</TMPL_IF>
 	</TMPL_LOOP>
-	<div class="clear">&nbsp;</div>
 	<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;removeTarget=<TMPL_VAR NAME=Id>">Remove</a></p>
+	</div>
+	<div class="leftinfo">
+	<p>	Comment:<br/>
+		<textarea rows="5" cols="20" name="comment:<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Comment></textarea>
+		<TMPL_VAR NAME=PlanetScan>
+	</p>
+	</div>
+	<TMPL_LOOP Scans>
+		<div class="leftinfo">
+		<TMPL_VAR NAME=Scan>
+		</div>
+	</TMPL_LOOP>
 	</fieldset>
 </TMPL_LOOP>
+<br/><input type="submit" value="Submit target changes"/>
+</form>
 </TMPL_IF>

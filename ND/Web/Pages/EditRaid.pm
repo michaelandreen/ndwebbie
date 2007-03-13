@@ -103,7 +103,7 @@ sub render_body {
 				SELECT ?, id FROM current_planet_stats p WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE) $sizelimit)});
 			while ($targets =~ m/(\d+):(\d+)(?::(\d+))?/g){
 				unless ($addtarget->execute($raid->{id},$1,$2,$3)){
-					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+					$error .= "<p> Something went wrong when adding $1:$2".($3 ? ":$3" : '').": ".$DBH->errstr."</p>";
 				}
 			}
 			if (param('alliance') =~ /^(\d+)$/ && $1 != 1){
@@ -135,7 +135,24 @@ sub render_body {
 			unless ($DBH->commit){
 				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 			}
+		}elsif (param('cmd') eq 'targets'){
+			$DBH->begin_work;
+			my $comment = $DBH->prepare(q{UPDATE raid_targets SET comment = ? WHERE id = ?});
+			my $unclaim =  $DBH->prepare(q{DELETE FROM raid_claims WHERE target = ? AND wave = ?});
+			my $block = $DBH->prepare(q{INSERT INTO raid_claims (target,uid,wave) VALUES(?,-2,?)});
+			for $_ (param()){
+				if (/^comment:(\d+)$/){
+					$comment->execute(escapeHTML(param($_)),$1) or $error .= p($DBH->errstr);
+				}elsif(/^unclaim:(\d+):(\d+)$/){
+					$unclaim->execute($1,$2) or $error .= p($DBH->errstr);
+					log_message $ND::UID,"BC unclaimed target $1 wave $2.";
+				}elsif(/^block:(\d+):(\d+)$/){
+					$block->execute($1,$2) or $error .= p($DBH->errstr);
+				}
+			}
+			$DBH->commit or $error .= p($DBH->errstr);
 		}
+
 	}
 	if ($raid && param('removeTarget')){
 		$error .= "test";
@@ -143,15 +160,6 @@ sub render_body {
 				,undef,$raid->{id},param('removeTarget'))){
 			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
-	}
-	if ($raid && param('block') && param('target')){
-		$DBH->do(q{INSERT INTO raid_claims (target,uid,wave) VALUES(?,-2,?)}
-			,undef,param('target'),param('block'));
-	}
-	if ($raid && param('unclaim') && param('target')){
-		$DBH->do(q{DELETE FROM raid_claims WHERE target = ? AND wave = ?}
-			,undef,param('target'),param('unclaim'));
-		log_message $ND::UID,"BC unclaimed target ".param('target')." wave ".param('unclaim').".";
 	}
 
 	my $groups = $DBH->prepare(q{SELECT g.gid,g.groupname,raid FROM groups g LEFT OUTER JOIN (SELECT gid,raid FROM raid_access WHERE raid = ?) AS ra ON g.gid = ra.gid WHERE g.attack});
@@ -194,7 +202,7 @@ sub render_body {
 			$order = "$1 DESC";
 		}
 
-		my $targetquery = $DBH->prepare(qq{SELECT r.id,coords(x,y,z),raid,comment,size,score,value,race,planet_status AS planetstatus,relationship,comment
+		my $targetquery = $DBH->prepare(qq{SELECT r.id,coords(x,y,z),raid,comment,size,score,value,race,planet_status AS planetstatus,relationship,comment,r.planet
 			FROM current_planet_stats p JOIN raid_targets r ON p.id = r.planet 
 			WHERE r.raid = ?
 			ORDER BY $order});
@@ -219,6 +227,31 @@ sub render_body {
 				push @waves,{Wave => $i, Claimers => $claimers};
 			}
 			$target->{waves} = \@waves;
+
+			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) type, tick, scan FROM scans 
+				WHERE planet = ? AND type ~ 'Unit|Planet|Advanced Unit|.* Analysis' AND tick + 24 > tick() AND scan is not null
+				GROUP BY type, tick, scan ORDER BY type ,tick DESC});
+			$scans->execute($target->{planet});
+			delete $target->{planet};
+			my %scans;
+			while (my $scan = $scans->fetchrow_hashref){
+				$scans{$scan->{type}} = $scan;
+			}
+
+			my @scans;
+			for my $type ('Planet','Unit','Advanced Unit','Surface Analysis','Technology Analysis'){
+				next unless exists $scans{$type};
+				my $scan = $scans{$type};
+				if ($self->{TICK} - $scan->{tick} > 5){
+					$scan->{scan} =~ s{<table( cellpadding="\d+")?>}{<table class="old">};
+				}
+				if ($type eq 'Planet'){
+					$target->{PlanetScan} = $scan->{scan};
+					next;
+				}
+				push @scans,{Scan => $scan->{scan}};
+			}
+			$target->{Scans} = \@scans;
 			push @targets,$target;
 		}
 		$BODY->param(Targets => \@targets);
