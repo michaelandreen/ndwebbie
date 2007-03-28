@@ -131,13 +131,15 @@ sub render_body {
 		GROUP BY fb.fbid,fb.board
 		ORDER BY fb.fbid
 			});
-	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,
+	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,u.username,ft.subject,
 		count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts,
 		date_trunc('seconds',max(fp.time)::timestamp) as last_post,
 		min(fp.time)::date as posting_date, ft.sticky
-		FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
+		FROM forum_threads ft JOIN forum_posts fp USING (ftid) 
+			JOIN users u ON u.uid = ft.uid
+			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 		WHERE ft.fbid = $1
-		GROUP BY ft.ftid, ft.subject,ft.sticky
+		GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
 		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= $3
 		ORDER BY sticky DESC,last_post DESC});
 

@@ -8,7 +8,7 @@ a {
 	color: white;
 	text-decoration:underline;
 }
-a:hover {
+a:hover, td.NAP a:hover {
 	color: black;
 	background: white;
 }
@@ -151,14 +151,7 @@ td.Hostile{
 	background: red;
 	color: black;
 }
-td.NAP{
-	background: blue;
-	color: white;
-}
-td.NAP a{
-	color: yellow;
-	background: blue;
-}
+
 table.old{
 	border: outset 1pt;
 	border-collapse: separate;
