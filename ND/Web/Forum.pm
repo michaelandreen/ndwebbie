@@ -25,8 +25,7 @@ use HTML::Template;
 use ND::Web::Include;
 require Exporter;
 
-our @ISA = qw/Exporter/;
-
+our @ISA = qw/Exporter/; 
 our @EXPORT = qw/viewForumThread addForumPost addForumThread markThreadAsRead/;
 
 sub viewForumThread {
@@ -38,7 +37,7 @@ sub viewForumThread {
 	$template->param(Post => $thread->{post});
 
 	my $posts = $ND::DBH->prepare(q{SELECT u.username,date_trunc('seconds',fp.time::timestamp) AS time,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
-FROM forum_threads ft JOIN forum_posts fp USING (ftid) JOIN users u USING (uid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
+FROM forum_threads ft JOIN forum_posts fp USING (ftid) JOIN users u ON u.uid = fp.uid LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
 WHERE ft.ftid = $1
 ORDER BY fp.time ASC
 });
