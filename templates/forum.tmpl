@@ -89,6 +89,7 @@ Move checked threads to: <select name="board">
 	<th>Total</th>
 	<th>Subject</th>
 	<th>Posted</th>
+	<th>Creator</th>
 	<th>Last post</th>
 </tr>
 <TMPL_LOOP Categories>
@@ -104,8 +105,9 @@ Move checked threads to: <select name="board">
 		<td align="center"><TMPL_VAR NAME=Unread></td>
 		<td align="center"><TMPL_VAR NAME=Posts></td>
 		<td<TMPL_IF Sticky> class="sticky"</TMPL_IF>><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR NAME=Subject>&nbsp;</a></td>
-		<td align="center"><TMPL_VAR NAME=Posting_date></td>
-		<td align="center"><TMPL_VAR NAME=Last_post></td>
+		<td align="left"><TMPL_VAR NAME=Posting_date></td>
+		<td align="center"><TMPL_VAR NAME=Username></td>
+		<td align="left"><TMPL_VAR NAME=Last_post></td>
 	</tr>
 		</TMPL_LOOP>
 	</TMPL_LOOP>
