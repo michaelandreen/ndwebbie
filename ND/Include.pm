@@ -25,7 +25,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/min max parseValue prettyValue log_message intel_log unread_query/;
+our @EXPORT = qw/min max parseValue prettyValue log_message intel_log unread_query pa_xp/;
 
 sub min {
     my ($x,$y) = @_;
@@ -79,6 +79,14 @@ sub intel_log {
 	my $log = $ND::DBH->prepare_cached(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
 		(SELECT ftid FROM planets WHERE id = $3),$1,$2)});
 	$log->execute($uid,$message,$planet) or $ND::ERROR .= p($ND::DBH->errstr);
+}
+
+sub pa_xp {
+	my ($roids,$ascore,$avalue,$tscore,$tvalue) = @_;
+	print "@_";
+	my $bravery = (min(2,$tscore/$ascore)-0.6) * (min(2,$tvalue/$avalue)-0.4);
+	return int(max($roids * 10 * $bravery,0))
+
 }
 
 sub unread_query {

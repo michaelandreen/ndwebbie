@@ -166,7 +166,7 @@ sub calcXp {
 		$ND::server->command("notice $ND::target Doesn't seem to be a planet at $x:$y:$z");
 		return;
 	}
-	my $xp = int(max($roids * 10 * (min(2,$tscore/$ascore) + min(2,$tvalue/$avalue) - 1),0));
+	my $xp = pa_xp($roids,$ascore,$avalue,$tscore,$tvalue);
 	my $score = 60 * $xp;
 	my $value = $roids*200;
 	my $totscore = prettyValue($score + $value);
