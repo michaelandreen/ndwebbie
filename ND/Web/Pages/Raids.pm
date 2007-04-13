@@ -259,7 +259,7 @@ sub render_body {
 				$size -= $roids;
 				my $xp = 0;
 				if ($planet){
-					$xp = max(0,floor($roids * 10 * (min(2,$target{Score}/$planet->{score}) + min(2,$target{Value}/$planet->{value})-1)));
+					$xp = pa_xp($roids,$planet->{score},$planet->{value},$target{Score},$target{Value});
 				}
 				push @roids,{Wave => $i, Roids => $roids, XP => $xp};
 				if ($self->{AJAX}){
