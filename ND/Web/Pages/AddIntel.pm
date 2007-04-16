@@ -47,7 +47,7 @@ sub render_body {
 			my $addpoint = $DBH->prepare('UPDATE users SET scan_points = scan_points + 1 WHERE uid = ? ');
 			my $intel = param('intel');
 			my @scans;
-			while ($intel =~ m/http:\/\/game.planetarion.com\/showscan.pl\?scan_id=(\d+)/g){
+			while ($intel =~ m/http:\/\/game.planetarion.com\/.+?scan(?:_id)?=(\d+)/g){
 				my %scan;
 				$scan{Scan} = $1;
 				$scan{Message} = "Scan $1: ";
