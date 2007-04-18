@@ -83,7 +83,7 @@ sub intel_log {
 
 sub pa_xp {
 	my ($roids,$ascore,$avalue,$tscore,$tvalue) = @_;
-	my $bravery = (min(2,$tscore/$ascore)-0.6) * (min(2,$tvalue/$avalue)-0.4);
+	my $bravery = (max(0,min(2,$tscore/$ascore)-0.6)) * (min(2,$tvalue/$avalue)-0.4);
 	return int(max($roids * 10 * $bravery,0))
 
 }
