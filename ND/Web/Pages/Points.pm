@@ -37,7 +37,7 @@ sub render_body {
 	return $self->noAccess unless $self->isMember;
 
 	my $type = "total";
-	if (defined param('type') && param('type') =~ /^(defense|attack|total|humor|scan|rank)$/){
+	if (defined param('type') && param('type') =~ /^(defense|attack|total|humor|scan|rank|raid)$/){
 		$type = $1;
 	}
 	$type .= '_points' unless ($type eq 'rank');
@@ -48,14 +48,19 @@ sub render_body {
 	my $limit = 'LIMIT 10';
 	$limit = '' if $self->isHC;
 
-	my $query = $DBH->prepare("SELECT username,defense_points,attack_points,scan_points,humor_points, (attack_points+defense_points+scan_points/20) as total_points, rank FROM users WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2) ORDER BY $type $order $limit");
+	my $query = $DBH->prepare(qq{SELECT username,defense_points,attack_points,scan_points,humor_points
+		,(attack_points+defense_points+scan_points/20) as total_points, rank, count(NULLIF(rc.launched,FALSE)) AS raid_points
+		FROM users u LEFT OUTER JOIN raid_claims rc USING (uid)
+		WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
+		GROUP BY username,defense_points,attack_points,scan_points,humor_points,rank
+		ORDER BY $type $order $limit});
 	$query->execute;
 
 	my @members;
 	my $i = 0;
-	while (my ($username,$defense,$attack,$scan,$humor,$total,$rank) = $query->fetchrow){
+	while (my ($username,$defense,$attack,$scan,$humor,$total,$rank,$raid) = $query->fetchrow){
 		$i++;
-		push @members,{Username => $username, Defense => $defense, Attack => $attack
+		push @members,{Username => $username, Defense => $defense, Attack => $attack, Raid => $raid
 			, Scan => $scan, Humor => $humor, Total => $total, Rank => $rank, ODD => $i % 2};
 	}
 	$BODY->param(Members => \@members);
