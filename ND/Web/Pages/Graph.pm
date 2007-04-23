@@ -126,11 +126,11 @@ sub render_body {
 		my $query;
 		if ($type eq 'alliance'){
 			$query = $DBH->prepare(q{SELECT a.tick,a.score,a.size,memsize, memscore FROM (SELECT tick,SUM(size) AS memsize,SUM(score) AS memscore FROM planets p JOIN planet_stats ps USING (id) WHERE p.alliance_id = $1 GROUP BY tick) p JOIN alliance_stats a ON a.tick = p.tick
-WHERE a.id = $1 ORDER BY tick});
+WHERE a.id = $1 AND a.tick > (SELECT max(tick) - 50 FROM alliance_stats) ORDER BY tick});
 		}else{
 			$graph_settings{title} = 'Average alliance vs known members';
 			$query = $DBH->prepare(q{SELECT a.tick,a.score/members AS score,a.size/members AS size,memsize, memscore FROM (SELECT tick,AVG(size) AS memsize,AVG(score) AS memscore FROM planets p JOIN planet_stats ps USING (id) WHERE p.alliance_id = $1 GROUP BY tick) p JOIN alliance_stats a ON a.tick = p.tick
-WHERE a.id = $1 ORDER BY tick});
+WHERE a.id = $1  AND a.tick > (SELECT max(tick) - 50 FROM alliance_stats)ORDER BY tick});
 		}
 		$query->execute($2) or die $DBH->errstr;
 
