@@ -31,7 +31,7 @@ sub addScan {
 	my ($id,$verbose) = @_;
 	DB();
 	if (1){
-		unless ($ND::DBH->selectrow_array("SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 48",undef,$id)){
+		unless ($ND::DBH->selectrow_array("SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168",undef,$id)){
 			my @user = $ND::DBH->selectrow_array(q{SELECT uid,username, scan_points, tick() 
 				FROM users WHERE hostmask ILIKE ? },undef,$ND::address);
 			if ($ND::DBH->do(q{INSERT INTO scans (scan_id,tick,"type") VALUES (?,tick(),COALESCE(?,'-1'))},
