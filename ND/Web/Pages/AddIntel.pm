@@ -42,7 +42,7 @@ sub render_body {
 
 	if (defined param('cmd')){
 		if (param('cmd') eq 'submit' || param('cmd') eq 'submit_message'){
-			my $findscan = $DBH->prepare("SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 48");
+			my $findscan = $DBH->prepare("SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168");
 			my $addscan = $DBH->prepare('INSERT INTO scans (scan_id,tick,"type") VALUES (?,tick(),?)');
 			my $addpoint = $DBH->prepare('UPDATE users SET scan_points = scan_points + 1 WHERE uid = ? ');
 			my $intel = param('intel');
