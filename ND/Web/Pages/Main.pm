@@ -86,8 +86,13 @@ sub render_body {
 			$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
 		}
 	}
-	if (param('sms')){ my $query = $DBH->prepare('UPDATE users SET sms = ? WHERE uid = ?');
+	if (param('sms')){
+		my $query = $DBH->prepare('UPDATE users SET sms = ? WHERE uid = ?');
 		$query->execute(escapeHTML(param('sms')),$ND::UID);
+	}
+	if (param('hostname')){
+		my $query = $DBH->prepare('UPDATE users SET hostmask = ? WHERE uid = ?');
+		$query->execute(escapeHTML(param('hostname')),$ND::UID);
 	}
 	if ($self->isMember() && !$self->{PLANET} && defined param('planet') && (param('planet') =~ m/(\d+)(?: |:)(\d+)(?: |:)(\d+)/)){
 		my $query = $DBH->prepare(q{
@@ -107,9 +112,9 @@ sub render_body {
 	$BODY->param(Groups => \@groups);
 
 
-	my $query = $DBH->prepare(q{SELECT planet,defense_points,attack_points,scan_points,humor_points, (attack_points+defense_points+scan_points/20) as total_points, sms,rank FROM users WHERE uid = ?});
+	my $query = $DBH->prepare(q{SELECT planet,defense_points,attack_points,scan_points,humor_points, (attack_points+defense_points+scan_points/20) as total_points, sms,rank,hostmask FROM users WHERE uid = ?});
 
-	my ($planet,$defense_points,$attack_points,$scan_points,$humor_points,$total_points,$sms,$rank) = $DBH->selectrow_array($query,undef,$ND::UID);
+	my ($planet,$defense_points,$attack_points,$scan_points,$humor_points,$total_points,$sms,$rank,$hostname) = $DBH->selectrow_array($query,undef,$ND::UID);
 
 	$self->{PLANET} = $planet unless $self->{PLANET};
 
@@ -173,6 +178,7 @@ ORDER BY f.fleet
 	$BODY->param(Fleets => \@fleets);
 
 	$BODY->param(SMS => $sms);
+	$BODY->param(Hostname => $hostname);
 	$BODY->param(Error => $error);
 	return $BODY;
 }

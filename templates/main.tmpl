@@ -84,6 +84,14 @@
 </form>
 </fieldset>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
+<fieldset class="forum-post"> <legend>Hostname</legend>
+	<p>Hostname: 
+	<input style="width:25em" type="text" name="hostname" value="<TMPL_VAR NAME=Hostname>"/>
+	<input type="submit" value="Submit"/>
+	</p>
+</fieldset>
+</form>
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
 <fieldset class="forum-post"> <legend>SMS</legend>
 	<p>Number: 
 	<input type="text" name="sms" value="<TMPL_VAR NAME=SMS>"/>
