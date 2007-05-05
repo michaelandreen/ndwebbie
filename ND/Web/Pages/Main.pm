@@ -47,15 +47,19 @@ sub render_body {
 				($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
 			}
 			my $delete = $DBH->prepare("DELETE FROM fleet_ships WHERE fleet = ?");
-			$delete->execute($id);
 			my $insert = $DBH->prepare('INSERT INTO fleet_ships (fleet,ship,amount) VALUES (?,?,?)');
 			$fleet = param('fleet');
 			$fleet =~ s/,//g;
+			my $match = 0;
 			while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+(\d+)/g){
+				unless($match){
+					$match = 1;
+					$delete->execute($id);
+				}
 				$insert->execute($id,$1,$2) or $error .= '<p>'.$DBH->errstr.'</p>';
 			}
 			$fleet = $DBH->prepare('UPDATE fleets SET landing_tick = tick() WHERE id = ?');
-			$fleet->execute($id);
+			$fleet->execute($id) if $match;
 			$DBH->commit;
 		}elsif (param('cmd') eq 'Recall Fleets'){
 			$DBH->begin_work;
