@@ -33,11 +33,11 @@ sub checkIntel {
 	my ($x,$y,$z) = @_;
 	DB();
 	if (officer() || dc()){
-		my $f = $ND::DBH->prepare("SELECT nick,alliance,coords(x,y,z),ruler,planet,hit_us,race,score,size,value,planet_status,relationship FROM current_planet_stats WHERE x = ? AND y = ? and z = ?");
+		my $f = $ND::DBH->prepare("SELECT nick,alliance,coords(x,y,z),ruler,planet,hit_us,race,score,size,value,planet_status,relationship,channel FROM current_planet_stats WHERE x = ? AND y = ? and z = ?");
 		$f->execute($x,$y,$z);
 		while (my @row = $f->fetchrow()){
 			@row = map (valuecolor(1),@row);
-			$ND::server->command("notice $ND::target $row[2] - $row[3] OF $row[4], Alliance=$row[1] ($row[11]), Nick=$row[0] ($row[10]), Hostile Count=$row[5], Race=$row[6], Score=$row[7], Size=$row[8], Value=$row[9] ");
+			$ND::server->command("notice $ND::target $row[2] - $row[3] OF $row[4], Alliance=$row[1] ($row[11]), Nick=$row[0] ($row[10]), Channel=$row[12] Hostile Count=$row[5], Race=$row[6], Score=$row[7], Size=$row[8], Value=$row[9] ");
 		}
 	}else{
 		$ND::server->command("msg $ND::target Only officers are allowed to check that");
@@ -95,10 +95,12 @@ sub setAlly {
 		if ($ally){
 			my $findid = $ND::DBH->prepare_cached(q{SELECT planetid(?,?,?,0)});
 			my ($id) = $ND::DBH->selectrow_array($findid,undef,$x,$y,$z);
-			if($ND::DBH->do('UPDATE planets SET alliance_id = $1 WHERE id = $2'
+			if($id && $ND::DBH->do('UPDATE planets SET alliance_id = $1 WHERE id = $2'
 				,undef,$aid,$id)){
 				$ND::server->command("msg $ND::target Setting $x:$y:$z as $ally");
 				intel_log $user->{uid},$id,"Set alliance_id to: $aid ($ally)";
+			}else{
+				$ND::server->command("msg $ND::target Couldn't find a planet at $x:$y:$z");
 			}
 		}else{
 			$ND::server->command("msg $ND::target Couldn't find such an alliance");
