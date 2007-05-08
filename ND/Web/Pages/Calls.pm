@@ -216,7 +216,7 @@ sub render_body {
 			SELECT c.id, coords(p.x,p.y,p.z), u.defense_points, c.landing_tick, c.dc,
 			TRIM('/' FROM concat(p2.race||' /')) AS race, TRIM('/' FROM concat(i.amount||' /')) AS amount,
 			TRIM('/' FROM concat(i.eta||' /')) AS eta, TRIM('/' FROM concat(i.shiptype||' /')) AS shiptype,
-			TRIM('/' FROM concat(c.landing_tick - tick() ||' /')) AS curreta,
+			(c.landing_tick - tick()) AS curreta,
 			TRIM('/' FROM concat(p2.alliance ||' /')) AS alliance,
 			TRIM('/' FROM concat(coords(p2.x,p2.y,p2.z) ||' /')) AS attackers
 			FROM calls c 
