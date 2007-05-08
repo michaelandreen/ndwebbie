@@ -59,6 +59,7 @@ sub shipEff {
 	$amount = parseValue($amount);
 	$value = parseValue($value);
 	$value *= -1.5 if defined $value and $value < 0;
+	my $feud = '';
 
 	my @ship = $ND::DBH->selectrow_array(q{
 SELECT name,target,"type",damage,metal+crystal+eonium,init,"class",guns,race
@@ -70,8 +71,9 @@ FROM ship_stats WHERE name ILIKE ?
 		$type = "steal" if ($ship[2] eq 'Steal') or ($ship[2] eq 'Pod');
 
 		$amount = int(($value*100/$ship[4])) if $amount eq 'value';
+		$feud = '(FEUD: '.int($amount/0.75).') ' if defined $value;
 		$value = prettyValue(($amount*$ship[4]/100));
-		my $text = "$amount $ship[0] ($ship[5]:$value) will $type:";
+		my $text = "$amount $feud $ship[0] ($ship[5]:$value) will $type:";
 		my $st = $ND::DBH->prepare(q{
 			SELECT name,"class","type",armor,metal+crystal+eonium,init,target,eres,race
 			FROM ship_stats WHERE "class" = ?
@@ -102,6 +104,7 @@ sub shipStop {
 	$amount = parseValue($amount);
 	$value = parseValue($value);
 	$value *= -1.5 if defined $value and $value < 0;
+	my $feud = '';
 
 	my @ship = $ND::DBH->selectrow_array(q{
 SELECT name,target,"type",armor,metal+crystal+eonium,init,"class",eres,race
@@ -113,8 +116,9 @@ FROM ship_stats WHERE name ILIKE ?
 		$ship[0] = "${ND::C}13$ship[0]$ND::C" if $ship[2] eq 'Steal';
 
 		$amount = int(($value*100/$ship[4])) if $amount eq 'value';
+		$feud = '(FEUD: '.int($amount/0.75).') ' if defined $value;
 		$value = prettyValue(($amount*$ship[4]/100));
-		my $text = "To stop $amount $ship[0] ($ship[5]:$value) you need:";
+		my $text = "To stop $amount $feud $ship[0] ($ship[5]:$value) you need:";
 		my $st = $ND::DBH->prepare(q{
 			SELECT name,"class","type",damage,metal+crystal+eonium,init,target,guns,race
 			FROM ship_stats WHERE "target" = ?
