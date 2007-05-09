@@ -2,6 +2,7 @@
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<fieldset> <legend><TMPL_IF Raid>Edit raid<TMPL_ELSE>New raid</TMPL_IF></legend>
 		<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+		<input type="hidden" name="raid" value="<TMPL_VAR NAME=Raid>"/>
 		<div class="leftinfo">
 		<TMPL_IF Raid>
 			<input type="hidden" name="cmd" value="change"/>
@@ -69,6 +70,7 @@
 <TMPL_LOOP Targets>
 	<fieldset> <legend>Target: #<TMPL_VAR NAME=Id> <TMPL_VAR NAME=Coords></legend>
 	<div class="leftinfo">
+	<p style="color:red;font-weight:bold">Remove target: <input type="checkbox" name="remove:<TMPL_VAR NAME=Id>" value="remove"/></p>
 		<ul>
 			<li>Size: <TMPL_VAR NAME=Size></li>
 			<li>Score: <TMPL_VAR NAME=Score></li>
@@ -89,7 +91,6 @@
 			<p>Block wave <TMPL_VAR NAME=Wave>: <input type="checkbox" name="block:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value="block"/></p>
 		</TMPL_IF>
 	</TMPL_LOOP>
-	<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>&amp;removeTarget=<TMPL_VAR NAME=Id>">Remove</a></p>
 	</div>
 	<div class="leftinfo">
 	<p>	Comment:<br/>

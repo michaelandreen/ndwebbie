@@ -140,6 +140,7 @@ sub render_body {
 			my $comment = $DBH->prepare(q{UPDATE raid_targets SET comment = ? WHERE id = ?});
 			my $unclaim =  $DBH->prepare(q{DELETE FROM raid_claims WHERE target = ? AND wave = ?});
 			my $block = $DBH->prepare(q{INSERT INTO raid_claims (target,uid,wave) VALUES(?,-2,?)});
+			my $remove = $DBH->prepare(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?});
 			for $_ (param()){
 				if (/^comment:(\d+)$/){
 					$comment->execute(escapeHTML(param($_)),$1) or $error .= p($DBH->errstr);
@@ -148,17 +149,11 @@ sub render_body {
 					log_message $ND::UID,"BC unclaimed target $1 wave $2.";
 				}elsif(/^block:(\d+):(\d+)$/){
 					$block->execute($1,$2) or $error .= p($DBH->errstr);
+				}elsif(/^remove:(\d+)$/){
+					$remove->execute($raid->{id},$1) or $error .= p($DBH->errstr);
 				}
 			}
 			$DBH->commit or $error .= p($DBH->errstr);
-		}
-
-	}
-	if ($raid && param('removeTarget')){
-		$error .= "test";
-		unless($DBH->do(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?}
-				,undef,$raid->{id},param('removeTarget'))){
-			$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 		}
 	}
 
@@ -202,7 +197,7 @@ sub render_body {
 			$order = "$1 DESC";
 		}
 
-		my $targetquery = $DBH->prepare(qq{SELECT r.id,coords(x,y,z),raid,comment,size,score,value,race,planet_status AS planetstatus,relationship,comment,r.planet
+		my $targetquery = $DBH->prepare(qq{SELECT r.id,coords(x,y,z),comment,size,score,value,race,planet_status AS planetstatus,relationship,comment,r.planet
 			FROM current_planet_stats p JOIN raid_targets r ON p.id = r.planet 
 			WHERE r.raid = ?
 			ORDER BY $order});
