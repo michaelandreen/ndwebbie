@@ -126,7 +126,7 @@ sub render_body {
 		$BODY->param(DefensePoints => $call->{defense_points});
 		$BODY->param(LandingTick => $call->{landing_tick});
 		$BODY->param(ETA => $call->{landing_tick}-$self->{TICK});
-		$BODY->param(Info => $call->{info});
+		$BODY->param(Info => escapeHTML $call->{info});
 		$BODY->param(DC => $call->{dc});
 		if ($call->{covered}){
 			$BODY->param(Cover => 'Uncover');
