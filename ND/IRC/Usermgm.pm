@@ -28,30 +28,25 @@ our @ISA = qw/Exporter/;
 our @EXPORT = qw/addUser whois flags flag laston addPoints chattrG setHost deactivateUser/;
 
 sub addUser {
-	my ($nick,$host) = @_;
+	my ($nick,$pnick) = @_;
 	DB();
 	if (hc()){
-		unless (defined $host){
-			my @nicks = $ND::server->nicks_get_same($nick);
-			if (@nicks){
-				$nicks[1]->{host} =~ /.*@(.*)/;
-				$host = $1;
-			}else{
-				$host = "$nick.users.netgamers.org";
-			}
-		}
-		my ($username,$hostname) = $ND::DBH->selectrow_array("SELECT username, hostmask FROM users WHERE username ILIKE ? OR hostmask ILIKE ?",undef,$nick,$host);
-		if ((not defined $username) && $ND::DBH->do("INSERT INTO users (username,hostmask,password) VALUES(?,?,'')"
-				,undef,$nick,$host)){
-			$ND::server->command("msg $ND::target Added $ND::B$nick$ND::B with host: $ND::B$host$ND::B");
+		$pnick = $nick unless $pnick;
+		my $host = "$pnick.users.netgamers.org";
+		my ($username,$hostname,$p_nick) = $ND::DBH->selectrow_array(q{SELECT username, hostmask,pnick
+			FROM users WHERE username ILIKE ? OR hostmask ILIKE ? OR pnick ILIKE ?}
+			,undef,$nick,$host,$pnick);
+		if ((not defined $username) && $ND::DBH->do("INSERT INTO users (username,hostmask,pnick,password) VALUES(?,?,?,'')"
+				,undef,$nick,$host,$pnick)){
+			$ND::server->command("msg $ND::target Added $ND::B$nick(/$pnick)$ND::B with host: $ND::B$host$ND::B");
 		}elsif(defined $username){
-			$ND::server->command("msg $ND::target $ND::B$username$ND::B already exists with host: $ND::B$hostname$ND::B.");
+			$ND::server->command("msg $ND::target $ND::B$username ($p_nick)$ND::B already exists with host: $ND::B$hostname$ND::B.");
 
 		}else{
-			$ND::server->command("msg $ND::target Something went wrong when trying to add $ND::B$nick$ND::B with host: $ND::B$host$ND::B, most likely duplicate user name");
+			$ND::server->command("msg $ND::target Something went wrong when trying to add $ND::B$nick ($pnick)$ND::B with host: $ND::B$host$ND::B, ".$ND::DBH->errstr);
 		}
 	}else{
-		$ND::server->command("msg $ND::target Only HCs are allowed to check that");
+		$ND::server->command("msg $ND::target Only HCs are allowed to add users");
 	}
 }
 sub whois {
