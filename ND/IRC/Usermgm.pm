@@ -25,7 +25,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/addUser whois flags flag laston addPoints chattrG setHost deactivateUser/;
+our @EXPORT = qw/addUser whois flags flag laston addPoints chattrG setHost setPNick deactivateUser/;
 
 sub addUser {
 	my ($nick,$pnick) = @_;
@@ -213,6 +213,31 @@ sub setHost {
 				$ND::server->command("msg $ND::target Updated $ND::B$nick${ND::B}'s host to: $ND::B$host$ND::B");
 			}elsif(defined $username){
 				$ND::server->command("msg $ND::target $ND::B$username$ND::B already exists with host: $ND::B$hostname$ND::B.");
+			}else{
+				$ND::server->command("msg $ND::target Couldn't update $ND::B$username${ND::B}'s host");
+			}
+		}elsif ($f->rows == 0){
+			$ND::server->command("msg $ND::target No hit, maybe spelling mistake, or add % as wildcard");
+		}else{
+			$ND::server->command("msg $ND::target More than 1 user matched, please refine the search");
+		}
+		$f->finish;
+	}
+}
+
+sub setPNick {
+	my ($nick, $pnick) = @_;
+	DB();
+	if (hc()){
+		my $f = $ND::DBH->prepare("SELECT uid,username FROM users WHERE username ILIKE ?");
+		$f->execute($nick);
+		my ($uid,$nick) = $f->fetchrow();
+		if ($f->rows == 1){
+			my ($username,$p_nick) = $ND::DBH->selectrow_array("SELECT username, pnick FROM users WHERE pnick ILIKE ? AND NOT (username ILIKE ?)",undef,$pnick,$nick);
+			if ((not defined $username) && $ND::DBH->do("UPDATE users SET pnick = ? WHERE uid = ?",undef,$pnick,$uid) > 0){
+				$ND::server->command("msg $ND::target Updated $ND::B$nick${ND::B}'s pnick to: $ND::B$pnick$ND::B");
+			}elsif(defined $username){
+				$ND::server->command("msg $ND::target $ND::B$username$ND::B already exists with pnick $ND::B$p_nick$ND::B.");
 			}else{
 				$ND::server->command("msg $ND::target Couldn't update $ND::B$username${ND::B}'s host");
 			}
