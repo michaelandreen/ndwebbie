@@ -55,6 +55,7 @@ use ND::Web::Pages::HostileAlliances;
 use ND::Web::Pages::AllianceRankings;
 use ND::Web::Pages::GalaxyRankings;
 use ND::Web::Pages::TargetList;
+use ND::Web::Pages::DefLeeches;
 
 
 
