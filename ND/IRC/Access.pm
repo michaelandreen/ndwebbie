@@ -23,8 +23,11 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/officer dc bc hc scanner intel masterop masterinvite/;
+our @EXPORT = qw/member officer dc bc hc scanner intel masterop masterinvite/;
 
+sub member {
+	return groupmember("HM");
+};
 sub officer {
 	return groupmember("HO");
 };
@@ -54,9 +57,10 @@ sub masterinvite {
 sub groupmember {
 	my ($groups) = @_;
 	$groups = join ",", map {"'$_'"} split //, $groups;
-	my $f = $ND::DBH->prepare("SELECT uid,username FROM users NATURAL JOIN groupmembers NATURAL JOIN groups WHERE flag IN ('T',$groups) AND lower(hostmask) = ?");
+	my $f = $ND::DBH->prepare("SELECT uid,username FROM users NATURAL JOIN groupmembers NATURAL JOIN groups WHERE flag IN ('T',$groups) AND lower(hostmask) = ?") or print $ND::DBH->errstr;
 	$f->execute(lc($ND::address));
-	return $f->fetchrow_hashref;
+	my $user = $f->fetchrow_hashref;
+	return $user;
 };
 
 1;

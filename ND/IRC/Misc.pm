@@ -37,12 +37,12 @@ $ND::xanchan = "#ViolatorS";
 
 sub valuecolor {
 	my $s = $_;
-	$s = $_[1] if defined $_[1];
+	$s = $_[1] if $#_ >= 1;
 	$s = "" unless defined $s;
-	return chr(3)."5$s".chr(3) if $s eq 'Hostile';
-	return chr(3)."3$s".chr(3) if $s eq 'Friendly';
-	return chr(3)."3$s".chr(3) if $s eq 'Nap' or $s eq 'NAP';
-	return chr(2)."$s".chr(2) if $_[0];
+	return chr(3)."5$s".chr(15) if $s eq 'Hostile';
+	return chr(3)."3$s".chr(15) if $s eq 'Friendly';
+	return chr(3)."3$s".chr(15) if $s eq 'Nap' or $s eq 'NAP';
+	return chr(2)."$s".chr(15) if $_[0];
 	return $s;
 }
 

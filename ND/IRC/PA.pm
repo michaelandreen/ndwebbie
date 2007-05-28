@@ -31,15 +31,35 @@ our @ISA = qw/Exporter/;
 our @EXPORT = qw/checkPlanet checkGal shipEff shipStop parseValue prettyValue calcXp/;
 
 sub checkPlanet {
-	my ($x,$y,$z,$intel) = @_;
+	my ($msg) = @_;
+
+	my ($x,$y,$z,$nick);
+	if ($msg =~ /(\d+)\D+(\d+)\D+(\d+)/){
+		$x = $1;
+		$y = $2;
+		$z = $3;
+	}elsif (officer()){
+		$nick = $msg;
+	}else{
+		$ND::server->command("notice $ND::target usage .p X:Y:Z".(officer() ? ' or .p nick' : ''));
+	}
 	DB();
-	my $f = $ND::DBH->prepare("SELECT ruler,planet,race,score,size,value,scorerank,sizerank,valuerank, xp, xprank, alliance FROM current_planet_stats WHERE x = ? AND y = ? and z = ?");
-	$f->execute($x,$y,$z);
-	while (my @row = $f->fetchrow()){
-		@row = map (valuecolor(1),@row);
+	my $f = $ND::DBH->prepare(q{SELECT coords(x,y,z),ruler,planet,race,score,size,value,scorerank,sizerank,
+		valuerank, xp, xprank, alliance, relationship, nick, planet_status, hit_us, channel
+		FROM current_planet_stats WHERE (x = $1 AND y = $2 and z = $3) OR nick ILIKE $4 LIMIT 1
+	});
+	$f->execute($x,$y,$z,$nick);
+	if (my $planet = $f->fetchrow_hashref()){
+		for (keys %{$planet}){
+			$planet->{$_} = valuecolor(1,$planet->{$_});
+		}
 		my $ally = "";
-		$ally = " Alliance=$row[11]," if $intel;
-		$ND::server->command("notice $ND::target $x:$y:$z $row[0] OF $row[1],$ally Race=$row[2], Score=$row[3] ($row[6]), Size=$row[4] ($row[7]), Value=$row[5] ($row[8]), XP=$row[9] ($row[10])");
+		if (officer() || dc()){
+			$ally = "Alliance=$planet->{alliance} ($planet->{relationship}), Nick=$planet->{nick} ($planet->{planet_status}), Channel: $planet->{channel}, Hostile Count: $planet->{hit_us},";
+		}
+		$ND::server->command("notice $ND::target $planet->{coords} $planet->{ruler} OF $planet->{planet},$ally Race=$planet->{race}, Score=$planet->{score} ($planet->{scorerank}), Size=$planet->{size} ($planet->{sizerank}), Value=$planet->{value} ($planet->{valuerank}), XP=$planet->{xp} ($planet->{xprank})");
+	}else{
+		$ND::server->command("notice $ND::target Couldn't find planet: $msg");
 	}
 }
 sub checkGal {
