@@ -33,6 +33,7 @@ our @EXPORT = qw/checkPlanet checkGal shipEff shipStop parseValue prettyValue ca
 sub checkPlanet {
 	my ($msg) = @_;
 
+	DB();
 	my ($x,$y,$z,$nick);
 	if ($msg =~ /(\d+)\D+(\d+)\D+(\d+)/){
 		$x = $1;
@@ -43,7 +44,6 @@ sub checkPlanet {
 	}else{
 		$ND::server->command("notice $ND::target usage .p X:Y:Z".(officer() ? ' or .p nick' : ''));
 	}
-	DB();
 	my $f = $ND::DBH->prepare(q{SELECT coords(x,y,z),ruler,planet,race,score,size,value,scorerank,sizerank,
 		valuerank, xp, xprank, alliance, relationship, nick, planet_status, hit_us, channel
 		FROM current_planet_stats WHERE (x = $1 AND y = $2 and z = $3) OR nick ILIKE $4 LIMIT 1
