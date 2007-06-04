@@ -39,6 +39,8 @@
 		<td><input type="checkbox" name="c:humor_points"/></td>
 	</tr>
 	</table>
+	<p>Other information. Change?<input type="checkbox" name="c:info"/></p>
+	<textarea rows="15" cols="80" name="info"><TMPL_VAR NAME=Info></textarea>
 	<TMPL_IF RemoveGroups>
 		<p><TMPL_VAR NAME=Username> is a member of the following groups</p>
 		<table>
