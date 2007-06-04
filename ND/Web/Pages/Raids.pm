@@ -203,6 +203,14 @@ sub render_body {
 		my @targets;
 		while (my $target = $targetquery->fetchrow_hashref){
 			my %target;
+			if ($planet){
+				if ($planet->{x} == $target->{x}){
+					$target{style} = 'incluster';
+				}
+				$target{ScoreBash} = 'bash' if ($target->{score}/$planet->{score} < 0.4);
+				$target{ValueBash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
+				#next if ($target->{score}/$planet->{score} < 0.4) && ($target->{value}/$planet->{value} < 0.4);
+			}
 			$target{Id} = $target->{id};
 			$target{Race} = $target->{race};
 			my $num = pow(10,length($target->{score})-2);
@@ -243,13 +251,6 @@ sub render_body {
 			}
 			$target{Scans} = \@scans;
 
-			if ($planet){
-				if ($planet->{x} == $target->{x}){
-					$target{style} = 'incluster';
-				}
-				$target{ScoreBash} = 'bash' if ($target->{score}/$planet->{score} < 0.4);
-				$target{ValueBash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
-			}
 
 			my @roids;
 			my @claims;
