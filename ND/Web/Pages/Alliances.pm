@@ -46,7 +46,7 @@ sub render_body {
 		$DBH->begin_work;
 		if (param('crelationship')){
 			my $value = escapeHTML(param('relationship'));
-			if ($DBH->do(q{UPDATE alliances SET relationship = ? WHERE id =?}
+			if ($DBH->do(q{UPDATE alliances SET relationship = NULLIF(?,'') WHERE id =?}
 					,undef,$value,$alliance->{id})){
 				$alliance->{relationship} = $value;
 				log_message $ND::UID,"HC set alliance: $alliance->{id} relationship: $value";
@@ -78,7 +78,7 @@ sub render_body {
 		$BODY->param(Alliance => $alliance->{name});
 		$BODY->param(Id => $alliance->{id});
 		my @relationships;
-		for my $relationship ("&nbsp;","Friendly", "NAP", "Hostile"){
+		for my $relationship ("","Friendly", "NAP", "Hostile"){
 			push @relationships,{Rel => $relationship, Selected => defined $alliance->{relationship} && $relationship eq $alliance->{relationship}}
 		}
 		$BODY->param(Relationships => \@relationships);
