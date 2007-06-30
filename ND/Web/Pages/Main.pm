@@ -131,6 +131,41 @@ sub render_body {
 
 	$BODY->param(Planet => $planet);
 
+	$query = $DBH->prepare(qq{
+		SELECT c.id, c.landing_tick, dc.username,c.covered,
+		TRIM('/' FROM concat(p2.race||' /')) AS race, TRIM('/' FROM concat(i.amount||' /')) AS amount,
+		TRIM('/' FROM concat(i.eta||' /')) AS eta, TRIM('/' FROM concat(i.shiptype||' /')) AS shiptype,
+		(c.landing_tick - tick()) AS curreta,
+		TRIM('/' FROM concat(coords(p2.x,p2.y,p2.z) ||' /')) AS attackers
+		FROM calls c 
+		JOIN incomings i ON i.call = c.id
+		JOIN current_planet_stats p2 ON i.sender = p2.id
+		LEFT OUTER JOIN users dc ON c.dc = dc.uid
+		WHERE c.member = ? AND (c.landing_tick - tick())  > 0
+		GROUP BY c.id, c.landing_tick,dc.username,c.covered
+		ORDER BY c.landing_tick DESC
+		})or $error .= $DBH->errstr;
+	$query->execute($ND::UIN) or $error .= $DBH->errstr;
+
+	my $i = 0;
+	my @calls;
+	while (my $call = $query->fetchrow_hashref){
+		$call->{attackers} =~ s{(\d+:\d+:\d+)}{<a href="/check?coords=$1">$1</a>}g;
+		unless(defined $call->{username}){
+			$call->{dc} = 'Hostile';
+			$call->{username} = 'none';
+		}
+		if($call->{covered}){
+			$call->{covered} = 'Friendly';
+		}else{
+			$call->{covered} = 'Hostile';
+		}
+		$i++;
+		$call->{ODD} = $i % 2;
+		$call->{shiptype} = escapeHTML($call->{shiptype});
+		push @calls, $call;
+	}
+	$BODY->param(Calls => \@calls);
 
 	my $planetstats= $DBH->selectrow_hashref(q{SELECT x,y,z, ((ruler || ' OF ') || p.planet) as planet,race,
 		size, size_gain, size_gain_day,
@@ -173,7 +208,7 @@ ORDER BY f.fleet
 
 	$query->execute($ND::UID,$self->{TICK}) or $error .= '<p>'.$DBH->errstr.'</p>';
 	my @fleets;
-	my $i = 0;
+	$i = 0;
 	while (my $fleet = $query->fetchrow_hashref){
 		$i++;
 		$fleet->{ODD} = $i % 2;

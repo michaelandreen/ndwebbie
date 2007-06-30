@@ -39,6 +39,22 @@
 	</table>
 </TMPL_IF>
 <div class="leftinfo">
+<table>
+	<tr><th>Call</th><th>DC</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>Current eta</th><th>Inital eta</th><th>Attackers</th></tr>
+<TMPL_LOOP Calls>
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td class="<TMPL_VAR NAME=Covered>"><a href="/calls?call=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Id></a></td>
+		<td class="<TMPL_VAR NAME=DC>"><TMPL_VAR NAME=Username></td>
+		<td><TMPL_VAR NAME=Landing_tick></td>
+		<td><TMPL_VAR NAME=Race></td>
+		<td><TMPL_VAR NAME=Amount></td>
+		<td><TMPL_VAR NAME=Shiptype></td>
+		<td><TMPL_VAR NAME=Curreta></td>
+		<td><TMPL_VAR NAME=Eta></td>
+		<td><TMPL_VAR NAME=Attackers></td>
+	</tr>
+</TMPL_LOOP>
+</table>
 <fieldset class="forum-post"> <legend>Account details</legend>
 	<ul>
 	<TMPL_IF isMEMBER>
