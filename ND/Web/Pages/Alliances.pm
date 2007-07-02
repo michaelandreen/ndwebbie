@@ -60,11 +60,11 @@ sub render_body {
 			UPDATE planets SET alliance_id = $2, nick = coalesce($3,nick)
 			WHERE id = $1;
 			});
-		while ($coords =~ m/(\d+):(\d+):(\d+)(?:\s+nick=\s*(\S+))?/g){
+		while ($coords =~ m/(\d+):(\d+):(\d+)(?:\s+nick=(\S+))?/g){
 			my ($id) = $DBH->selectrow_array($findplanet,undef,$1,$2,$3) or $ND::ERROR .= p $DBH->errstr;
 			if ($addplanet->execute($id,$alliance->{id},$4)){
 				my $nick = '';
-				$nick = '(nick $4)' if defined $4;
+				$nick = "(nick $4)" if defined $4;
 				$error .= "<p> Added planet $1:$2:$3 $nick to this alliance</p>";
 				intel_log $ND::UID,$id,"HC Added planet $1:$2:$3 $nick to alliance: $alliance->{id} ($alliance->{name})";
 			}else{
