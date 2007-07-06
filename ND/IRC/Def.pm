@@ -82,7 +82,7 @@ sub setType {
 		while (my ($id,$call,$oldtype,$coords,$tick) = $fleet->fetchrow()){
 			if($ND::DBH->do(q{UPDATE incomings SET shiptype = ? WHERE id = ?},undef,$type,$id) == 1){
 				log_message $user->{uid}, "DC set fleet: $id to: $type";
-				$ND::server->command("msg $ND::target Set fleet from $coords on call $call to $type (previosly $oldtype)");
+				$ND::server->command("msg $ND::target Set fleet from $coords on call $call to $type (previously $oldtype)");
 				if ($tick < 0 && not (defined $x && $x eq 'call')){
 					$ND::server->command("msg $ND::target This call is old, did you use the call id, instead of inc id by accident? You can use .settypeall callid to set the type on all incs in a call.");
 				}
