@@ -25,7 +25,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/addScan sendScan/;
+our @EXPORT = qw/addScan addScanGroup sendScan/;
 
 sub addScan {
 	my ($id,$verbose) = @_;
@@ -49,6 +49,27 @@ sub addScan {
 		}
 	}
 }
+sub addScanGroup {
+	my ($id,$verbose) = @_;
+	DB();
+	if (1){
+		unless ($ND::DBH->selectrow_array("SELECT scan_id FROM scans WHERE type = 'group' AND  scan_id = ? AND tick >= tick() - 168",undef,$id)){
+			my @user = $ND::DBH->selectrow_array(q{SELECT uid,username, scan_points, tick() 
+				FROM users WHERE hostmask ILIKE ? },undef,$ND::address);
+			if ($ND::DBH->do(q{INSERT INTO scans (scan_id,tick,"type",scan) VALUES (?,tick(),'group',COALESCE(?,'-1'))},
+					undef,$id,$user[0]) == 1){
+				if (@user){
+					$ND::server->command("msg $ND::target Added scan group, at tick $user[3]. Points will be added after parsing");
+				}elsif ($verbose){
+					$ND::server->command("msg $ND::target Added scan, but unknown user, no points");
+				}
+			}
+		}elsif ($verbose){
+			$ND::server->command("msg $ND::target a scan with that id has already been added within the last 48 ticks");
+		}
+	}
+}
+
 sub sendScan {
 	my ($target,$msg) = @_;
 	DB();
