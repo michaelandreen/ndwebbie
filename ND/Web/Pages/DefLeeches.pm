@@ -34,7 +34,7 @@ sub render_body {
 	$self->{TITLE} = 'Def Leeches';
 	my $DBH = $self->{DBH};
 
-	return $self->noAccess unless $self->isHC;
+	return $self->noAccess unless $self->isDC;
 
 	my $query = $DBH->prepare(q{SELECT username,defense_points,count(id) AS calls, SUM(fleets) AS fleets, SUM(recalled) AS recalled
 		FROM (SELECT username,defense_points,c.id,count(f.target) AS fleets, count(NULLIF(f.landing_tick + f.eta -1 = f.back,TRUE)) AS recalled

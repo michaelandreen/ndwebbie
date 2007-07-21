@@ -77,7 +77,7 @@ sub render : method {
 sub isInGroup ($) : method {
 	my $self = shift;
 	my $group = shift;
-	return exists $self->{GROUPS}{$group} || exists $self->{GROUPS}{Tech};
+	return exists $self->{GROUPS}{$group} || exists $self->{GROUPS}{Tech} || exists $self->{GROUPS}{HC};
 }
 
 sub isMember () : method {
