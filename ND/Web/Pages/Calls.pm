@@ -213,19 +213,22 @@ sub render_body {
 		my ($maxpoints) = $DBH->selectrow_array($pointlimits,undef,'DEFMAX');
 
 		my $query = $DBH->prepare(qq{
-			SELECT c.id, coords(p.x,p.y,p.z), u.defense_points, c.landing_tick, c.dc,
+			SELECT c.id, coords(p.x,p.y,p.z), u.defense_points, c.landing_tick, dc.username AS dc,
 			TRIM('/' FROM concat(p2.race||' /')) AS race, TRIM('/' FROM concat(i.amount||' /')) AS amount,
 			TRIM('/' FROM concat(i.eta||' /')) AS eta, TRIM('/' FROM concat(i.shiptype||' /')) AS shiptype,
 			(c.landing_tick - tick()) AS curreta,
 			TRIM('/' FROM concat(p2.alliance ||' /')) AS alliance,
-			TRIM('/' FROM concat(coords(p2.x,p2.y,p2.z) ||' /')) AS attackers
+			TRIM('/' FROM concat(coords(p2.x,p2.y,p2.z) ||' /')) AS attackers,
+			COUNT(DISTINCT f.id) AS fleets
 			FROM calls c 
 			JOIN incomings i ON i.call = c.id
 			JOIN users u ON c.member = u.uid
 			JOIN current_planet_stats p ON u.planet = p.id
 			JOIN current_planet_stats p2 ON i.sender = p2.id
+			LEFT OUTER JOIN users dc ON c.dc = dc.uid
+			LEFT OUTER JOIN fleets f ON f.target = u.planet AND f.landing_tick = c.landing_tick AND f.back = f.landing_tick + f.eta - 1
 			WHERE $where
-			GROUP BY c.id, p.x,p.y,p.z, u.username, c.landing_tick, c.info,u.defense_points,c.dc
+			GROUP BY c.id, p.x,p.y,p.z, u.username, c.landing_tick, c.info,u.defense_points,dc.username
 			ORDER BY c.landing_tick DESC
 			})or $error .= $DBH->errstr;
 		$query->execute or $error .= $DBH->errstr;
@@ -246,7 +249,7 @@ sub render_body {
 				$i = 0;
 			}
 			$call->{attackers} =~ s{(\d+:\d+:\d+)}{<a href="/check?coords=$1">$1</a>}g;
-			$call->{dc} = 'Hostile' unless defined $call->{dc};
+			$call->{dcstyle} = 'Hostile' unless defined $call->{dc};
 			$i++;
 			$call->{ODD} = $i % 2;
 			$call->{shiptype} = escapeHTML($call->{shiptype});
