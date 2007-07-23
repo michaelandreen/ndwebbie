@@ -279,25 +279,63 @@ sub render_body {
 
 		$BODY->param(Targets => \@targets);
 	}else{#list raids if we haven't chosen one yet
-		my $query = $DBH->prepare(q{SELECT id,released_coords FROM raids WHERE open AND not removed AND
-			id IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?)});
+		my $launched = 0;
+		my $query = $DBH->prepare(q{SELECT r.id AS raid,released_coords AS releasedcoords,tick,waves*COUNT(DISTINCT rt.id) AS waves,
+				COUNT(rc.uid) AS claims, COUNT(nullif(rc.launched,false)) AS launched,COUNT(NULLIF(rc.uid > 0,true)) AS blocked
+			FROM raids r JOIN raid_targets rt ON r.id = rt.raid
+				LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target
+			WHERE open AND not removed AND r.id 
+				IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?)
+			GROUP BY r.id,released_coords,tick,waves});
 		$query->execute($ND::UID);
 		my @raids;
 		while (my $raid = $query->fetchrow_hashref){
-			push @raids,{Raid => $raid->{id}, ReleasedCoords => $raid->{released_coords}};
+			$raid->{waves} -= $raid->{blocked};
+			$raid->{claims} -= $raid->{blocked};
+			delete $raid->{blocked};
+			$launched += $raid->{launched};
+			push @raids,$raid;
 		}
 		$BODY->param(Raids => \@raids);
 
 		if ($self->isBC){
 			$BODY->param(isBC => 1);
-			my $query = $DBH->prepare(q{SELECT id,open FROM raids WHERE not removed AND (not open 
-				OR id NOT IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?))});
+			my $query = $DBH->prepare(q{SELECT r.id AS raid,open ,tick,waves*COUNT(DISTINCT rt.id) AS waves,
+				COUNT(rc.uid) AS claims, COUNT(nullif(rc.launched,false)) AS launched ,COUNT(NULLIF(uid > 0,true)) AS blocked
+			FROM raids r JOIN raid_targets rt ON r.id = rt.raid
+				LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target
+			WHERE not removed AND (not open 
+				OR r.id NOT IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?))
+			GROUP BY r.id,open,tick,waves});
 			$query->execute($ND::UID);
 			my @raids;
 			while (my $raid = $query->fetchrow_hashref){
-				push @raids,{Raid => $raid->{id}, Open => $raid->{open}};
+				$raid->{waves} -= $raid->{blocked};
+				$raid->{claims} -= $raid->{blocked};
+				delete $raid->{blocked};
+				$launched += $raid->{launched};
+				push @raids,$raid;
 			}
 			$BODY->param(ClosedRaids => \@raids);
+
+
+			$query = $DBH->prepare(q{SELECT r.id AS raid,tick,waves*COUNT(DISTINCT rt.id) AS waves,
+				COUNT(rc.uid) AS claims, COUNT(nullif(rc.launched,false)) AS launched ,COUNT(NULLIF(uid > 0,true)) AS blocked
+			FROM raids r JOIN raid_targets rt ON r.id = rt.raid
+				LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target
+			WHERE removed
+			GROUP BY r.id,tick,waves});
+			$query->execute;
+			my @oldraids;
+			while (my $raid = $query->fetchrow_hashref){
+				$raid->{waves} -= $raid->{blocked};
+				$raid->{claims} -= $raid->{blocked};
+				delete $raid->{blocked};
+				$launched += $raid->{launched};
+				push @oldraids,$raid;
+			}
+			$BODY->param(RemovedRaids => \@oldraids);
+			$BODY->param(Launched => $launched);
 		}
 	}
 	return $BODY;

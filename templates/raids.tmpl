@@ -1,11 +1,19 @@
+<TMPL_IF isBC>
+	<p>Total launched fleets: <TMPL_VAR NAME=Launched></p>
+</TMPL_IF>
+<p> Open raids </p>
 <TMPL_LOOP Raids>
 	<p><a href="/<TMPL_VAR NAME=PAGE>?raid=<TMPL_VAR NAME=Raid>">Raid <TMPL_VAR NAME=Raid></a>
+	Landing tick: <TMPL_VAR NAME=tick>
 	<TMPL_IF isBC>
 		<a href="editRaid?raid=<TMPL_VAR NAME=Raid>">Edit</a>
 		<a href="editRaid?raid=<TMPL_VAR NAME=Raid>&amp;cmd=Close">Close raid.</a>
 		<TMPL_UNLESS ReleasedCoords>
 		<a href="editRaid?raid=<TMPL_VAR NAME=Raid>&amp;cmd=showcoords">Show coords.</a>
 		</TMPL_UNLESS>
+		Waves: <TMPL_VAR NAME=Waves>
+		Claims: <TMPL_VAR NAME=Claims>
+		Launched: <TMPL_VAR NAME=Launched>
 	</TMPL_IF>
 	</p>
 </TMPL_LOOP>
@@ -14,10 +22,24 @@
 <TMPL_LOOP ClosedRaids>
 		<p>
 			<a href="editRaid?raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
-			
+			Landing tick: <TMPL_VAR NAME=tick>
 			<TMPL_UNLESS Open>
 			<a href="editRaid?raid=<TMPL_VAR NAME=Raid>&amp;cmd=Open">Open raid.</a>
 			</TMPL_UNLESS>
+			Waves: <TMPL_VAR NAME=Waves>
+			Claims: <TMPL_VAR NAME=Claims>
+			Launched: <TMPL_VAR NAME=Launched>
+		</p>
+</TMPL_LOOP>
+
+<p> Removed raids </p>
+<TMPL_LOOP RemovedRaids>
+		<p>
+			<a href="editRaid?raid=<TMPL_VAR NAME=Raid>">Edit raid <TMPL_VAR NAME=Raid></a>
+			Landing tick: <TMPL_VAR NAME=tick>
+			Waves: <TMPL_VAR NAME=Waves>
+			Claims: <TMPL_VAR NAME=Claims>
+			Launched: <TMPL_VAR NAME=Launched>
 		</p>
 </TMPL_LOOP>
 </TMPL_IF>
