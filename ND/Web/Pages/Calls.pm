@@ -213,13 +213,14 @@ sub render_body {
 		my ($maxpoints) = $DBH->selectrow_array($pointlimits,undef,'DEFMAX');
 
 		my $query = $DBH->prepare(qq{
-			SELECT c.id, coords(p.x,p.y,p.z), u.defense_points, c.landing_tick, dc.username AS dc,
-			TRIM('/' FROM concat(DISTINCT p2.race||' /')) AS race, TRIM('/' FROM concat(DISTINCT i.amount||' /')) AS amount,
-			TRIM('/' FROM concat(DISTINCT i.eta||' /')) AS eta, TRIM('/' FROM concat(DISTINCT i.shiptype||' /')) AS shiptype,
-			(c.landing_tick - tick()) AS curreta,
-			TRIM('/' FROM concat(DISTINCT p2.alliance ||' /')) AS alliance,
-			TRIM('/' FROM concat(DISTINCT coords(p2.x,p2.y,p2.z) ||' /')) AS attackers,
-			COUNT(DISTINCT f.id) AS fleets
+			SELECT id,coords(x,y,z),defense_points,landing_tick,dc,curreta,fleets,
+				TRIM('/' FROM concat(DISTINCT race||' /')) AS race, TRIM('/' FROM concat(amount||' /')) AS amount,
+				TRIM('/' FROM concat(DISTINCT eta||' /')) AS eta, TRIM('/' FROM concat(DISTINCT shiptype||' /')) AS shiptype,
+				TRIM('/' FROM concat(DISTINCT alliance ||' /')) AS alliance,
+				TRIM('/' FROM concat(coords||' /')) AS attackers 
+			FROM (SELECT c.id, p.x,p.y,p.z, u.defense_points, c.landing_tick, dc.username AS dc,
+				(c.landing_tick - tick()) AS curreta,p2.race, i.amount, i.eta, i.shiptype, p2.alliance,
+				coords(p2.x,p2.y,p2.z),	COUNT(DISTINCT f.id) AS fleets
 			FROM calls c 
 			JOIN incomings i ON i.call = c.id
 			JOIN users u ON c.member = u.uid
@@ -228,8 +229,9 @@ sub render_body {
 			LEFT OUTER JOIN users dc ON c.dc = dc.uid
 			LEFT OUTER JOIN fleets f ON f.target = u.planet AND f.landing_tick = c.landing_tick AND f.back = f.landing_tick + f.eta - 1
 			WHERE $where
-			GROUP BY c.id, p.x,p.y,p.z, u.username, c.landing_tick, c.info,u.defense_points,dc.username
-			ORDER BY c.landing_tick DESC
+			GROUP BY c.id, p.x,p.y,p.z, c.landing_tick, u.defense_points,dc.username,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z) a
+			GROUP BY id, x,y,z,landing_tick, defense_points,dc,curreta,fleets
+			ORDER BY landing_tick DESC
 			})or $error .= $DBH->errstr;
 		$query->execute or $error .= $DBH->errstr;
 		my @calls;
