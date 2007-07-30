@@ -25,7 +25,7 @@ require Exporter;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/addUser whois flags flag laston addPoints chattrG setHost setPNick deactivateUser/;
+our @EXPORT = qw/addUser whois flags flag laston addPoints chattrG setHost setPNick deactivateUser getShips/;
 
 sub addUser {
 	my ($nick,$pnick) = @_;
@@ -123,6 +123,32 @@ sub laston {
 		$ND::server->command("msg $ND::target $ND::B$i$ND::B Users(days) with flag $ND::B$flag$ND::B: $text");
 	}else{
 		$ND::server->command("msg $ND::target Only officers are allowed to check that");
+	}
+}
+
+
+sub getShips {
+	my ($ship) = @_;
+
+	if (officer() || dc()){
+		my $f = $ND::DBH->prepare(qq{SELECT username,amount
+			FROM users u JOIN fleets f USING (uid) JOIN fleet_ships fs ON f.id = fs.fleet WHERE f.fleet = 0 AND ship ILIKE ? ORDER BY amount DESC
+			});
+		$f->execute($ship);
+		my $text;
+		my $i = 0;
+		my $total = 0;
+		while (my $user = $f->fetchrow_hashref){
+			$user->{last} = '?' unless defined $user->{last};
+			$text .= "$user->{username}: $user->{amount} ";
+			$i++;
+			$total += $user->{amount};
+		}
+		if ($text){
+			$ND::server->command("notice $ND::nick $ND::B$i$ND::B Users with $ND::B$total $ship$ND::B: $text");
+		}else{
+			$ND::server->command("msg $ND::target $ND::B$i$ND::B Couldn't find any user with $ND::B$ship$ND::B:");
+		}
 	}
 }
 
