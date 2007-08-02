@@ -62,7 +62,7 @@ sub render_body {
 		}
 		my @missions;
 		$DBH->begin_work;
-		while ($missions =~ m/\S+\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((?:(\d+)\+)?(\d+)\).*?(?:\d+hrs\s+)?\d+mins\s+(Attack|Defend|Return|Fake Attack|Fake Defend)(.*?)(?:Launching in tick (\d+), arrival in tick (\d+)|ETA: \d+, Return ETA: (\d+)|Return ETA: (\d+))/sg){
+		while ($missions =~ m/\S+\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((?:(\d+)\+)?(\d+)\).*?(?:\d+hrs\s+)?\d+mins?\s+(Attack|Defend|Return|Fake Attack|Fake Defend)(.*?)(?:Launching in tick (\d+), arrival in tick (\d+)|ETA: \d+, Return ETA: (\d+)|Return ETA: (\d+))/sg){
 			my %mission;
 			next if $9 eq 'Return';
 
