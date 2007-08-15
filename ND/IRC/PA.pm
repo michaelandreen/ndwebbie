@@ -91,9 +91,9 @@ FROM ship_stats WHERE name ILIKE ?
 		$type = "steal" if ($ship[2] eq 'Steal') or ($ship[2] eq 'Pod');
 
 		$amount = int(($value*100/$ship[4])) if $amount eq 'value';
-		$feud = '(FEUD: '.int($amount/0.75).') ' if defined $value;
+		$feud = '(FEUD: '.prettyValue(int($amount/0.80)).') ' if defined $value;
 		$value = prettyValue(($amount*$ship[4]/100));
-		my $text = "$amount $feud $ship[0] ($ship[5]:$value) will $type:";
+		my $text = prettyValue($amount)." $feud $ship[0] ($ship[5]:$value) will $type:";
 		my $st = $ND::DBH->prepare(q{
 			SELECT name,"class","type",armor,metal+crystal+eonium,init,target,eres,race
 			FROM ship_stats WHERE "class" = ?
@@ -136,7 +136,7 @@ FROM ship_stats WHERE name ILIKE ?
 		$ship[0] = "${ND::C}13$ship[0]$ND::C" if $ship[2] eq 'Steal';
 
 		$amount = int(($value*100/$ship[4])) if $amount eq 'value';
-		$feud = '(FEUD: '.int($amount/0.75).') ' if defined $value;
+		$feud = '(FEUD: '.int($amount/0.80).') ' if defined $value;
 		$value = prettyValue(($amount*$ship[4]/100));
 		my $text = "To stop $amount $feud $ship[0] ($ship[5]:$value) you need:";
 		my $st = $ND::DBH->prepare(q{
@@ -195,6 +195,32 @@ sub calcXp {
 	my $value = $roids*200;
 	my $totscore = prettyValue($score + $value);
 	$ND::server->command("notice $ND::target You will gain $ND::B$xp$ND::B XP, $ND::B$score$ND::B score, if you steal $roids roids ($ND::B$value$ND::B value), from $ND::B$x:$y:$z$ND::B, who will have $ND::B$tsize$ND::B roids left, total score gain will be: $ND::B$totscore$ND::B in total,");
+}
+
+sub findCovOpper {
+	my ($stolen) = @_;
+
+	my $tick = $ND::tick;
+	my $agents;
+
+	if ($stolen =~ /(\d+) (\d+) (\d+)/){
+		$tick = $1;
+		$agents = $2;
+		$stolen = $3;
+	}elsif ($stolen =~ /(\d+) (\d+)/){
+		$tick = $1;
+		$stolen = $3;
+	}
+
+	my ($value,$score) = $ND::DBH->selectrow_array(q{
+		SELECT value,score FROM planet_stats WHERE 
+			id = (SELECT planet FROM users WHERE hostmask ILIKE ?) AND tick = ?;
+		}, undef, $ND::address,$tick);
+	my ($coords) = $ND::DBH->selectrow_array(q{
+		SELECT coords(p.x,p.y,p.z) FROM current_planet_stats p JOIN planet_stats ps using (id) WHERE 
+		ps.tick = ? AND (2000*?*?/ps.value)::int = $stolen ;
+		}, undef, $tick,$agents,$value,$stolen);
+	$ND::server->command("notice $ND::target The planet that cov opped you is: $coords");
 }
 
 1;

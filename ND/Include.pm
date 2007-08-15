@@ -51,9 +51,10 @@ sub parseValue {
 
 sub prettyValue {
 	my ($value,$decimals) = @_;
+	return sprintf('%.3e',$value) if $value > 1000000000000000;
 	my $unit = '';
 	my @units = ('k','M','G','T');
-	for (my $i = 0; $value >= 1000;$i++){
+	for (my $i = 0; $value >= 1000 && $i < 4;$i++){
 		$value /= 1000;
 		$unit = $units[$i];
 	}
