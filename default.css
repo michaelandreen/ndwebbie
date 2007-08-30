@@ -66,6 +66,8 @@ div.leftinfo{
 }
 
 fieldset {
+	display: block;
+	clear: left;
 }
 p.claimlinks{
 	clear: both;
