@@ -5,6 +5,10 @@ body,html,table,div {
 	background-color: black;
 }
 
+textarea, input{
+	font-size: 11px;
+}
+
 a {
 	color: white;
 	text-decoration:underline;
