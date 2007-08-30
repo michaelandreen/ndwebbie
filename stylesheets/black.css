@@ -31,52 +31,8 @@ td.sticky {
 legend {
 	color: black;
 	background: gray;
-	border-style: solid;
-	border-width: 1px;
-	padding: 1px;
 }
 
-table.boards td {
-	/*border-style: solid;
-	border-width: 1px;*/
-	padding: 2px;
-	border-collapse: separate;
-	border-spacing: 15pt;
-	font-size: larger;
-}
-table.boards{
-	border-collapse: separate;
-	border-spacing: 5px;
-}
-table.boards th {
-	font-size: larger;
-}
-
-table.boards,table.stats a {
-	text-decoration: none;
-	width: 100%;
-	display: block;
-}
-fieldset.forum-post {
-	width: 40em;
-}
-fieldset.forum-post legend b {
-	font-size: larger;
-}
-div.leftinfo{
-	float: left;
-	padding-right: 2em;
-}
-p.claimlinks{
-	clear: both;
-}
-
-ul.linkbar {
-	list-style-type: none;
-	width: 13.5em;
-	padding: 0;
-	margin: 0;
-}
 ul.linkbar li {
 	background: gray;
 	color: black;
@@ -84,17 +40,8 @@ ul.linkbar li {
 	padding: 0.3em;
 	/*border-right: 1em solid black;*/
 }
-ul.linkbar a {
-	text-decoration: none;
-	width: 100%;
-	display: block;
-}
-input.coordsinput {
-	width: 4em;
-}
-input.small {
-	width: 1.7em;
-}
+
+
 tr.even {
 	background: #B2B2B2;
 	color: black;
@@ -154,29 +101,6 @@ td.Hostile{
 	color: black;
 }
 
-table.old{
-	border: outset 1pt;
-	border-collapse: separate;
-	border-color: red;
-}
-
-table.closedPlanet{
-	border: outset 2pt;
-	border-collapse: separate;
-	border-color: red;
-}
-li.bash{
-	color: #FF9933;
-}
-div.clear {
-	clear: both;
-	height: 0;
-	margin: 0;
-	padding: 0;
-	line-height: 0.0;
-	font-size: 1px;
-}
-
 td.LowestPrio{
 	background: red;
 	color: black;
@@ -188,10 +112,4 @@ td.MediumPrio{
 td.HighestPrio{
 	background: green;
 	color: black;
-}
-span.newposts,span.unreadposts {
-	font-weight: bold;
-}
-span.newposts {
-	color: red;
 }

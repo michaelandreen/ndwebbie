@@ -47,13 +47,15 @@ table.boards th {
 	font-size: larger;
 }
 
-table.boards a {
+table.boards a, table.stats a {
 	text-decoration: none;
 	width: 100%;
 	display: block;
 }
 fieldset.forum-post {
+	clear: both;
 	width: 40em;
+	padding: 5px;
 }
 fieldset.forum-post legend b {
 	font-size: larger;
@@ -61,6 +63,9 @@ fieldset.forum-post legend b {
 div.leftinfo{
 	float: left;
 	padding-right: 2em;
+}
+
+fieldset {
 }
 p.claimlinks{
 	clear: both;

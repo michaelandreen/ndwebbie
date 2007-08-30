@@ -3,6 +3,9 @@
 <hr/>
 <p><a name="NewPosts">New posts below:</a></p>
 </TMPL_IF>
+<!--[if ie]>
+<p class="claimlinks"></p>
+<![endif]-->
 <fieldset class="forum-post">
 <legend class="unread:<TMPL_VAR NAME=Unread>"><b><TMPL_VAR NAME=Username></b> : <TMPL_VAR NAME=Time></legend>
 	<TMPL_VAR NAME=Message>
