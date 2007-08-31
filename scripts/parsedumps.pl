@@ -27,7 +27,7 @@ use DBD::Pg qw(:pg_types);
 
 use LWP::Simple;
 
-use lib qw{/var/www/ndawn/code/};
+use lib qw{/var/www/ndawn/};
 
 use ND::Include;
 
