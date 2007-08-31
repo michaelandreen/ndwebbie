@@ -32,7 +32,7 @@ use warnings;
 
 $SIG{__WARN__} = sub {$ND::ERROR .= p $_[0]};
 
-chdir '/var/www/ndawn/code';
+chdir '/var/www/ndawn';
 
 sub handler {
 	my $r = shift;

@@ -1,4 +1,4 @@
-use lib qw(/var/www/ndawn/code/);
+use lib qw(/var/www/ndawn/);
 
 
 use CGI qw/:standard/;
