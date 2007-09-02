@@ -113,7 +113,7 @@ if (@_ = $dumps->fetchrow){
 	$_ = $_[0];
 	$hour = (gmtime($_[1]))[2];
 	my $planetid = $dbh->prepare(qq{SELECT findplanetid(?,?,?)});
-	while (m/(\d+)\t(\d+)\t(\d+)\t\"(.+)\"\t\"(.+)\"\t(Ter|Cat|Zik|Xan|Etd)\t(\d+)\t(\d+)\t(\d+)\t(\d+)/g){
+	while (m/(\d+)\t(\d+)\t(\d+)\t\"(.*)\"\t\"(.*)\"\t(Ter|Cat|Zik|Xan|Etd)\t(\d+)\t(\d+)\t(\d+)\t(\d+)/g){
 		$planetid->execute($5,$4,$6);
 		my @id = $planetid->fetchrow;
 		push @planets,[$tick,$id[0],$1,$2,$3,$7,$8,$9,$10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
