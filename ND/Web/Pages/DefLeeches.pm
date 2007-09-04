@@ -42,7 +42,7 @@ sub render_body {
 			WHERE (f.mission = 'Defend') OR f.target IS NULL
 			GROUP BY username,defense_points,c.id
 			) d
-		GROUP BY username,defense_points ORDER BY fleets DESC
+		GROUP BY username,defense_points ORDER BY fleets DESC, defense_points
 		});
 	$query->execute;
 
