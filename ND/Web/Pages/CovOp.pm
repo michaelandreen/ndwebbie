@@ -40,7 +40,7 @@ sub render_body {
 	$self->{TITLE} = 'CovOp Targets';
 	my $DBH = $self->{DBH};
 
-	return $self->noAccess unless $self->isMember;
+	return $self->noAccess unless $self->isHC;
 
 	my $show = q{AND ((planet_status IS NULL OR NOT planet_status IN ('Friendly','NAP')) AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP')))};
 	$show = '' if defined param('show') && param('show') eq 'all';
