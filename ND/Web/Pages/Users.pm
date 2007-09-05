@@ -19,7 +19,7 @@
 
 package ND::Web::Pages::Users;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use ND::Include;
 use CGI qw/:standard/;
 use ND::Web::Include;
@@ -40,7 +40,7 @@ sub render_body {
 	my $user;
 	if (defined param('user') && param('user') =~ /^(\d+)$/){
 		my $query = $DBH->prepare(q{
-			SELECT uid,username,hostmask,coords(x,y,z) AS planet,attack_points,defense_points,scan_points,humor_points,info 
+			SELECT uid,username,hostmask,CASE WHEN u.planet IS NULL THEN '' ELSE coords(x,y,z) END AS planet,attack_points,defense_points,scan_points,humor_points,info 
 			FROM users u LEFT OUTER JOIN current_planet_stats p ON u.planet = p.id
 			WHERE uid = ?;
 			}) or $error .= "<p> Something went wrong: </p>";
@@ -128,7 +128,7 @@ sub render_body {
 			FROM users u LEFT OUTER JOIN (groupmembers gm NATURAL JOIN groups g) ON gm.uid = u.uid
 			WHERE u.uid > 0
 			GROUP BY u.uid,username
-			ORDER BY username})or $error .= $DBH->errstr;
+			ORDER BY lower(username)})or $error .= $DBH->errstr;
 		$query->execute or $error .= $DBH->errstr;
 		my @users;
 		my $i = 0;
