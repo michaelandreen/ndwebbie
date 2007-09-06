@@ -53,7 +53,6 @@ table.boards a, table.stats a {
 	display: block;
 }
 fieldset.forum-post {
-	clear: both;
 	width: 40em;
 	padding: 5px;
 }
