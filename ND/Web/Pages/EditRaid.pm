@@ -252,7 +252,8 @@ sub render_body {
 		$BODY->param(Targets => \@targets);
 	}else{
 		$BODY->param(Waves => 3);
-		$BODY->param(LandingTick => $self->{TICK}+12);
+		my @time = gmtime;
+		$BODY->param(LandingTick => $self->{TICK} + 24 - $time[2] + 12);
 	}
 	$BODY->param(Error => $error);
 	return $BODY;
