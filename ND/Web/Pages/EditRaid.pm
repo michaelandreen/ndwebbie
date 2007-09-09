@@ -253,7 +253,7 @@ sub render_body {
 	}else{
 		$BODY->param(Waves => 3);
 		my @time = gmtime;
-		$BODY->param(LandingTick => $self->{TICK} + 23 - $time[2] + 13);
+		$BODY->param(LandingTick => $self->{TICK} + 24 - $time[2] + 12);
 	}
 	$BODY->param(Error => $error);
 	return $BODY;
