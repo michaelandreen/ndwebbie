@@ -17,15 +17,15 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::Points;
+package NDWeb::Pages::Points;
 use strict;
 use warnings FATAL => 'all';
 use CGI qw/:standard/;
-use ND::Web::Include;
+use NDWeb::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{points} = __PACKAGE__;
+$NDWeb::Page::PAGES{points} = __PACKAGE__;
 
 
 sub render_body {

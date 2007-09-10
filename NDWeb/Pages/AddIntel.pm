@@ -17,16 +17,16 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::AddIntel;
+package NDWeb::Pages::AddIntel;
 use strict;
 use warnings FATAL => 'all';
 use CGI qw/:standard/;
-use ND::Web::Forum;
-use ND::Web::Include;
+use NDWeb::Forum;
+use NDWeb::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{addintel} = 'ND::Web::Pages::AddIntel';
+$NDWeb::Page::PAGES{addintel} = 'NDWeb::Pages::AddIntel';
 
 sub render_body {
 	my $self = shift;

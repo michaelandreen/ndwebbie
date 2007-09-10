@@ -17,15 +17,15 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::AllianceRankings;
+package NDWeb::Pages::AllianceRankings;
 use strict;
 use warnings FATAL => 'all';
 use CGI qw/:standard/;
-use ND::Web::Include;
+use NDWeb::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{alliancerankings} = __PACKAGE__;
+$NDWeb::Page::PAGES{alliancerankings} = __PACKAGE__;
 
 sub parse {
 	#TODO: Need to fix some links first

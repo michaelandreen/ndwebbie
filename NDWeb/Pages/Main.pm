@@ -17,16 +17,16 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::Main;
+package NDWeb::Pages::Main;
 use strict;
 use warnings;
 use CGI qw/:standard/;
 use ND::Include;
-use ND::Web::Include;
+use NDWeb::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{main} = 'ND::Web::Pages::Main';
+$NDWeb::Page::PAGES{main} = 'NDWeb::Pages::Main';
 
 sub render_body {
 	my $self = shift;

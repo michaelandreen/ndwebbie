@@ -17,17 +17,17 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::Raids;
+package NDWeb::Pages::Raids;
 use strict;
 use warnings;
 use ND::Include;
 use POSIX;
 use CGI qw/:standard/;
-use ND::Web::Include;
+use NDWeb::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{raids} = __PACKAGE__;
+$NDWeb::Page::PAGES{raids} = __PACKAGE__;
 
 sub process {
 	my $self = shift;

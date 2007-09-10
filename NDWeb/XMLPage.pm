@@ -17,17 +17,17 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::XMLPage;
+package NDWeb::XMLPage;
 use strict;
 use warnings;
 use CGI qw/:standard/;
 use HTML::Template;
 
 use ND::Include;
-use ND::Web::Page;
-use ND::Web::Include;
+use NDWeb::Page;
+use NDWeb::Include;
 
-use base qw/ND::Web::Page/;
+use base qw/NDWeb::Page/;
 
 sub noAccess () {
 	HTML::Template->new(filename => 'templates/NoAccess.tmpl', global_vars => 1, cache => 1);

@@ -17,11 +17,11 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Image;
+package NDWeb::Image;
 use strict;
 use warnings;
 
-use base qw/ND::Web::Page/;
+use base qw/NDWeb::Page/;
 
 
 sub render {

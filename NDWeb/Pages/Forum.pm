@@ -17,17 +17,17 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::Forum;
+package NDWeb::Pages::Forum;
 use strict;
 use warnings;
-use ND::Web::Forum;
+use NDWeb::Forum;
 use CGI qw/:standard/;
-use ND::Web::Include;
+use NDWeb::Include;
 use ND::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{forum} = __PACKAGE__;
+$NDWeb::Page::PAGES{forum} = __PACKAGE__;
 
 sub parse {
 	my $self = shift;

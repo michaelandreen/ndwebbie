@@ -16,16 +16,16 @@
 #   Free Software Foundation, Inc.,                                       *
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
-package ND::Web::Pages::EditRaid;
+package NDWeb::Pages::EditRaid;
 use strict;
 use warnings FATAL => 'all';
 use ND::Include;
 use CGI qw/:standard/;
-use ND::Web::Include;
+use NDWeb::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{editRaid} = __PACKAGE__;
+$NDWeb::Page::PAGES{editRaid} = __PACKAGE__;
 
 sub render_body {
 	my $self = shift;

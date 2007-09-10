@@ -26,7 +26,7 @@ use Apache2::Request;
 use Apache2::Response;
 use Apache2::RequestUtil;
 use ND::DB;
-use ND::Web::Page;
+use NDWeb::Page;
 use strict;
 use warnings;
 
@@ -46,7 +46,7 @@ sub handler {
 	if ($ENV{'SCRIPT_NAME'} =~ /(\w+)(\.(pl|php|pm))?$/){
 		$page = $1 unless $1 eq 'index' and $3 eq 'pl';
 	}
-	$page = ND::Web::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI}, USER_AGENT => $ENV{HTTP_USER_AGENT}, HTTP_ACCEPT => $ENV{HTTP_ACCEPT}, R => $r);
+	$page = NDWeb::Page->new(PAGE => $page, DBH => $ND::DBH, URI => $ENV{REQUEST_URI}, USER_AGENT => $ENV{HTTP_USER_AGENT}, HTTP_ACCEPT => $ENV{HTTP_ACCEPT}, R => $r);
 	$page->render;
 
 	$ND::DBH->rollback unless $ND::DBH->{AutoCommit};

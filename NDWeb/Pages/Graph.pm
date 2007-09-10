@@ -17,18 +17,18 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::Graph;
+package NDWeb::Pages::Graph;
 use strict;
 use warnings FATAL => 'all';
 use ND::Include;
-use ND::Web::Graph;
+use NDWeb::Graph;
 use DBI qw(:sql_types);
 use DBD::Pg qw(:pg_types);
 
 
-use base qw/ND::Web::Image/;
+use base qw/NDWeb::Image/;
 
-$ND::Web::Page::PAGES{graph} = 'ND::Web::Pages::Graph';
+$NDWeb::Page::PAGES{graph} = 'NDWeb::Pages::Graph';
 
 sub render_body {
 	my $self = shift;

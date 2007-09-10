@@ -17,15 +17,15 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Pages::CovOp;
+package NDWeb::Pages::CovOp;
 use strict;
 use warnings FATAL => 'all';
 use CGI qw/:standard/;
-use ND::Web::Include;
+use NDWeb::Include;
 
-use base qw/ND::Web::XMLPage/;
+use base qw/NDWeb::XMLPage/;
 
-$ND::Web::Page::PAGES{covop} = __PACKAGE__;
+$NDWeb::Page::PAGES{covop} = __PACKAGE__;
 
 sub parse {
 	my ($uri) = @_;

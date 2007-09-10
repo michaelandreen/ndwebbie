@@ -17,12 +17,12 @@
 #   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.         *
 #**************************************************************************/
 
-package ND::Web::Forum;
+package NDWeb::Forum;
 use strict;
 use warnings FATAL => 'all';
 use CGI qw{:standard};
 use HTML::Template;
-use ND::Web::Include;
+use NDWeb::Include;
 require Exporter;
 
 our @ISA = qw/Exporter/; 
