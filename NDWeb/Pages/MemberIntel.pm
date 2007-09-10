@@ -45,43 +45,26 @@ sub render_body {
 		}
 	}
 
-
-	my $query = $DBH->prepare(intelquery('o.alliance AS oalliance,coords(o.x,o.y,o.z) AS origin, coords(t.x,t.y,t.z) AS target, t.nick',"t.alliance_id = 1 $showticks"));
+	my $query = $DBH->prepare(q{SELECT u.uid,u.username,u.attack_points, u.defense_points
+		,count(CASE WHEN i.mission = 'Attack' THEN 1 ELSE NULL END) AS attacks
+		,count(CASE WHEN (i.mission = 'Defend' OR i.mission = 'AllyDef') THEN 1 ELSE NULL END) AS defenses
+		FROM users u
+		JOIN groupmembers gm USING (uid)
+		LEFT OUTER JOIN (SELECT * FROM intel WHERE amount = -1) i ON i.sender = u.planet
+		LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+		WHERE gm.gid = 2
+		GROUP BY u.uid,u.username,u.attack_points, u.defense_points
+		ORDER BY attacks DESC,defenses DESC});
 	$query->execute() or $error .= $DBH->errstr;
-	my @intellists;
-	my @incomings;
+	my @members;
 	my $i = 0;
 	while (my $intel = $query->fetchrow_hashref){
-		if ($intel->{ingal}){
-			$intel->{missionclass} = 'ingal';
-		}else{
-			$intel->{missionclass} = $intel->{mission};
-		}
-		$intel->{oalliance} = ' ' unless $intel->{oalliance};
 		$i++;
 		$intel->{ODD} = $i % 2;
-		push @incomings,$intel;
+		push @members,$intel;
 	}
-	push @intellists,{Message => 'Incoming fleets', Intel => \@incomings, Origin => 1};
 
-	$query = $DBH->prepare(intelquery('o.nick,coords(o.x,o.y,o.z) AS origin,t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',"o.alliance_id = 1 $showticks"));
-	$query->execute() or $error .= $DBH->errstr;
-	my @outgoings;
-	$i = 0;
-	while (my $intel = $query->fetchrow_hashref){
-		if ($intel->{ingal}){
-			$intel->{missionclass} = 'ingal';
-		}else{
-			$intel->{missionclass} = $intel->{mission};
-		}
-		$intel->{talliance} = ' ' unless $intel->{talliance};
-		$i++;
-		$intel->{ODD} = $i % 2;
-		push @outgoings,$intel;
-	}
-	push @intellists,{Message => 'Outgoing Fleets', Intel => \@outgoings, Target => 1};
-
-	$BODY->param(IntelLIsts => \@intellists);
+	$BODY->param(Members => \@members);
 
 	$BODY->param(Error => $error);
 	return $BODY;
