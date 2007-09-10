@@ -158,6 +158,11 @@ td.NAP a{
 	color: yellow;
 	background: blue;
 }
+
+td.OLD{
+	background: red;
+	color: black;
+}
 table.old{
 	border: outset 1pt;
 	border-collapse: separate;

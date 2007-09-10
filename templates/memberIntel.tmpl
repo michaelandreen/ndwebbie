@@ -7,7 +7,7 @@
 	</tr>
 	<TMPL_LOOP Members>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td><a href="intel?coords=<TMPL_VAR NAME=uid>"><TMPL_VAR NAME=username></a></td>
+		<td class="<TMPL_VAR NAME=OLD>"><a href="<TMPL_VAR NAME=PAGE>?uid=<TMPL_VAR NAME=uid>"><TMPL_VAR NAME=username></a></td>
 		<td><TMPL_VAR NAME=attacks></td>
 		<td><TMPL_VAR NAME=defenses></td>
 		<td><TMPL_VAR NAME=attack_points></td>
