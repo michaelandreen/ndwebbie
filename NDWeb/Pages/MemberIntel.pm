@@ -45,30 +45,39 @@ sub render_body {
 		}
 	}
 
-	my $query = $DBH->prepare(q{SELECT u.uid,u.username,u.attack_points, u.defense_points, n.tick
-		,count(CASE WHEN i.mission = 'Attack' THEN 1 ELSE NULL END) AS attacks
-		,count(CASE WHEN (i.mission = 'Defend' OR i.mission = 'AllyDef') THEN 1 ELSE NULL END) AS defenses
-		FROM users u
-		JOIN groupmembers gm USING (uid)
-		LEFT OUTER JOIN (SELECT DISTINCT ON (planet) planet,tick from scans where type = 'News' ORDER BY planet,tick DESC) n USING (planet)
-		LEFT OUTER JOIN (SELECT * FROM intel WHERE amount = -1) i ON i.sender = u.planet
-		LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
-		WHERE gm.gid = 2
-		GROUP BY u.uid,u.username,u.attack_points, u.defense_points,n.tick
-		ORDER BY attacks DESC,defenses DESC});
-	$query->execute() or $error .= $DBH->errstr;
-	my @members;
-	my $i = 0;
-	while (my $intel = $query->fetchrow_hashref){
-		$i++;
-		$intel->{ODD} = $i % 2;
-		$intel->{OLD} = 'OLD' if (!defined $intel->{tick} || $self->{TICK} > $intel->{tick} + 60);
-		delete $intel->{tick};
-		push @members,$intel;
+	my $user;
+	if (defined param('uid') && param('uid') =~ /^(\d+)$/){
+		my $query = $DBH->prepare(q{SELECT username,uid FROM users WHERE uid = ?
+			});
+		$user = $DBH->selectrow_hashref($query,undef,$1);
 	}
 
-	$BODY->param(Members => \@members);
-
+	if ($user){
+		$BODY->param(UID => $user->{uid});
+	}else{
+		my $query = $DBH->prepare(q{SELECT u.uid,u.username,u.attack_points, u.defense_points, n.tick
+			,count(CASE WHEN i.mission = 'Attack' THEN 1 ELSE NULL END) AS attacks
+			,count(CASE WHEN (i.mission = 'Defend' OR i.mission = 'AllyDef') THEN 1 ELSE NULL END) AS defenses
+			FROM users u
+			JOIN groupmembers gm USING (uid)
+			LEFT OUTER JOIN (SELECT DISTINCT ON (planet) planet,tick from scans where type = 'News' ORDER BY planet,tick DESC) n USING (planet)
+			LEFT OUTER JOIN (SELECT * FROM intel WHERE amount = -1) i ON i.sender = u.planet
+			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+			WHERE gm.gid = 2
+			GROUP BY u.uid,u.username,u.attack_points, u.defense_points,n.tick
+			ORDER BY attacks DESC,defenses DESC, attack_points DESC, defense_points DESC});
+		$query->execute() or $error .= $DBH->errstr;
+		my @members;
+		my $i = 0;
+		while (my $intel = $query->fetchrow_hashref){
+			$i++;
+			$intel->{ODD} = $i % 2;
+			$intel->{OLD} = 'OLD' if (!defined $intel->{tick} || $self->{TICK} > $intel->{tick} + 60);
+			delete $intel->{tick};
+			push @members,$intel;
+		}
+		$BODY->param(Members => \@members);
+	}
 	$BODY->param(Error => $error);
 	return $BODY;
 }
