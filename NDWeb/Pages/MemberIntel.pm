@@ -54,6 +54,44 @@ sub render_body {
 
 	if ($user){
 		$BODY->param(UID => $user->{uid});
+		my $query = $DBH->prepare(q{
+			SELECT coords(t.x,t.y,t.z), i.eta, i.tick, rt.id AS ndtarget, rc.launched, inc.landing_tick
+			FROM users u
+			LEFT OUTER JOIN (SELECT * FROM intel WHERE amount = -1) i ON i.sender = u.planet
+			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+			LEFT OUTER JOIN (SELECT rt.id,planet,tick FROM raids r 
+					JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.planet = i.target 
+				AND (rt.tick + 12) > i.tick AND rt.tick < i.tick 
+			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid
+			LEFT OUTER JOIN (SELECT sender, eta, landing_tick FROM calls c 
+						JOIN incomings i ON i.call = c.id) inc ON inc.sender = i.target 
+					AND (inc.landing_tick + inc.eta) >= i.tick 
+					AND (inc.landing_tick - inc.eta - 1) <= (i.tick - i.eta) 
+			WHERE u.uid = $1 AND i.mission = 'Attack'
+			ORDER BY (i.tick - i.eta)
+			});
+		$query->execute($user->{uid}) or $error .= $DBH->errstr;
+		my @nd_attacks;
+		my @retals;
+		my @other;
+		while (my $intel = $query->fetchrow_hashref){
+			my $attack = {target => $intel->{coords}, tick => $intel->{tick}};
+			if ($intel->{ndtarget}){
+				if (defined $intel->{launched}){
+					$attack->{Other} = 'Claimed '.($intel->{launched} ? 'and confirmed' : 'but NOT confirmed');
+				}else{
+					$attack->{Other} = 'Launched at a tick that was not claimed';
+				}
+				push @nd_attacks, $attack;
+			}else{
+				push @other, $attack;
+			}
+		}
+		my @attacks;
+		push @attacks, {name => 'ND Attacks', list => \@nd_attacks};
+		push @attacks, {name => 'Other', list => \@other};
+		$BODY->param(Attacks => \@attacks);
+
 	}else{
 		my $query = $DBH->prepare(q{SELECT u.uid,u.username,u.attack_points, u.defense_points, n.tick
 			,count(CASE WHEN i.mission = 'Attack' THEN 1 ELSE NULL END) AS attacks
