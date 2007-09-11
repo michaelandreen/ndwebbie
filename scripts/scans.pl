@@ -153,7 +153,7 @@ HTML
 
 					my $eta = $5 - $t;
 					my $mission = $4;
-					$mission = 'AllyDef' if $eta == 7 && $x != $1;
+					$mission = 'AllyDef' if $eta == 6 && $x != $1;
 					$f->execute($t,$eta,$1,$2,$3,$x,$y,$z,-1,$mission) or print $dbh->errstr;
 					$class = qq{ class="$mission"};
 				}elsif($news eq 'Incoming' && $text =~ m/We have detected an open jumpgate from (?:[^<]*), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have roughly (\d+) ships/g){
