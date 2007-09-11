@@ -91,8 +91,8 @@ sub render_body {
 			}
 		}
 		my @attacks;
-		push @attacks, {name => 'ND Attacks', list => \@nd_attacks};
-		push @attacks, {name => 'Other', list => \@other_attacks};
+		push @attacks, {name => 'ND Attacks', list => \@nd_attacks, class => 'AllyDef'};
+		push @attacks, {name => 'Other', list => \@other_attacks, class => 'Attack'};
 		$BODY->param(Attacks => \@attacks);
 
 		$query = $DBH->prepare(q{
@@ -124,9 +124,9 @@ sub render_body {
 			}
 		}
 		my @defenses;
-		push @defenses, {name => 'ND Def', list => \@nd_def};
-		push @defenses, {name => 'Ingal Def', list => \@ingal_def};
-		push @defenses, {name => 'Other', list => \@other_def};
+		push @defenses, {name => 'ND Def', list => \@nd_def, class => 'AllyDef'};
+		push @defenses, {name => 'Ingal Def', list => \@ingal_def, class => 'Defend'};
+		push @defenses, {name => 'Other', list => \@other_def, class => 'Attack'};
 		$BODY->param(Defenses => \@defenses);
 
 	}else{

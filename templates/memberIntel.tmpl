@@ -6,7 +6,7 @@
 		<th>Attack</th><th>Pt</th><th></th>
 	</tr>
 	<TMPL_LOOP Attacks>
-		<tr><td><TMPL_VAR NAME=NAME></td></tr>
+		<tr><td class="<TMPL_VAR NAME=CLASS>"><TMPL_VAR NAME=NAME></td></tr>
 		<TMPL_LOOP LIST>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><TMPL_VAR NAME=Target></td>
@@ -21,7 +21,7 @@
 		<th>Defense</th><th>Pt</th><th></th>
 	</tr>
 	<TMPL_LOOP Defenses>
-		<tr><td><TMPL_VAR NAME=NAME></td></tr>
+		<tr><td class="<TMPL_VAR NAME=CLASS>"><TMPL_VAR NAME=NAME></td></tr>
 		<TMPL_LOOP LIST>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><TMPL_VAR NAME=Target></td>
