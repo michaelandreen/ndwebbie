@@ -1,7 +1,7 @@
 <TMPL_VAR NAME=Error>
 <!--<p><a href="/<TMPL_VAR NAME=PAGE>?show=all">Show all ticks</a></p>-->
 <TMPL_IF UID>
-<table>
+<table class="boards">
 	<tr>
 		<th>Attack</th><th>Pt</th><th></th>
 	</tr>
@@ -16,7 +16,7 @@
 		</TMPL_LOOP>
 	</TMPL_LOOP>
 </table>
-<table>
+<table class="boards">
 	<tr>
 		<th>Defense</th><th>Pt</th><th></th>
 	</tr>
@@ -44,6 +44,8 @@
 		<td><TMPL_VAR NAME=defenses></td>
 		<td><TMPL_VAR NAME=attack_points></td>
 		<td><TMPL_VAR NAME=defense_points></td>
+		<td><TMPL_VAR NAME=solo></td>
+		<td><TMPL_VAR NAME=bad_def></td>
 	</tr>
 	</TMPL_LOOP>
 </table>

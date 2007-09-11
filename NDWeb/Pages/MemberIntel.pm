@@ -61,7 +61,7 @@ sub render_body {
 			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
 			LEFT OUTER JOIN (SELECT rt.id,planet,tick FROM raids r 
 					JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.planet = i.target 
-				AND (rt.tick + 12) > i.tick AND rt.tick < i.tick 
+				AND (rt.tick + 12) > i.tick AND rt.tick <= i.tick 
 			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid
 			LEFT OUTER JOIN (SELECT sender, eta, landing_tick FROM calls c 
 						JOIN incomings i ON i.call = c.id) inc ON inc.sender = i.target 
@@ -133,11 +133,17 @@ sub render_body {
 		my $query = $DBH->prepare(q{SELECT u.uid,u.username,u.attack_points, u.defense_points, n.tick
 			,count(CASE WHEN i.mission = 'Attack' THEN 1 ELSE NULL END) AS attacks
 			,count(CASE WHEN (i.mission = 'Defend' OR i.mission = 'AllyDef') THEN 1 ELSE NULL END) AS defenses
+			,count(CASE WHEN i.mission = 'Attack' AND rt.id IS NULL THEN 1 ELSE NULL END) AS solo
+			,count(CASE WHEN i.mission = 'Defend' OR i.mission = 'AllyDef' THEN NULLIF(i.ingal OR (t.alliance_id = 1),TRUE) ELSE NULL END) AS bad_def
 			FROM users u
 			JOIN groupmembers gm USING (uid)
 			LEFT OUTER JOIN (SELECT DISTINCT ON (planet) planet,tick from scans where type = 'News' ORDER BY planet,tick DESC) n USING (planet)
 			LEFT OUTER JOIN (SELECT * FROM intel WHERE amount = -1) i ON i.sender = u.planet
 			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+			LEFT OUTER JOIN (SELECT rt.id,planet,tick FROM raids r 
+					JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.planet = i.target 
+				AND (rt.tick + 12) > i.tick AND rt.tick <= i.tick 
+			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid
 			WHERE gm.gid = 2
 			GROUP BY u.uid,u.username,u.attack_points, u.defense_points,n.tick
 			ORDER BY attacks DESC,defenses DESC, attack_points DESC, defense_points DESC});
