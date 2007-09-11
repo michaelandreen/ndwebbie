@@ -72,8 +72,9 @@ sub render_body {
 			});
 		$query->execute($user->{uid}) or $error .= $DBH->errstr;
 		my @nd_attacks;
-		my @retals;
 		my @other_attacks;
+		my $ndi = 0;
+		my $oi = 0;
 		while (my $intel = $query->fetchrow_hashref){
 			my $attack = {target => $intel->{coords}, tick => $intel->{tick}};
 			if ($intel->{ndtarget}){
@@ -82,8 +83,10 @@ sub render_body {
 				}else{
 					$attack->{Other} = 'Launched at a tick that was not claimed';
 				}
+				$attack->{ODD} = ++$ndi % 2;
 				push @nd_attacks, $attack;
 			}else{
+				$attack->{ODD} = ++$oi % 2;
 				push @other_attacks, $attack;
 			}
 		}
@@ -104,13 +107,19 @@ sub render_body {
 		my @nd_def;
 		my @ingal_def;
 		my @other_def;
+		$ndi = 0;
+		$oi = 0;
+		my $gi = 0;
 		while (my $intel = $query->fetchrow_hashref){
 			my $def = {target => $intel->{coords}.(defined $intel->{alliance} ? " ($intel->{alliance})" : ''), tick => $intel->{tick}};
 			if (defined $intel->{alliance_id} && $intel->{alliance_id} == 1){
+				$def->{ODD} = ++$ndi % 2;
 				push @nd_def, $def;
 			}elsif($intel->{ingal}){
+				$def->{ODD} = ++$gi % 2;
 				push @ingal_def, $def;
 			}else{
+				$def->{ODD} = ++$oi % 2;
 				push @other_def, $def;
 			}
 		}
