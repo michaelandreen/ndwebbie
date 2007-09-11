@@ -34,12 +34,17 @@
 <TMPL_ELSE>
 <table>
 	<tr>
-		<th>Member</th><th>Attacks</th><th>Defenses</th><th>Attack Points</th><th>Defense Points</th>
-		<th>Solo attacks</th><th>Def outside ND/Gal</th>
+		<th>Member</th>
+		<th><a href="<TMPL_VAR NAME=PAGE>?order=attacks">Attacks</a></th>
+		<th><a href="<TMPL_VAR NAME=PAGE>?order=defenses">Defenses</a></th>
+		<th><a href="<TMPL_VAR NAME=PAGE>?order=attack_points">Attack Points</a></th>
+		<th><a href="<TMPL_VAR NAME=PAGE>?order=defense_points">Defense Points</a></th>
+		<th><a href="<TMPL_VAR NAME=PAGE>?order=solo">Solo attacks</a></th>
+		<th><a href="<TMPL_VAR NAME=PAGE>?order=bad_def">Def outside ND/Gal</a></th>
 	</tr>
 	<TMPL_LOOP Members>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td class="<TMPL_VAR NAME=OLD>"><a href="<TMPL_VAR NAME=PAGE>?uid=<TMPL_VAR NAME=uid>"><TMPL_VAR NAME=username></a></td>
+	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td align="left" class="<TMPL_VAR NAME=OLD>"><a href="<TMPL_VAR NAME=PAGE>?uid=<TMPL_VAR NAME=uid>"><TMPL_VAR NAME=username></a></td>
 		<td><TMPL_VAR NAME=attacks></td>
 		<td><TMPL_VAR NAME=defenses></td>
 		<td><TMPL_VAR NAME=attack_points></td>

@@ -130,7 +130,12 @@ sub render_body {
 		$BODY->param(Defenses => \@defenses);
 
 	}else{
-		my $query = $DBH->prepare(q{SELECT u.uid,u.username,u.attack_points, u.defense_points, n.tick
+		my $order = "attacks";
+		if (defined param('order') && param('order') =~ /^(attacks|defenses|attack_points|defense_points|solo|bad_def)$/){
+			$order = $1;
+		}
+
+		my $query = $DBH->prepare(qq{SELECT u.uid,u.username,u.attack_points, u.defense_points, n.tick
 			,count(CASE WHEN i.mission = 'Attack' THEN 1 ELSE NULL END) AS attacks
 			,count(CASE WHEN (i.mission = 'Defend' OR i.mission = 'AllyDef') THEN 1 ELSE NULL END) AS defenses
 			,count(CASE WHEN i.mission = 'Attack' AND rt.id IS NULL THEN 1 ELSE NULL END) AS solo
@@ -146,7 +151,7 @@ sub render_body {
 			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid
 			WHERE gm.gid = 2
 			GROUP BY u.uid,u.username,u.attack_points, u.defense_points,n.tick
-			ORDER BY attacks DESC,defenses DESC, attack_points DESC, defense_points DESC});
+			ORDER BY $order DESC});
 		$query->execute() or $error .= $DBH->errstr;
 		my @members;
 		my $i = 0;
