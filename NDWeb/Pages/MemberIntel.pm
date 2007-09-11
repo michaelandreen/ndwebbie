@@ -19,7 +19,7 @@
 
 package NDWeb::Pages::MemberIntel;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use CGI qw/:standard/;
 use NDWeb::Include;
 
@@ -73,7 +73,7 @@ sub render_body {
 		$query->execute($user->{uid}) or $error .= $DBH->errstr;
 		my @nd_attacks;
 		my @retals;
-		my @other;
+		my @other_attacks;
 		while (my $intel = $query->fetchrow_hashref){
 			my $attack = {target => $intel->{coords}, tick => $intel->{tick}};
 			if ($intel->{ndtarget}){
@@ -84,13 +84,41 @@ sub render_body {
 				}
 				push @nd_attacks, $attack;
 			}else{
-				push @other, $attack;
+				push @other_attacks, $attack;
 			}
 		}
 		my @attacks;
 		push @attacks, {name => 'ND Attacks', list => \@nd_attacks};
-		push @attacks, {name => 'Other', list => \@other};
+		push @attacks, {name => 'Other', list => \@other_attacks};
 		$BODY->param(Attacks => \@attacks);
+
+		$query = $DBH->prepare(q{
+			SELECT coords(t.x,t.y,t.z),t.alliance_id, t.alliance, i.eta, i.tick, i.ingal
+			FROM users u
+			JOIN (SELECT * FROM intel WHERE amount = -1) i ON i.sender = u.planet
+			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+			WHERE u.uid = $1 AND (i.mission = 'Defend' OR i.mission = 'AllyDef')
+			ORDER BY (i.tick - i.eta)
+			});
+		$query->execute($user->{uid}) or $error .= $DBH->errstr;
+		my @nd_def;
+		my @ingal_def;
+		my @other_def;
+		while (my $intel = $query->fetchrow_hashref){
+			my $def = {target => $intel->{coords}.(defined $intel->{alliance} ? " ($intel->{alliance})" : ''), tick => $intel->{tick}};
+			if (defined $intel->{alliance_id} && $intel->{alliance_id} == 1){
+				push @nd_def, $def;
+			}elsif($intel->{ingal}){
+				push @ingal_def, $def;
+			}else{
+				push @other_def, $def;
+			}
+		}
+		my @defenses;
+		push @defenses, {name => 'ND Def', list => \@nd_def};
+		push @defenses, {name => 'Ingal Def', list => \@ingal_def};
+		push @defenses, {name => 'Other', list => \@other_def};
+		$BODY->param(Defenses => \@defenses);
 
 	}else{
 		my $query = $DBH->prepare(q{SELECT u.uid,u.username,u.attack_points, u.defense_points, n.tick
