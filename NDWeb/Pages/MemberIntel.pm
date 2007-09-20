@@ -62,7 +62,7 @@ sub render_body {
 			LEFT OUTER JOIN (SELECT rt.id,planet,tick FROM raids r 
 					JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.planet = i.target 
 				AND (rt.tick + 12) > i.tick AND rt.tick <= i.tick 
-			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid
+			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid AND i.tick = rt.tick + rc.wave - 1
 			LEFT OUTER JOIN (SELECT sender, eta, landing_tick FROM calls c 
 						JOIN incomings i ON i.call = c.id) inc ON inc.sender = i.target 
 					AND (inc.landing_tick + inc.eta) >= i.tick 
@@ -148,7 +148,7 @@ sub render_body {
 			LEFT OUTER JOIN (SELECT rt.id,planet,tick FROM raids r 
 					JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.planet = i.target 
 				AND (rt.tick + 12) > i.tick AND rt.tick <= i.tick 
-			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid
+			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid AND i.tick = rt.tick + rc.wave - 1
 			WHERE gm.gid = 2
 			GROUP BY u.uid,u.username,u.attack_points, u.defense_points,n.tick
 			ORDER BY $order DESC});
