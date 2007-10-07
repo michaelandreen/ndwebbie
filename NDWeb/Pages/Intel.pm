@@ -204,7 +204,7 @@ sub render_body {
 
 	}elsif(!param('coords')){
 		my $query = $DBH->prepare(intelquery('o.alliance AS oalliance,coords(o.x,o.y,o.z) AS origin, t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',qq{not ingal
-				AND ((( t.alliance_id != o.alliance_id OR t.alliance_id IS NULL OR o.alliance_id IS NULL) AND i.mission != 'Attack')
+				AND ((( t.alliance_id != o.alliance_id OR t.alliance_id IS NULL OR o.alliance_id IS NULL) AND (i.mission = 'Defend' OR i.mission = 'AllyDef' ))
 				OR ( t.alliance_id = o.alliance_id AND i.mission = 'Attack'))
 				AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
 				$showticks}));
