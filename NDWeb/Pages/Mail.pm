@@ -40,16 +40,19 @@ sub render_body {
 
 	return $self->noAccess unless $self->isHC;
 
-	my $groups = $DBH->prepare(q{SELECT gid,groupname FROM groups ORDER BY gid});
+	my $groups = $DBH->prepare(q{SELECT gid,groupname FROM groups WHERE gid > 0 ORDER BY gid});
 	$groups->execute;
 	my @groups;
+	push @groups,{gid => -1, groupname => 'Pick a group'};
 	while (my $group = $groups->fetchrow_hashref){
 		push @groups,$group;
 	}
 	$BODY->param(Groups => \@groups);
 
-	if (defined param('cmd')){
-		my $emails = $DBH->prepare(q{SELECT email FROM users WHERE (uid IN (SELECT uid FROM groupmembers WHERE gid = $1) OR $1 = -1) AND email is not null});
+	if (defined param('cmd') && param('group') > 0){
+		my $emails = $DBH->prepare(q{SELECT email FROM users
+			WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = $1)
+				AND email is not null});
 		$emails->execute(param('group'));
 		my @emails;
 		while (my $email = $emails->fetchrow_hashref){
@@ -71,6 +74,9 @@ sub render_body {
 		}else {
 			$ND::ERROR .= p $Mail::Sendmail::error;
 		}
+	}elsif(defined param('message')) {
+		$BODY->param(Subject => param('subject'));
+		$BODY->param(Message => param('message'));
 	}
 	return $BODY;
 }
