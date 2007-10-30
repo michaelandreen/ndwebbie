@@ -59,6 +59,11 @@ tr.total {
 	color: red;
 }
 
+tr:hover {
+	color: black;
+	background: #626262;
+}
+
 td.ingal{
 	background: blue;
 	color: black;
