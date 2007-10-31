@@ -40,14 +40,17 @@ for my $file ("/home/whale/db.pl")
 }
 $dbh->do("SET CLIENT_ENCODING TO 'LATIN1';");
 
+my %classes = (Fighter => 'Fi', Corvette => 'Co', Frigate => 'Fr', Destroyer => 'De', Cruiser => 'Cr', Battleship => 'Bs');
+
 my $file = get("http://game.planetarion.com/manual.php?page=stats");
 $dbh->begin_work;
-my $st = $dbh->prepare(q{INSERT INTO ship_stats (name,"class",target,"type",init,guns,armor,damage,eres,metal,crystal,eonium,race) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)});
-while ($file =~ /((?:\w| )+)<\/td><td>(\w+)<\/td><td>(\w+)<\/td><td>(\w+)\D+(\d+)\D+(\d+)\D+(\d+)\D+?(\d+|-)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+\d+\D+\d+.+?(\w+)<\/td>/g){
-	my $dmg = $8;
+my $st = $dbh->prepare(q{INSERT INTO ship_stats (name,"class",t1,t2,t3,"type",init,guns,armor,damage,eres,metal,crystal,eonium,race) VALUES(?,?,NULLIF(?,'-'),NULLIF(?,'-'),NULLIF(?,'-'),?,?,?,?,?,?,?,?,?,?)});
+while ($file =~ /((?:\w| )+)<\/td><td>(\w+)<\/td><td>(\w+|-)<\/td><td>(\w+|-)<\/td><td>(\w+|-)<\/td><td>(\w+)\D+(\d+)\D+(\d+)\D+(\d+)\D+?(\d+|-)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+\d+\D+\d+.+?(\w+)<\/td>/g){
+	my $dmg = $10;
 	$dmg = 0 if $dmg eq '-';
-	$st->execute($1,$2,$3,$4,$5,$6,$7,$dmg,$9,$10,$11,$12,$13) or die $dbh->errstr;
-	#print "$1,$2,$3,$4,$5,$6,$7,$dmg,$9,$10,$11,$12,$13\n";
+	my $class = $classes{$2};
+	$st->execute($1,$class,$3,$4,$5,$6,$7,$8,$9,$dmg,$11,$12,$13,$14,$15) or die $dbh->errstr;
+	#print "$1,$class,$3,$4,$5,$6,$7,$dmg,$9,$10,$11,$12,$13,$14,$15\n";
 }
 
 $dbh->commit;
