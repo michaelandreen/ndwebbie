@@ -27,4 +27,4 @@ ALTER SEQUENCE incomings_id_seq RESTART 1;
 ALTER SEQUENCE planets_id_seq RESTART 1;
 ALTER SEQUENCE raid_targets_id_seq RESTART 1;
 ALTER SEQUENCE raids_id_seq RESTART 1;
-UPDATE users SET scan_points = 0, defense_points = 0, attack_points = 0, humor_points = 0;
+UPDATE users SET scan_points = 0, defense_points = 0, attack_points = 0, humor_points = 0, rank = NULL;
