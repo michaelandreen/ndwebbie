@@ -99,7 +99,7 @@ sub render_body {
 			$mission{Back} = $tick+$eta-1;
 			my $ships = $10;
 			my @ships;
-			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+\w+\s+(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Struc)\s+(\d+)/g){
+			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+(?:(?:\w+|-)\s+){3}(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Struc)\s+(\d+)/g){
 				$addships->execute($fleet,$1,$2) or $ND::ERROR .= p $DBH->errstr;
 				push @ships,{Ship => $1, Amount => $2};
 			}
