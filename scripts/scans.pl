@@ -108,7 +108,7 @@ HTML
 			my $f = $dbh->prepare("UPDATE covop_targets SET metal = ?, crystal = ?, eonium = ? WHERE planet = ?");
 			if ($f->execute($2,$4,$6,$planet) < 1){
 				$f = $dbh->prepare("INSERT INTO covop_targets (planet,metal, crystal, eonium) VALUES(?,?,?,?)");
-				$f->execute($planet,$4,$5,$6);
+				$f->execute($planet,$2,$4,$6);
 			}
 		}elsif ($type eq 'Jumpgate'){
 			$scantext .= <<HTML
