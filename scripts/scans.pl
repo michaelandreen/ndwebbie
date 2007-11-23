@@ -65,6 +65,9 @@ my $emptyscans = $dbh->prepare('SELECT scan_id,tick,"type"::integer,tick() FROM 
 my $update = $dbh->prepare('UPDATE scans SET tick = ?, "type" = ?, scan = ? , planet = ? WHERE scan_id = ? AND tick = ?');
 $addScan = $dbh->prepare('INSERT INTO scans (tick,scan_id,"type",scan,planet) VALUES($1,$2,$3,$4,$5)') or die $dbh->errstr;
 my $findplanet = $dbh->prepare('SELECT planetid(?,?,?,?)');
+
+my $oldcoords = $dbh->prepare(q{SELECT x,y,z FROM planet_stats 
+	WHERE id = ? AND tick = ?});
 my $delscan = $dbh->prepare('DELETE FROM scans WHERE scan_id = ? AND tick = ?');
 unless ($emptyscans->execute){
 	my $cleanup = $dbh->prepare('UPDATE scans SET "type" = \'-1\' WHERE planet is NULL');
@@ -148,6 +151,7 @@ HTML
 				my $t = $2;
 				my $text = $cgi->escapeHTML($3);
 				my $class = '';
+				my ($x,$y,$z) = $dbh->selectrow_array($oldcoords,undef,$planet,$t);
 
 				if($news eq 'Launch' && $text =~ m/(?:[^<]*) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to (Attack|Defend). Arrival tick: (\d+)/g){
 
