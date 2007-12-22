@@ -46,7 +46,7 @@ sub render_body {
 	$order = 'ASC' if ($type eq 'rank');
 
 	my $limit = 'LIMIT 10';
-	$limit = '' if $self->isHC;
+	$limit = '' if $self->isOfficer;
 
 	my $query = $DBH->prepare(qq{SELECT username,defense_points,attack_points,scan_points,humor_points
 		,(attack_points+defense_points+scan_points/20) as total_points, rank, count(NULLIF(rc.launched,FALSE)) AS raid_points
