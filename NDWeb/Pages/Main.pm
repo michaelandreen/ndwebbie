@@ -224,12 +224,12 @@ ORDER BY x,y,z,mission,tick
 	my @fleets;
 	$i = 0;
 	while (my $fleet = $query->fetchrow_hashref){
-		$fleet->{ODD} = $i % 2;
+		$fleet->{ODD} = $i++ % 2;
 		my @ships;
 		$ships->execute($fleet->{id});
 		my $j = 0;
 		while (my $ship = $ships->fetchrow_hashref){
-			$ship->{ODD} = $i++ % 2;
+			$ship->{ODD} = $j++ % 2;
 			push @ships,$ship;
 		}
 		$fleet->{ships} = \@ships;
