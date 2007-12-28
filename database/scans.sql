@@ -95,3 +95,9 @@ CREATE TABLE data_scans (
 ) WITHOUT OIDS;
 
 DROP TABLE intel;
+
+CREATE INDEX fleets_tick_index ON fleets (tick);
+CREATE INDEX fleets_target_index ON fleets (target);
+CREATE INDEX fleets_sender_index ON fleets (sender);
+CREATE INDEX fleets_mission_index ON fleets (mission);
+CREATE INDEX fleets_ingal_index ON fleets (ingal);
