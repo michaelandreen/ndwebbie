@@ -19,8 +19,7 @@
 
 package NDWeb::Pages::Check;
 use strict;
-use warnings FATAL => 'all';
-no warnings qw(uninitialized);
+use warnings;
 use ND::Include;
 use CGI qw/:standard/;
 use NDWeb::Include;
@@ -57,7 +56,7 @@ sub render_body {
 		return $BODY;
 	}
 
-	if ($self->isMember && param('cmd') eq 'arbiter'){
+	if ($self->isMember && defined param('cmd') && param('cmd') eq 'arbiter'){
 		my $query = $DBH->prepare(q{SELECT count(*) AS friendlies FROM current_planet_stats WHERE x = ? AND y = ? 
 			AND (planet_status IN ('Friendly','NAP') OR relationship IN ('Friendly','NAP'))});
 		my ($count) = $DBH->selectrow_array($query,undef,$x,$y);
@@ -130,82 +129,75 @@ sub render_body {
 		$BODY->param(OnePlanet => 1);
 
 		my $query = $DBH->prepare(q{ 
-			SELECT i.mission, i.tick AS landingtick,MIN(eta) AS eta, i.amount, coords(p.x,p.y,p.z) AS target
-			FROM intel i
-			JOIN (planets
-			NATURAL JOIN planet_stats) p ON i.target = p.id
-			JOIN (planets
-			NATURAL JOIN planet_stats) p2 ON i.sender = p2.id
-			WHERE  p.tick = ( SELECT max(tick) FROM planet_stats) AND i.tick > tick() AND i.uid = -1 
-			AND p2.tick = p.tick AND p2.id = ?
-			GROUP BY p.x,p.y,p.z,p2.x,p2.y,p2.z,i.mission,i.tick,i.amount,i.ingal,i.uid
-			ORDER BY p.x,p.y,p.z});
+			SELECT i.id,i.mission, i.name, i.tick AS landingtick,MIN(eta) AS eta
+				, i.amount, coords(t.x,t.y,t.z) AS target
+			FROM fleets i
+			LEFT OUTER JOIN (planets
+				NATURAL JOIN planet_stats) t ON i.target = t.id
+					AND t.tick = ( SELECT max(tick) FROM planet_stats)
+			WHERE  i.uid = -1
+				AND i.sender = ?
+				AND (i.tick > tick() - 14 OR i.mission = 'Full Fleet')
+			GROUP BY i.id,t.x,t.y,t.z,i.mission,i.tick,i.name,i.amount,i.ingal,i.uid
+			ORDER BY i.tick,t.x,t.y,t.z
+		});
 		$query->execute($planet_id);
+		my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships where id = ?});
 		my @missions;
-		while (my ($mission,$landingtick,$eta,$amount,$target) = $query->fetchrow){
-			push @missions,{Target => $target, Mission => $mission, LandingTick => $landingtick
-				, ETA => $eta, Amount => $amount};
+		$i = 0;
+		while (my $mission = $query->fetchrow_hashref){
+			$mission->{ODD} = $i++ % 2;
+			$mission->{CLASS} = $mission->{mission};
+			my @ships;
+			$ships->execute($mission->{id});
+			my $j = 0;
+			while (my $ship = $ships->fetchrow_hashref){
+				$ship->{ODD} = $j++ % 2;
+				push @ships,$ship;
+			}
+			push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
+			$mission->{ships} = \@ships;
+			push @missions,$mission;
 		}
 		$BODY->param(Missions => \@missions);
 
-		my @scans;
-		$query = $DBH->prepare(q{SELECT value,tick FROM planet_stats 
+		$query = $DBH->prepare(q{SELECT value,value_gain AS gain,tick FROM planet_stats 
 			WHERE id = ? AND tick > tick() - 24});
-		my $scan = q{
-		<p>Value the last 24 ticks</p>
-		<table><tr><th>Tick</th><th>Value</th><th>Difference</th></tr>};
-		my $old = 0;
 		$query->execute($planet_id);
-		while (my($value,$tick) = $query->fetchrow){
-			my $diff = $value-$old;
-			$old = $value;
-			my $class = 'Defend';
-			$class = 'Attack' if $diff < 0;
-			$scan .= qq{<tr><td>$tick</td><td>$value</td><td class="$class">$diff</td></tr>};
+		my @values;
+		while (my $value = $query->fetchrow_hashref){
+			$value->{class} = 'Defend';
+			$value->{class} = 'Attack' if $value->{gain} < 0;
+			push @values, $value;
 		}
-		$scan .= q{</table>};
-		push @scans, {Scan => $scan};
+		$BODY->param(Values => \@values);
 
-		$query = $DBH->prepare(q{SELECT DISTINCT ON (type) type,scan_id, tick, scan FROM scans WHERE planet = ?
-			GROUP BY type,scan_id, tick, scan ORDER BY type,tick DESC});
+		$query = $DBH->prepare(q{SELECT type,scan_id, tick FROM scans
+			WHERE planet = ? AND tick > tick() - 168
+			ORDER BY tick,type DESC
+		});
 		$query->execute($planet_id);
-		my %scans;
-		while (my($type,$scan_id,$tick,$scan) = $query->fetchrow){
-			$scans{$type} = [$scan_id,$tick,$scan];
+		my @scans;
+		$i = 0;
+		while (my $scan = $query->fetchrow_hashref){
+			$scan->{ODD} = $i++ % 2;
+			push @scans,$scan;
 		}
-
-		$query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats WHERE id = ? ORDER BY tick ASC});
-		$scan = q{
-		<p>Previous Coords</p>
-		<table><tr><th>Tick</th><th>Value</th><th>Difference</th></tr>};
-		$query->execute($planet_id);
-		$x = $y = $z = 0;
-		while (my($nx,$ny,$nz,$tick) = $query->fetchrow){
-			if ($nx != $x || $ny != $y || $nz != $z){
-				$x = $nx;
-				$y = $ny;
-				$z = $nz;
-				$scan .= qq{<tr><td>$tick</td><td>$x:$y:$z</td></tr>};
-			}
-		}
-		$scan .= q{</table>};
-		$scan .= $scans{'Ship Classes'}->[2] if $scans{'Ship Classes'};
-		push @scans, {Scan => $scan};
-
-		for my $type ('Planet','Jumpgate','Unit','Advanced Unit','Surface Analysis','Technology Analysis','Fleet Analysis','News'){
-			next unless exists $scans{$type};
-			my $scan_id = $scans{$type}->[0];
-			my $tick = $scans{$type}->[1];
-			my $scan = $scans{$type}->[2];
-			if ($self->{TICK} - $tick > 10){
-				$scan =~ s{<table( cellpadding="\d+")?>}{<table$1 class="old">};
-			}
-			push @scans,{Scan => qq{
-				<p><b><a href="http://game.planetarion.com/showscan.pl?scan_id=$scan_id">$type</a> Scan from tick $tick</b></p>
-				$scan}};
-		}
-
 		$BODY->param(Scans => \@scans);
+
+		$query = $DBH->prepare(q{SELECT x,y,z,tick FROM planet_stats
+			WHERE id = ? ORDER BY tick ASC});
+		$query->execute($planet_id);
+		my @coords;
+		my $c = {x => 0, y => 0, z => 0};
+		while (my $c2 = $query->fetchrow_hashref){
+			if ($c->{x} != $c2->{x} || $c->{y} != $c2->{y} || $c->{z} != $c2->{z}){
+				$c = $c2;
+				push @coords,$c;
+			}
+		}
+		$BODY->param(OldCoords => \@coords);
+
 	}
 	$query = $DBH->prepare(q{SELECT x,y,
 		size, size_gain, size_gain_day,
