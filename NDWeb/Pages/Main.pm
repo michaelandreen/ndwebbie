@@ -34,47 +34,57 @@ sub render_body {
 	$self->{TITLE} = 'Main Page';
 	my $DBH = $self->{DBH};
 
-	my $error;
-
 	if (defined param('cmd')){
 		if (param('cmd') eq 'fleet'){
-			$DBH->begin_work;
-			my $fleet = $DBH->prepare("SELECT id FROM fleets WHERE uid = ? AND fleet = 0");
-			my ($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
-			unless ($id){
-				my $insert = $DBH->prepare(q{INSERT INTO fleets (uid,target,mission,landing_tick,fleet,eta,back) VALUES (?,?,'Full fleet',0,0,0,0)});
-				$insert->execute($ND::UID,$self->{PLANET});
-				($id) = $DBH->selectrow_array($fleet,undef,$ND::UID);
-			}
-			my $delete = $DBH->prepare("DELETE FROM fleet_ships WHERE fleet = ?");
-			my $insert = $DBH->prepare('INSERT INTO fleet_ships (fleet,ship,amount) VALUES (?,?,?)');
-			$fleet = param('fleet');
+			my $fleet = param('fleet');
 			$fleet =~ s/,//g;
-			my $match = 0;
+			my $amount = 0;
+			my @ships;
 			while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+(\d+)/g){
-				unless($match){
-					$match = 1;
-					$delete->execute($id);
-				}
-				$insert->execute($id,$1,$2) or $error .= '<p>'.$DBH->errstr.'</p>';
+				$amount += $2;
+				push @ships, [$1,$2];
 			}
-			$fleet = $DBH->prepare('UPDATE fleets SET landing_tick = tick() WHERE id = ?');
-			$fleet->execute($id) if $match;
-			$DBH->commit;
+			if ($amount){
+				$DBH->begin_work;
+				eval{
+					my $insert = $DBH->prepare(q{INSERT INTO fleets 
+						(uid,sender,name,mission,tick,amount)
+						VALUES (?,?,'Main','Full fleet',tick(),?) RETURNING id});
+					my ($id) = $DBH->selectrow_array($insert,undef,$self->{UID}
+						,$self->{PLANET},$amount) or die $DBH->errstr;
+					$insert = $DBH->prepare('INSERT INTO fleet_ships 
+						(id,ship,amount) VALUES (?,?,?)');
+					for my $s (@ships){
+						unshift @{$s},$id;
+						$insert->execute(@{$s}) or die $DBH->errstr;
+					}
+				};
+				if ($@){
+					warn $@;
+					$DBH->rollback;
+				}else{
+					$DBH->commit;
+					$self->{RETURN} = 'REDIRECT';
+					$self->{REDIR_LOCATION} = "/main";
+					return;
+				}
+			}else{
+				warn 'Fleet does not contain any ships';
+			}
 		}elsif (param('cmd') eq 'Recall Fleets'){
 			$DBH->begin_work;
-			my $updatefleets = $DBH->prepare('UPDATE fleets SET back = tick() + (tick() - (landing_tick - eta))  WHERE uid = ? AND id = ?');
+			my $updatefleets = $DBH->prepare('UPDATE fleets SET back = tick() + (tick() - (tick - eta))  WHERE uid = ? AND id = ?');
 
 			for my $param (param()){
 				if ($param =~ /^change:(\d+)$/){
 					if($updatefleets->execute($ND::UID,$1)){
 						log_message $ND::UID,"Member recalled fleet $1";
 					}else{
-						$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+						warn $DBH->errstr;
 					}
 				}
 			}
-			$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
+			$DBH->commit or warn $DBH->errstr;
 		}elsif (param('cmd') eq 'Change Fleets'){
 			$DBH->begin_work;
 			my $updatefleets = $DBH->prepare('UPDATE fleets SET back = ? WHERE uid = ? AND id = ?');
@@ -83,11 +93,11 @@ sub render_body {
 					if($updatefleets->execute(param("back:$1"),$ND::UID,$1)){
 						log_message $ND::UID,"Member set fleet $1 to be back tick: ".param("back:$1");
 					}else{
-						$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+						warn $DBH->errstr;
 					}
 				}
 			}
-			$DBH->commit or $error .= '<p>'.$DBH->errstr.'</p>';
+			$DBH->commit or warn $DBH->errstr;
 		}
 	}
 	if (param('sms')){
@@ -144,8 +154,8 @@ sub render_body {
 		WHERE c.member = ? AND (c.landing_tick - tick())  > 0
 		GROUP BY c.id, c.landing_tick,dc.username,c.covered
 		ORDER BY c.landing_tick DESC
-		})or $error .= $DBH->errstr;
-	$query->execute($ND::UIN) or $error .= $DBH->errstr;
+		})or warn  $DBH->errstr;
+	$query->execute($ND::UIN) or warn $DBH->errstr;
 
 	my $i = 0;
 	my @calls;
@@ -197,28 +207,38 @@ sub render_body {
 	}
 
 
-	$query = $DBH->prepare(q{SELECT f.fleet,f.id, coords(x,y,z) AS target, mission, sum(fs.amount) AS amount, landing_tick, back
+	$query = $DBH->prepare(q{SELECT f.id, coords(x,y,z) AS target, mission
+		, f.amount, tick, back
 FROM fleets f 
-JOIN fleet_ships fs ON f.id = fs.fleet 
-JOIN current_planet_stats p ON f.target = p.id
-WHERE f.uid = ? AND (f.fleet = 0 OR back >= ?)
-GROUP BY f.fleet,f.id, x,y,z, mission, landing_tick,back
-ORDER BY f.fleet
+JOIN fleet_ships fs USING (id)
+LEFT OUTER JOIN current_planet_stats p ON f.target = p.id
+WHERE f.uid = ? AND f.sender = ? AND 
+	(back >= ? OR (tick >= tick() -  24 AND name = 'Main'))
+GROUP BY f.id, x,y,z, mission, tick,back,f.amount
+ORDER BY x,y,z,mission,tick
 		});
 
-	$query->execute($ND::UID,$self->{TICK}) or $error .= '<p>'.$DBH->errstr.'</p>';
+	my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships where id = ?});
+
+	$query->execute($self->{UID},$self->{PLANET},$self->{TICK}) or warn $DBH->errstr;
 	my @fleets;
 	$i = 0;
 	while (my $fleet = $query->fetchrow_hashref){
-		$i++;
 		$fleet->{ODD} = $i % 2;
+		my @ships;
+		$ships->execute($fleet->{id});
+		my $j = 0;
+		while (my $ship = $ships->fetchrow_hashref){
+			$ship->{ODD} = $i++ % 2;
+			push @ships,$ship;
+		}
+		$fleet->{ships} = \@ships;
 		push @fleets,$fleet;
 	}
 	$BODY->param(Fleets => \@fleets);
 
 	$BODY->param(SMS => $sms);
 	$BODY->param(Hostname => $hostname);
-	$BODY->param(Error => $error);
 	return $BODY;
 }
 

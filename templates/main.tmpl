@@ -1,5 +1,4 @@
 <TMPL_VAR NAME=Error>
-<p>Hello <TMPL_VAR NAME=Username>.</p>
 <div class="leftinfo">
 <fieldset class="forum-post"> <legend>Message from HC<TMPL_IF isHC> <a href="motd?">EDIT</a></TMPL_IF></legend>
 	<TMPL_VAR NAME=MOTD>
@@ -44,7 +43,7 @@
 	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td class="<TMPL_VAR NAME=Covered>"><a href="/calls?call=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Id></a></td>
 		<td class="<TMPL_VAR NAME=DC>"><TMPL_VAR NAME=Username></td>
-		<td><TMPL_VAR NAME=Landing_tick></td>
+		<td><TMPL_VAR NAME=Tick></td>
 		<td><TMPL_VAR NAME=Race></td>
 		<td><TMPL_VAR NAME=Amount></td>
 		<td><TMPL_VAR NAME=Shiptype></td>
@@ -85,11 +84,21 @@
 	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
 	<TMPL_LOOP Fleets>
 	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-		<td><TMPL_VAR NAME=Target></td><td><TMPL_VAR NAME=Mission></td>
-		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=Landing_Tick></td>
+		<td><TMPL_VAR NAME=Target></td>
+		<td><a href="javascript://"  onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')"><TMPL_VAR NAME=Mission></a></td>
+		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=Tick></td>
 		<td><TMPL_IF Fleet><input class="coordsinput" type="text" name="back:<TMPL_VAR NAME=Id>" value="<TMPL_VAR NAME=Back>"/></TMPL_IF></td>
 		<td><TMPL_IF Fleet><input type="checkbox" name="change:<TMPL_VAR NAME=Id>"/></TMPL_IF></td>
 	</tr>
+	<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
+		<td/>
+		<td colspan="5"><table>
+		<TMPL_LOOP Ships>
+		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+		</tr>
+		</TMPL_LOOP>
+		</table></td></tr>
 	</TMPL_LOOP>
 	</table>
 	<p>
@@ -115,6 +124,7 @@
 	</p>
 </fieldset>
 </form>
+<TMPL_IF PLANET>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
 <fieldset class="forum-post"> <legend>Fleet</legend>
 	<p>Paste your total fleet from ships section on overview here (do it daily to see the menus):</p>
@@ -124,6 +134,7 @@
 	<br/><input type="submit" value="Submit"/>
 </fieldset>
 </form>
+</TMPL_IF>
 </div>
 <TMPL_IF PlanetCoords>
 <img class="graph" src="/graph/stats/<TMPL_VAR NAME=PlanetCoords>" alt="stats for your planet" height="300" width="500"/>

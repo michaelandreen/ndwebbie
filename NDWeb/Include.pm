@@ -78,7 +78,7 @@ sub intelquery {
 	my ($columns,$where) = @_;
 	return qq{
 SELECT $columns, i.mission, i.tick AS landingtick,MIN(i.eta) AS eta, i.amount, i.ingal, u.username
-FROM (intel i NATURAL JOIN users u)
+FROM (fleets i NATURAL JOIN users u)
 	JOIN current_planet_stats t ON i.target = t.id
 	JOIN current_planet_stats o ON i.sender = o.id
 WHERE $where 

@@ -101,7 +101,8 @@ sub render : method {
 	}
 
 	unless ($self->{XML}){
-		my $fleetupdate = $DBH->selectrow_array('SELECT landing_tick FROM fleets WHERE uid = ? AND fleet = 0',undef,$self->{UID});
+		#TODO: Need to fix this with new stuff.
+		my $fleetupdate = $DBH->selectrow_array(q{SELECT tick FROM fleets WHERE sender = ? AND mission = 'Full fleet' AND tick > tick() - 24},undef,$self->{PLANET});
 
 		$fleetupdate = 0 unless defined $fleetupdate;
 
