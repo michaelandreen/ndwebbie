@@ -34,19 +34,19 @@ our $dbh = ND::DB::DB();
 
 #my $test = $dbh->prepare(q{INSERT INTO scans (tick,scan_id) VALUES(1,3) RETURNING id});
 #print ;
-$dbh->do("SET CLIENT_ENCODING TO 'LATIN1';");
+$dbh->do(q{SET CLIENT_ENCODING TO 'LATIN1';});
 
 my $scangroups = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans WHERE groupscan AND NOT parsed});
 my $oldscan = $dbh->prepare(q{SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168});
 my $addScan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid) VALUES (?,?,COALESCE(?,'-1'))});
-my $parsedscan = $dbh->prepare('UPDATE scans SET tick = ?, type = ?, planet = ?, parsed = TRUE WHERE id = ?');
-my $addpoints = $dbh->prepare('UPDATE users SET scan_points = scan_points + ? WHERE uid = ? ');
-my $delscan = $dbh->prepare('DELETE FROM scans WHERE id = ?');
+my $parsedscan = $dbh->prepare(q{UPDATE scans SET tick = ?, type = ?, planet = ?, parsed = TRUE WHERE id = ?});
+my $addpoints = $dbh->prepare(q{UPDATE users SET scan_points = scan_points + ? WHERE uid = ? });
+my $delscan = $dbh->prepare(q{DELETE FROM scans WHERE id = ?});
 
 $scangroups->execute or die $dbh->errstr;
 
 while (my $group = $scangroups->fetchrow_hashref){
-	$dbh->being_work;
+	$dbh->begin_work;
 	my $file = get("http://game.planetarion.com/showscan.pl?scan_grp=$group->{scan_id}");
 
 	my $points = 0;
@@ -57,13 +57,13 @@ while (my $group = $scangroups->fetchrow_hashref){
 		}
 	}
 	$addpoints->execute($points,$group->{uid});
-	$parsedscan->execute($group->{tick},'GROUP',$group->{id});
+	$parsedscan->execute($group->{tick},'GROUP',undef,$group->{id});
 	$dbh->commit;
 }
 
-my $newscans = $dbh->prepare('SELECT id,scan_id,tick,uid FROM scans WHERE NOT groupscan AND NOT parsed');
-my $findplanet = $dbh->prepare('SELECT planetid(?,?,?,?)');
-my $findcoords = $dbh->prepare('SELECT * FROM planetcoords(?,?)');
+my $newscans = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans WHERE NOT groupscan AND NOT parsed});
+my $findplanet = $dbh->prepare(q{SELECT planetid(?,?,?,?)});
+my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
 my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,sender,target,tick,eta,back,amount,ingal,uid) VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
 my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (id,scan) VALUES(?,?)});
 my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount) VALUES(?,?,?)});
