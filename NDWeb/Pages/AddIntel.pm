@@ -19,7 +19,7 @@
 
 package NDWeb::Pages::AddIntel;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use CGI qw/:standard/;
 use NDWeb::Forum;
 use NDWeb::Include;
@@ -42,19 +42,20 @@ sub render_body {
 
 	if (defined param('cmd')){
 		if (param('cmd') eq 'submit' || param('cmd') eq 'submit_message'){
-			my $findscan = $DBH->prepare("SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168");
-			my $addscan = $DBH->prepare('INSERT INTO scans (scan_id,tick,"type") VALUES (?,tick(),?)');
-			my $addpoint = $DBH->prepare('UPDATE users SET scan_points = scan_points + 1 WHERE uid = ? ');
+			my $findscan = $DBH->prepare(q{SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168 AND groupscan = ?});
+			my $addscan = $DBH->prepare(q{INSERT INTO scans (scan_id,tick,uid,groupscan) VALUES (?,tick(),?,?)});
+			my $addpoint = $DBH->prepare(q{UPDATE users SET scan_points = scan_points + 1 WHERE uid = ? });
 			my $intel = param('intel');
 			my @scans;
-			while ($intel =~ m{http://[\w.]+/.+?scan(?:_id)?=(\d+)}g){
+			while ($intel =~ m{http://[\w.]+/.+?scan(_id|_grp)?=(\d+)}g){
+				my $groupscan = (defined $1 && $1 eq '_grp') || 0;
 				my %scan;
-				$scan{Scan} = $1;
-				$scan{Message} = "Scan $1: ";
-				$findscan->execute($1);
+				$scan{Scan} = $2;
+				$scan{Message} = ($groupscan ? b 'Group':'')."Scan $2: ";
+				$findscan->execute($2,$groupscan);
 				if ($findscan->rows == 0){
-					if ($addscan->execute($1,$ND::UID)){
-						$addpoint->execute($ND::UID);
+					if ($addscan->execute($2,$ND::UID,$groupscan)){
+						$addpoint->execute($ND::UID) unless $groupscan;
 						$scan{Message} .= '<i>added</i>';
 					}else{
 						$scan{Message} .= "<b>something went wrong:</b> <i>$DBH->errstr</i>";
@@ -66,10 +67,23 @@ sub render_body {
 			}
 			$BODY->param(Scans => \@scans);
 			my $tick = $self->{TICK};
-			$tick = param('tick') if $tick =~ /^(\d+)$/;
-			my $addintel = $DBH->prepare(qq{SELECT add_intel(?,?,?,?,?,?,?,?,?,?,?)});
-			while ($intel =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\*?\s+.+(?:Ter|Cat|Xan|Zik|Etd)?\s+(\d+)\s+(Attack|Defend)\s+(\d+)/g){
-				$addintel->execute($tick,$9, $1,$2,$3,$4,$5,$6,$7,$8,$ND::UID) or $error .= $DBH->errstr;
+			$tick = param('tick') if defined param('tick') 
+				&& param('tick') =~ /^(\d+)$/;
+			my $addintel = $DBH->prepare(q{INSERT INTO fleets 
+				(name,mission,tick,target,sender,eta,amount,ingal,back,uid)
+				VALUES($1,$2,$3,planetid($4,$5,$6,$10),planetid($7,$8,$9,$10)
+					,$11,$12,$13,$14,$15)
+			});
+			my $findplanet = $DBH->prepare(q{SELECT planetid(?,?,?,?)});
+			while ($intel =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)
+				\*?\s+(.+)(?:Ter|Cat|Xan|Zik|Etd)?
+				\s+(\d+)\s+(Attack|Defend)\s+(\d+)/gx){
+				my $ingal = ($1 == $4 && $2 == $5) || 0;
+				my $lt = $tick + $10;
+				my $back = ($ingal ? $lt + 4 : undef);
+				warn "Added: $&\n";
+				$addintel->execute($7,$9,$lt,$1,$2,$3,$4,$5,$6,$tick,$10,$8
+					,$ingal,$back, $ND::UID) or warn $DBH->errstr;
 			}
 		}
 		if (param('cmd') eq 'submit_message'){
@@ -79,7 +93,6 @@ sub render_body {
 				if (param('intel') =~ /(.*\w.*)/){
 					$subject = $1;
 				}
-
 			}
 			if (my $thread = addForumThread $DBH,$board,$ND::UID,$subject){
 				$error .= p 'Intel message added' if addForumPost $DBH,$thread,$ND::UID,param('intel')
