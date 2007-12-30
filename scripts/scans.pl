@@ -38,7 +38,7 @@ $dbh->do(q{SET CLIENT_ENCODING TO 'LATIN1';});
 
 my $scangroups = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans WHERE groupscan AND NOT parsed});
 my $oldscan = $dbh->prepare(q{SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168});
-my $addScan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid) VALUES (?,?,COALESCE(?,'-1'))});
+my $addScan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid) VALUES (?,?,?)});
 my $parsedscan = $dbh->prepare(q{UPDATE scans SET tick = ?, type = ?, planet = ?, parsed = TRUE WHERE id = ?});
 my $addpoints = $dbh->prepare(q{UPDATE users SET scan_points = scan_points + ? WHERE uid = ? });
 my $delscan = $dbh->prepare(q{DELETE FROM scans WHERE id = ?});
@@ -67,8 +67,7 @@ my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
 my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,sender,target,tick,eta,back,amount,ingal,uid) VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
 my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (id,scan) VALUES(?,?)});
 my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount) VALUES(?,?,?)});
-my $addpdata = $dbh->prepare(q{INSERT INTO planet_data (planet,tick,rid,amount,uid) VALUES(?,?,(SELECT id FROM planet_data_types WHERE category = ? AND name = ?), ?,-1) RETURNING id});
-my $pdatascan = $dbh->prepare(q{INSERT INTO data_scans (id,scan) VALUES(?,?)});
+my $addpdata = $dbh->prepare(q{INSERT INTO planet_data (id,tick,scan,rid,amount) VALUES(?,?,?,(SELECT id FROM planet_data_types WHERE category = ? AND name = ?), ?)});
 
 $newscans->execute or die $dbh->errstr;
 while (my $scan = $newscans->fetchrow_hashref){
@@ -101,12 +100,10 @@ while (my $scan = $newscans->fetchrow_hashref){
 		if ($type eq 'Planet'){
 			$file =~ s/(\d),(\d)/$1$2/g;
 			while($file =~ m/(Metal|Crystal|Eonium)\D+(\d+)\D+(\d+)/g){
-				my $id = $dbh->selectrow_array($addpdata,undef,$planet,$tick
+				$addpdata->execute($planet,$tick,$scan->{id}
 					,'roid',$1, $2) or die $dbh->errstr;
-				$pdatascan->execute($id,$scan->{id});
-				$id = $dbh->selectrow_array($addpdata,undef,$planet,$tick
+				$addpdata->execute($planet,$tick,$scan->{id}
 					,'resource',$1, $3) or die $dbh->errstr;
-				$pdatascan->execute($id,$scan->{id});
 			}
 		}elsif ($type eq 'Jumpgate'){
 			while ($file =~ m/(\d+):(\d+):(\d+)\D+"left"\>(Attack|Defend|Return)<\/td><td>([^<]*)<\/td><td>(\d+)\D+(\d+)/g){
@@ -151,9 +148,8 @@ while (my $scan = $newscans->fetchrow_hashref){
 		} elsif($type eq 'Surface Analysis' || $type eq 'Technology Analysis'){
 			my $cat = ($type eq 'Surface Analysis' ? 'struc' : 'tech');
 			while($file =~ m{((?:[a-zA-Z]| )+)</t[dh]><td(?: class="right")?>(\d+)}sg){
-				my $id = $dbh->selectrow_array($addpdata,undef,$planet,$tick
+				$addpdata->execute($planet,$tick,$scan->{id}
 					,$cat,$1, $2) or die $dbh->errstr;
-				$pdatascan->execute($id,$scan->{id});
 			}
 
 		} elsif($type eq 'Unit' || $type eq 'Advanced Unit'){

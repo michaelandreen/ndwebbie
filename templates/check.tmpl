@@ -78,17 +78,17 @@
 </div>
 <div class="leftinfo">
 <table>
-<tr><th>Tick</th><th>Coords</th></tr>
-<TMPL_LOOP OldCoords>
-<tr>
-	<td><TMPL_VAR NAME=Tick></td><td><TMPL_VAR NAME=X>:<TMPL_VAR NAME=Y>:<TMPL_VAR NAME=Z></td>
-</tr>
-</TMPL_LOOP>
 <tr><th>Tick</th><th>Scan</th></tr>
 <TMPL_LOOP Scans>
 <tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 	<td><TMPL_VAR NAME=Tick></td>
-	<td><a href="http://game.planetarion.com/showscan.pl?scan=<TMPL_VAR NAME=Scan_id>"><TMPL_VAR NAME=Type></a></td>
+	<td><a href="http://game.planetarion.com/showscan.pl?scan_id=<TMPL_VAR NAME=Scan_id>"><TMPL_VAR NAME=Type></a></td>
+</tr>
+</TMPL_LOOP>
+<tr><th>Tick</th><th>Coords</th></tr>
+<TMPL_LOOP OldCoords>
+<tr>
+	<td><TMPL_VAR NAME=Tick></td><td><TMPL_VAR NAME=X>:<TMPL_VAR NAME=Y>:<TMPL_VAR NAME=Z></td>
 </tr>
 </TMPL_LOOP>
 </table>
@@ -98,6 +98,27 @@
 	<TMPL_LOOP Missions>
 	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
+		<td><TMPL_VAR NAME=Name></td>
+		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=LandingTick></td>
+		<td><TMPL_VAR NAME=ETA></td><td><TMPL_VAR NAME=Amount></td>
+	</tr>
+	<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
+		<td/>
+		<td colspan="5"><table>
+		<TMPL_LOOP Ships>
+		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+		</tr>
+		</TMPL_LOOP>
+		</table></td>
+	</tr>
+	</TMPL_LOOP>
+</table>
+<table>
+	<tr><th>Sender</th><th>Name</th><th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th></tr>
+	<TMPL_LOOP Incomings>
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+		<td><a href="/check?coords=<TMPL_VAR NAME=Sender>"><TMPL_VAR NAME=Sender></a></td>
 		<td><TMPL_VAR NAME=Name></td>
 		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=LandingTick></td>
 		<td><TMPL_VAR NAME=ETA></td><td><TMPL_VAR NAME=Amount></td>

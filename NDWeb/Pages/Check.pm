@@ -78,7 +78,7 @@ sub render_body {
 		$extra_columns = ", planet_status,hit_us, alliance,relationship";
 	}
 
-	my $query = $DBH->prepare(qq{Select id,coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race,
+	my $query = $DBH->prepare(qq{Select p.id,coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,
@@ -87,7 +87,15 @@ sub render_body {
 		scorerank,scorerank_gain,scorerank_gain_day,
 		valuerank,valuerank_gain,valuerank_gain_day,
 		xprank,xprank_gain,xprank_gain_day,
-		p.value - p.size*200 - coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue  $extra_columns from current_planet_stats_full p LEFT OUTER JOIN covop_targets c ON p.id = c.planet where x = ? AND y = ? $where order by x,y,z asc});
+		p.value - p.size*200 - 
+			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 - 
+			COALESCE(ss.total ,(SELECT COALESCE(avg(total),0) FROM structure_scans)::int)*1500 AS fleetvalue
+		,(metal+crystal+eonium)/100 AS resvalue  $extra_columns 
+		FROM current_planet_stats_full p 
+			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
+			LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
+		WHERE x = ? AND y = ? $where ORDER BY x,y,z ASC
+	});
 
 	if (defined $z){
 		$query->execute($x,$y,$z);
@@ -130,19 +138,19 @@ sub render_body {
 
 		my $query = $DBH->prepare(q{ 
 			SELECT i.id,i.mission, i.name, i.tick AS landingtick,MIN(eta) AS eta
-				, i.amount, coords(t.x,t.y,t.z) AS target
+				, i.amount, coords(x,y,z) AS target
 			FROM fleets i
 			LEFT OUTER JOIN (planets
 				NATURAL JOIN planet_stats) t ON i.target = t.id
-					AND t.tick = ( SELECT max(tick) FROM planet_stats)
+					AND t.tick = ( SELECT MAX(tick) FROM planet_stats)
 			WHERE  i.uid = -1
 				AND i.sender = ?
 				AND (i.tick > tick() - 14 OR i.mission = 'Full Fleet')
-			GROUP BY i.id,t.x,t.y,t.z,i.mission,i.tick,i.name,i.amount,i.ingal,i.uid
-			ORDER BY i.tick,t.x,t.y,t.z
+			GROUP BY i.id,x,y,z,i.mission,i.tick,i.name,i.amount,i.ingal,i.uid
+			ORDER BY i.tick,x,y,z
 		});
 		$query->execute($planet_id);
-		my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships where id = ?});
+		my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships WHERE id = ?});
 		my @missions;
 		$i = 0;
 		while (my $mission = $query->fetchrow_hashref){
@@ -160,6 +168,38 @@ sub render_body {
 			push @missions,$mission;
 		}
 		$BODY->param(Missions => \@missions);
+
+		$query = $DBH->prepare(q{ 
+			SELECT i.id,i.mission, i.name, i.tick AS landingtick,MIN(eta) AS eta
+				, i.amount, coords(x,y,z) AS sender
+			FROM fleets i
+			LEFT OUTER JOIN (planets
+				NATURAL JOIN planet_stats) s ON i.sender = s.id
+					AND s.tick = ( SELECT MAX(tick) FROM planet_stats)
+			WHERE  i.uid = -1
+				AND i.target = ?
+				AND (i.tick > tick() - 14 OR i.mission = 'Full Fleet')
+			GROUP BY i.id,x,y,z,i.mission,i.tick,i.name,i.amount,i.ingal,i.uid
+			ORDER BY i.tick,x,y,z
+		});
+		$query->execute($planet_id);
+		my @incomings;
+		$i = 0;
+		while (my $mission = $query->fetchrow_hashref){
+			$mission->{ODD} = $i++ % 2;
+			$mission->{CLASS} = $mission->{mission};
+			my @ships;
+			$ships->execute($mission->{id});
+			my $j = 0;
+			while (my $ship = $ships->fetchrow_hashref){
+				$ship->{ODD} = $j++ % 2;
+				push @ships,$ship;
+			}
+			push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
+			$mission->{ships} = \@ships;
+			push @incomings,$mission;
+		}
+		$BODY->param(Incomings => \@incomings);
 
 		$query = $DBH->prepare(q{SELECT value,value_gain AS gain,tick FROM planet_stats 
 			WHERE id = ? AND tick > tick() - 24});

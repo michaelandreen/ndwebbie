@@ -81,17 +81,12 @@ INSERT INTO planet_data_types (category,name) VALUES('struc','Finance Centre');
 INSERT INTO planet_data_types (category,name) VALUES('struc','Security Centre');
 
 CREATE TABLE planet_data (
-	id SERIAL PRIMARY KEY,
-	uid INTEGER NOT NULL REFERENCES users(uid),
-	planet INTEGER NOT NULL REFERENCES planets(id),
+	id INTEGER NOT NULL REFERENCES planets(id),
+	scan INTEGER NOT NULL REFERENCES scans(id),
 	tick INTEGER NOT NULL,
 	rid INTEGER NOT NULL REFERENCES planet_data_types(id),
-	amount INTEGER NOT NULL
-) WITHOUT OIDS;
-
-CREATE TABLE data_scans (
-	id INTEGER PRIMARY KEY REFERENCES planet_data(id),
-	scan INTEGER NOT NULL REFERENCES scans(id)
+	amount INTEGER NOT NULL,
+	PRIMARY KEY(rid,scan)
 ) WITHOUT OIDS;
 
 DROP TABLE intel;
@@ -101,3 +96,33 @@ CREATE INDEX fleets_target_index ON fleets (target);
 CREATE INDEX fleets_sender_index ON fleets (sender);
 CREATE INDEX fleets_mission_index ON fleets (mission);
 CREATE INDEX fleets_ingal_index ON fleets (ingal);
+
+DROP TABLE covop_targets ;
+
+CREATE OR REPLACE VIEW planet_scans AS
+SELECT DISTINCT ON (planet) id,planet,tick,metal,crystal,eonium,metal_roids,crystal_roids,eonium_roids
+FROM scans s
+	JOIN (SELECT scan AS id,amount AS metal_roids FROM planet_data
+		WHERE rid = 1) AS mr USING (id)
+	JOIN (SELECT scan AS id,amount AS crystal_roids FROM planet_data
+		WHERE rid = 2) AS cr USING (id)
+	JOIN (SELECT scan AS id,amount AS eonium_roids FROM planet_data
+		WHERE rid = 3) AS er USING (id)
+	JOIN (SELECT scan AS id,amount AS metal FROM planet_data
+		WHERE rid = 4) AS m USING (id)
+	JOIN (SELECT scan AS id,amount AS crystal FROM planet_data
+		WHERE rid = 5) AS c USING (id)
+	JOIN (SELECT scan AS id,amount AS eonium FROM planet_data
+		WHERE rid = 6) AS e USING (id)
+ORDER BY planet,tick DESC,id DESC;
+
+CREATE OR REPLACE VIEW structure_scans AS
+SELECT DISTINCT ON (planet) id,planet,tick, total,distorters,seccents
+FROM scans s
+	JOIN (SELECT scan AS id, SUM(amount) AS total FROM planet_data
+		WHERE rid >= 14 AND rid <= 24 GROUP BY scan) AS t USING (id)
+	JOIN (SELECT scan AS id,amount AS distorters FROM planet_data
+		WHERE rid = 18) AS d USING (id)
+	JOIN (SELECT scan AS id,amount AS seccents FROM planet_data
+		WHERE rid = 24) AS sc USING (id)
+ORDER BY planet,tick DESC, id DESC
