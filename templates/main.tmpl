@@ -37,13 +37,14 @@
 	</TMPL_LOOP>
 	</table>
 </TMPL_IF>
+<TMPL_IF Calls>
 <table>
 	<tr><th>Call</th><th>DC</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>Current eta</th><th>Inital eta</th><th>Attackers</th></tr>
 <TMPL_LOOP Calls>
 	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td class="<TMPL_VAR NAME=Covered>"><a href="/calls?call=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Id></a></td>
-		<td class="<TMPL_VAR NAME=DC>"><TMPL_VAR NAME=Username></td>
-		<td><TMPL_VAR NAME=Tick></td>
+		<td class="<TMPL_VAR NAME=ActiveDC>"><TMPL_VAR NAME=DC></td>
+		<td><TMPL_VAR NAME=Landing_Tick></td>
 		<td><TMPL_VAR NAME=Race></td>
 		<td><TMPL_VAR NAME=Amount></td>
 		<td><TMPL_VAR NAME=Shiptype></td>
@@ -53,6 +54,7 @@
 	</tr>
 </TMPL_LOOP>
 </table>
+</TMPL_IF>
 <div class="leftinfo">
 <fieldset class="forum-post"> <legend>Account details</legend>
 	<ul>
@@ -83,12 +85,12 @@
 	<table>
 	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
 	<TMPL_LOOP Fleets>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 		<td><TMPL_VAR NAME=Target></td>
 		<td><a href="javascript://"  onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')"><TMPL_VAR NAME=Mission></a></td>
 		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=Tick></td>
-		<td><TMPL_IF Fleet><input class="coordsinput" type="text" name="back:<TMPL_VAR NAME=Id>" value="<TMPL_VAR NAME=Back>"/></TMPL_IF></td>
-		<td><TMPL_IF Fleet><input type="checkbox" name="change:<TMPL_VAR NAME=Id>"/></TMPL_IF></td>
+		<td><TMPL_IF Back><input class="coordsinput" type="text" name="back:<TMPL_VAR NAME=Id>" value="<TMPL_VAR NAME=Back>"/></TMPL_IF></td>
+		<td><TMPL_IF Back><input type="checkbox" name="change:<TMPL_VAR NAME=Id>"/></TMPL_IF></td>
 	</tr>
 	<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
 		<td/>

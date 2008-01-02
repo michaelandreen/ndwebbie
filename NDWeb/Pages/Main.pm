@@ -119,7 +119,6 @@ sub render_body {
 	my ($motd) = $DBH->selectrow_array("SELECT value FROM misc WHERE id='MOTD'");
 
 	$BODY->param(MOTD => parseMarkup($motd));
-	$BODY->param(Username => $self->{USER});
 	$BODY->param(isMember => $self->isMember());
 	$BODY->param(isHC => $self->isHC());
 	my @groups = map {name => $_}, sort keys %{$self->{GROUPS}};
@@ -141,29 +140,35 @@ sub render_body {
 
 	$BODY->param(Planet => $planet);
 
-	$query = $DBH->prepare(qq{
-		SELECT c.id, c.landing_tick, dc.username,c.covered,
-		TRIM('/' FROM concat(p2.race||' /')) AS race, TRIM('/' FROM concat(i.amount||' /')) AS amount,
-		TRIM('/' FROM concat(i.eta||' /')) AS eta, TRIM('/' FROM concat(i.shiptype||' /')) AS shiptype,
-		(c.landing_tick - tick()) AS curreta,
-		TRIM('/' FROM concat(coords(p2.x,p2.y,p2.z) ||' /')) AS attackers
-		FROM calls c 
-		JOIN incomings i ON i.call = c.id
-		JOIN current_planet_stats p2 ON i.sender = p2.id
-		LEFT OUTER JOIN users dc ON c.dc = dc.uid
-		WHERE c.member = ? AND (c.landing_tick - tick())  > 0
-		GROUP BY c.id, c.landing_tick,dc.username,c.covered
-		ORDER BY c.landing_tick DESC
+	my $calls = $DBH->prepare(qq{
+		SELECT id,landing_tick,dc,curreta,
+				TRIM('/' FROM concat(DISTINCT race||' /')) AS race, TRIM('/' FROM concat(amount||' /')) AS amount,
+				TRIM('/' FROM concat(DISTINCT eta||' /')) AS eta, TRIM('/' FROM concat(DISTINCT shiptype||' /')) AS shiptype,
+				TRIM('/' FROM concat(coords||' /')) AS attackers 
+			FROM (SELECT c.id,p.x,p.y,p.z, u.defense_points, c.landing_tick, dc.username AS dc,
+				(c.landing_tick - tick()) AS curreta,p2.race, i.amount, i.eta, i.shiptype, p2.alliance,
+				coords(p2.x,p2.y,p2.z),	COUNT(DISTINCT f.id) AS fleets
+			FROM calls c 
+			JOIN incomings i ON i.call = c.id
+			JOIN users u ON c.member = u.uid
+			JOIN current_planet_stats p ON u.planet = p.id
+			JOIN current_planet_stats p2 ON i.sender = p2.id
+			LEFT OUTER JOIN users dc ON c.dc = dc.uid
+			LEFT OUTER JOIN fleets f ON f.target = u.planet AND f.tick = c.landing_tick AND f.back = f.tick + f.eta - 1
+			WHERE u.uid = ? AND c.landing_tick >= tick()
+			GROUP BY c.id, p.x,p.y,p.z, c.landing_tick, u.defense_points,dc.username,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z) a
+			GROUP BY id, x,y,z,landing_tick, defense_points,dc,curreta,fleets
+			ORDER BY landing_tick DESC
 		})or warn  $DBH->errstr;
-	$query->execute($ND::UIN) or warn $DBH->errstr;
+	$calls->execute($ND::UID) or warn $DBH->errstr;
 
 	my $i = 0;
 	my @calls;
-	while (my $call = $query->fetchrow_hashref){
+	while (my $call = $calls->fetchrow_hashref){
 		$call->{attackers} =~ s{(\d+:\d+:\d+)}{<a href="/check?coords=$1">$1</a>}g;
-		unless(defined $call->{username}){
-			$call->{dc} = 'Hostile';
-			$call->{username} = 'none';
+		unless(defined $call->{dc}){
+			$call->{activedc} = 'Hostile';
+			$call->{dc} = 'none';
 		}
 		if($call->{covered}){
 			$call->{covered} = 'Friendly';
