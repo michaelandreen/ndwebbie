@@ -109,7 +109,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 			while ($file =~ m/(\d+):(\d+):(\d+)\D+"left"\>(Attack|Defend|Return)<\/td><td>([^<]*)<\/td><td>(\d+)\D+(\d+)/g){
 				
 				my ($sender) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3,$tick) or die $dbh->errstr;
-				my $id = addfleet($5,$4,"",$sender,$planet,$tick+$6,$6
+				my $id = addfleet($5,$4,undef,$sender,$planet,$tick+$6,$6
 					,undef,$7, $x == $1 && $y == $2);
 				$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 			}
@@ -128,7 +128,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 					my ($target) = $dbh->selectrow_array($findplanet,undef
 						,$2,$3,$4,$t) or die $dbh->errstr;
 					die "No target: $2:$3:$4" unless defined $target;
-					my $id = addfleet($1,$mission,"",$planet,$target,$6
+					my $id = addfleet($1,$mission,undef,$planet,$target,$6
 						,$eta,$back,undef, ($x == $2 && $y == $3));
 					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 				}elsif($news eq 'Incoming' && $text =~ m/We have detected an open jumpgate from (.*?), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have roughly (\d+) ships/g){
@@ -140,7 +140,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 					my ($target) = $dbh->selectrow_array($findplanet,undef
 						,$2,$3,$4,$t) or die $dbh->errstr;
 					die "No target: $2:$3:$4" unless defined $target;
-					my $id = addfleet($1,$mission,"",$planet,$target,$5
+					my $id = addfleet($1,$mission,undef,$planet,$target,$5
 						,$eta,$back,$6, ($x == $2 && $y == $3));
 					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 				}
@@ -190,13 +190,12 @@ sub addfleet {
 	}
 
 	my @ships;
-	my $total = undef;
-	while($ships =~ m{((?:[a-zA-Z]| )+)</td><td>(\d+)}sg){
-		$total = 0 unless defined $total;
+	my $total = 0;
+	while(defined $ships && $ships =~ m{((?:[a-zA-Z]| )+)</td><td>(\d+)}sg){
 		$total += $2;
 		push @ships, [$1,$2];
 	}
-	$amount = $total unless defined $amount;
+	$amount = $total if not defined $amount && defined $ships;
 	my $id = $dbh->selectrow_array($addfleet,undef,$name,$mission,$sender
 		,$target,$tick, $eta, $back, $amount,$ingal) or die $dbh->errstr;
 	for my $s (@ships){
