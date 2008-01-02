@@ -18,7 +18,7 @@
 #**************************************************************************/
 package NDWeb::Pages::Calls;
 use strict;
-use warnings FATAL => 'all';
+use warnings;
 use ND::Include;
 use CGI qw/:standard/;
 use NDWeb::Include;
@@ -35,12 +35,10 @@ sub render_body {
 
 	return $self->noAccess unless $self->isDC;
 
-	my $error;
-
 	my $call;
 	if (defined param('call') && param('call') =~ /^(\d+)$/){
 		my $query = $DBH->prepare(q{
-			SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member,u.planet
+			SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member,u.planet, u.username AS member, u.sms
 			FROM calls c 
 			JOIN users u ON c.member = u.uid
 			LEFT OUTER JOIN users dc ON c.dc = dc.uid
@@ -57,7 +55,7 @@ sub render_body {
 					$call->{landing_tick} = param('tick');
 					log_message $ND::UID,"DC updated landing tick for call $call->{id}";
 				}else{
-					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+					warn $DBH->errstr;
 				}
 			}
 			if (param('cinfo')){
@@ -66,12 +64,11 @@ sub render_body {
 					$call->{info} = param('info');
 					log_message $ND::UID,"DC updated info for call $call->{id}";
 				}else{
-					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+					warn $DBH->errstr;
 				}
 			}
-			$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+			$DBH->commit or warn $DBH->errstr;
 		}elsif(param('cmd') =~ /^(Cover|Uncover|Ignore|Open|Take) call$/){
-			$error .= "test";
 			my $extra_vars = '';
 			if (param('cmd') eq 'Cover call'){
 				$extra_vars = ", covered = TRUE, open = FALSE";
@@ -88,7 +85,7 @@ sub render_body {
 				$call->{open} = (param('cmd') =~ /^(Uncover|Open) call$/);
 				$call->{DC} = $self->{USER};
 			}else{
-				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+				warn $DBH->errstr;
 			}
 		}elsif(param('cmd') eq 'Remove'){
 			$DBH->begin_work;
@@ -98,11 +95,11 @@ sub render_body {
 					if($query->execute($1,$call->{id})){
 						log_message $ND::UID,"DC deleted fleet: $1, call $call->{id}";
 					}else{
-						$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+						warn $DBH->errstr;
 					}
 				}
 			}
-			$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+			$DBH->commit or warn $DBH->errstr;
 		}elsif(param('cmd') eq 'Change'){
 			$DBH->begin_work;
 			my $query = $DBH->prepare(q{UPDATE incomings SET shiptype = ? WHERE id = ? AND call = ?});
@@ -112,11 +109,11 @@ sub render_body {
 					if($query->execute($shiptype,$1,$call->{id})){
 						log_message $ND::UID,"DC set fleet: $1, call $call->{id} to: $shiptype";
 					}else{
-						$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+						warn $DBH->errstr;
 					}
 				}
 			}
-			$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+			$DBH->commit or warn $DBH->errstr;
 		}
 	}
 
@@ -128,6 +125,8 @@ sub render_body {
 		$BODY->param(ETA => $call->{landing_tick}-$self->{TICK});
 		$BODY->param(Info => escapeHTML $call->{info});
 		$BODY->param(DC => $call->{dc});
+		$BODY->param(Member => $call->{member});
+		$BODY->param(SMS => $call->{sms});
 		if ($call->{covered}){
 			$BODY->param(Cover => 'Uncover');
 		}else{
@@ -138,14 +137,24 @@ sub render_body {
 		}else{
 			$BODY->param(Ignore => 'Open');
 		}
-		my $fleets = $DBH->prepare(q{
-			SELECT id,mission,landing_tick,eta, back FROM fleets WHERE uid = ? AND (fleet = 0 OR (back >= ? AND landing_tick - eta - 11 < ? ))
-			ORDER BY fleet ASC});
-		my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE fleet = ?');
-		$fleets->execute($call->{member},$call->{landing_tick},$call->{landing_tick});
+
+		my $outgoings = $DBH->prepare(q{ 
+			SELECT i.id,i.mission, i.name, i.tick,eta
+				, i.amount, coords(x,y,z) AS target
+			FROM fleets i
+			LEFT OUTER JOIN (planets
+				NATURAL JOIN planet_stats) t ON i.target = t.id
+					AND t.tick = ( SELECT MAX(tick) FROM planet_stats)
+			WHERE  i.sender = $1 
+				AND (i.tick > $2 - 14 OR i.mission = 'Full Fleet')
+			ORDER BY i.tick,x,y,z
+		});
+		my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE id = ?');
+		$outgoings->execute($call->{planet},$call->{landing_tick});
 		my @fleets;
-		while (my $fleet = $fleets->fetchrow_hashref){
-			if ($fleet->{back} == $call->{landing_tick}){
+		while (my $fleet = $outgoings->fetchrow_hashref){
+			if (defined $fleet->{back} &&
+					$fleet->{back} == $call->{landing_tick}){
 				$fleet->{Fleetcatch} = 1;
 			}
 			$ships->execute($fleet->{id});
@@ -161,13 +170,22 @@ sub render_body {
 		}
 		$BODY->param(Fleets => \@fleets);
 
+		my $defenders = $DBH->prepare(q{ 
+			SELECT i.id,i.mission, i.name, i.tick,eta
+				, i.amount, coords(x,y,z) AS sender
+			FROM fleets i
+			LEFT OUTER JOIN (planets
+				NATURAL JOIN planet_stats) s ON i.sender = s.id
+					AND s.tick = ( SELECT MAX(tick) FROM planet_stats)
+			WHERE i.target = ?
+				AND i.tick = ? AND i.mission = 'Defend'
+			ORDER BY i.tick,x,y,z
+		});
 
-		$fleets = $DBH->prepare(q{
-			SELECT username, id,back - (landing_tick + eta - 1) AS recalled FROM fleets f JOIN users u USING (uid) WHERE target = $1 and landing_tick = $2
-			});
-		$fleets->execute($call->{planet},$call->{landing_tick}) or $ND::ERROR .= p $DBH->errstr;
+		$defenders->execute($call->{planet},$call->{landing_tick}) or warn $DBH->errstr;
 		my @defenders;
-		while (my $fleet = $fleets->fetchrow_hashref){
+		while (my $fleet = $defenders->fetchrow_hashref){
+			$fleet->{CLASS} = $fleet->{mission};
 			$ships->execute($fleet->{id});
 			my @ships;
 			my $i = 0;
@@ -183,17 +201,39 @@ sub render_body {
 		$BODY->param(Defenders => \@defenders);
 
 		my $attackers = $DBH->prepare(q{
-			SELECT coords(p.x,p.y,p.z), p.planet_status, p.race,i.eta,i.amount,i.fleet,i.shiptype,p.relationship,p.alliance,i.id
+			SELECT coords(p.x,p.y,p.z), p.planet_status, p.race,i.eta,i.amount,i.fleet,i.shiptype,p.relationship,p.alliance,i.id,p.id AS planet
 			FROM incomings i
 			JOIN current_planet_stats p ON i.sender = p.id
 			WHERE i.call = ?
-			ORDER BY p.x,p.y,p.z});
+			ORDER BY p.x,p.y,p.z
+		});
 		$attackers->execute($call->{id});
 		my @attackers;
 		my $i = 0;
 		while(my $attacker = $attackers->fetchrow_hashref){
 			$i++;
 			$attacker->{ODD} = $i % 2;
+			$outgoings->execute($attacker->{planet},$call->{landing_tick});
+			my @missions;
+			my $k = 0;
+			while (my $mission = $outgoings->fetchrow_hashref){
+				$mission->{eta} = '?' if not defined $mission->{eta};
+				$mission->{amount} = '?' if not defined $mission->{amount};
+				$mission->{ODD} = $k++ % 2;
+				$mission->{CLASS} = $mission->{mission};
+				my @ships;
+				$ships->execute($mission->{id});
+				my $j = 0;
+				while (my $ship = $ships->fetchrow_hashref){
+					$ship->{ODD} = $j++ % 2;
+					push @ships,$ship;
+				}
+				push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
+				$mission->{ships} = \@ships;
+				push @missions,$mission;
+			}
+			delete $attacker->{planet};
+			$attacker->{missions} = \@missions;
 			push @attackers,$attacker;
 		}
 		$BODY->param(Attackers => \@attackers);
@@ -227,13 +267,13 @@ sub render_body {
 			JOIN current_planet_stats p ON u.planet = p.id
 			JOIN current_planet_stats p2 ON i.sender = p2.id
 			LEFT OUTER JOIN users dc ON c.dc = dc.uid
-			LEFT OUTER JOIN fleets f ON f.target = u.planet AND f.landing_tick = c.landing_tick AND f.back = f.landing_tick + f.eta - 1
+			LEFT OUTER JOIN fleets f ON f.target = u.planet AND f.tick = c.landing_tick AND f.back = f.tick + f.eta - 1
 			WHERE $where
 			GROUP BY c.id, p.x,p.y,p.z, c.landing_tick, u.defense_points,dc.username,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z) a
 			GROUP BY id, x,y,z,landing_tick, defense_points,dc,curreta,fleets
 			ORDER BY landing_tick DESC
-			})or $error .= $DBH->errstr;
-		$query->execute or $error .= $DBH->errstr;
+			})or warn $DBH->errstr;
+		$query->execute or warn $DBH->errstr;
 		my @calls;
 		my $i = 0;
 		my $tick = $self->{TICK};
@@ -259,7 +299,6 @@ sub render_body {
 		}
 		$BODY->param(Calls => \@calls);
 	}
-	$BODY->param(Error => $error);
 	return $BODY;
 }
 1;

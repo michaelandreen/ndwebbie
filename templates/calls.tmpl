@@ -1,55 +1,40 @@
-<TMPL_VAR NAME=Error>
 <TMPL_IF Call>
-<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Call details, call# <TMPL_VAR NAME=Call></legend>
-	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
-	<input type="hidden" name="call" value="<TMPL_VAR NAME=Call>"/>
-	<p>Current DC: <TMPL_VAR NAME=DC></p>
-	<p>Member: <a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></p>
-	<p>Defense points: <TMPL_VAR NAME=DefensePoints></p>
-	<p>Landing at tick: <input type="text" name="tick" value="<TMPL_VAR NAME=LandingTick>"/>
-		<input type="checkbox" name="ctick"/></p>
-	<p>ETA: <TMPL_VAR NAME=ETA></p>
-	<fieldset><legend>Member fleet</legend>
-	<TMPL_LOOP Fleets><TMPL_IF NAME=Id></TMPL_IF>
-	<div class="leftinfo">
-		<TMPL_IF Fleetcatch><p><b>FLEETCATCH</b></p></TMPL_IF>
-		<p>Fleet mission: <TMPL_VAR NAME=Mission>, Landing tick: <TMPL_VAR NAME=Landing_Tick>, Initial eta: <TMPL_VAR NAME=ETA>, Back: <TMPL_VAR NAME=Back></p>
-		<table>
-			<tr><th>Ship</th><th>Amount</th></tr>
-			<TMPL_LOOP Ships>
-				<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-					<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
-				</tr>
-			</TMPL_LOOP>
-		</table>
-	</div>
-	</TMPL_LOOP Fleets>
-	</fieldset>
-	<fieldset><legend>Defenders</legend>
-	<TMPL_LOOP Defenders>
-	<div class="leftinfo">
-		<p>Member: <TMPL_VAR NAME=Username></p>
-		<TMPL_IF Recalled><p style="color:red;">RECALLED!</p></TMPL_IF>	
-		<table>
-			<tr><th>Ship</th><th>Amount</th></tr>
-			<TMPL_LOOP Ships>
-				<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
-					<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
-				</tr>
-			</TMPL_LOOP>
-		</table>
-	</div>
-	</TMPL_LOOP>
-	</fieldset>
-	<p>Useful information. Change?<input type="checkbox" name="cinfo"/></p>
-	<textarea rows="15" cols="80" name="info"><TMPL_VAR NAME=Info></textarea>
-	<p>
-		<input type="submit" name="cmd" value="Submit"/>
-		<input type="submit" name="cmd" value="Take call"/>
-		<input type="submit" name="cmd" value="<TMPL_VAR NAME=Cover> call"/>
-		<input type="submit" name="cmd" value="<TMPL_VAR NAME=Ignore> call"/>
-	</p>
-</fieldset></form>
+<form action="<TMPL_VAR NAME=PAGE>" method="post">
+<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+<input type="hidden" name="call" value="<TMPL_VAR NAME=Call>"/>
+<fieldset> <legend>Call details, call# <TMPL_VAR NAME=Call></legend>
+<table>
+<tr>
+<td>
+<ul>
+	<li>Current DC: <TMPL_VAR NAME=DC></li>
+	<li>Member:<TMPL_VAR NAME=Member> </li>
+	<li>SMS:<TMPL_VAR NAME=SMS> </li>
+	<li>Coords: <a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></li>
+	<li>Defense points: <TMPL_VAR NAME=DefensePoints></li>
+	<li>Landing at tick: <br/>
+		<input type="text" name="tick" value="<TMPL_VAR NAME=LandingTick>"/>
+		<input type="checkbox" name="ctick"/></li>
+	<li>Current ETA: <TMPL_VAR NAME=ETA></li>
+</ul>
+</td>
+<td>
+	<textarea rows="8" cols="40" name="info">
+				<TMPL_VAR NAME=Info>
+	</textarea>
+</td>
+<td><ul>
+	<li><input type="text" name="bcalc" value="<TMPL_VAR NAME=BCalc>"/><input type="checkbox" name="cbcalc"/></li>
+	<li>Change Notes? <input type="checkbox" name="cinfo"/></li>
+	<li><input type="submit" name="cmd" value="Submit"/></li>
+	<li><input type="submit" name="cmd" value="Take call"/></li>
+	<li><input type="submit" name="cmd" value="<TMPL_VAR NAME=Cover> call"/></li>
+	<li><input type="submit" name="cmd" value="<TMPL_VAR NAME=Ignore> call"/></li>
+</ul></td>
+</tr>
+</table>
+</fieldset>
+</form>
 <fieldset><legend>Attackers:</legend>
 <form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
@@ -67,7 +52,7 @@
 	<th>Change/remove?</th>
 	</tr>
 	<TMPL_LOOP Attackers>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('attacker<TMPL_VAR NAME=Id>')">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td class="<TMPL_VAR NAME=Planet_status>"><TMPL_VAR NAME=Planet_status></td>
 		<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance> (<TMPL_VAR NAME=Relationship>)</td>
@@ -78,6 +63,31 @@
 		<td><TMPL_VAR NAME=Fleet></td>
 		<td><input type="checkbox" name="change:<TMPL_VAR NAME=Id>"/></td>
 	</tr>
+	<tr id="attacker<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
+	<td></td>
+	<td colspan="8">
+	<table>
+		<tr><th>Target</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
+		<TMPL_LOOP Missions>
+		<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+			<td><a href="/check?coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
+			<td><TMPL_VAR NAME=Name></td>
+			<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=Tick></td>
+			<td><TMPL_VAR NAME=ETA></td><td><TMPL_VAR NAME=Amount></td>
+		</tr>
+		<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
+			<td/>
+			<td colspan="5"><table>
+			<TMPL_LOOP Ships>
+			<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+				<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+			</tr>
+			</TMPL_LOOP>
+			</table></td>
+		</tr>
+		</TMPL_LOOP>
+	</table>
+	</td></tr>
 	</TMPL_LOOP>
 	</table>
 	<p>
@@ -85,6 +95,52 @@
 	<input type="submit" name="cmd" value="Remove"/>
 	</p>
 </form>
+</fieldset>
+<fieldset><legend>Member fleet</legend>
+<table>
+	<tr><th>Target</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
+	<TMPL_LOOP Fleets>
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+		<td><a href="/check?coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
+		<td><TMPL_VAR NAME=Name></td>
+		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=Tick></td>
+		<td><TMPL_VAR NAME=ETA></td><td><TMPL_VAR NAME=Amount></td>
+	</tr>
+	<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
+		<td/>
+		<td colspan="5"><table>
+		<TMPL_LOOP Ships>
+		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+		</tr>
+		</TMPL_LOOP>
+		</table></td>
+	</tr>
+	</TMPL_LOOP>
+</table>
+</fieldset>
+<fieldset><legend>Defenders</legend>
+<table>
+	<tr><th>Sender</th><th>Name</th><th>Mission</th><th>Landing Tick</th><th>ETA</th><th>Amount</th></tr>
+	<TMPL_LOOP Defenders>
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+		<td><a href="/check?coords=<TMPL_VAR NAME=Sender>"><TMPL_VAR NAME=Sender></a></td>
+		<td><TMPL_VAR NAME=Name></td>
+		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=Tick></td>
+		<td><TMPL_VAR NAME=ETA></td><td><TMPL_VAR NAME=Amount></td>
+	</tr>
+	<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
+		<td/>
+		<td colspan="5"><table>
+		<TMPL_LOOP Ships>
+		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+		</tr>
+		</TMPL_LOOP>
+		</table></td>
+	</tr>
+	</TMPL_LOOP>
+</table>
 </fieldset>
 <TMPL_ELSE>
 <table>
