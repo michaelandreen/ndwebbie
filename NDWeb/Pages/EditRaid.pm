@@ -223,28 +223,17 @@ sub render_body {
 			}
 			$target->{waves} = \@waves;
 
-			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) type, tick, scan FROM scans 
-				WHERE planet = ? AND type ~ 'Unit|Planet|Advanced Unit|.* Analysis' AND tick + 24 > tick() AND scan is not null
-				GROUP BY type, tick, scan ORDER BY type ,tick DESC});
+			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) scan_id,type, tick FROM scans 
+				WHERE planet = ? AND type ~ 'Unit|Planet|Advanced Unit|.* Analysis' AND tick + 24 > tick()
+				ORDER BY type ,tick DESC});
 			$scans->execute($target->{planet});
 			delete $target->{planet};
-			my %scans;
-			while (my $scan = $scans->fetchrow_hashref){
-				$scans{$scan->{type}} = $scan;
-			}
 
 			my @scans;
-			for my $type ('Planet','Unit','Advanced Unit','Surface Analysis','Technology Analysis'){
-				next unless exists $scans{$type};
-				my $scan = $scans{$type};
-				if ($self->{TICK} - $scan->{tick} > 5){
-					$scan->{scan} =~ s{<table( cellpadding="\d+")?>}{<table class="old">};
-				}
-				if ($type eq 'Planet'){
-					$target->{PlanetScan} = $scan->{scan};
-					next;
-				}
-				push @scans,{Scan => $scan->{scan}};
+			my $i = 0;
+			while (my $scan = $scans->fetchrow_hashref){
+				$scan->{ODD} = $i++ % 2;
+				push @scans,$scan;
 			}
 			$target->{Scans} = \@scans;
 			push @targets,$target;
