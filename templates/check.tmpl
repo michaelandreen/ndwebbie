@@ -67,6 +67,18 @@
 <TMPL_IF OnePlanet>
 <div class="leftinfo">
 <table>
+<tr><th>Tick</th><th>Type</th>Amount</tr>
+<TMPL_LOOP PlanetData>
+<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<td><TMPL_VAR NAME=Tick></td>
+	<td><TMPL_VAR NAME=Category> <TMPL_VAR NAME=Name></td>
+	<td><TMPL_VAR NAME=Amount></td>
+</tr>
+</TMPL_LOOP>
+</table>
+</div>
+<div class="leftinfo">
+<table>
 <tr><th>Tick</th><th>Value</th><th>Gain</th></tr>
 <TMPL_LOOP Values>
 <tr>
@@ -93,6 +105,7 @@
 </TMPL_LOOP>
 </table>
 </div>
+<div class="leftinfo">
 <table>
 	<tr><th>Target</th><th>Name</th><th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th></tr>
 	<TMPL_LOOP Missions>
@@ -135,6 +148,7 @@
 	</tr>
 	</TMPL_LOOP>
 </table>
+</div>
 </TMPL_IF>
 <div class="leftinfo">
 <img class="graph" src="/graph/stats/<TMPL_VAR NAME=Coords>" alt="stats" height="300" width="500"/>

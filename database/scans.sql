@@ -126,3 +126,6 @@ FROM scans s
 	JOIN (SELECT scan AS id,amount AS seccents FROM planet_data
 		WHERE rid = 24) AS sc USING (id)
 ORDER BY planet,tick DESC, id DESC
+
+
+CREATE INDEX planet_data_id_index ON planet_data (id);

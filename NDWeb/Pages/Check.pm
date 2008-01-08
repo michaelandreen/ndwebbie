@@ -122,7 +122,7 @@ sub render_body {
 			}
 		}
 		if ($self->isMember && ($self->isOfficer || $self->isBC)){
-			if ($z && $planet->{alliance} eq 'NewDawn' && not ($self->isHC || $self->isOfficer)){
+			if ($z && defined $planet->{alliance} && $planet->{alliance} eq 'NewDawn' && not ($self->isHC || $self->isOfficer)){
 				log_message $ND::UID,"BC browsing ND planet $planet->{coords} tick $self->{TICK}";
 			}
 		}
@@ -145,7 +145,7 @@ sub render_body {
 					AND t.tick = ( SELECT MAX(tick) FROM planet_stats)
 			WHERE  i.uid = -1
 				AND i.sender = ?
-				AND (i.tick > tick() - 14 OR i.mission = 'Full Fleet')
+				AND (i.tick > tick() - 14 OR i.mission = 'Full fleet')
 			GROUP BY i.id,x,y,z,i.mission,i.tick,i.name,i.amount,i.ingal,i.uid
 			ORDER BY i.tick,x,y,z
 		});
@@ -178,7 +178,7 @@ sub render_body {
 					AND s.tick = ( SELECT MAX(tick) FROM planet_stats)
 			WHERE  i.uid = -1
 				AND i.target = ?
-				AND (i.tick > tick() - 14 OR i.mission = 'Full Fleet')
+				AND (i.tick > tick() - 14 OR i.mission = 'Full fleet')
 			GROUP BY i.id,x,y,z,i.mission,i.tick,i.name,i.amount,i.ingal,i.uid
 			ORDER BY i.tick,x,y,z
 		});
@@ -237,6 +237,20 @@ sub render_body {
 			}
 		}
 		$BODY->param(OldCoords => \@coords);
+
+		$query = $DBH->prepare(q{SELECT DISTINCT ON(rid) tick,category,name,amount
+			FROM planet_data pd JOIN planet_data_types pdt ON pd.rid = pdt.id
+			WHERE pd.id = $1 ORDER BY rid,tick DESC
+		});
+		$query->execute($planet_id);
+		my @pdata;
+		$i = 0;
+		while (my $data = $query->fetchrow_hashref){
+			$data->{ODD} = ++$i % 2;
+			$data->{amount} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+			push @pdata,$data;
+		}
+		$BODY->param(PlanetData => \@pdata);
 
 	}
 	$query = $DBH->prepare(q{SELECT x,y,
