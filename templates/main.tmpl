@@ -1,8 +1,16 @@
-<TMPL_VAR NAME=Error>
 <div class="leftinfo">
-<fieldset class="forum-post"> <legend>Message from HC<TMPL_IF isHC> <a href="motd?">EDIT</a></TMPL_IF></legend>
-	<TMPL_VAR ESCAPE=NONE NAME=MOTD>
-</fieldset>
+<table class="boards">
+		<TMPL_LOOP Announcements>
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td align="center"><TMPL_VAR NAME=Unread></td>
+		<td align="center"><TMPL_VAR NAME=Posts></td>
+		<td<TMPL_IF Sticky> class="sticky"</TMPL_IF>><a href="/forum?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR NAME=Subject>&nbsp;</a></td>
+		<td align="left"><TMPL_VAR NAME=Posting_date></td>
+		<td align="center"><TMPL_VAR NAME=Username></td>
+		<td align="left"><TMPL_VAR NAME=Last_post></td>
+	</tr>
+		</TMPL_LOOP>
+</table>
 </div>
 <TMPL_IF PLANET>
 <img class="graph" src="/graph/planetvsnd/<TMPL_VAR NAME=PLANET>" alt="Your planet vs ND avg" height="300" width="500"/>

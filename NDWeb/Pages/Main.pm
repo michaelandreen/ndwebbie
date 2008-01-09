@@ -116,11 +116,7 @@ sub render_body {
 		$query->execute($1,$2,$3,$ND::UID);
 	}
 
-	my ($motd) = $DBH->selectrow_array("SELECT value FROM misc WHERE id='MOTD'");
-
-	$BODY->param(MOTD => parseMarkup($motd));
 	$BODY->param(isMember => $self->isMember());
-	$BODY->param(isHC => $self->isHC());
 	my @groups = map {name => $_}, sort keys %{$self->{GROUPS}};
 	$BODY->param(Groups => \@groups);
 
@@ -237,6 +233,29 @@ ORDER BY x,y,z,mission,tick
 
 	$BODY->param(SMS => $sms);
 	$BODY->param(Hostname => $hostname);
+
+	if ($self->isMember()){
+		my $announcements = $DBH->prepare(q{SELECT ft.ftid AS id,u.username,ft.subject,
+			count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts,
+			date_trunc('seconds',max(fp.time)::timestamp) as last_post,
+			min(fp.time)::date as posting_date, ft.sticky
+			FROM forum_threads ft JOIN forum_posts fp USING (ftid) 
+				JOIN users u ON u.uid = ft.uid
+				LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
+			WHERE ft.fbid = 1
+			GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
+			HAVING count(NULLIF(COALESCE(ft.sticky OR fp.time > ftv.time,TRUE),FALSE)) >= $2
+			ORDER BY sticky DESC,last_post DESC
+		});
+		$announcements->execute($ND::UID,1) or warn $DBH->errstr;
+		my @threads;
+		while (my $thread = $announcements->fetchrow_hashref){
+			push @threads,$thread;
+		}
+		$BODY->param(Announcements => \@threads);
+	}
+
+
 	return $BODY;
 }
 
