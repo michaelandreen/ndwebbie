@@ -53,31 +53,38 @@ sub render_body {
 	my $where = '';
 	if (defined param('list') && param('list') eq 'distwhores'){
 		$list = '&amp;list=distwhores';
-		$where = qq{WHERE dists > 0 $show
-		ORDER BY dists DESC,COALESCE(sec_centres::float/structures*100,0)ASC}
+		$where = qq{AND distorters > 0 $show
+		ORDER BY distorters DESC,COALESCE(seccents::float/structures*100,0)ASC}
 	}else{
-		$where = qq{WHERE MaxResHack > 130000 
+		$where = qq{AND MaxResHack > 130000
 		$show
-		ORDER BY COALESCE(sec_centres::float/structures*100,0) ASC,MaxResHack DESC,metal+crystal+eonium DESC};
+		ORDER BY COALESCE(seccents::float/structures*100,0) ASC,MaxResHack DESC,metal+crystal+eonium DESC};
 	}
 
-	my $query = $DBH->prepare(qq{SELECT id, coords, metal, crystal, eonium, sec_centres::float/structures*100 AS secs, dists, last_covop, username, MaxResHack
+	my $query = $DBH->prepare(qq{SELECT id, coords, metal, crystal, eonium
+		, seccents::float/structures*100 AS secs, distorters
+		, MaxResHack
 		FROM (SELECT p.id,coords(x,y,z), metal,crystal,eonium,
-		sec_centres,NULLIF(structures,0) AS structures,dists,last_covop,
-		u.username,max_bank_hack(metal,crystal,eonium,p.value,(SELECT value FROM
-		current_planet_stats WHERE id = ?)) AS MaxResHack, planet_status, relationship
-		FROM covop_targets c JOIN current_planet_stats p ON p.id = c.planet
-		LEFT OUTER JOIN users u ON u.uid = c.covop_by) AS foo
-		$where});
+			seccents,NULLIF(ss.total,0) AS structures,distorters
+			,max_bank_hack(metal,crystal,eonium,p.value
+				,(SELECT value FROM current_planet_stats WHERE id = ?)) AS MaxResHack
+			, planet_status, relationship
+			FROM current_planet_stats p
+				LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
+				LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
+			) AS foo
+		WHERE (metal IS NOT NULL OR seccents IS NOT NULL)
+		$where
+	});
 	$query->execute($self->{PLANET});
 
 	my @targets;
 	my $i = 0;
-	while (my ($id,$coords,$metal,$crystal,$eonium,$seccents,$dists,$lastcovop,$user,$max) = $query->fetchrow){
+	while (my ($id,$coords,$metal,$crystal,$eonium,$seccents,$dists,$max) = $query->fetchrow){
 		$i++;
-		push @targets,{Username => $user, Target => $id, Coords => $coords
+		push @targets,{Target => $id, Coords => $coords
 			, Metal => $metal, Crystal => $crystal, Eonium => $eonium, SecCents => $seccents
-			, Dists => $dists, MaxResHack => $max, LastCovOp => $lastcovop, List => $list, ODD => $i % 2};
+			, Dists => $dists, MaxResHack => $max, List => $list, ODD => $i % 2};
 	}
 	$BODY->param(Targets => \@targets);
 	return $BODY;
