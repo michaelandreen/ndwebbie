@@ -49,7 +49,7 @@ sub render_body {
 		(s.size::int8*(1464-tick())*250)/100 + score + (resources/planets*LEAST(members,60))/300 AS nscore3,
 		(s.size::int8*(1464-tick())*250)/100 AS scoregain3
 		FROM (SELECT alliance_id AS id,sum(metal+crystal+eonium) AS resources, count(*) AS planets 
-		FROM planets p join covop_targets c ON p.id = c.planet GROUP by alliance_id) r 
+		FROM planets p join planet_scans c ON p.id = c.planet GROUP by alliance_id) r 
 		NATURAL JOIN alliances a 
 		LEFT OUTER JOIN (SELECT * FROM alliance_stats WHERE tick = (SELECT max(tick) FROM alliance_stats)) s ON a.id = s.id
 		ORDER BY $order
