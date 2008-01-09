@@ -123,7 +123,7 @@ sub render_body {
 		$BODY->param(DefensePoints => $call->{defense_points});
 		$BODY->param(LandingTick => $call->{landing_tick});
 		$BODY->param(ETA => $call->{landing_tick}-$self->{TICK});
-		$BODY->param(Info => escapeHTML $call->{info});
+		$BODY->param(Info => $call->{info});
 		$BODY->param(DC => $call->{dc});
 		$BODY->param(Member => $call->{member});
 		$BODY->param(SMS => $call->{sms});
@@ -294,7 +294,7 @@ sub render_body {
 			$call->{dcstyle} = 'Hostile' unless defined $call->{dc};
 			$i++;
 			$call->{ODD} = $i % 2;
-			$call->{shiptype} = escapeHTML($call->{shiptype});
+			$call->{shiptype} = $call->{shiptype};
 			push @calls, $call;
 		}
 		$BODY->param(Calls => \@calls);

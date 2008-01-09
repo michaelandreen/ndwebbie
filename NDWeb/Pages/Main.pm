@@ -177,7 +177,7 @@ sub render_body {
 		}
 		$i++;
 		$call->{ODD} = $i % 2;
-		$call->{shiptype} = escapeHTML($call->{shiptype});
+		$call->{shiptype} = $call->{shiptype};
 		push @calls, $call;
 	}
 	$BODY->param(Calls => \@calls);

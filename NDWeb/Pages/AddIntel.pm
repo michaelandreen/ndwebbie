@@ -95,7 +95,7 @@ sub render_body {
 				}
 			}
 			if (my $thread = addForumThread $DBH,$board,$ND::UID,$subject){
-				$error .= p 'Intel message added' if addForumPost $DBH,$thread,$ND::UID,param('intel')
+				$error .= 'Intel message added' if addForumPost $DBH,$thread,$ND::UID,param('intel')
 			}
 		}
 	}

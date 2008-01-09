@@ -90,7 +90,8 @@ sub render : method {
 		$template = HTML::Template->new(filename => "templates/xml.tmpl", cache => 1);
 		$body = HTML::Template->new(filename => "templates/$self->{PAGE}.xml.tmpl", cache => 1);
 	}else{
-		$body = HTML::Template->new(filename => "templates/$self->{PAGE}.tmpl", global_vars => 1, cache => 1);
+		$body = HTML::Template->new(filename => "templates/$self->{PAGE}.tmpl", global_vars => 1
+			, cache => 1, default_escape => 'HTML');
 		$body->param(PAGE => $self->{PAGE});
 	}
 

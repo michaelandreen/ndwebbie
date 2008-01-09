@@ -79,7 +79,7 @@
 
 <TMPL_IF Thread>
 <div>
-<TMPL_VAR NAME=Thread>
+<TMPL_VAR ESCAPE=NONE NAME=Thread>
 <form action="<TMPL_VAR NAME=PAGE>#NewPosts" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
 	<textarea rows="10" cols="60" name="message"></textarea>
 	<input type="hidden" name="cmd" value="forumpost"/>

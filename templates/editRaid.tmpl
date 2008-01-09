@@ -36,7 +36,7 @@
 		</div>
 		<div class="leftinfo">
 			<p>Raid message here</p>
-			<textarea rows="15" cols="40" name="message"><TMPL_VAR NAME=Message></textarea>
+			<textarea rows="15" cols="40" name="message"><TMPL_VAR ESCAPE=NONE NAME=Message></textarea>
 		</div>
 		<div class="leftinfo">
 			<p>List all target coords here</p>
@@ -94,7 +94,7 @@
 	</div>
 	<div class="leftinfo">
 	<p>	Comment:<br/>
-		<textarea rows="5" cols="20" name="comment:<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Comment></textarea>
+		<textarea rows="5" cols="20" name="comment:<TMPL_VAR NAME=Id>"><TMPL_VAR ESCAPE=NONE NAME=Comment></textarea>
 	</p>
 	<TMPL_VAR NAME=PlanetScan>
 	</div>

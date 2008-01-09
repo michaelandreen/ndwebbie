@@ -158,7 +158,7 @@ sub render_body {
 		$BODY->param(Nick => escapeHTML($planet->{nick}));
 		$BODY->param(Channel => $planet->{channel});
 		my @status;
-		for my $status ("&nbsp;","Friendly", "NAP", "Hostile"){
+		for my $status ("","Friendly", "NAP", "Hostile"){
 			push @status,{Status => $status, Selected => defined $planet->{planet_status} && $status eq $planet->{planet_status}}
 		}
 		$BODY->param(PlanetStatus => \@status);

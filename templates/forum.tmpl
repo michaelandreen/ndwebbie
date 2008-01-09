@@ -10,7 +10,7 @@
 <TMPL_IF Thread>
 
 <TMPL_IF Moderate><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=FTID>;cmd=<TMPL_VAR NAME=Sticky>">Make this thread <TMPL_VAR NAME=Sticky></a></TMPL_IF>
-<TMPL_VAR Thread>
+<TMPL_VAR ESCAPE=NONE Thread>
 </TMPL_IF>
 <TMPL_IF ViewBoard>
 <p><a href="/<TMPL_VAR NAME=PAGE>?b=<TMPL_VAR NAME=Id>;markAsRead=<TMPL_VAR ESCAPE=URL NAME=DATE>">Mark threads as read</a></p>

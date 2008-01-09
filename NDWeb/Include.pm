@@ -65,7 +65,7 @@ sub alliances {
 	my ($alliance) = @_;
 	my @alliances;
 	$alliance = -1 unless defined $alliance;
-	push @alliances,{Id => -1, Name => '&nbsp;', Selected => not $alliance};
+	push @alliances,{Id => -1, Name => '', Selected => not $alliance};
 	my $query = $ND::DBH->prepare(q{SELECT id,name FROM alliances ORDER BY LOWER(name)});
 	$query->execute;	
 	while (my $ally = $query->fetchrow_hashref){
