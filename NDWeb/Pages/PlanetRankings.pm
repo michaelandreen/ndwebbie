@@ -78,7 +78,6 @@ sub render_body {
 		$extra_columns FROM current_planet_stats_full ORDER BY $order LIMIT 100 OFFSET ?});
 	$query->execute($offset) or $error .= p($DBH->errstr);
 	my @planets;
-	my $i = 0;
 	while (my $planet = $query->fetchrow_hashref){
 		for my $type (qw/size score value xp/){
 			#$planet->{$type} = prettyValue($planet->{$type});
@@ -92,8 +91,6 @@ sub render_body {
 				$planet->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
 			}
 		}
-		$i++;
-		$planet->{ODD} = $i % 2;
 		push @planets,$planet;
 	}
 	$BODY->param(Planets => \@planets);

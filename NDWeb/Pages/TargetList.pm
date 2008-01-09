@@ -66,10 +66,7 @@ ORDER BY $order
 		});
 	$query->execute;
 	my @alliances;
-	my $i = 0;
 	while (my $alliance = $query->fetchrow_hashref){
-		$i++;
-		$alliance->{ODD} = $i % 2;
 		push @alliances,$alliance;
 	}
 	$BODY->param(Alliances => \@alliances);

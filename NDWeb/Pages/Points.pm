@@ -57,11 +57,9 @@ sub render_body {
 	$query->execute;
 
 	my @members;
-	my $i = 0;
 	while (my ($username,$defense,$attack,$scan,$humor,$total,$rank,$raid) = $query->fetchrow){
-		$i++;
 		push @members,{Username => $username, Defense => $defense, Attack => $attack, Raid => $raid
-			, Scan => $scan, Humor => $humor, Total => $total, Rank => $rank, ODD => $i % 2};
+			, Scan => $scan, Humor => $humor, Total => $total, Rank => $rank};
 	}
 	$BODY->param(Members => \@members);
 	return $BODY;

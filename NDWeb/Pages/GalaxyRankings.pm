@@ -80,7 +80,6 @@ sub render_body {
 	ORDER BY $order LIMIT 100 OFFSET ?});
 	$query->execute($offset) or $error .= p($DBH->errstr);
 	my @galaxies;
-	my $i = 0;
 	while (my $galaxy = $query->fetchrow_hashref){
 		for my $type (qw/planets size score xp value/){
 			#$galaxy->{$type} = prettyValue($galaxy->{$type});
@@ -97,8 +96,6 @@ sub render_body {
 				$galaxy->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
 			}
 		}
-		$i++;
-		$galaxy->{ODD} = $i % 2;
 		push @galaxies,$galaxy;
 	}
 	$BODY->param(Galaxies => \@galaxies);

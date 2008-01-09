@@ -19,7 +19,7 @@
 	</TMPL_IF>
 	</tr>
 	<TMPL_LOOP Galaxies>
-	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr align="right" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
 		<td title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
 		<td title="<TMPL_VAR NAME=ValueRank_Gain_day> Today | <TMPL_VAR NAME=ValueRank_Gain> Tick"><TMPL_VAR NAME=ValueRank> <img src="/images/<TMPL_VAR NAME=ValueRankImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>

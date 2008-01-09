@@ -171,15 +171,12 @@ sub render_body {
 		$query->execute($planet->{id}) or $error .= $DBH->errstr;
 		my @intellists;
 		my @incomings;
-		my $i = 0;
 		while (my $intel = $query->fetchrow_hashref){
 			if ($intel->{ingal}){
 				$intel->{missionclass} = 'ingal';
 			}else{
 				$intel->{missionclass} = $intel->{mission};
 			}
-			$i++;
-			$intel->{ODD} = $i % 2;
 			push @incomings,$intel;
 		}
 		push @intellists,{Message => 'Incoming fleets', Intel => \@incomings, Origin => 1};
@@ -187,15 +184,12 @@ sub render_body {
 		$query = $DBH->prepare(intelquery('t.alliance AS talliance,coords(t.x,t.y,t.z) AS target',"o.id = ? $showticks"));
 		$query->execute($planet->{id}) or $error .= $DBH->errstr;
 		my @outgoings;
-		$i = 0;
 		while (my $intel = $query->fetchrow_hashref){
 			if ($intel->{ingal}){
 				$intel->{missionclass} = 'ingal';
 			}else{
 				$intel->{missionclass} = $intel->{mission};
 			}
-			$i++;
-			$intel->{ODD} = $i % 2;
 			push @outgoings,$intel;
 		}
 		push @intellists,{Message => 'Outgoing Fleets', Intel => \@outgoings, Target => 1};
@@ -212,15 +206,12 @@ sub render_body {
 
 		my @intellists;
 		my @intel;
-		my $i = 0;
 		while (my $intel = $query->fetchrow_hashref){
 			if ($intel->{ingal}){
 				$intel->{missionclass} = 'ingal';
 			}else{
 				$intel->{missionclass} = $intel->{mission};
 			}
-			$i++;
-			$intel->{ODD} = $i % 2;
 			push @intel,$intel;
 		}
 		push @intellists,{Message => q{Intel where alliances doesn't match}, Intel => \@intel, Origin => 1, Target => 1};

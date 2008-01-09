@@ -63,10 +63,10 @@
 </fieldset>
 </form>
 <TMPL_ELSE>
-<table border="1">
+<table>
 	<tr><th>User</th><th>Groups</th></tr>
 <TMPL_LOOP Users>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="/<TMPL_VAR NAME=PAGE>?user=<TMPL_VAR NAME=Uid>"><TMPL_VAR NAME=Username></a></td>
 		<td><TMPL_VAR NAME=Groups></td>
 	</tr>

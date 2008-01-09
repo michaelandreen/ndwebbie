@@ -55,11 +55,8 @@ ORDER BY hostilecount DESC
 		})or $ND::ERROR .= $DBH->errstr;
 	$query->execute($begintick,$endtick) or $ND::ERROR .= $DBH->errstr;
 	my @alliances;
-	my $i = 0;
 	my $tick = $self->{TICK};
 	while (my $alliance = $query->fetchrow_hashref){
-		$i++;
-		$alliance->{ODD} = $i % 2;
 		push @alliances, $alliance;
 	}
 	$BODY->param(Alliances => \@alliances);

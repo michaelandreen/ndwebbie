@@ -159,10 +159,7 @@ sub render_body {
 			}
 			$ships->execute($fleet->{id});
 			my @ships;
-			my $i = 0;
 			while (my $ship = $ships->fetchrow_hashref){
-				$i++;
-				$ship->{ODD} = $i % 2;
 				push @ships,$ship;
 			}
 			$fleet->{Ships} = \@ships;
@@ -188,10 +185,7 @@ sub render_body {
 			$fleet->{CLASS} = $fleet->{mission};
 			$ships->execute($fleet->{id});
 			my @ships;
-			my $i = 0;
 			while (my $ship = $ships->fetchrow_hashref){
-				$i++;
-				$ship->{ODD} = $i % 2;
 				push @ships,$ship;
 			}
 			$fleet->{Ships} = \@ships;
@@ -209,23 +203,16 @@ sub render_body {
 		});
 		$attackers->execute($call->{id});
 		my @attackers;
-		my $i = 0;
 		while(my $attacker = $attackers->fetchrow_hashref){
-			$i++;
-			$attacker->{ODD} = $i % 2;
 			$outgoings->execute($attacker->{planet},$call->{landing_tick});
 			my @missions;
-			my $k = 0;
 			while (my $mission = $outgoings->fetchrow_hashref){
 				$mission->{eta} = '?' if not defined $mission->{eta};
 				$mission->{amount} = '?' if not defined $mission->{amount};
-				$mission->{ODD} = $k++ % 2;
 				$mission->{CLASS} = $mission->{mission};
 				my @ships;
 				$ships->execute($mission->{id});
-				my $j = 0;
 				while (my $ship = $ships->fetchrow_hashref){
-					$ship->{ODD} = $j++ % 2;
 					push @ships,$ship;
 				}
 				push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
@@ -275,7 +262,6 @@ sub render_body {
 			})or warn $DBH->errstr;
 		$query->execute or warn $DBH->errstr;
 		my @calls;
-		my $i = 0;
 		my $tick = $self->{TICK};
 		while (my $call = $query->fetchrow_hashref){
 			if ($call->{defense_points} < $minpoints){
@@ -288,12 +274,9 @@ sub render_body {
 			while ($tick - 24 > $call->{landing_tick}){
 				$tick -= 24;
 				push @calls,{};
-				$i = 0;
 			}
 			$call->{attackers} =~ s{(\d+:\d+:\d+)}{<a href="/check?coords=$1">$1</a>}g;
 			$call->{dcstyle} = 'Hostile' unless defined $call->{dc};
-			$i++;
-			$call->{ODD} = $i % 2;
 			$call->{shiptype} = $call->{shiptype};
 			push @calls, $call;
 		}

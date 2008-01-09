@@ -50,10 +50,7 @@ sub render_body {
 
 	$query->execute or $error .= p($DBH->errstr);
 	my @planets;
-	my $i = 0;
 	while (my $planet = $query->fetchrow_hashref){
-		$i++;
-		$planet->{ODD} = $i % 2;
 		push @planets,$planet;
 	}
 	$BODY->param(Planets => \@planets);

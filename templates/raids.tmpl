@@ -144,7 +144,7 @@
 		</p>
 		<table>
 		<TMPL_LOOP Ships>
-		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 		</tr>
 		</TMPL_LOOP>

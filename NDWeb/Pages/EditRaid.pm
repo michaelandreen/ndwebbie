@@ -230,9 +230,7 @@ sub render_body {
 			delete $target->{planet};
 
 			my @scans;
-			my $i = 0;
 			while (my $scan = $scans->fetchrow_hashref){
-				$scan->{ODD} = $i++ % 2;
 				push @scans,$scan;
 			}
 			$target->{Scans} = \@scans;

@@ -101,7 +101,7 @@
 	<table>
 	<tr><th>Tick</th><th>Scan</th></tr>
 	<TMPL_LOOP Scans>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><TMPL_VAR NAME=Tick></td>
 		<td><a href="http://game.planetarion.com/showscan.pl?scan_id=<TMPL_VAR NAME=Scan_id>"><TMPL_VAR NAME=Type></a></td>
 	</tr>

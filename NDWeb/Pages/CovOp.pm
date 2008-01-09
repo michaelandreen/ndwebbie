@@ -79,12 +79,10 @@ sub render_body {
 	$query->execute($self->{PLANET});
 
 	my @targets;
-	my $i = 0;
 	while (my ($id,$coords,$metal,$crystal,$eonium,$seccents,$dists,$max) = $query->fetchrow){
-		$i++;
 		push @targets,{Target => $id, Coords => $coords
 			, Metal => $metal, Crystal => $crystal, Eonium => $eonium, SecCents => $seccents
-			, Dists => $dists, MaxResHack => $max, List => $list, ODD => $i % 2};
+			, Dists => $dists, MaxResHack => $max, List => $list};
 	}
 	$BODY->param(Targets => \@targets);
 	return $BODY;

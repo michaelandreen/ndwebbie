@@ -17,7 +17,7 @@
 		<th>XP</th>
 	</tr>
 <TMPL_LOOP Planets>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 
 		<td title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
 		<td title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
@@ -41,7 +41,7 @@
 <table>
 	<tr><th>Call</th><th>DC</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>Current eta</th><th>Inital eta</th><th>Attackers</th></tr>
 <TMPL_LOOP Calls>
-	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td class="<TMPL_VAR NAME=Covered>"><a href="/calls?call=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Id></a></td>
 		<td class="<TMPL_VAR NAME=ActiveDC>"><TMPL_VAR NAME=DC></td>
 		<td><TMPL_VAR NAME=Landing_Tick></td>
@@ -85,7 +85,7 @@
 	<table>
 	<tr><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
 	<TMPL_LOOP Fleets>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 		<td><TMPL_VAR NAME=Target></td>
 		<td><a href="javascript://"  onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')"><TMPL_VAR NAME=Mission></a></td>
 		<td><TMPL_VAR NAME=Amount></td><td><TMPL_VAR NAME=Tick></td>
@@ -96,7 +96,7 @@
 		<td/>
 		<td colspan="5"><table>
 		<TMPL_LOOP Ships>
-		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 		</tr>
 		</TMPL_LOOP>

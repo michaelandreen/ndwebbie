@@ -16,7 +16,7 @@
 		<th>Hostile Counts</th>
 	</tr>
 <TMPL_LOOP Alliances>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="/alliances?alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
 		<td><TMPL_VAR NAME=HostileCount></td>
 	</tr>

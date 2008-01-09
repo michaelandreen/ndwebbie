@@ -16,7 +16,7 @@
 	<th><a href="/<TMPL_VAR NAME=PAGE>?offset=<TMPL_VAR NAME=Offset>&amp;order=xprank">XP</a></th>
 	</tr>
 	<TMPL_LOOP Galaxies>
-	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr align="right" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
 		<td title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
 		<td title="<TMPL_VAR NAME=ValueRank_Gain_day> Today | <TMPL_VAR NAME=ValueRank_Gain> Tick"><TMPL_VAR NAME=ValueRank> <img src="/images/<TMPL_VAR NAME=ValueRankImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>
@@ -40,7 +40,7 @@
 		<th>XP</th><th>Fleet (Resource) value</th><TMPL_IF isBC><th>Nick</th><th>Hit us</th><th>Alliance</th></TMPL_IF>
 	</tr>
 	<TMPL_LOOP GPlanets>
-	<tr align="right" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr align="right" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 
 		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=SizeRank_Gain_day> Today | <TMPL_VAR NAME=SizeRank_Gain> Tick"><TMPL_VAR NAME=SizeRank> <img src="/images/<TMPL_VAR NAME=SizeRankImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
 		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=ScoreRank_Gain_day> Today | <TMPL_VAR NAME=ScoreRank_Gain> Tick"><TMPL_VAR NAME=ScoreRank> <img src="/images/<TMPL_VAR NAME=ScoreRankImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
@@ -69,7 +69,7 @@
 <table>
 <tr><th>Tick</th><th>Type</th>Amount</tr>
 <TMPL_LOOP PlanetData>
-<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 	<td><TMPL_VAR NAME=Tick></td>
 	<td><TMPL_VAR NAME=Category> <TMPL_VAR NAME=Name></td>
 	<td><TMPL_VAR NAME=Amount></td>
@@ -92,7 +92,7 @@
 <table>
 <tr><th>Tick</th><th>Scan</th></tr>
 <TMPL_LOOP Scans>
-<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 	<td><TMPL_VAR NAME=Tick></td>
 	<td><a href="http://game.planetarion.com/showscan.pl?scan_id=<TMPL_VAR NAME=Scan_id>"><TMPL_VAR NAME=Type></a></td>
 </tr>
@@ -109,7 +109,7 @@
 <table>
 	<tr><th>Target</th><th>Name</th><th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th></tr>
 	<TMPL_LOOP Missions>
-	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+	<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
 		<td><TMPL_VAR NAME=Name></td>
 		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=LandingTick></td>
@@ -119,7 +119,7 @@
 		<td/>
 		<td colspan="5"><table>
 		<TMPL_LOOP Ships>
-		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 		</tr>
 		</TMPL_LOOP>
@@ -130,7 +130,7 @@
 <table>
 	<tr><th>Sender</th><th>Name</th><th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th></tr>
 	<TMPL_LOOP Incomings>
-	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+	<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Sender>"><TMPL_VAR NAME=Sender></a></td>
 		<td><TMPL_VAR NAME=Name></td>
 		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=LandingTick></td>
@@ -140,7 +140,7 @@
 		<td/>
 		<td colspan="5"><table>
 		<TMPL_LOOP Ships>
-		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 		</tr>
 		</TMPL_LOOP>

@@ -52,7 +52,7 @@
 	<th>Change/remove?</th>
 	</tr>
 	<TMPL_LOOP Attackers>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('attacker<TMPL_VAR NAME=Id>')">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('attacker<TMPL_VAR NAME=Id>')">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td class="<TMPL_VAR NAME=Planet_status>"><TMPL_VAR NAME=Planet_status></td>
 		<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Alliance> (<TMPL_VAR NAME=Relationship>)</td>
@@ -69,7 +69,7 @@
 	<table>
 		<tr><th>Target</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
 		<TMPL_LOOP Missions>
-		<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+		<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 			<td><a href="/check?coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
 			<td><TMPL_VAR NAME=Name></td>
 			<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=Tick></td>
@@ -79,7 +79,7 @@
 			<td/>
 			<td colspan="5"><table>
 			<TMPL_LOOP Ships>
-			<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+			<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 				<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 			</tr>
 			</TMPL_LOOP>
@@ -100,7 +100,7 @@
 <table>
 	<tr><th>Target</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
 	<TMPL_LOOP Fleets>
-	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+	<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Target>"><TMPL_VAR NAME=Target></a></td>
 		<td><TMPL_VAR NAME=Name></td>
 		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=Tick></td>
@@ -110,7 +110,7 @@
 		<td/>
 		<td colspan="5"><table>
 		<TMPL_LOOP Ships>
-		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 		</tr>
 		</TMPL_LOOP>
@@ -123,7 +123,7 @@
 <table>
 	<tr><th>Sender</th><th>Name</th><th>Mission</th><th>Landing Tick</th><th>ETA</th><th>Amount</th></tr>
 	<TMPL_LOOP Defenders>
-	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+	<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Sender>"><TMPL_VAR NAME=Sender></a></td>
 		<td><TMPL_VAR NAME=Name></td>
 		<td class="<TMPL_VAR NAME=Class>"><TMPL_VAR NAME=Mission></td><td><TMPL_VAR NAME=Tick></td>
@@ -133,7 +133,7 @@
 		<td/>
 		<td colspan="5"><table>
 		<TMPL_LOOP Ships>
-		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+		<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 		</tr>
 		</TMPL_LOOP>
@@ -146,7 +146,7 @@
 <table>
 	<tr><th>Call</th><th>DC</th><th>Def Fleets</th><th>Member (def points)</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>ETA</th><th>Alliance</th><th>Attackers</th></tr>
 <TMPL_LOOP Calls>
-	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td class="<TMPL_VAR NAME=DCSTYLE>"><a href="/<TMPL_VAR NAME=PAGE>?call=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Id></a></td>
 		<td><TMPL_VAR NAME=DC></td>
 		<td><TMPL_VAR NAME=Fleets></td>

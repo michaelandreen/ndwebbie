@@ -95,10 +95,7 @@ sub render_body {
 			ORDER BY $order});
 		my @members;
 		$members->execute($alliance->{id});
-		my $i = 0;
 		while (my $member = $members->fetchrow_hashref){
-			$i++;
-			$member->{ODD} = $i % 2;
 			push @members,$member;
 		}
 		$BODY->param(Members => \@members);
@@ -111,15 +108,12 @@ sub render_body {
 		$query->execute($alliance->{id}) or $error .= $DBH->errstr;
 
 		my @intel;
-		$i = 0;
 		while (my $intel = $query->fetchrow_hashref){
 			if ($intel->{ingal}){
 				$intel->{missionclass} = 'ingal';
 			}else{
 				$intel->{missionclass} = $intel->{mission};
 			}
-			$i++;
-			$intel->{ODD} = $i % 2;
 			push @intel,$intel;
 		}
 		$BODY->param(Intel => \@intel);
@@ -142,11 +136,8 @@ sub render_body {
 			})or $error .= $DBH->errstr;
 		$query->execute or $error .= $DBH->errstr;
 		my @alliances;
-		my $i = 0;
 		while (my $alliance = $query->fetchrow_hashref){
 			next unless (defined $alliance->{score} || $alliance->{kscore} > 0);
-			$i++;
-			$alliance->{ODD} = $i % 2;
 			push @alliances, $alliance;
 		}
 		$BODY->param(Alliances => \@alliances);

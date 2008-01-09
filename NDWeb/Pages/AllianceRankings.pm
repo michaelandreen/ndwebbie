@@ -81,7 +81,6 @@ sub render_body {
 		ORDER BY $order LIMIT 100 OFFSET ?});
 	$query->execute($offset) or $error .= p($DBH->errstr);
 	my @alliances;
-	my $i = 0;
 	while (my $alliance = $query->fetchrow_hashref){
 		for my $type (qw/members size score avgsize avgscore/){
 			#$alliance->{$type} = prettyValue($alliance->{$type});
@@ -98,8 +97,6 @@ sub render_body {
 				$alliance->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
 			}
 		}
-		$i++;
-		$alliance->{ODD} = $i % 2;
 		push @alliances,$alliance;
 	}
 	$BODY->param(Alliances => \@alliances);

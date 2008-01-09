@@ -250,9 +250,7 @@ sub render_body {
 			while (my $mission = $unitscans->fetchrow_hashref){
 				my @ships;
 				$ships->execute($mission->{id});
-				my $j = 0;
 				while (my $ship = $ships->fetchrow_hashref){
-					$ship->{ODD} = $j++ % 2;
 					push @ships,$ship;
 				}
 				push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;

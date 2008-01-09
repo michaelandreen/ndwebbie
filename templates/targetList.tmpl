@@ -12,7 +12,7 @@
 		<th><a href="/<TMPL_VAR NAME=PAGE>?order=nfvalue2">NF Value - Ally Value</a></th>
 	</tr>
 <TMPL_LOOP Alliances>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="/check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td><TMPL_VAR NAME=Alliance></td>
 		<td><TMPL_VAR NAME=Race></td>

@@ -47,9 +47,7 @@ sub render_body {
 	$query->execute;
 
 	my @members;
-	my $i = 0;
 	while ( my $member = $query->fetchrow_hashref){
-		$member->{ODD} = $i++ % 2;
 		push @members,$member;
 	}
 	$BODY->param(Members => \@members);

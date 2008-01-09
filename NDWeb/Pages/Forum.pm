@@ -168,16 +168,13 @@ sub render_body {
 			while (my $board = $boards->fetchrow_hashref){
 				next if $board->{id} < 0;
 				$threads->execute($board->{id},$ND::UID,1) or $ND::ERROR .= p($DBH->errstr);
-				my $i = 0;
 				my @threads;
 				while (my $thread = $threads->fetchrow_hashref){
-					$i++;
-					$thread->{Odd} = $i % 2;
 					push @threads,$thread;
 				}
 				$board->{Threads} = \@threads;
 				delete $board->{post};
-				push @boards,$board if $i > 0;
+				push @boards,$board if $threads->rows > 0;
 			}
 			$category->{Boards} = \@boards;
 			delete $category->{id};
@@ -196,11 +193,8 @@ sub render_body {
 		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
 		$BODY->param(Date => $time);
 		$threads->execute($board->{id},$ND::UID,0) or $ND::ERROR .= p($DBH->errstr);
-		my $i = 0;
 		my @threads;
 		while (my $thread = $threads->fetchrow_hashref){
-			$i++;
-			$thread->{Odd} = $i % 2;
 			push @threads,$thread;
 		}
 		$BODY->param(Threads => \@threads);
@@ -241,15 +235,12 @@ sub render_body {
 		while (my $category = $categories->fetchrow_hashref){
 			$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
 			my @boards;
-			my $i = 0;
 			while (my $board = $boards->fetchrow_hashref){
-				$i++;
-				$board->{Odd} = $i % 2;
 				push @boards,$board;
 			}
 			$category->{Boards} = \@boards;
 			delete $category->{id};
-			push @categories,$category if $i > 0;
+			push @categories,$category if $boards->rows > 0;
 		}
 		$BODY->param(Categories => \@categories);
 

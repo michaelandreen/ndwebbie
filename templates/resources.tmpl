@@ -11,7 +11,7 @@
 		<th><a href="/<TMPL_VAR NAME=PAGE>?order=nscore3">Estimated score</a>[3]</th>
 	</tr>
 <TMPL_LOOP Alliances>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="alliances?alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
 		<td class="<TMPL_VAR NAME=relationship>"><TMPL_VAR NAME=relationship></td>
 		<td><TMPL_VAR NAME=members> (<TMPL_VAR NAME=planets>)</td>

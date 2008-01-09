@@ -39,7 +39,7 @@
 		<th><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>&amp;order=xp">XP (rank)</a></th>
 	</tr>
 	<TMPL_LOOP Members>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td class="<TMPL_VAR NAME=Planet_status>"><a href="intel?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Nick>(<TMPL_VAR NAME=Planet_status>)</a></td>
 		<td><TMPL_VAR NAME=hit_us></td>
@@ -62,7 +62,7 @@
 		<th>Ingal</th><th>Reported by</th>
 	</tr>
 	<TMPL_LOOP Intel>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 	<td><TMPL_VAR NAME=OAlliance></td>
 	<td><a href="intel?coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>
 	<td class="<TMPL_VAR NAME=MissionClass>"><TMPL_VAR NAME=Mission></td>
@@ -92,7 +92,7 @@
 		<th><a href="/<TMPL_VAR NAME=PAGE>?order=kvalue">Value</a> (<a href="/<TMPL_VAR NAME=PAGE>?order=kvalavg">avg</a>)</th>
 	</tr>
 <TMPL_LOOP Alliances>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="/<TMPL_VAR NAME=PAGE>?alliance=<TMPL_VAR NAME=Id>"><TMPL_VAR NAME=Name></a></td>
 		<td><TMPL_VAR NAME=kmem></td>
 		<td><TMPL_VAR NAME=members></td>

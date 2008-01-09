@@ -107,7 +107,6 @@ sub render_body {
 	}
 	my @planets;
 	my $planet_id = undef;
-	my $i = 0;
 	while (my $planet = $query->fetchrow_hashref){
 		$planet_id = $planet->{id};
 		for my $type (qw/size score value xp/){
@@ -126,8 +125,6 @@ sub render_body {
 				log_message $ND::UID,"BC browsing ND planet $planet->{coords} tick $self->{TICK}";
 			}
 		}
-		$i++;
-		$planet->{ODD} = $i % 2;
 		delete $planet->{id};
 		push @planets,$planet;
 	}
@@ -152,15 +149,11 @@ sub render_body {
 		$query->execute($planet_id);
 		my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships WHERE id = ?});
 		my @missions;
-		$i = 0;
 		while (my $mission = $query->fetchrow_hashref){
-			$mission->{ODD} = $i++ % 2;
 			$mission->{CLASS} = $mission->{mission};
 			my @ships;
 			$ships->execute($mission->{id});
-			my $j = 0;
 			while (my $ship = $ships->fetchrow_hashref){
-				$ship->{ODD} = $j++ % 2;
 				push @ships,$ship;
 			}
 			push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
@@ -184,15 +177,11 @@ sub render_body {
 		});
 		$query->execute($planet_id);
 		my @incomings;
-		$i = 0;
 		while (my $mission = $query->fetchrow_hashref){
-			$mission->{ODD} = $i++ % 2;
 			$mission->{CLASS} = $mission->{mission};
 			my @ships;
 			$ships->execute($mission->{id});
-			my $j = 0;
 			while (my $ship = $ships->fetchrow_hashref){
-				$ship->{ODD} = $j++ % 2;
 				push @ships,$ship;
 			}
 			push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
@@ -218,9 +207,7 @@ sub render_body {
 		});
 		$query->execute($planet_id);
 		my @scans;
-		$i = 0;
 		while (my $scan = $query->fetchrow_hashref){
-			$scan->{ODD} = $i++ % 2;
 			push @scans,$scan;
 		}
 		$BODY->param(Scans => \@scans);
@@ -244,9 +231,7 @@ sub render_body {
 		});
 		$query->execute($planet_id);
 		my @pdata;
-		$i = 0;
 		while (my $data = $query->fetchrow_hashref){
-			$data->{ODD} = ++$i % 2;
 			$data->{amount} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
 			push @pdata,$data;
 		}
@@ -270,7 +255,6 @@ sub render_body {
 	$query->execute($x,$y) or $ND::ERROR .= p($DBH->errstr);
 
 	my @galaxies;
-	$i = 0;
 	while (my $galaxy = $query->fetchrow_hashref){
 		for my $type (qw/planets size score xp value/){
 			#$galaxy->{$type} = prettyValue($galaxy->{$type});
@@ -287,8 +271,6 @@ sub render_body {
 				$galaxy->{$type} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
 			}
 		}
-		$i++;
-		$galaxy->{ODD} = $i % 2;
 		push @galaxies,$galaxy;
 	}
 	$BODY->param(Galaxies => \@galaxies);

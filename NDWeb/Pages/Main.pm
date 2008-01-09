@@ -162,7 +162,6 @@ sub render_body {
 		})or warn  $DBH->errstr;
 	$calls->execute($ND::UID) or warn $DBH->errstr;
 
-	my $i = 0;
 	my @calls;
 	while (my $call = $calls->fetchrow_hashref){
 		$call->{attackers} =~ s{(\d+:\d+:\d+)}{<a href="/check?coords=$1">$1</a>}g;
@@ -175,8 +174,6 @@ sub render_body {
 		}else{
 			$call->{covered} = 'Hostile';
 		}
-		$i++;
-		$call->{ODD} = $i % 2;
 		$call->{shiptype} = $call->{shiptype};
 		push @calls, $call;
 	}
@@ -227,14 +224,10 @@ ORDER BY x,y,z,mission,tick
 
 	$query->execute($self->{UID},$self->{PLANET},$self->{TICK}) or warn $DBH->errstr;
 	my @fleets;
-	$i = 0;
 	while (my $fleet = $query->fetchrow_hashref){
-		$fleet->{ODD} = $i++ % 2;
 		my @ships;
 		$ships->execute($fleet->{id});
-		my $j = 0;
 		while (my $ship = $ships->fetchrow_hashref){
-			$ship->{ODD} = $j++ % 2;
 			push @ships,$ship;
 		}
 		$fleet->{ships} = \@ships;

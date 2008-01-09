@@ -5,7 +5,7 @@
 		<th>XP (rank)</th><th>Fleet (Resouce) value</th><th>Nick</th><th>Hit us</th><th>Alliance</th>
 	</tr>
 	<TMPL_LOOP Planets>
-	<tr align="center"  class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr align="center"  class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td><a href="check?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td><TMPL_VAR NAME=Planet></td><td><TMPL_VAR NAME=Race></td>
 		<td><TMPL_VAR NAME=Size>(<TMPL_VAR NAME=Sizerank>)</td>

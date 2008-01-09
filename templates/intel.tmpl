@@ -102,7 +102,7 @@
 		<th>Ingal</th><th>Reported by</th>
 	</tr>
 	<TMPL_LOOP Intel>
-	<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 	<TMPL_IF Origin>
 	<td><TMPL_VAR NAME=OAlliance></td>
 	<td><a href="/<TMPL_VAR NAME=PAGE>?coords=<TMPL_VAR NAME=Origin>"><TMPL_VAR NAME=Origin></a></td>

@@ -131,10 +131,7 @@ sub render_body {
 			ORDER BY lower(username)})or $error .= $DBH->errstr;
 		$query->execute or $error .= $DBH->errstr;
 		my @users;
-		my $i = 0;
 		while (my $user = $query->fetchrow_hashref){
-			$i++;
-			$user->{ODD} = $i % 2;
 			push @users, $user;
 		}
 		$BODY->param(Users => \@users);
