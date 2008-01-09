@@ -87,13 +87,13 @@
 	<table>
 	<tr><th></th><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
 	<tr align="center">
-		<td>Roids</td>
+		<th>Roids</th>
 		<td><TMPL_VAR NAME=roidMetal></td>
 		<td><TMPL_VAR NAME=roidCrystal></td>
 		<td><TMPL_VAR NAME=roidEonium></td>
 	</tr>
 	<tr align="center">
-		<td>Resources</td>
+		<th>Resources</th>
 		<td><TMPL_VAR NAME=resourceMetal></td>
 		<td><TMPL_VAR NAME=resourceCrystal></td>
 		<td><TMPL_VAR NAME=resourceEonium></td>
@@ -135,28 +135,22 @@
 	</tr>
 	</table>
 	</div>
-	<div class="leftinfo">
-<table>
-	<tr><th>Name</th><th>Tick</th><th>Amount</th></tr>
 	<TMPL_LOOP Missions>
-	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
-		<td><TMPL_VAR NAME=Name></td>
-		<td><TMPL_VAR NAME=Tick></td>
-		<td><TMPL_VAR NAME=Amount></td>
-	</tr>
-	<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
-		<td/>
-		<td colspan="5"><table>
+	<div class="leftinfo">
+
+		<p><TMPL_VAR NAME=Name><br/>
+			Tick: <TMPL_VAR NAME=Tick><br/>
+			Ships:<TMPL_VAR NAME=Amount>
+		</p>
+		<table>
 		<TMPL_LOOP Ships>
 		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
 			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
 		</tr>
 		</TMPL_LOOP>
-		</table></td>
-	</tr>
-	</TMPL_LOOP>
-</table>
+		</table>
 	</div>
+	</TMPL_LOOP>
 	<div class="clear"> &nbsp;</div>
 	<form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<p class="claimlinks">

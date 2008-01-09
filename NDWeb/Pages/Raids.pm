@@ -236,20 +236,18 @@ sub render_body {
 			$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
 
 			my $unitscans = $DBH->prepare(q{ 
-				SELECT i.id,i.name, i.tick, i.amount 
+				SELECT DISTINCT ON (name) i.id,i.name, i.tick, i.amount 
 				FROM fleets i
 				WHERE  i.uid = -1
 					AND i.sender = ?
 					AND i.mission = 'Full fleet'
 				GROUP BY i.id,i.tick,i.name,i.amount
-				ORDER BY i.tick,name
+				ORDER BY name,i.tick DESC
 			});
 			$unitscans->execute($target->{planet}) or warn $DBH->errstr;
 			my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships WHERE id = ?});
 			my @missions;
-			my $i = 0;
 			while (my $mission = $unitscans->fetchrow_hashref){
-				$mission->{ODD} = $i++ % 2;
 				my @ships;
 				$ships->execute($mission->{id});
 				my $j = 0;
@@ -260,6 +258,7 @@ sub render_body {
 				push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
 				$mission->{ships} = \@ships;
 				$mission->{amount} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+				delete $mission->{id};
 				push @missions,$mission;
 			}
 			$target{missions} = \@missions;
