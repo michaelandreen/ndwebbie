@@ -36,7 +36,17 @@ sub render_body {
 	return $self->noAccess unless $self->isHC;
 	my $error;
 
-	my $query = $DBH->prepare(qq{Select coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race, size, score, value, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 - coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue, planet_status,hit_us, alliance,relationship,nick from current_planet_stats p LEFT OUTER JOIN covop_targets c ON p.id = c.planet WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc});
+	my $query = $DBH->prepare(q{SELECT coords(x,y,z)
+		, ((ruler || ' OF ') || p.planet) AS planet,race, size, score, value
+		, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 
+			- COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150
+			- COALESCE(ss.total ,(SELECT COALESCE(avg(total),0) FROM structure_scans)::int)*1500 AS fleetvalue
+		,(metal+crystal+eonium)/100 AS resvalue, planet_status,hit_us
+		, alliance,relationship,nick 
+		FROM current_planet_stats p
+			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
+			LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
+		WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc});
 
 	$query->execute or $error .= p($DBH->errstr);
 	my @planets;
