@@ -19,12 +19,6 @@ ALTER TABLE fleets RENAME COLUMN landing_tick TO tick;
 
 ALTER TABLE fleet_ships RENAME COLUMN fleet TO id;
 
-
-CREATE TABLE fleet_scans (
-	id INTEGER PRIMARY KEY REFERENCES fleets(id),
-	scan INTEGER NOT NULL REFERENCES scans(id)
-) WITHOUT OIDS;
-
 ALTER TABLE scans DROP COLUMN scan;
 
 ALTER TABLE scans DROP COLUMN type;
@@ -42,6 +36,11 @@ ALTER TABLE scans DROP CONSTRAINT scans_pkey;
 ALTER TABLE scans ADD COLUMN id SERIAL PRIMARY KEY;
 
 ALTER TABLE scans ADD UNIQUE (scan_id, tick, groupscan);
+
+CREATE TABLE fleet_scans (
+	id INTEGER PRIMARY KEY REFERENCES fleets(id),
+	scan INTEGER NOT NULL REFERENCES scans(id)
+) WITHOUT OIDS;
 
 CREATE OR REPLACE FUNCTION planetid(x integer, y integer, z integer, tick integer) RETURNS integer
     AS $_$SELECT id FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND (tick >= $4  OR tick =( SELECT max(tick) FROM planet_stats)) ORDER BY tick ASC LIMIT 1$_$
