@@ -192,10 +192,18 @@ sub render_body {
 		}
 		$BODY->param(Message => parseMarkup($raid->{message}));
 		$BODY->param(LandingTick => $raid->{tick});
-		my $targetquery = $DBH->prepare(qq{SELECT r.id, r.planet, size, score, value, p.x,p.y,p.z, race, p.value - p.size*200 -coalesce(c.metal+c.crystal+c.eonium,0)/150 - coalesce(c.structures,(SELECT avg(structures) FROM covop_targets)::int)*1500 AS fleetvalue,(c.metal+c.crystal+c.eonium)/100 AS resvalue, comment
+		my $targetquery = $DBH->prepare(qq{SELECT r.id, r.planet, size, score, value
+			, p.x,p.y,p.z, race
+			, p.value - p.size*200 - 
+				COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 - 
+				COALESCE(ss.total ,(SELECT
+					COALESCE(avg(total),0) FROM
+					structure_scans)::int)*1500 AS fleetvalue
+			,(metal+crystal+eonium)/100 AS resvalue, comment
 			FROM current_planet_stats p 
 			JOIN raid_targets r ON p.id = r.planet 
-			LEFT OUTER JOIN covop_targets c ON p.id = c.planet
+			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
+			LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
 			WHERE r.raid = ?
 			$noingal
 			ORDER BY size});
@@ -227,30 +235,45 @@ sub render_body {
 			}
 			$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
 
-			my $scans = $DBH->prepare(q{SELECT DISTINCT ON (type) type, tick, scan FROM scans 
-				WHERE planet = ? AND type ~ 'Unit|Planet|Advanced Unit|.* Analysis' AND tick + 24 > tick() AND scan is not null
-				GROUP BY type, tick, scan ORDER BY type ,tick DESC});
-			$scans->execute($target->{planet});
-			my %scans;
-			while (my $scan = $scans->fetchrow_hashref){
-				$scans{$scan->{type}} = $scan;
-			}
-
-			my @scans;
-			for my $type ('Planet','Unit','Advanced Unit','Surface Analysis','Technology Analysis'){
-				next unless exists $scans{$type};
-				my $scan = $scans{$type};
-				if ($self->{TICK} - $scan->{tick} > 5){
-					$scan->{scan} =~ s{<table( cellpadding="\d+")?>}{<table class="old">};
+			my $unitscans = $DBH->prepare(q{ 
+				SELECT i.id,i.name, i.tick, i.amount 
+				FROM fleets i
+				WHERE  i.uid = -1
+					AND i.sender = ?
+					AND i.mission = 'Full fleet'
+				GROUP BY i.id,i.tick,i.name,i.amount
+				ORDER BY i.tick,name
+			});
+			$unitscans->execute($target->{planet}) or warn $DBH->errstr;
+			my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships WHERE id = ?});
+			my @missions;
+			my $i = 0;
+			while (my $mission = $unitscans->fetchrow_hashref){
+				$mission->{ODD} = $i++ % 2;
+				my @ships;
+				$ships->execute($mission->{id});
+				my $j = 0;
+				while (my $ship = $ships->fetchrow_hashref){
+					$ship->{ODD} = $j++ % 2;
+					push @ships,$ship;
 				}
-				if ($type eq 'Planet'){
-					$target{PlanetScan} = $scan->{scan};
-					next;
-				}
-				push @scans,{Scan => $scan->{scan}};
+				push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
+				$mission->{ships} = \@ships;
+				$mission->{amount} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+				push @missions,$mission;
 			}
-			$target{Scans} = \@scans;
+			$target{missions} = \@missions;
 
+			my $query = $DBH->prepare(q{SELECT DISTINCT ON(rid) tick,category,name,amount
+				FROM planet_data pd JOIN planet_data_types pdt ON pd.rid = pdt.id
+				WHERE pd.id = $1 AND rid in (1,2,3,4,5,6,9,10,14,15,16,17,18)
+				ORDER BY rid,tick DESC
+			});
+			$query->execute($target->{planet});
+			while (my $data = $query->fetchrow_hashref){
+				$data->{amount} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
+				$target{$data->{category}.$data->{name}} = $data->{amount};
+			}
 
 			my @roids;
 			my @claims;

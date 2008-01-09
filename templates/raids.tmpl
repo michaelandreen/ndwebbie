@@ -84,13 +84,79 @@
 			<TMPL_VAR NAME=Comment>
 		</fieldset>
 	</TMPL_IF>
-	<TMPL_VAR NAME=PlanetScan>
+	<table>
+	<tr><th></th><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
+	<tr align="center">
+		<td>Roids</td>
+		<td><TMPL_VAR NAME=roidMetal></td>
+		<td><TMPL_VAR NAME=roidCrystal></td>
+		<td><TMPL_VAR NAME=roidEonium></td>
+	</tr>
+	<tr align="center">
+		<td>Resources</td>
+		<td><TMPL_VAR NAME=resourceMetal></td>
+		<td><TMPL_VAR NAME=resourceCrystal></td>
+		<td><TMPL_VAR NAME=resourceEonium></td>
+	</tr>
+
+	</table>
 	</div>
-	<TMPL_LOOP Scans>
-		<div class="leftinfo">
-		<TMPL_VAR NAME=Scan>
-		</div>
+	<div class="leftinfo">
+	<table>
+	<tr><th>Waves</th></tr>
+	<tr>
+		<td>Research</td>
+		<td><TMPL_VAR NAME=techWaves></td>
+	</tr>
+	<tr>
+		<td>Amps</td>
+		<td><TMPL_VAR NAME="strucWave Amplifier"></td>
+	</tr>
+	<tr>
+		<td>Dists</td>
+		<td><TMPL_VAR NAME="strucWave Distorter"></td>
+	</tr>
+	<tr><th>Production</th></tr>
+	<tr>
+		<td>Research</td>
+		<td><TMPL_VAR NAME=techHulls></td>
+	</tr>
+	<tr>
+		<td>Light factory</td>
+		<td><TMPL_VAR NAME="strucLight Factory"></td>
+	</tr>
+	<tr>
+		<td>Medium factory</td>
+		<td><TMPL_VAR NAME="strucMedium Factory"></td>
+	</tr>
+	<tr>
+		<td>Heavy factory</td>
+		<td><TMPL_VAR NAME="strucHeavy Factory"></td>
+	</tr>
+	</table>
+	</div>
+	<div class="leftinfo">
+<table>
+	<tr><th>Name</th><th>Tick</th><th>Amount</th></tr>
+	<TMPL_LOOP Missions>
+	<tr align="center" class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>" onclick="toggleVisibility('fleet<TMPL_VAR NAME=Id>')">
+		<td><TMPL_VAR NAME=Name></td>
+		<td><TMPL_VAR NAME=Tick></td>
+		<td><TMPL_VAR NAME=Amount></td>
+	</tr>
+	<tr id="fleet<TMPL_VAR NAME=Id>" style="z-index:1; display:none;">
+		<td/>
+		<td colspan="5"><table>
+		<TMPL_LOOP Ships>
+		<tr class="<TMPL_IF ODD>odd<TMPL_ELSE>even</TMPL_IF>">
+			<td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td>
+		</tr>
+		</TMPL_LOOP>
+		</table></td>
+	</tr>
 	</TMPL_LOOP>
+</table>
+	</div>
 	<div class="clear"> &nbsp;</div>
 	<form action="<TMPL_VAR NAME=PAGE>" method="post">
 	<p class="claimlinks">
