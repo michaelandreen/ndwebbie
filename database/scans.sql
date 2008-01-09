@@ -1,3 +1,4 @@
+DELETE FROM fleets;
 ALTER TABLE fleets ADD COLUMN sender INTEGER NOT NULL REFERENCES planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 ALTER TABLE fleets DROP COLUMN fleet;
@@ -35,6 +36,8 @@ ALTER TABLE scans ADD COLUMN uid INTEGER NOT NULL DEFAULT -1 REFERENCES users(ui
 ALTER TABLE scans ADD COLUMN groupscan BOOLEAN NOT NULL DEFAULT False;
 
 ALTER TABLE scans ADD COLUMN parsed BOOLEAN NOT NULL DEFAULT False;
+
+ALTER TABLE scans DROP CONSTRAINT scans_pkey;
 
 ALTER TABLE scans ADD COLUMN id SERIAL PRIMARY KEY;
 
@@ -125,7 +128,7 @@ FROM scans s
 		WHERE rid = 18) AS d USING (id)
 	JOIN (SELECT scan AS id,amount AS seccents FROM planet_data
 		WHERE rid = 24) AS sc USING (id)
-ORDER BY planet,tick DESC, id DESC
+ORDER BY planet,tick DESC, id DESC;
 
 
 CREATE INDEX planet_data_id_index ON planet_data (id);
