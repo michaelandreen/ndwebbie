@@ -137,7 +137,7 @@ sub render_body {
 	$BODY->param(Planet => $planet);
 
 	my $calls = $DBH->prepare(qq{
-		SELECT id,landing_tick,dc,curreta,
+		SELECT id,landing_tick,dc,curreta,covered,
 				TRIM('/' FROM concat(DISTINCT race||' /')) AS race, TRIM('/' FROM concat(amount||' /')) AS amount,
 				TRIM('/' FROM concat(DISTINCT eta||' /')) AS eta, TRIM('/' FROM concat(DISTINCT shiptype||' /')) AS shiptype,
 				TRIM('/' FROM concat(coords||' /')) AS attackers 
