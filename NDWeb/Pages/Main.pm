@@ -141,7 +141,7 @@ sub render_body {
 				TRIM('/' FROM concat(DISTINCT race||' /')) AS race, TRIM('/' FROM concat(amount||' /')) AS amount,
 				TRIM('/' FROM concat(DISTINCT eta||' /')) AS eta, TRIM('/' FROM concat(DISTINCT shiptype||' /')) AS shiptype,
 				TRIM('/' FROM concat(coords||' /')) AS attackers 
-			FROM (SELECT c.id,p.x,p.y,p.z, u.defense_points, c.landing_tick, dc.username AS dc,
+			FROM (SELECT c.id,p.x,p.y,p.z, u.defense_points, c.landing_tick, dc.username AS dc,covered,
 				(c.landing_tick - tick()) AS curreta,p2.race, i.amount, i.eta, i.shiptype, p2.alliance,
 				coords(p2.x,p2.y,p2.z),	COUNT(DISTINCT f.id) AS fleets
 			FROM calls c 
@@ -152,8 +152,8 @@ sub render_body {
 			LEFT OUTER JOIN users dc ON c.dc = dc.uid
 			LEFT OUTER JOIN fleets f ON f.target = u.planet AND f.tick = c.landing_tick AND f.back = f.tick + f.eta - 1
 			WHERE u.uid = ? AND c.landing_tick >= tick()
-			GROUP BY c.id, p.x,p.y,p.z, c.landing_tick, u.defense_points,dc.username,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z) a
-			GROUP BY id, x,y,z,landing_tick, defense_points,dc,curreta,fleets
+			GROUP BY c.id, p.x,p.y,p.z, c.landing_tick, u.defense_points,dc.username,covered,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z) a
+			GROUP BY id, x,y,z,landing_tick, defense_points,dc,covered,curreta,fleets
 			ORDER BY landing_tick DESC
 		})or warn  $DBH->errstr;
 	$calls->execute($ND::UID) or warn $DBH->errstr;
