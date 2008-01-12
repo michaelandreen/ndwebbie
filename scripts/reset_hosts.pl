@@ -6,18 +6,12 @@ use DBI;
 use DBD::Pg qw(:pg_types);
 
 use LWP::Simple;
+use lib qw{/var/www/ndawn/};
+use ND::DB;
 
-our $dbh;
-for my $file ("/home/whale/db.pl")
-{
-	unless (my $return = do $file){
-		warn "couldn't parse $file: $@" if $@;
-		warn "couldn't do $file: $!"    unless defined $return;
-		warn "couldn't run $file"       unless $return;
-	}
-}
+our $dbh = ND::DB::DB();
 
-$dbh->trace("0","/tmp/scanstest");
+#$dbh->trace("0","/tmp/scanstest");
 my $update = $dbh->prepare("UPDATE users SET hostmask = pnick || '.users.netgamers.org' where hostmask ilike '%.%' AND NOT hostmask ilike pnick || '.users.netgamers.org'");
 $update->execute();
 $dbh->disconnect;

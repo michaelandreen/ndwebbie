@@ -26,18 +26,11 @@ use DBI;
 use DBD::Pg qw(:pg_types);
 
 use LWP::Simple;
+use lib qw{/var/www/ndawn/};
+use ND::DB;
 
-$0 =~ /(.*\/)[^\/]/;
-my $dir = $1;
-our $dbh;
-for my $file ("/home/whale/db.pl")
-{
-	unless (my $return = do $file){
-		warn "couldn't parse $file: $@" if $@;
-		warn "couldn't do $file: $!"    unless defined $return;
-		warn "couldn't run $file"       unless $return;
-	}
-}
+our $dbh = ND::DB::DB();
+
 $dbh->do("SET CLIENT_ENCODING TO 'LATIN1';");
 
 my %classes = (Fighter => 'Fi', Corvette => 'Co', Frigate => 'Fr', Destroyer => 'De', Cruiser => 'Cr', Battleship => 'Bs');

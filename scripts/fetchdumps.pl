@@ -27,17 +27,11 @@ use DBD::Pg qw(:pg_types);
 
 use LWP::Simple;
 
-$0 =~ /(.*\/)[^\/]/;
-my $dir = $1;
-our $dbh;
-for my $file ("/home/whale/db.pl")
-{
-	unless (my $return = do $file){
-		warn "couldn't parse $file: $@" if $@;
-		warn "couldn't do $file: $!"    unless defined $return;
-		warn "couldn't run $file"       unless $return;
-	}
-}
+use lib qw{/var/www/ndawn/};
+use ND::DB;
+
+our $dbh = ND::DB::DB();
+
 $dbh->do("SET CLIENT_ENCODING TO 'LATIN1';");
 
 my $insert = $dbh->prepare("INSERT INTO dumps(tick,type,modified,dump) VALUES(?,?,?,?)");
@@ -57,8 +51,8 @@ for my $type ("planet","alliance","galaxy"){
 }
 
 if ($updated){
-	`${dir}parsedumps.pl $updated`;
-	`${dir}ndrank.pl`;
+	`/var/www/ndawn/scripts/parsedumps.pl $updated`;
+	`/var/www/ndawn/scripts/ndrank.pl`;
 	$dbh->do("UPDATE misc SET value = ? WHERE id = 'TICK'", undef, $updated);
 }
 

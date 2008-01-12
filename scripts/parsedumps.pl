@@ -30,17 +30,9 @@ use LWP::Simple;
 use lib qw{/var/www/ndawn/};
 
 use ND::Include;
+use ND::DB;
 
-our $dbh;
-for my $file ("/home/whale/db.pl")
-{
-	unless (my $return = do $file){
-		warn "couldn't parse $file: $@" if $@;
-		warn "couldn't do $file: $!"    unless defined $return;
-		warn "couldn't run $file"       unless $return;
-	}
-}
-#$dbh->trace("0","/tmp/parsedumps");
+our $dbh = ND::DB::DB();
 
 $ND::DBH = $dbh;
 
