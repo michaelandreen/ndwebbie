@@ -1,4 +1,4 @@
-<TMPL_IF Title><h2><TMPL_VAR NAME=Title></h2></TMPL_IF>
+<TMPL_IF Title><h2><TMPL_VAR ESCAPE=NONE NAME=Title></h2></TMPL_IF>
 <TMPL_IF Category>
 <h3>
 <a href="/<TMPL_VAR NAME=Page>"><TMPL_VAR NAME=Category></a>
@@ -29,7 +29,7 @@
 	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td align="center"><TMPL_VAR NAME=Unread></td>
 		<td align="center"><TMPL_VAR NAME=Posts></td>
-		<td <TMPL_IF Sticky>class="sticky"</TMPL_IF>><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR NAME=Subject>&nbsp;</a></td>
+		<td <TMPL_IF Sticky>class="sticky"</TMPL_IF>><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR ESCAPE=NONE NAME=Subject>&nbsp;</a></td>
 		<td align="left"><TMPL_VAR NAME=Posting_date></td>
 		<td align="center"><TMPL_VAR NAME=Username></td>
 		<td align="left"><TMPL_VAR NAME=Last_post></td>
@@ -104,7 +104,7 @@ Move checked threads to: <select name="board">
 	<tr class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
 		<td align="center"><TMPL_VAR NAME=Unread></td>
 		<td align="center"><TMPL_VAR NAME=Posts></td>
-		<td<TMPL_IF Sticky> class="sticky"</TMPL_IF>><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR NAME=Subject>&nbsp;</a></td>
+		<td<TMPL_IF Sticky> class="sticky"</TMPL_IF>><a href="/<TMPL_VAR NAME=PAGE>?t=<TMPL_VAR NAME=Id>#NewPosts">&nbsp;<TMPL_VAR ESCAPE=NONE NAME=Subject>&nbsp;</a></td>
 		<td align="left"><TMPL_VAR NAME=Posting_date></td>
 		<td align="center"><TMPL_VAR NAME=Username></td>
 		<td align="left"><TMPL_VAR NAME=Last_post></td>
