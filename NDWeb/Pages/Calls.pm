@@ -19,6 +19,7 @@
 package NDWeb::Pages::Calls;
 use strict;
 use warnings;
+use NDWeb::Forum;
 use ND::Include;
 use CGI qw/:standard/;
 use NDWeb::Include;
@@ -36,15 +37,19 @@ sub render_body {
 	return $self->noAccess unless $self->isDC;
 
 	my $call;
+	my $thread;
 	if (defined param('call') && param('call') =~ /^(\d+)$/){
 		my $query = $DBH->prepare(q{
-			SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member,u.planet, u.username AS member, u.sms
+			SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered, open, dc.username AS dc, u.defense_points,c.member,u.planet, u.username AS member, u.sms,c.ftid
 			FROM calls c 
 			JOIN users u ON c.member = u.uid
 			LEFT OUTER JOIN users dc ON c.dc = dc.uid
 			JOIN current_planet_stats p ON u.planet = p.id
 			WHERE c.id = ?});
 		$call = $DBH->selectrow_hashref($query,undef,$1);
+
+		$thread = $DBH->selectrow_hashref(q{SELECT ftid AS id, subject FROM forum_threads
+			where ftid = $1},undef,$call->{ftid}) or warn $DBH->errstr;
 	}
 	if ($call && defined param('cmd')){
 		if (param('cmd') eq 'Submit'){
@@ -53,7 +58,7 @@ sub render_body {
 				if ($DBH->do(q{UPDATE calls SET landing_tick = ? WHERE id = ?}
 						,undef,param('tick'),$call->{id})){
 					$call->{landing_tick} = param('tick');
-					log_message $ND::UID,"DC updated landing tick for call $call->{id}";
+					def_log $ND::UID,$call->{id},"Updated landing tick to [B] $call->{landing_tick} [/B]";
 				}else{
 					warn $DBH->errstr;
 				}
@@ -62,7 +67,7 @@ sub render_body {
 				if ($DBH->do(q{UPDATE calls SET info = ? WHERE id = ?}
 						,undef,param('info'),$call->{id})){
 					$call->{info} = param('info');
-					log_message $ND::UID,"DC updated info for call $call->{id}";
+					def_log $ND::UID,$call->{id},"Updated info";
 				}else{
 					warn $DBH->errstr;
 				}
@@ -84,6 +89,7 @@ sub render_body {
 				$call->{covered} = (param('cmd') eq 'Cover call');
 				$call->{open} = (param('cmd') =~ /^(Uncover|Open) call$/);
 				$call->{DC} = $self->{USER};
+				def_log $ND::UID,$call->{id},'Changed status to: [B]'.param('cmd').'[/B]';
 			}else{
 				warn $DBH->errstr;
 			}
@@ -93,7 +99,7 @@ sub render_body {
 			for my $param (param()){
 				if ($param =~ /^change:(\d+)$/){
 					if($query->execute($1,$call->{id})){
-						log_message $ND::UID,"DC deleted fleet: $1, call $call->{id}";
+						def_log $ND::UID,$call->{id},"Deleted fleet: [B] $1 [/B]";
 					}else{
 						warn $DBH->errstr;
 					}
@@ -107,13 +113,16 @@ sub render_body {
 				if ($param =~ /^change:(\d+)$/){
 					my $shiptype = escapeHTML(param("shiptype:$1"));
 					if($query->execute($shiptype,$1,$call->{id})){
-						log_message $ND::UID,"DC set fleet: $1, call $call->{id} to: $shiptype";
+						def_log $ND::UID,$call->{id},"set fleet: [B] $1 [/B] to: [B] $shiptype [/B]";
 					}else{
 						warn $DBH->errstr;
 					}
 				}
 			}
 			$DBH->commit or warn $DBH->errstr;
+		}
+		if (defined $thread and param('cmd') eq 'forumpost'){
+			addForumPost($DBH,$thread,$ND::UID,param('message'));
 		}
 	}
 
@@ -127,6 +136,7 @@ sub render_body {
 		$BODY->param(DC => $call->{dc});
 		$BODY->param(Member => $call->{member});
 		$BODY->param(SMS => $call->{sms});
+		$BODY->param(Thread => viewForumThread $thread);
 		if ($call->{covered}){
 			$BODY->param(Cover => 'Uncover');
 		}else{
