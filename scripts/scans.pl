@@ -128,7 +128,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 					my ($target) = $dbh->selectrow_array($findplanet,undef
 						,$2,$3,$4,$t) or die $dbh->errstr;
 					die "No target: $2:$3:$4" unless defined $target;
-					my $id = addfleet($1,$mission,undef,$target,$planet,$6
+					my $id = addfleet($1,$mission,undef,$planet,$target,$6
 						,$eta,$back,undef, ($x == $2 && $y == $3));
 					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 				}elsif($news eq 'Incoming' && $text =~ m/We have detected an open jumpgate from (.*?), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have roughly (\d+) ships/g){
@@ -140,7 +140,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 					my ($target) = $dbh->selectrow_array($findplanet,undef
 						,$2,$3,$4,$t) or die $dbh->errstr;
 					die "No target: $2:$3:$4" unless defined $target;
-					my $id = addfleet($1,$mission,undef,$planet,$target,$5
+					my $id = addfleet($1,$mission,undef,$target,$planet,$5
 						,$eta,$back,$6, ($x == $2 && $y == $3));
 					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 				}
