@@ -25,12 +25,41 @@ CREATE PROCEDURAL LANGUAGE plperl;
 SET search_path = public, pg_catalog;
 
 --
+-- Name: add_call(); Type: FUNCTION; Schema: public; Owner: ndawn
+--
+
+CREATE FUNCTION add_call() RETURNS "trigger"
+    AS $_X$
+if ($_TD->{event} eq 'INSERT'){
+	$rv = spi_exec_query("SELECT nextval('public.forum_threads_ftid_seq') AS id");
+	if ($rv->{processed} != 1){
+		return 'SKIP';
+	}
+	$ftid = $rv->{rows}[0]->{id};
+	$query = spi_prepare('INSERT INTO forum_threads (fbid,ftid,subject,uid) VALUES(-3,$1,$2,-3)','int4','varchar');
+	$rv = spi_exec_prepared($query,$ftid,"$_TD->{new}{member}: $_TD->{new}{landing_tick}");
+	spi_freeplan($query);
+	if (rv->{status} != SPI_OK_INSERT){
+		return 'SKIP';
+	}
+	$_TD->{new}{ftid} = $ftid;
+	return 'MODIFY';
+}
+return 'SKIP';
+$_X$
+    LANGUAGE plperl;
+
+
+ALTER FUNCTION public.add_call() OWNER TO ndawn;
+
+--
 -- Name: add_intel(integer, integer, integer, integer, integer, integer, integer, integer, integer, character varying, integer); Type: FUNCTION; Schema: public; Owner: ndawn
 --
 
 CREATE FUNCTION add_intel(tick integer, eta integer, x1 integer, y1 integer, z1 integer, x2 integer, y2 integer, z2 integer, amount integer, mission character varying, uid integer) RETURNS boolean
     AS $_$my ($tick, $eta, $x1, $y1, $z1, $x2, $y2, $z2, $amount, $mission, $uid) = @_;
 $ingal = false;
+$tick = -1 unless defined $tick;
 if ($x1 == $x2 && $y1 == $y2) {
 $ingal = true;
 }
@@ -154,6 +183,34 @@ return true;$_$
 
 
 ALTER FUNCTION public.add_intel4(tick integer, eta integer, x1 integer, y1 integer, z1 integer, x2 integer, y2 integer, z2 integer, amount integer, mission character varying, uid integer) OWNER TO ndawn;
+
+--
+-- Name: add_user(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION add_user() RETURNS "trigger"
+    AS $_X$
+if ($_TD->{event} eq 'INSERT'){
+	$rv = spi_exec_query("SELECT nextval('public.forum_threads_ftid_seq') AS id");
+	if ($rv->{processed} != 1){
+		return 'SKIP';
+	}
+	$ftid = $rv->{rows}[0]->{id};
+	$query = spi_prepare('INSERT INTO forum_threads (fbid,ftid,subject,uid) VALUES($1,$2,$3,-3)','int4','int4','varchar');
+	$rv = spi_exec_prepared($query,-1,$ftid,"$_TD->{new}{uid}: $_TD->{new}{username}");
+	spi_freeplan($query);
+	if (rv->{status} != SPI_OK_INSERT){
+		return 'SKIP';
+	}
+	$_TD->{new}{ftid} = $ftid;
+	return 'MODIFY';
+}
+return 'SKIP';
+$_X$
+    LANGUAGE plperl;
+
+
+ALTER FUNCTION public.add_user() OWNER TO postgres;
 
 --
 -- Name: calc_rank(integer); Type: FUNCTION; Schema: public; Owner: ndawn
@@ -396,23 +453,29 @@ if ($nrows == 1){
 		spi_freeplan($query);
 	}
 }else {
+	$rv = spi_exec_query("SELECT nextval('public.forum_threads_ftid_seq') AS id");
+	if ($rv->{processed} != 1){
+		return;
+	}
+	$ftid = $rv->{rows}[0]->{id};
+	$query = spi_prepare('INSERT INTO forum_threads (fbid,ftid,subject) VALUES($1,$2,$3)','int4','int4','varchar');
+	$rv = spi_exec_prepared($query,-2,$ftid,"$ruler OF $planet");
+	spi_freeplan($query);
+	if (rv->{status} != SPI_OK_INSERT){
+		return;
+	}
 	$rv = spi_exec_query("SELECT nextval('public.planets_id_seq') AS id");
 	if ($rv->{processed} != 1){
 		return;
 	}
 	$id = $rv->{rows}[0]->{id};
-	$query = spi_prepare('INSERT INTO planets(id,ruler,planet,race) VALUES($1,$2,$3,$4)','int4','varchar','varchar','varchar');
-	$rv = spi_exec_prepared($query,$id,$ruler,$planet,$race);
+	$query = spi_prepare('INSERT INTO planets(id,ruler,planet,race,ftid) VALUES($1,$2,$3,$4,$5)','int4','varchar','varchar','varchar','int4');
+	$rv = spi_exec_prepared($query,$id,$ruler,$planet,$race,$ftid);
 	spi_freeplan($query);
 	if (rv->{status} != SPI_OK_INSERT){
 		return;
 	}
-	$query = spi_prepare('INSERT INTO forum_threads (fbid,planet,subject) VALUES($1,$2,$3)','int4','int4','varchar');
-	$rv = spi_exec_prepared($query,-2,$id,"$ruler OF $planet");
-	spi_freeplan($query);
-	if (rv->{status} != SPI_OK_INSERT){
-		return;
-	}
+	
 }
 return $id;$_$
     LANGUAGE plperl;
@@ -443,11 +506,33 @@ CREATE FUNCTION max_bank_hack(metal integer, crystal integer, eonium integer, tv
 ALTER FUNCTION public.max_bank_hack(metal integer, crystal integer, eonium integer, tvalue integer, value integer) OWNER TO ndawn;
 
 --
+-- Name: old_claim(timestamp with time zone); Type: FUNCTION; Schema: public; Owner: ndawn
+--
+
+CREATE FUNCTION old_claim("timestamp" timestamp with time zone) RETURNS boolean
+    AS $_$SELECT NOW() - '10 minutes'::INTERVAL > $1;$_$
+    LANGUAGE sql IMMUTABLE;
+
+
+ALTER FUNCTION public.old_claim("timestamp" timestamp with time zone) OWNER TO ndawn;
+
+--
+-- Name: planetcoords(integer, integer); Type: FUNCTION; Schema: public; Owner: ndawn
+--
+
+CREATE FUNCTION planetcoords(id integer, tick integer, OUT x integer, OUT y integer, OUT z integer) RETURNS record
+    AS $_$SELECT x,y,z FROM planet_stats WHERE id = $1 AND (tick >= $2  OR tick =( SELECT max(tick) FROM planet_stats))  ORDER BY tick ASC LIMIT 1$_$
+    LANGUAGE sql STABLE;
+
+
+ALTER FUNCTION public.planetcoords(id integer, tick integer, OUT x integer, OUT y integer, OUT z integer) OWNER TO ndawn;
+
+--
 -- Name: planetid(integer, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: ndawn
 --
 
 CREATE FUNCTION planetid(x integer, y integer, z integer, tick integer) RETURNS integer
-    AS $_$SELECT id FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND (tick = $4 OR tick =( SELECT max(tick) FROM planet_stats) ) ORDER BY tick ASC LIMIT 1$_$
+    AS $_$SELECT id FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND (tick >= $4  OR tick =( SELECT max(tick) FROM planet_stats)) ORDER BY tick ASC LIMIT 1$_$
     LANGUAGE sql STABLE;
 
 
@@ -492,6 +577,27 @@ CREATE FUNCTION tick() RETURNS integer
 
 
 ALTER FUNCTION public.tick() OWNER TO postgres;
+
+--
+-- Name: unclaim_target(); Type: FUNCTION; Schema: public; Owner: ndawn
+--
+
+CREATE FUNCTION unclaim_target() RETURNS "trigger"
+    AS $_X$
+if ($_TD->{event} eq 'DELETE' && $_TD->{old}{launched} eq 't'){
+	my $uid = $_TD->{old}{uid};
+	my $query = spi_prepare(q{UPDATE users
+		SET attack_points = attack_points - 1
+		WHERE uid = $1},'int4');
+	spi_exec_prepared($query,$uid);
+	spi_freeplan($query);
+}
+return;
+$_X$
+    LANGUAGE plperl;
+
+
+ALTER FUNCTION public.unclaim_target() OWNER TO ndawn;
 
 --
 -- Name: update_user_planet(); Type: FUNCTION; Schema: public; Owner: ndawn
@@ -560,7 +666,19 @@ CREATE TABLE alliance_stats (
     tick integer NOT NULL,
     size integer NOT NULL,
     members integer NOT NULL,
-    score integer NOT NULL
+    score integer NOT NULL,
+    sizerank integer NOT NULL,
+    scorerank integer NOT NULL,
+    size_gain integer NOT NULL,
+    score_gain integer NOT NULL,
+    sizerank_gain integer NOT NULL,
+    scorerank_gain integer NOT NULL,
+    size_gain_day integer NOT NULL,
+    score_gain_day integer NOT NULL,
+    sizerank_gain_day integer NOT NULL,
+    scorerank_gain_day integer NOT NULL,
+    members_gain integer NOT NULL,
+    members_gain_day integer NOT NULL
 );
 
 
@@ -611,7 +729,8 @@ CREATE TABLE calls (
     info text NOT NULL,
     covered boolean DEFAULT false NOT NULL,
     shiptypes text,
-    open boolean DEFAULT true NOT NULL
+    open boolean DEFAULT true NOT NULL,
+    ftid integer
 );
 
 
@@ -716,25 +835,6 @@ ALTER SEQUENCE channels_id_seq OWNED BY channels.id;
 
 
 --
--- Name: covop_targets; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE TABLE covop_targets (
-    planet integer NOT NULL,
-    metal integer,
-    crystal integer,
-    eonium integer,
-    structures integer,
-    sec_centres integer,
-    dists integer,
-    last_covop integer,
-    covop_by integer
-);
-
-
-ALTER TABLE public.covop_targets OWNER TO ndawn;
-
---
 -- Name: planet_stats; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
 --
 
@@ -751,7 +851,23 @@ CREATE TABLE planet_stats (
     sizerank integer NOT NULL,
     scorerank integer NOT NULL,
     valuerank integer NOT NULL,
-    xprank integer NOT NULL
+    xprank integer NOT NULL,
+    size_gain integer NOT NULL,
+    score_gain integer NOT NULL,
+    value_gain integer NOT NULL,
+    xp_gain integer NOT NULL,
+    sizerank_gain integer NOT NULL,
+    scorerank_gain integer NOT NULL,
+    valuerank_gain integer NOT NULL,
+    xprank_gain integer NOT NULL,
+    size_gain_day integer NOT NULL,
+    score_gain_day integer NOT NULL,
+    value_gain_day integer NOT NULL,
+    xp_gain_day integer NOT NULL,
+    sizerank_gain_day integer NOT NULL,
+    scorerank_gain_day integer NOT NULL,
+    valuerank_gain_day integer NOT NULL,
+    xprank_gain_day integer NOT NULL
 );
 
 
@@ -770,7 +886,8 @@ CREATE TABLE planets (
     planet_status text,
     hit_us integer DEFAULT 0 NOT NULL,
     alliance_id integer,
-    channel text
+    channel text,
+    ftid integer
 );
 
 
@@ -781,10 +898,34 @@ ALTER TABLE public.planets OWNER TO ndawn;
 --
 
 CREATE VIEW current_planet_stats AS
-    SELECT p.id, p.nick, p.planet_status, p.hit_us, ps.x, ps.y, ps.z, p.ruler, p.planet, p.race, ps.size, ps.score, ps.value, ps.xp, ps.sizerank, ps.scorerank, ps.valuerank, ps.xprank, alliances.name AS alliance, alliances.relationship, p.alliance_id, p.channel FROM (((SELECT planet_stats.id, planet_stats.tick, planet_stats.x, planet_stats.y, planet_stats.z, planet_stats.size, planet_stats.score, planet_stats.value, planet_stats.xp, planet_stats.sizerank, planet_stats.scorerank, planet_stats.valuerank, planet_stats.xprank FROM planet_stats WHERE (planet_stats.tick = (SELECT max(planet_stats.tick) AS max FROM planet_stats))) ps NATURAL JOIN planets p) LEFT JOIN alliances ON ((alliances.id = p.alliance_id)));
+    SELECT p.id, p.nick, p.planet_status, p.hit_us, ps.x, ps.y, ps.z, p.ruler, p.planet, p.race, ps.size, ps.score, ps.value, ps.xp, ps.sizerank, ps.scorerank, ps.valuerank, ps.xprank, alliances.name AS alliance, alliances.relationship, p.alliance_id, p.channel, p.ftid FROM (((SELECT planet_stats.id, planet_stats.tick, planet_stats.x, planet_stats.y, planet_stats.z, planet_stats.size, planet_stats.score, planet_stats.value, planet_stats.xp, planet_stats.sizerank, planet_stats.scorerank, planet_stats.valuerank, planet_stats.xprank FROM planet_stats WHERE (planet_stats.tick = (SELECT max(planet_stats.tick) AS max FROM planet_stats))) ps NATURAL JOIN planets p) LEFT JOIN alliances ON ((alliances.id = p.alliance_id)));
 
 
 ALTER TABLE public.current_planet_stats OWNER TO ndawn;
+
+--
+-- Name: current_planet_stats_full; Type: VIEW; Schema: public; Owner: ndawn
+--
+
+CREATE VIEW current_planet_stats_full AS
+    SELECT p.id, p.nick, p.planet_status, p.hit_us, ps.x, ps.y, ps.z, p.ruler, p.planet, p.race, ps.size, ps.score, ps.value, ps.xp, ps.sizerank, ps.scorerank, ps.valuerank, ps.xprank, alliances.name AS alliance, alliances.relationship, p.alliance_id, p.channel, p.ftid, ps.size_gain, ps.score_gain, ps.value_gain, ps.xp_gain, ps.sizerank_gain, ps.scorerank_gain, ps.valuerank_gain, ps.xprank_gain, ps.size_gain_day, ps.score_gain_day, ps.value_gain_day, ps.xp_gain_day, ps.sizerank_gain_day, ps.scorerank_gain_day, ps.valuerank_gain_day, ps.xprank_gain_day FROM (((SELECT planet_stats.id, planet_stats.tick, planet_stats.x, planet_stats.y, planet_stats.z, planet_stats.size, planet_stats.score, planet_stats.value, planet_stats.xp, planet_stats.sizerank, planet_stats.scorerank, planet_stats.valuerank, planet_stats.xprank, planet_stats.size_gain, planet_stats.score_gain, planet_stats.value_gain, planet_stats.xp_gain, planet_stats.sizerank_gain, planet_stats.scorerank_gain, planet_stats.valuerank_gain, planet_stats.xprank_gain, planet_stats.size_gain_day, planet_stats.score_gain_day, planet_stats.value_gain_day, planet_stats.xp_gain_day, planet_stats.sizerank_gain_day, planet_stats.scorerank_gain_day, planet_stats.valuerank_gain_day, planet_stats.xprank_gain_day FROM planet_stats WHERE (planet_stats.tick = (SELECT max(planet_stats.tick) AS max FROM planet_stats))) ps NATURAL JOIN planets p) LEFT JOIN alliances ON ((alliances.id = p.alliance_id)));
+
+
+ALTER TABLE public.current_planet_stats_full OWNER TO ndawn;
+
+--
+-- Name: defense_missions; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE defense_missions (
+    call integer NOT NULL,
+    fleet integer NOT NULL,
+    announced boolean DEFAULT false NOT NULL,
+    pointed boolean DEFAULT false NOT NULL
+);
+
+
+ALTER TABLE public.defense_missions OWNER TO ndawn;
 
 --
 -- Name: defense_requests; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
@@ -835,11 +976,23 @@ CREATE TABLE dumps (
 ALTER TABLE public.dumps OWNER TO ndawn;
 
 --
+-- Name: fleet_scans; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE fleet_scans (
+    id integer NOT NULL,
+    scan integer NOT NULL
+);
+
+
+ALTER TABLE public.fleet_scans OWNER TO ndawn;
+
+--
 -- Name: fleet_ships; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
 --
 
 CREATE TABLE fleet_ships (
-    fleet integer NOT NULL,
+    id integer NOT NULL,
     ship text NOT NULL,
     amount integer NOT NULL
 );
@@ -853,13 +1006,16 @@ ALTER TABLE public.fleet_ships OWNER TO ndawn;
 
 CREATE TABLE fleets (
     uid integer NOT NULL,
-    fleet integer NOT NULL,
-    target integer NOT NULL,
+    target integer,
     mission text NOT NULL,
-    landing_tick integer NOT NULL,
+    tick integer NOT NULL,
     id integer NOT NULL,
-    eta integer NOT NULL,
-    back integer NOT NULL
+    eta integer,
+    back integer,
+    sender integer NOT NULL,
+    amount integer,
+    name text NOT NULL,
+    ingal boolean DEFAULT false NOT NULL
 );
 
 
@@ -892,7 +1048,8 @@ ALTER SEQUENCE fleets_id_seq OWNED BY fleets.id;
 CREATE TABLE forum_access (
     fbid integer NOT NULL,
     gid integer NOT NULL,
-    post boolean DEFAULT false NOT NULL
+    post boolean DEFAULT false NOT NULL,
+    moderate boolean DEFAULT false NOT NULL
 );
 
 
@@ -1019,8 +1176,8 @@ CREATE TABLE forum_threads (
     ftid integer NOT NULL,
     fbid integer NOT NULL,
     subject text NOT NULL,
-    planet integer,
-    log_uid integer
+    sticky boolean DEFAULT false NOT NULL,
+    uid integer
 );
 
 
@@ -1054,14 +1211,52 @@ CREATE TABLE galaxies (
     x integer NOT NULL,
     y integer NOT NULL,
     tick integer NOT NULL,
-    name character varying NOT NULL,
     size integer NOT NULL,
     score integer NOT NULL,
-    value integer NOT NULL
+    value integer NOT NULL,
+    xp integer NOT NULL,
+    planets integer NOT NULL,
+    sizerank integer NOT NULL,
+    scorerank integer NOT NULL,
+    valuerank integer NOT NULL,
+    xprank integer NOT NULL,
+    size_gain integer NOT NULL,
+    score_gain integer NOT NULL,
+    value_gain integer NOT NULL,
+    xp_gain integer NOT NULL,
+    planets_gain integer NOT NULL,
+    sizerank_gain integer NOT NULL,
+    scorerank_gain integer NOT NULL,
+    valuerank_gain integer NOT NULL,
+    xprank_gain integer NOT NULL,
+    size_gain_day integer NOT NULL,
+    score_gain_day integer NOT NULL,
+    value_gain_day integer NOT NULL,
+    xp_gain_day integer NOT NULL,
+    planets_gain_day integer NOT NULL,
+    sizerank_gain_day integer NOT NULL,
+    scorerank_gain_day integer NOT NULL,
+    valuerank_gain_day integer NOT NULL,
+    xprank_gain_day integer NOT NULL
 );
 
 
 ALTER TABLE public.galaxies OWNER TO ndawn;
+
+--
+-- Name: graphs; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE graphs (
+    "type" text NOT NULL,
+    id integer NOT NULL,
+    last_modified timestamp with time zone DEFAULT now() NOT NULL,
+    tick integer NOT NULL,
+    img bytea NOT NULL
+);
+
+
+ALTER TABLE public.graphs OWNER TO ndawn;
 
 --
 -- Name: groupmembers; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
@@ -1146,28 +1341,6 @@ ALTER TABLE public.incomings_id_seq OWNER TO ndawn;
 ALTER SEQUENCE incomings_id_seq OWNED BY incomings.id;
 
 
-SET default_with_oids = true;
-
---
--- Name: intel; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE TABLE intel (
-    target integer NOT NULL,
-    sender integer NOT NULL,
-    tick integer NOT NULL,
-    mission character varying NOT NULL,
-    ingal boolean NOT NULL,
-    amount integer NOT NULL,
-    eta smallint DEFAULT 16 NOT NULL,
-    uid integer NOT NULL
-);
-
-
-ALTER TABLE public.intel OWNER TO ndawn;
-
-SET default_with_oids = false;
-
 --
 -- Name: intel_messages; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
 --
@@ -1251,6 +1424,96 @@ CREATE TABLE misc (
 ALTER TABLE public.misc OWNER TO ndawn;
 
 --
+-- Name: planet_data; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE planet_data (
+    id integer NOT NULL,
+    scan integer NOT NULL,
+    tick integer NOT NULL,
+    rid integer NOT NULL,
+    amount integer NOT NULL
+);
+
+
+ALTER TABLE public.planet_data OWNER TO ndawn;
+
+--
+-- Name: planet_data_types; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE planet_data_types (
+    id integer NOT NULL,
+    category text NOT NULL,
+    name text NOT NULL
+);
+
+
+ALTER TABLE public.planet_data_types OWNER TO ndawn;
+
+--
+-- Name: planet_data_types_id_seq; Type: SEQUENCE; Schema: public; Owner: ndawn
+--
+
+CREATE SEQUENCE planet_data_types_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.planet_data_types_id_seq OWNER TO ndawn;
+
+--
+-- Name: planet_data_types_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ndawn
+--
+
+ALTER SEQUENCE planet_data_types_id_seq OWNED BY planet_data_types.id;
+
+
+--
+-- Name: planet_graphs; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE planet_graphs (
+    planet integer NOT NULL,
+    tick integer NOT NULL,
+    "type" text NOT NULL,
+    graph bytea NOT NULL
+);
+
+
+ALTER TABLE public.planet_graphs OWNER TO ndawn;
+
+--
+-- Name: scans; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE scans (
+    tick integer NOT NULL,
+    scan_id numeric(10,0) NOT NULL,
+    planet integer,
+    "type" text,
+    uid integer DEFAULT -1 NOT NULL,
+    groupscan boolean DEFAULT false NOT NULL,
+    parsed boolean DEFAULT false NOT NULL,
+    id integer NOT NULL
+);
+
+
+ALTER TABLE public.scans OWNER TO ndawn;
+
+--
+-- Name: planet_scans; Type: VIEW; Schema: public; Owner: ndawn
+--
+
+CREATE VIEW planet_scans AS
+    SELECT DISTINCT ON (s.planet) s.id, s.planet, s.tick, m.metal, c.crystal, e.eonium, mr.metal_roids, cr.crystal_roids, er.eonium_roids FROM ((((((scans s JOIN (SELECT planet_data.scan AS id, planet_data.amount AS metal_roids FROM planet_data WHERE (planet_data.rid = 1)) mr USING (id)) JOIN (SELECT planet_data.scan AS id, planet_data.amount AS crystal_roids FROM planet_data WHERE (planet_data.rid = 2)) cr USING (id)) JOIN (SELECT planet_data.scan AS id, planet_data.amount AS eonium_roids FROM planet_data WHERE (planet_data.rid = 3)) er USING (id)) JOIN (SELECT planet_data.scan AS id, planet_data.amount AS metal FROM planet_data WHERE (planet_data.rid = 4)) m USING (id)) JOIN (SELECT planet_data.scan AS id, planet_data.amount AS crystal FROM planet_data WHERE (planet_data.rid = 5)) c USING (id)) JOIN (SELECT planet_data.scan AS id, planet_data.amount AS eonium FROM planet_data WHERE (planet_data.rid = 6)) e USING (id)) ORDER BY s.planet, s.tick DESC, s.id DESC;
+
+
+ALTER TABLE public.planet_scans OWNER TO ndawn;
+
+--
 -- Name: planets_id_seq; Type: SEQUENCE; Schema: public; Owner: ndawn
 --
 
@@ -1291,7 +1554,8 @@ CREATE TABLE raid_claims (
     uid integer NOT NULL,
     wave integer NOT NULL,
     joinable boolean DEFAULT false NOT NULL,
-    launched boolean DEFAULT false NOT NULL
+    launched boolean DEFAULT false NOT NULL,
+    "timestamp" timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
@@ -1370,19 +1634,24 @@ ALTER SEQUENCE raids_id_seq OWNED BY raids.id;
 
 
 --
--- Name: scans; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+-- Name: scans_id_seq; Type: SEQUENCE; Schema: public; Owner: ndawn
 --
 
-CREATE TABLE scans (
-    tick integer NOT NULL,
-    "type" character varying,
-    scan_id integer NOT NULL,
-    scan text,
-    planet integer
-);
+CREATE SEQUENCE scans_id_seq
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
 
 
-ALTER TABLE public.scans OWNER TO ndawn;
+ALTER TABLE public.scans_id_seq OWNER TO ndawn;
+
+--
+-- Name: scans_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: ndawn
+--
+
+ALTER SEQUENCE scans_id_seq OWNED BY scans.id;
+
 
 --
 -- Name: ship_stats; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
@@ -1391,7 +1660,7 @@ ALTER TABLE public.scans OWNER TO ndawn;
 CREATE TABLE ship_stats (
     name text NOT NULL,
     "class" text NOT NULL,
-    target text NOT NULL,
+    t1 text NOT NULL,
     "type" text NOT NULL,
     init integer NOT NULL,
     armor integer NOT NULL,
@@ -1401,11 +1670,49 @@ CREATE TABLE ship_stats (
     eonium integer NOT NULL,
     race text NOT NULL,
     guns integer DEFAULT 0 NOT NULL,
-    eres integer DEFAULT 0 NOT NULL
+    eres integer DEFAULT 0 NOT NULL,
+    t2 text,
+    t3 text
 );
 
 
 ALTER TABLE public.ship_stats OWNER TO ndawn;
+
+--
+-- Name: smslist; Type: TABLE; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE TABLE smslist (
+    nick text NOT NULL,
+    sms text NOT NULL,
+    info text
+);
+
+
+ALTER TABLE public.smslist OWNER TO ndawn;
+
+--
+-- Name: structure_scans; Type: VIEW; Schema: public; Owner: ndawn
+--
+
+CREATE VIEW structure_scans AS
+    SELECT DISTINCT ON (s.planet) s.id, s.planet, s.tick, t.total, d.distorters, sc.seccents FROM (((scans s JOIN (SELECT planet_data.scan AS id, sum(planet_data.amount) AS total FROM planet_data WHERE ((planet_data.rid >= 14) AND (planet_data.rid <= 24)) GROUP BY planet_data.scan) t USING (id)) JOIN (SELECT planet_data.scan AS id, planet_data.amount AS distorters FROM planet_data WHERE (planet_data.rid = 18)) d USING (id)) JOIN (SELECT planet_data.scan AS id, planet_data.amount AS seccents FROM planet_data WHERE (planet_data.rid = 24)) sc USING (id)) ORDER BY s.planet, s.tick DESC, s.id DESC;
+
+
+ALTER TABLE public.structure_scans OWNER TO ndawn;
+
+--
+-- Name: test; Type: SEQUENCE; Schema: public; Owner: ndawn
+--
+
+CREATE SEQUENCE test
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.test OWNER TO ndawn;
 
 SET default_with_oids = true;
 
@@ -1438,7 +1745,13 @@ CREATE TABLE users (
     hostmask text,
     sms text,
     rank integer,
-    laston timestamp with time zone
+    laston timestamp with time zone,
+    ftid integer,
+    css text,
+    last_forum_visit timestamp with time zone,
+    email text,
+    pnick text,
+    info text
 );
 
 
@@ -1576,6 +1889,13 @@ ALTER TABLE log ALTER COLUMN id SET DEFAULT nextval('log_id_seq'::regclass);
 -- Name: id; Type: DEFAULT; Schema: public; Owner: ndawn
 --
 
+ALTER TABLE planet_data_types ALTER COLUMN id SET DEFAULT nextval('planet_data_types_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: ndawn
+--
+
 ALTER TABLE planets ALTER COLUMN id SET DEFAULT nextval('planets_id_seq'::regclass);
 
 
@@ -1591,6 +1911,13 @@ ALTER TABLE raid_targets ALTER COLUMN id SET DEFAULT nextval('raid_targets_id_se
 --
 
 ALTER TABLE raids ALTER COLUMN id SET DEFAULT nextval('raids_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE scans ALTER COLUMN id SET DEFAULT nextval('scans_id_seq'::regclass);
 
 
 --
@@ -1689,11 +2016,11 @@ ALTER TABLE ONLY channels
 
 
 --
--- Name: covOp_targets_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+-- Name: defense_missions_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
 --
 
-ALTER TABLE ONLY covop_targets
-    ADD CONSTRAINT "covOp_targets_pkey" PRIMARY KEY (planet);
+ALTER TABLE ONLY defense_missions
+    ADD CONSTRAINT defense_missions_pkey PRIMARY KEY (fleet);
 
 
 --
@@ -1713,11 +2040,19 @@ ALTER TABLE ONLY dumps
 
 
 --
+-- Name: fleet_scans_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY fleet_scans
+    ADD CONSTRAINT fleet_scans_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: fleet_ships_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
 --
 
 ALTER TABLE ONLY fleet_ships
-    ADD CONSTRAINT fleet_ships_pkey PRIMARY KEY (fleet, ship);
+    ADD CONSTRAINT fleet_ships_pkey PRIMARY KEY (id, ship);
 
 
 --
@@ -1726,14 +2061,6 @@ ALTER TABLE ONLY fleet_ships
 
 ALTER TABLE ONLY fleets
     ADD CONSTRAINT fleets_pkey PRIMARY KEY (id);
-
-
---
--- Name: fleets_uid_key; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
---
-
-ALTER TABLE ONLY fleets
-    ADD CONSTRAINT fleets_uid_key UNIQUE (uid, fleet);
 
 
 --
@@ -1793,14 +2120,6 @@ ALTER TABLE ONLY forum_thread_visits
 
 
 --
--- Name: forum_threads_log_uid_key; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
---
-
-ALTER TABLE ONLY forum_threads
-    ADD CONSTRAINT forum_threads_log_uid_key UNIQUE (log_uid);
-
-
---
 -- Name: forum_threads_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
 --
 
@@ -1809,19 +2128,19 @@ ALTER TABLE ONLY forum_threads
 
 
 --
--- Name: forum_threads_planet_key; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
---
-
-ALTER TABLE ONLY forum_threads
-    ADD CONSTRAINT forum_threads_planet_key UNIQUE (planet);
-
-
---
 -- Name: galaxies_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
 --
 
 ALTER TABLE ONLY galaxies
     ADD CONSTRAINT galaxies_pkey PRIMARY KEY (x, y, tick);
+
+
+--
+-- Name: graphs_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY graphs
+    ADD CONSTRAINT graphs_pkey PRIMARY KEY ("type", id);
 
 
 --
@@ -1889,6 +2208,38 @@ ALTER TABLE ONLY misc
 
 
 --
+-- Name: planet_data_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY planet_data
+    ADD CONSTRAINT planet_data_pkey PRIMARY KEY (rid, scan);
+
+
+--
+-- Name: planet_data_types_category_key; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY planet_data_types
+    ADD CONSTRAINT planet_data_types_category_key UNIQUE (category, name);
+
+
+--
+-- Name: planet_data_types_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY planet_data_types
+    ADD CONSTRAINT planet_data_types_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: planet_graphs_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY planet_graphs
+    ADD CONSTRAINT planet_graphs_pkey PRIMARY KEY (planet, "type");
+
+
+--
 -- Name: planet_stats_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
 --
 
@@ -1902,6 +2253,14 @@ ALTER TABLE ONLY planet_stats
 
 ALTER TABLE ONLY planet_stats
     ADD CONSTRAINT planet_stats_tick_key UNIQUE (tick, x, y, z);
+
+
+--
+-- Name: planets_ftid_key; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY planets
+    ADD CONSTRAINT planets_ftid_key UNIQUE (ftid);
 
 
 --
@@ -1965,7 +2324,15 @@ ALTER TABLE ONLY raids
 --
 
 ALTER TABLE ONLY scans
-    ADD CONSTRAINT scans_pkey PRIMARY KEY (tick, scan_id);
+    ADD CONSTRAINT scans_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: scans_scan_id_key; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY scans
+    ADD CONSTRAINT scans_scan_id_key UNIQUE (scan_id, tick, groupscan);
 
 
 --
@@ -1974,6 +2341,14 @@ ALTER TABLE ONLY scans
 
 ALTER TABLE ONLY ship_stats
     ADD CONSTRAINT ship_stats_pkey PRIMARY KEY (name);
+
+
+--
+-- Name: smslist_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY smslist
+    ADD CONSTRAINT smslist_pkey PRIMARY KEY (sms);
 
 
 --
@@ -1990,6 +2365,49 @@ ALTER TABLE ONLY ticks
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_planet_key UNIQUE (planet);
+
+
+--
+-- Name: users_tfid_key; Type: CONSTRAINT; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_tfid_key UNIQUE (ftid);
+
+
+--
+-- Name: fleets_ingal_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE INDEX fleets_ingal_index ON fleets USING btree (ingal);
+
+
+--
+-- Name: fleets_mission_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE INDEX fleets_mission_index ON fleets USING btree (mission);
+
+
+--
+-- Name: fleets_sender_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE INDEX fleets_sender_index ON fleets USING btree (sender);
+
+
+--
+-- Name: fleets_target_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE INDEX fleets_target_index ON fleets USING btree (target);
+
+
+--
+-- Name: fleets_tick_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE INDEX fleets_tick_index ON fleets USING btree (tick);
 
 
 --
@@ -2014,6 +2432,13 @@ CREATE INDEX forum_posts_time_index ON forum_posts USING btree ("time");
 
 
 --
+-- Name: forum_thread_visits_time_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE INDEX forum_thread_visits_time_index ON forum_thread_visits USING btree ("time");
+
+
+--
 -- Name: groupmembers_uid_key; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
 --
 
@@ -2021,52 +2446,10 @@ CREATE INDEX groupmembers_uid_key ON groupmembers USING btree (uid);
 
 
 --
--- Name: inteL_ingal_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+-- Name: planet_data_id_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
 --
 
-CREATE INDEX "inteL_ingal_index" ON intel USING btree (ingal);
-
-
---
--- Name: intel_eta_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE INDEX intel_eta_index ON intel USING btree (eta);
-
-
---
--- Name: intel_launchtick_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE INDEX intel_launchtick_index ON intel USING btree (((tick - eta)));
-
-
---
--- Name: intel_mission_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE INDEX intel_mission_index ON intel USING btree (mission);
-
-
---
--- Name: intel_sender_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE INDEX intel_sender_index ON intel USING btree (sender);
-
-
---
--- Name: intel_target_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE INDEX intel_target_index ON intel USING btree (target);
-
-
---
--- Name: intel_tick_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
---
-
-CREATE INDEX intel_tick_index ON intel USING btree (tick);
+CREATE INDEX planet_data_id_index ON planet_data USING btree (id);
 
 
 --
@@ -2133,10 +2516,24 @@ CREATE INDEX raid_targets_modified_index ON raid_targets USING btree (modified);
 
 
 --
+-- Name: smslist_nick_key; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE UNIQUE INDEX smslist_nick_key ON smslist USING btree (lower(nick));
+
+
+--
 -- Name: users_hostmask_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
 --
 
 CREATE UNIQUE INDEX users_hostmask_index ON users USING btree (lower(hostmask));
+
+
+--
+-- Name: users_pnick_index; Type: INDEX; Schema: public; Owner: ndawn; Tablespace: 
+--
+
+CREATE UNIQUE INDEX users_pnick_index ON users USING btree (lower(pnick));
 
 
 --
@@ -2147,6 +2544,16 @@ CREATE UNIQUE INDEX users_username_index ON users USING btree (lower(username));
 
 
 --
+-- Name: add_call; Type: TRIGGER; Schema: public; Owner: ndawn
+--
+
+CREATE TRIGGER add_call
+    BEFORE INSERT ON calls
+    FOR EACH ROW
+    EXECUTE PROCEDURE add_call();
+
+
+--
 -- Name: add_remove_member; Type: TRIGGER; Schema: public; Owner: ndawn
 --
 
@@ -2154,6 +2561,26 @@ CREATE TRIGGER add_remove_member
     AFTER INSERT OR DELETE ON groupmembers
     FOR EACH ROW
     EXECUTE PROCEDURE change_member();
+
+
+--
+-- Name: add_user; Type: TRIGGER; Schema: public; Owner: ndawn
+--
+
+CREATE TRIGGER add_user
+    BEFORE INSERT ON users
+    FOR EACH ROW
+    EXECUTE PROCEDURE add_user();
+
+
+--
+-- Name: unclaim_target; Type: TRIGGER; Schema: public; Owner: ndawn
+--
+
+CREATE TRIGGER unclaim_target
+    AFTER DELETE ON raid_claims
+    FOR EACH ROW
+    EXECUTE PROCEDURE unclaim_target();
 
 
 --
@@ -2193,6 +2620,14 @@ ALTER TABLE ONLY calls
 
 
 --
+-- Name: calls_ftid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY calls
+    ADD CONSTRAINT calls_ftid_fkey FOREIGN KEY (ftid) REFERENCES forum_threads(ftid);
+
+
+--
 -- Name: calls_member_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
 --
 
@@ -2225,19 +2660,19 @@ ALTER TABLE ONLY channel_group_flags
 
 
 --
--- Name: covOp_targets_planet_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+-- Name: defense_missions_call_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
 --
 
-ALTER TABLE ONLY covop_targets
-    ADD CONSTRAINT "covOp_targets_planet_fkey" FOREIGN KEY (planet) REFERENCES planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY defense_missions
+    ADD CONSTRAINT defense_missions_call_fkey FOREIGN KEY (call) REFERENCES calls(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
--- Name: covop_targets_covop_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+-- Name: defense_missions_fleet_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
 --
 
-ALTER TABLE ONLY covop_targets
-    ADD CONSTRAINT covop_targets_covop_by_fkey FOREIGN KEY (covop_by) REFERENCES users(uid) ON UPDATE SET NULL ON DELETE SET NULL;
+ALTER TABLE ONLY defense_missions
+    ADD CONSTRAINT defense_missions_fleet_fkey FOREIGN KEY (fleet) REFERENCES fleets(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -2249,11 +2684,43 @@ ALTER TABLE ONLY defense_requests
 
 
 --
+-- Name: fleet_scans_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY fleet_scans
+    ADD CONSTRAINT fleet_scans_id_fkey FOREIGN KEY (id) REFERENCES fleets(id) ON DELETE CASCADE;
+
+
+--
+-- Name: fleet_scans_scan_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY fleet_scans
+    ADD CONSTRAINT fleet_scans_scan_fkey FOREIGN KEY (scan) REFERENCES scans(id);
+
+
+--
 -- Name: fleet_ships_fleet_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
 --
 
 ALTER TABLE ONLY fleet_ships
-    ADD CONSTRAINT fleet_ships_fleet_fkey FOREIGN KEY (fleet) REFERENCES fleets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fleet_ships_fleet_fkey FOREIGN KEY (id) REFERENCES fleets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: fleet_ships_ship_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY fleet_ships
+    ADD CONSTRAINT fleet_ships_ship_fkey FOREIGN KEY (ship) REFERENCES ship_stats(name);
+
+
+--
+-- Name: fleets_sender_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY fleets
+    ADD CONSTRAINT fleets_sender_fkey FOREIGN KEY (sender) REFERENCES planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -2337,19 +2804,11 @@ ALTER TABLE ONLY forum_threads
 
 
 --
--- Name: forum_threads_log_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+-- Name: forum_threads_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
 --
 
 ALTER TABLE ONLY forum_threads
-    ADD CONSTRAINT forum_threads_log_uid_fkey FOREIGN KEY (log_uid) REFERENCES users(uid) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: forum_threads_planet_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
---
-
-ALTER TABLE ONLY forum_threads
-    ADD CONSTRAINT forum_threads_planet_fkey FOREIGN KEY (planet) REFERENCES planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT forum_threads_uid_fkey FOREIGN KEY (uid) REFERENCES users(uid) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --
@@ -2401,35 +2860,43 @@ ALTER TABLE ONLY intel_messages
 
 
 --
--- Name: intel_sender_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
---
-
-ALTER TABLE ONLY intel
-    ADD CONSTRAINT intel_sender_fkey FOREIGN KEY (sender) REFERENCES planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: intel_target_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
---
-
-ALTER TABLE ONLY intel
-    ADD CONSTRAINT intel_target_fkey FOREIGN KEY (target) REFERENCES planets(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: intel_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
---
-
-ALTER TABLE ONLY intel
-    ADD CONSTRAINT intel_uid_fkey FOREIGN KEY (uid) REFERENCES users(uid) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
 -- Name: log_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
 --
 
 ALTER TABLE ONLY log
     ADD CONSTRAINT log_uid_fkey FOREIGN KEY (uid) REFERENCES users(uid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: planet_data_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY planet_data
+    ADD CONSTRAINT planet_data_id_fkey FOREIGN KEY (id) REFERENCES planets(id);
+
+
+--
+-- Name: planet_data_rid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY planet_data
+    ADD CONSTRAINT planet_data_rid_fkey FOREIGN KEY (rid) REFERENCES planet_data_types(id);
+
+
+--
+-- Name: planet_data_scan_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY planet_data
+    ADD CONSTRAINT planet_data_scan_fkey FOREIGN KEY (scan) REFERENCES scans(id);
+
+
+--
+-- Name: planet_graphs_planet_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY planet_graphs
+    ADD CONSTRAINT planet_graphs_planet_fkey FOREIGN KEY (planet) REFERENCES planets(id);
 
 
 --
@@ -2446,6 +2913,14 @@ ALTER TABLE ONLY planet_stats
 
 ALTER TABLE ONLY planets
     ADD CONSTRAINT planets_alliance_id_fkey FOREIGN KEY (alliance_id) REFERENCES alliances(id) ON UPDATE SET NULL ON DELETE SET NULL;
+
+
+--
+-- Name: planets_ftid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY planets
+    ADD CONSTRAINT planets_ftid_fkey FOREIGN KEY (ftid) REFERENCES forum_threads(ftid) ON UPDATE RESTRICT ON DELETE RESTRICT;
 
 
 --
@@ -2505,11 +2980,27 @@ ALTER TABLE ONLY scans
 
 
 --
+-- Name: scans_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY scans
+    ADD CONSTRAINT scans_uid_fkey FOREIGN KEY (uid) REFERENCES users(uid) ON UPDATE RESTRICT ON DELETE RESTRICT;
+
+
+--
 -- Name: users_planet_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
 --
 
 ALTER TABLE ONLY users
     ADD CONSTRAINT users_planet_fkey FOREIGN KEY (planet) REFERENCES planets(id) ON UPDATE SET NULL ON DELETE SET NULL;
+
+
+--
+-- Name: users_tfid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: ndawn
+--
+
+ALTER TABLE ONLY users
+    ADD CONSTRAINT users_tfid_fkey FOREIGN KEY (ftid) REFERENCES forum_threads(ftid) ON UPDATE SET NULL ON DELETE SET NULL;
 
 
 --
