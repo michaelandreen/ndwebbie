@@ -18,6 +18,7 @@ DELETE FROM planets ;
 DELETE FROM alliances WHERE id > 1;
 SELECT * FROM alliances;
 DELETE FROM forum_threads WHERE fbid = -2;
+DELETE FROM forum_threads WHERE fbid = -3;
 DELETE FROM forum_threads WHERE fbid = 12;
 DELETE FROM forum_posts WHERE ftid IN (SELECT ftid FROM forum_threads WHERE fbid = -1);
 ALTER SEQUENCE alliances_id_seq RESTART 2;
