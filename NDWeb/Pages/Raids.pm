@@ -245,7 +245,9 @@ sub render_body {
 				ORDER BY name,i.tick DESC
 			});
 			$unitscans->execute($target->{planet}) or warn $DBH->errstr;
-			my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships WHERE id = ?});
+			my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships
+				WHERE id = ? ORDER BY num
+			});
 			my @missions;
 			while (my $mission = $unitscans->fetchrow_hashref){
 				my @ships;

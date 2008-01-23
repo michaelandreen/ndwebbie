@@ -159,7 +159,7 @@ sub render_body {
 				AND (i.tick > $2 - 14 OR i.mission = 'Full fleet')
 			ORDER BY i.tick,x,y,z
 		});
-		my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE id = ?');
+		my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE id = ? ORDER BY num');
 		$outgoings->execute($call->{planet},$call->{landing_tick});
 		my @fleets;
 		while (my $fleet = $outgoings->fetchrow_hashref){

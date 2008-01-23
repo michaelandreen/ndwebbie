@@ -147,7 +147,9 @@ sub render_body {
 			ORDER BY i.tick,x,y,z
 		});
 		$query->execute($planet_id);
-		my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships WHERE id = ?});
+		my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships
+			WHERE id = ? ORDER BY num
+		});
 		my @missions;
 		while (my $mission = $query->fetchrow_hashref){
 			$mission->{CLASS} = $mission->{mission};

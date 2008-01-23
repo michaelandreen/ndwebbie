@@ -208,7 +208,6 @@ sub render_body {
 	$query = $DBH->prepare(q{SELECT f.id, coords(x,y,z) AS target, mission
 		, f.amount, tick, back
 FROM fleets f 
-JOIN fleet_ships fs USING (id)
 LEFT OUTER JOIN current_planet_stats p ON f.target = p.id
 WHERE f.uid = ? AND f.sender = ? AND 
 	(back >= ? OR (tick >= tick() -  24 AND name = 'Main'))
@@ -216,7 +215,9 @@ GROUP BY f.id, x,y,z, mission, tick,back,f.amount
 ORDER BY x,y,z,mission,tick
 		});
 
-	my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships where id = ?});
+	my $ships = $DBH->prepare(q{SELECT ship,amount FROM fleet_ships
+		WHERe id = ? ORDER BY num
+	});
 
 	$query->execute($self->{UID},$self->{PLANET},$self->{TICK}) or warn $DBH->errstr;
 	my @fleets;
