@@ -156,7 +156,7 @@ sub render_body {
 				NATURAL JOIN planet_stats) t ON i.target = t.id
 					AND t.tick = ( SELECT MAX(tick) FROM planet_stats)
 			WHERE  i.sender = $1 
-				AND (i.tick > $2 - 14 OR i.mission = 'Full Fleet')
+				AND (i.tick > $2 - 14 OR i.mission = 'Full fleet')
 			ORDER BY i.tick,x,y,z
 		});
 		my $ships = $DBH->prepare('SELECT ship,amount FROM fleet_ships WHERE id = ?');
@@ -199,7 +199,6 @@ sub render_body {
 				push @ships,$ship;
 			}
 			$fleet->{Ships} = \@ships;
-			delete $fleet->{id};
 			push @defenders, $fleet;
 		}
 		$BODY->param(Defenders => \@defenders);
