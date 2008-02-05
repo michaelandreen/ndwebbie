@@ -57,7 +57,7 @@ sub render_body {
 		my $query = $DBH->prepare(q{
 			SELECT coords(t.x,t.y,t.z), i.eta, i.tick, rt.id AS ndtarget, rc.launched, inc.landing_tick
 			FROM users u
-			LEFT OUTER JOIN (SELECT DISTINCT * FROM fleets WHERE amount = -1) i ON i.sender = u.planet
+			LEFT OUTER JOIN (SELECT DISTINCT eta,tick,sender,target,mission,name FROM fleets WHERE amount IS NULL) i ON i.sender = u.planet
 			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
 			LEFT OUTER JOIN (SELECT rt.id,planet,tick FROM raids r 
 					JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.planet = i.target 
@@ -94,7 +94,7 @@ sub render_body {
 		$query = $DBH->prepare(q{
 			SELECT coords(t.x,t.y,t.z),t.alliance_id, t.alliance, i.eta, i.tick, i.ingal
 			FROM users u
-			JOIN (SELECT DISTINCT * FROM fleets WHERE amount = -1) i ON i.sender = u.planet
+			JOIN (SELECT DISTINCT name,eta,tick,sender,target,mission,ingal FROM fleets WHERE amount IS NULL) i ON i.sender = u.planet
 			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
 			WHERE u.uid = $1 AND (i.mission = 'Defend' OR i.mission = 'AllyDef')
 			ORDER BY (i.tick - i.eta)
@@ -133,7 +133,7 @@ sub render_body {
 			FROM users u
 			JOIN groupmembers gm USING (uid)
 			LEFT OUTER JOIN (SELECT DISTINCT ON (planet) planet,tick from scans where type = 'News' ORDER BY planet,tick DESC) n USING (planet)
-			LEFT OUTER JOIN (SELECT DISTINCT * FROM fleets WHERE amount = -1) i ON i.sender = u.planet
+			LEFT OUTER JOIN (SELECT DISTINCT name,eta,tick,sender,target,mission,ingal FROM fleets WHERE amount IS NULL) i ON i.sender = u.planet
 			LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
 			LEFT OUTER JOIN (SELECT rt.id,planet,tick FROM raids r 
 					JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.planet = i.target 
