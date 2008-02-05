@@ -108,7 +108,7 @@ sub render_body {
 			my $ships = $11;
 			my @ships;
 			my $amount = 0;
-			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+(?:(?:\w+|-)\s+){3}(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Struc)\s+(\d+)/g){
+			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+(?:(?:\w+|-)\s+){3}(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Structure Killer)\s+(\d+)/g){
 				$amount += $2;
 				push @ships,{Ship => $1, Amount => $2};
 			}
