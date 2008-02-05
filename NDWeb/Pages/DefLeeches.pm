@@ -39,7 +39,8 @@ sub render_body {
 	my $query = $DBH->prepare(q{SELECT username,defense_points,count(id) AS calls, SUM(fleets) AS fleets, SUM(recalled) AS recalled
 		FROM (SELECT username,defense_points,c.id,count(f.target) AS fleets, count(NULLIF(f.tick + f.eta -1 = f.back,TRUE)) AS recalled
 			FROM users u JOIN calls c ON c.member = u.uid LEFT OUTER JOIN fleets f ON u.planet = f.target AND c.landing_tick = f.tick
-			WHERE (f.mission = 'Defend' AND f.uid > 0) OR f.target IS NULL
+			WHERE (f.mission = 'Defend' AND f.uid > 0 AND f.back IS NOT NULL AND NOT ingal)
+				OR f.target IS NULL
 			GROUP BY username,defense_points,c.id
 			) d
 		GROUP BY username,defense_points ORDER BY fleets DESC, defense_points
