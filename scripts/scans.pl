@@ -21,6 +21,7 @@
 
 use strict;
 use warnings;
+no warnings 'exiting';
 use CGI;
 use DBI;
 use DBD::Pg qw(:pg_types);
@@ -36,7 +37,9 @@ our $dbh = ND::DB::DB();
 #print ;
 $dbh->do(q{SET CLIENT_ENCODING TO 'LATIN1';});
 
-my $scangroups = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans WHERE groupscan AND NOT parsed});
+my $scangroups = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
+	WHERE groupscan AND NOT parsed FOR UPDATE
+});
 my $oldscan = $dbh->prepare(q{SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168});
 my $addScan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid) VALUES (?,?,?)});
 my $parsedscan = $dbh->prepare(q{UPDATE scans SET tick = ?, type = ?, planet = ?, parsed = TRUE WHERE id = ?});
@@ -61,7 +64,9 @@ while (my $group = $scangroups->fetchrow_hashref){
 	$dbh->commit;
 }
 
-my $newscans = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans WHERE NOT groupscan AND NOT parsed});
+my $newscans = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
+	WHERE NOT groupscan AND NOT parsed FOR UPDATE
+});
 my $findplanet = $dbh->prepare(q{SELECT planetid(?,?,?,?)});
 my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
 my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,sender,target,tick,eta,back,amount,ingal,uid) VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
@@ -180,6 +185,8 @@ while (my $scan = $newscans->fetchrow_hashref){
 
 sub addfleet {
 	my ($name,$mission,$ships,$sender,$target,$tick,$eta,$back,$amount,$ingal) = @_;
+
+	die "no sender" unless defined $sender;
 
 	$ingal = 0 unless $ingal;
 	$back = $tick + 4 if $ingal && $eta <= 4;
