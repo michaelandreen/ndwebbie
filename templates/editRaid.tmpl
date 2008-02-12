@@ -84,13 +84,20 @@
 				<td class="<TMPL_VAR NAME=Relationship>"><TMPL_VAR NAME=Relationship></td>
 			</tr>
 		</table>
+	<table>
 	<TMPL_LOOP Waves>
+		<tr>
+		<td>
 		<TMPL_IF Claimers>
-			<p>Unclaim wave <TMPL_VAR NAME=Wave> (<TMPL_VAR NAME=Claimers>): <input type="checkbox" name="unclaim:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value="unclaim"/></p>
+			Unclaim wave <TMPL_VAR NAME=Wave> (<TMPL_VAR NAME=Claimers>): <input type="checkbox" name="unclaim:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value="unclaim"/>
 		<TMPL_ELSE>
-			<p>Block wave <TMPL_VAR NAME=Wave>: <input type="checkbox" name="block:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value="block"/></p>
+			Block wave <TMPL_VAR NAME=Wave>: <input type="checkbox" name="block:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value="block"/>
 		</TMPL_IF>
+		</td>
+		<td><input type="text" name="claim:<TMPL_VAR NAME=Id>:<TMPL_VAR NAME=Wave>" value=""/></td>
+		</tr>
 	</TMPL_LOOP>
+	</table>
 	</div>
 	<div class="leftinfo">
 	<p>	Comment:<br/>

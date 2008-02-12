@@ -140,6 +140,10 @@ sub render_body {
 			my $comment = $DBH->prepare(q{UPDATE raid_targets SET comment = ? WHERE id = ?});
 			my $unclaim =  $DBH->prepare(q{DELETE FROM raid_claims WHERE target = ? AND wave = ?});
 			my $block = $DBH->prepare(q{INSERT INTO raid_claims (target,uid,wave) VALUES(?,-2,?)});
+			my $claim = $DBH->prepare(q{INSERT INTO raid_claims (target,uid,wave)
+				VALUES($1,(SELECT uid FROM users WHERE username ILIKE $3),$2)
+			});
+			my $unblock =  $DBH->prepare(q{DELETE FROM raid_claims WHERE target = ? AND wave = ? AND uid = -2});
 			my $remove = $DBH->prepare(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?});
 			for $_ (param()){
 				if (/^comment:(\d+)$/){
@@ -149,6 +153,14 @@ sub render_body {
 					log_message $ND::UID,"BC unclaimed target $1 wave $2.";
 				}elsif(/^block:(\d+):(\d+)$/){
 					$block->execute($1,$2) or $error .= p($DBH->errstr);
+				}elsif(/^claim:(\d+):(\d+)$/){
+					my $target = $1;
+					my $wave = $2;
+					my @claims = split /[, ]+/, param($_);
+					$unblock->execute($target,$wave) if @claims;
+					for (@claims){
+						$claim->execute($target,$wave,$_) or warn $DBH->errstr;
+					}
 				}elsif(/^remove:(\d+)$/){
 					$remove->execute($raid->{id},$1) or $error .= p($DBH->errstr);
 				}
