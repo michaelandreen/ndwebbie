@@ -32,7 +32,10 @@ $NDWeb::Page::PAGES{forum} = __PACKAGE__;
 sub parse {
 	my $self = shift;
 	if ($self->{URI} =~ m{^/.*/allUnread}){
-		param('allUnread',1);
+		$self->{allUnread} = 1;
+	}elsif ($self->{URI} =~ m{^/.*/search(?:/(.*))?}){
+		bless $self, 'NDWeb::Pages::Forum::Search';
+		$self->{PAGE} = 'forum/search';
 	}
 }
 
@@ -155,7 +158,7 @@ sub render_body {
 			,undef,$thread->{fcid}) or $ND::ERROR .= p($DBH->errstr);
 		$BODY->param(Category =>  $category);
 
-	}elsif(defined param('allUnread')){ #List threads in this board
+	}elsif(defined $self->{allUnread}){ #List threads in this board
 		$BODY->param(AllUnread => 1);
 		$BODY->param(Id => $board->{id});
 		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
@@ -220,8 +223,6 @@ sub render_body {
 		my ($category) = $DBH->selectrow_array(q{SELECT category FROM forum_categories WHERE fcid = $1}
 			,undef,$board->{fcid}) or $ND::ERROR .= p($DBH->errstr);
 		$BODY->param(Category =>  $category);
-
-	}elsif($self->{URI} =~ m{^/.*/search/(.*)}){ #List threads in this board
 	}else{ #List boards
 		$BODY->param(Overview => 1);
 		$categories->execute or $ND::ERROR .= p($DBH->errstr);

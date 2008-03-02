@@ -1,0 +1,26 @@
+<form action="/<TMPL_VAR NAME=PAGE>" method="post"><fieldset class="forum-post"> <legend>Search</legend>
+	Use | (OR) or &amp; (AND) to separate words. Word:A searches for Word in
+	topic and Word:B searches for Word as author. 'Two words' to search for a
+	longer string. Word:D limits the search to just the message body.
+	<p>Search query: <input type="text" name="search" value=""/></p>
+	<input type="submit" name="cmd" value="Search"/>
+</fieldset></form>
+
+<TMPL_IF SearchResult>
+<table>
+<tr>
+	<th>Thread</th>
+	<th>Author</th>
+	<th>Message</th>
+	<th>Rank</th>
+</tr>
+<TMPL_LOOP SearchResult>
+	<tr align="left" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
+		<td><a href="/forum?t=<TMPL_VAR NAME=FTID>">&nbsp;<TMPL_VAR ESCAPE=NONE NAME=Subject>&nbsp;</a></td>
+		<td><TMPL_VAR NAME=Username></td>
+		<td align="center"><TMPL_VAR ESCAPE=NONE NAME=Headline></td>
+		<td><TMPL_VAR NAME=Rank></td>
+	</tr>
+</TMPL_LOOP>
+</table>
+</TMPL_IF>

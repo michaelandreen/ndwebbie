@@ -48,6 +48,7 @@ use NDWeb::Pages::Resources;
 use NDWeb::Pages::PlanetNaps;
 use NDWeb::Pages::Motd;
 use NDWeb::Pages::Forum;
+use NDWeb::Pages::Forum::Search;
 use NDWeb::Pages::Settings;
 use NDWeb::Pages::Graph;
 use NDWeb::Pages::Mail;
