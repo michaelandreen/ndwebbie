@@ -32,8 +32,23 @@ sub render_body {
 	my ($BODY) = @_;
 	my $DBH = $self->{DBH};
 	$self->{TITLE} = 'Forum';
-
+	my @queries;
 	if (param('search')){
+		push @queries,'('.param('search').')';
+	}
+	my %cat = (body => 'D', topic => 'A', author => 'B');
+	for ('body','topic','author'){
+		if (param($_)){
+			my @words = split /\W+/,param($_);
+			my $op = param('all'.$_) ? '&' : '|';
+			my $cat = $cat{$_};
+			my $query = join " $op ", map {"$_:$cat"} @words;
+			push @queries,"($query)";
+		}
+	}
+	my $search = join ' & ', @queries;
+
+	if ($search){
 		my $posts = $DBH->prepare(q{SELECT fp.ftid,u.username,ft.subject
 			,ts_headline(fp.message,to_tsquery($2)) AS headline
 			,ts_rank_cd(fp.textsearch, to_tsquery($2),32) AS rank
@@ -46,7 +61,7 @@ sub render_body {
 				AND fp.textsearch @@@ to_tsquery($2)
 			ORDER BY rank DESC
 		}) or warn $DBH->errstr;
-		$posts->execute($ND::UID,param('search')) or warn $DBH->errstr;
+		$posts->execute($ND::UID,$search) or warn escapeHTML $DBH->errstr;
 		my @posts;
 		while (my $post = $posts->fetchrow_hashref){
 			push @posts,$post;
