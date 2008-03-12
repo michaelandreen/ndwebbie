@@ -160,29 +160,48 @@ sub render_body {
 
 	}elsif(defined $self->{allUnread}){ #List threads in this board
 		$BODY->param(AllUnread => 1);
-		$BODY->param(Id => $board->{id});
+
+		my $threads = $DBH->prepare(q{SELECT fcid,category,fbid,board,ft.ftid AS id,u.username,ft.subject,
+		count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts,
+		date_trunc('seconds',max(fp.time)::timestamp) as last_post,
+		min(fp.time)::date as posting_date, ft.sticky
+		FROM forum_categories fc 
+			JOIN forum_boards fb USING (fcid) 
+			JOIN forum_threads ft USING (fbid)
+			JOIN forum_posts fp USING (ftid) 
+			JOIN users u ON u.uid = ft.uid
+			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
+		WHERE fbid > 0 AND
+			fb.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1)))
+		GROUP BY fcid,category,fbid,board,ft.ftid, ft.subject,ft.sticky,u.username
+		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= 1 
+		ORDER BY fcid,fbid,sticky DESC,last_post DESC});
+
 		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
 		$BODY->param(Date => $time);
-		$categories->execute or $ND::ERROR .= p($DBH->errstr);
+		$threads->execute($ND::UID) or $ND::ERROR .= p($DBH->errstr);
 		my @categories;
-		while (my $category = $categories->fetchrow_hashref){
-			$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
-			my @boards;
-			while (my $board = $boards->fetchrow_hashref){
-				next if $board->{id} < 0;
-				$threads->execute($board->{id},$ND::UID,1) or $ND::ERROR .= p($DBH->errstr);
-				my @threads;
-				while (my $thread = $threads->fetchrow_hashref){
-					push @threads,$thread;
-				}
-				$board->{Threads} = \@threads;
-				delete $board->{post};
-				push @boards,$board if $threads->rows > 0;
+		my $category = {fcid => 0};
+		my $board = {fbid => 0};
+		while (my $thread = $threads->fetchrow_hashref){
+			if ($category->{fcid} != $thread->{fcid}){
+				delete $category->{fcid};
+				$category = {fcid => $thread->{fcid}, category => $thread->{category}};
+				push @categories,$category;
 			}
-			$category->{Boards} = \@boards;
-			delete $category->{id};
-			push @categories,$category if @boards;
+			if ($board->{fbid} != $thread->{fbid}){
+				delete $board->{fbid};
+				$board = {fbid => $thread->{fbid}, board => $thread->{board}};
+				push @{$category->{Boards}},$board;
+			}
+			delete $thread->{fcid};
+			delete $thread->{fbid};
+			delete $thread->{category};
+			delete $thread->{board};
+			push @{$board->{Threads}},$thread;
 		}
+		delete $category->{fcid};
+		delete $board->{fbid};
 		$BODY->param(Categories => \@categories);
 
 	}elsif($board){ #List threads in this board
