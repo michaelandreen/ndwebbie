@@ -244,24 +244,32 @@ sub render_body {
 		$BODY->param(Category =>  $category);
 	}else{ #List boards
 		$BODY->param(Overview => 1);
-		$categories->execute or $ND::ERROR .= p($DBH->errstr);
-		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board,count(NULLIF(COALESCE(fp.fpid::boolean,FALSE) AND COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,date_trunc('seconds',max(fp.time)::timestamp) as last_post
-			FROM forum_boards fb LEFT OUTER JOIN (forum_threads ft JOIN forum_posts fp USING (ftid)) ON fb.fbid = ft.fbid LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
-			WHERE fb.fcid = $1 AND 
-			fb.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($2)))
-			GROUP BY fb.fbid, fb.board
-			ORDER BY fb.fbid	});
+		my $boards = $DBH->prepare(q{SELECT fcid,category,fb.fbid AS id,fb.board
+			,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
+			,date_trunc('seconds',max(fp.time)::timestamp) as last_post
+			FROM forum_categories
+				JOIN forum_boards fb USING (fcid)
+				JOIN forum_threads ft USING (fbid)
+				JOIN forum_posts fp USING (ftid)
+				LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv USING (ftid)
+			WHERE EXISTS (SELECT fbid FROM forum_access WHERE fbid = fb.fbid AND gid IN (SELECT groups($1)))
+			GROUP BY fcid,category,fb.fbid, fb.board
+			ORDER BY fcid,fb.fbid
+		});
+		$boards->execute($ND::UID) or warn $DBH->errstr;
 		my @categories;
-		while (my $category = $categories->fetchrow_hashref){
-			$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
-			my @boards;
-			while (my $board = $boards->fetchrow_hashref){
-				push @boards,$board;
+		my $category = {fcid => 0};
+		while (my $board = $boards->fetchrow_hashref){
+			if ($category->{fcid} != $board->{fcid}){
+				delete $category->{fcid};
+				$category = {fcid => $board->{fcid}, category => $board->{category}};
+				push @categories,$category;
 			}
-			$category->{Boards} = \@boards;
-			delete $category->{id};
-			push @categories,$category if $boards->rows > 0;
+			delete $board->{fcid};
+			delete $board->{category};
+			push @{$category->{Boards}},$board;
 		}
+		delete $category->{fcid};
 		$BODY->param(Categories => \@categories);
 
 	}
