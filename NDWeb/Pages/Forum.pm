@@ -254,12 +254,13 @@ sub render_body {
 	}else{ #List boards
 		$BODY->param(Overview => 1);
 		my $boards = $DBH->prepare(q{SELECT fcid,category,fb.fbid AS id,fb.board
-			,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
+			,count(NULLIF(COALESCE(fp.fpid::BOOLEAN,FALSE)
+				AND COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
 			,date_trunc('seconds',max(fp.time)::timestamp) as last_post
 			FROM forum_categories
 				JOIN forum_boards fb USING (fcid)
-				JOIN forum_threads ft USING (fbid)
-				JOIN forum_posts fp USING (ftid)
+				LEFT OUTER JOIN forum_threads ft USING (fbid)
+				LEFT OUTER JOIN forum_posts fp USING (ftid)
 				LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv USING (ftid)
 			WHERE EXISTS (SELECT fbid FROM forum_access WHERE fbid = fb.fbid AND gid IN (SELECT groups($1)))
 			GROUP BY fcid,category,fb.fbid, fb.board
