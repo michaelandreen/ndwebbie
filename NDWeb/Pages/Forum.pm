@@ -45,42 +45,49 @@ sub render_body {
 	$self->{TITLE} = 'Forum';
 	my $DBH = $self->{DBH};
 
-	$DBH->do(q{UPDATE users SET last_forum_visit = NOW() WHERE uid = $1},undef,$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+	$DBH->do(q{UPDATE users SET last_forum_visit = NOW() WHERE uid = $1},undef,$ND::UID) or warn $DBH->errstr;
 
 	my $board;
 	if(param('b')){
 		my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate,fb.fcid
 			FROM forum_boards fb NATURAL JOIN forum_access fa
-			WHERE fb.fbid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
-			WHERE uid = $2))
-			GROUP BY fb.fbid,fb.board,fb.fcid});
-		$board = $DBH->selectrow_hashref($boards,undef,param('b'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+			WHERE fb.fbid = $1 AND
+				gid IN (SELECT groups($2))
+			GROUP BY fb.fbid,fb.board,fb.fcid
+		});
+		$board = $DBH->selectrow_hashref($boards,undef,param('b'),$ND::UID) or warn $DBH->errstr;
 	}
 	if (param('markAsRead')){
-		my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts, max(fp.time)::timestamp as last_post
-		FROM forum_threads ft JOIN forum_posts fp USING (ftid) LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
-		WHERE ((ft.fbid IS NULL AND $1 IS NULL) OR ft.fbid = $1) AND fp.time <= $3
-		GROUP BY ft.ftid, ft.subject
-		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= 1
+		my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject
+			,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
+			,count(fp.fpid) AS posts, max(fp.time)::timestamp as last_post
+			FROM forum_threads ft 
+				JOIN forum_posts fp USING (ftid) 
+				LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
+			WHERE ((ft.fbid IS NULL AND $1 IS NULL) OR ft.fbid = $1) AND fp.time <= $3
+			GROUP BY ft.ftid, ft.subject
+			HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= 1
 		});
 
-		$threads->bind_param('$1',$board->{id},{TYPE => DBI::SQL_INTEGER }) or $ND::ERROR .= p($DBH->errstr);
-		$threads->bind_param('$2',$ND::UID,{TYPE => DBI::SQL_INTEGER }) or $ND::ERROR .= p($DBH->errstr);
-		$threads->bind_param('$3',param('markAsRead')) or $ND::ERROR .= p($DBH->errstr);
-		$threads->execute or $ND::ERROR .= p($DBH->errstr);
+		$threads->bind_param('$1',$board->{id},{TYPE => DBI::SQL_INTEGER }) or warn $DBH->errstr;
+		$threads->bind_param('$2',$ND::UID,{TYPE => DBI::SQL_INTEGER }) or warn $DBH->errstr;
+		$threads->bind_param('$3',param('markAsRead')) or warn $DBH->errstr;
+		$threads->execute or warn $DBH->errstr;
 		while (my $thread = $threads->fetchrow_hashref){
 			markThreadAsRead $thread->{id};
 		}
 	}
 
 	my $thread;
-	my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate,ft.fbid,fb.board,fb.fcid,ft.sticky
-		FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft
-		WHERE ft.ftid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
-		WHERE uid = $2))
-		GROUP BY ft.ftid,ft.subject,ft.fbid,fb.board,fb.fcid,ft.sticky});
 	if(param('t')){
-		$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+		my $findThread = $DBH->prepare(q{SELECT ft.ftid AS id,ft.subject, bool_or(fa.post) AS post
+			, bool_or(fa.moderate) AS moderate,ft.fbid,fb.board,fb.fcid,ft.sticky
+			FROM forum_boards fb NATURAL JOIN forum_access fa NATURAL JOIN forum_threads ft
+			WHERE ft.ftid = $1 AND
+				gid IN (SELECT groups($2))
+			GROUP BY ft.ftid,ft.subject,ft.fbid,fb.board,fb.fcid,ft.sticky
+		});
+		$thread = $DBH->selectrow_hashref($findThread,undef,param('t'),$ND::UID) or warn $DBH->errstr;
 	}
 
 	if (defined param('cmd')){
@@ -94,7 +101,7 @@ sub render_body {
 				$self->{RETURN} = 'REDIRECT';
 				$self->{REDIR_LOCATION} = "/forum?t=$thread->{id}#NewPosts";
 			}
-			$DBH->commit or $ND::ERROR .= p($DBH->errstr);
+			$DBH->commit or warn $DBH->errstr;
 			return if $self->{RETURN};
 		}
 		if(param('cmd') eq 'Move' && $board->{moderate}){
@@ -102,49 +109,30 @@ sub render_body {
 			my $moveThread = $DBH->prepare(q{UPDATE forum_threads SET fbid = $1 WHERE ftid = $2 AND fbid = $3});
 			for my $param (param()){
 				if ($param =~ /t:(\d+)/){
-					$moveThread->execute(param('board'),$1,$board->{id}) or $ND::ERROR .= p($DBH->errstr);
+					$moveThread->execute(param('board'),$1,$board->{id}) or warn $DBH->errstr;
 					if ($moveThread->rows > 0){
 						log_message $ND::UID, qq{Moved thread: $1 to board: }.param('board');
 					}
 				}
 			}
-			$DBH->commit or $ND::ERROR .= p($DBH->errstr);
+			$DBH->commit or warn $DBH->errstr;
 		}
 		if($thread && param('cmd') eq 'Sticky' && $thread->{moderate}){
 			if ($DBH->do(q{UPDATE forum_threads SET sticky = TRUE WHERE ftid = ?}, undef,$thread->{id})){
 				$thread->{sticky} = 1;
 			}else{
-				$ND::ERROR .= p($DBH->errstr);
+				warn $DBH->errstr;
 			}
 		}
 		if($thread && param('cmd') eq 'Unsticky' && $thread->{moderate}){
 			if ($DBH->do(q{UPDATE forum_threads SET sticky = FALSE WHERE ftid = ?}, undef,$thread->{id})){
 				$thread->{sticky} = 0;
 			}else{
-				$ND::ERROR .= p($DBH->errstr);
+				warn $DBH->errstr;
 			}
 		}
 	}
 
-	my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM forum_categories ORDER BY fcid});
-	my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post
-		FROM forum_boards fb NATURAL JOIN forum_access fa
-		WHERE fb.fcid = $1 AND (gid = -1 OR gid IN (SELECT gid FROM groupmembers
-		WHERE uid = $2))
-		GROUP BY fb.fbid,fb.board
-		ORDER BY fb.fbid
-			});
-	my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,u.username,ft.subject,
-		count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts,
-		date_trunc('seconds',max(fp.time)::timestamp) as last_post,
-		min(fp.time)::date as posting_date, ft.sticky
-		FROM forum_threads ft JOIN forum_posts fp USING (ftid) 
-			JOIN users u ON u.uid = ft.uid
-			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
-		WHERE ft.fbid = $1
-		GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
-		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= $3
-		ORDER BY sticky DESC,last_post DESC});
 
 	if ($thread){ #Display the thread
 		$BODY->param(Title =>  $thread->{subject});
@@ -155,7 +143,7 @@ sub render_body {
 		$BODY->param(Sticky =>  $thread->{sticky} ? 'Unsticky' : 'Sticky');
 		$BODY->param(Thread => viewForumThread $thread);
 		my ($category) = $DBH->selectrow_array(q{SELECT category FROM forum_categories WHERE fcid = $1}
-			,undef,$thread->{fcid}) or $ND::ERROR .= p($DBH->errstr);
+			,undef,$thread->{fcid}) or warn $DBH->errstr;
 		$BODY->param(Category =>  $category);
 
 	}elsif(defined $self->{allUnread}){ #List threads in this board
@@ -179,7 +167,7 @@ sub render_body {
 
 		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
 		$BODY->param(Date => $time);
-		$threads->execute($ND::UID) or $ND::ERROR .= p($DBH->errstr);
+		$threads->execute($ND::UID) or warn $DBH->errstr;
 		my @categories;
 		my $category = {fcid => 0};
 		my $board = {fbid => 0};
@@ -214,7 +202,20 @@ sub render_body {
 		$BODY->param(Board => $board->{board});
 		my ($time) = $DBH->selectrow_array('SELECT now()::timestamp',undef);
 		$BODY->param(Date => $time);
-		$threads->execute($board->{id},$ND::UID,0) or $ND::ERROR .= p($DBH->errstr);
+
+		my $threads = $DBH->prepare(q{SELECT ft.ftid AS id,u.username,ft.subject
+			,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
+			,date_trunc('seconds',max(fp.time)::timestamp) as last_post
+			,min(fp.time)::date as posting_date, ft.sticky
+			FROM forum_threads ft 
+				JOIN forum_posts fp USING (ftid) 
+				JOIN users u ON u.uid = ft.uid
+				LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
+			WHERE ft.fbid = $1
+			GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
+			ORDER BY sticky DESC,last_post DESC
+		}) or warn $DBH->errstr;
+		$threads->execute($board->{id},$ND::UID) or warn $DBH->errstr;
 		my @threads;
 		while (my $thread = $threads->fetchrow_hashref){
 			push @threads,$thread;
@@ -222,10 +223,18 @@ sub render_body {
 		$BODY->param(Threads => \@threads);
 
 		if ($board->{moderate}){
-			$categories->execute or $ND::ERROR .= p($DBH->errstr);
+			my $categories = $DBH->prepare(q{SELECT fcid AS id,category FROM forum_categories ORDER BY fcid});
+			my $boards = $DBH->prepare(q{SELECT fb.fbid AS id,fb.board, bool_or(fa.post) AS post
+				FROM forum_boards fb NATURAL JOIN forum_access fa
+				WHERE fb.fcid = $1 AND
+					gid IN (SELECT groups($2))
+				GROUP BY fb.fbid,fb.board
+				ORDER BY fb.fbid
+			});
+			$categories->execute or warn $DBH->errstr;
 			my @categories;
 			while (my $category = $categories->fetchrow_hashref){
-				$boards->execute($category->{id},$ND::UID) or $ND::ERROR .= p($DBH->errstr);
+				$boards->execute($category->{id},$ND::UID) or warn $DBH->errstr;
 
 				my @boards;
 				while (my $b = $boards->fetchrow_hashref){
@@ -240,7 +249,7 @@ sub render_body {
 			$BODY->param(Categories => \@categories);
 		}
 		my ($category) = $DBH->selectrow_array(q{SELECT category FROM forum_categories WHERE fcid = $1}
-			,undef,$board->{fcid}) or $ND::ERROR .= p($DBH->errstr);
+			,undef,$board->{fcid}) or warn $DBH->errstr;
 		$BODY->param(Category =>  $category);
 	}else{ #List boards
 		$BODY->param(Overview => 1);
