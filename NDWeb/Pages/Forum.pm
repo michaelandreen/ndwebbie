@@ -170,16 +170,15 @@ sub render_body {
 		$threads->execute($ND::UID) or warn $DBH->errstr;
 		my @categories;
 		my $category = {fcid => 0};
-		my $board = {fbid => 0};
+		my $board = {id => 0};
 		while (my $thread = $threads->fetchrow_hashref){
 			if ($category->{fcid} != $thread->{fcid}){
 				delete $category->{fcid};
 				$category = {fcid => $thread->{fcid}, category => $thread->{category}};
 				push @categories,$category;
 			}
-			if ($board->{fbid} != $thread->{fbid}){
-				delete $board->{fbid};
-				$board = {fbid => $thread->{fbid}, board => $thread->{board}};
+			if ($board->{id} != $thread->{fbid}){
+				$board = {id => $thread->{fbid}, board => $thread->{board}};
 				push @{$category->{Boards}},$board;
 			}
 			delete $thread->{fcid};
@@ -189,7 +188,6 @@ sub render_body {
 			push @{$board->{Threads}},$thread;
 		}
 		delete $category->{fcid};
-		delete $board->{fbid};
 		$BODY->param(Categories => \@categories);
 
 	}elsif($board){ #List threads in this board
