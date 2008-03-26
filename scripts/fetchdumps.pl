@@ -42,7 +42,7 @@ for my $type ("planet","alliance","galaxy"){
 	$select->execute($type,$head[2]);
 	unless ($select->fetchrow){
 		my $file = get("http://game.planetarion.com/botfiles/${type}_listing.txt");
-		if ($file =~ /Tick: (\d+)/){
+		if (defined $file && $file =~ /Tick: (\d+)/){
 			$updated = $1;
 			$insert->execute($1,$type,$head[2],$file);
 		}
@@ -50,10 +50,11 @@ for my $type ("planet","alliance","galaxy"){
 	$select->finish;
 }
 
-if ($updated){
+if ($updated > 36){
 	`/var/www/ndawn/scripts/parsedumps.pl $updated`;
 	`/var/www/ndawn/scripts/ndrank.pl`;
-	$dbh->do("UPDATE misc SET value = ? WHERE id = 'TICK'", undef, $updated);
+	$dbh->do(q{UPDATE misc SET value = ? WHERE id = 'TICK'}, undef, $updated);
+	$dbh->do(q{VACUUM ANALYZE});
 }
 
 
