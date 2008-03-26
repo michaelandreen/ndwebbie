@@ -222,9 +222,9 @@ sub render_body {
 			$target{Id} = $target->{id};
 			$target{Race} = $target->{race};
 			my $num = pow(10,length($target->{score})-2);
-			$target{Score} = ceil($target->{score}/$num)*$num;
+			$target{Score} = "Hidden"; #ceil($target->{score}/$num)*$num;
 			$num = pow(10,length($target->{value})-2);
-			$target{Value} = ceil($target->{value}/$num)*$num;
+			$target{Value} = "Hidden"; #ceil($target->{value}/$num)*$num;
 			$num = pow(10,length($target->{size})-2);
 			$target{Size} = floor($target->{size}/$num)*$num;
 			$num = pow(10,length($target->{fleetvalue})-2);
@@ -282,7 +282,7 @@ sub render_body {
 				$size -= $roids;
 				my $xp = 0;
 				if ($planet){
-					$xp = pa_xp($roids,$planet->{score},$planet->{value},$target{Score},$target{Value});
+					$xp = pa_xp($roids,$planet->{score},$planet->{value},$target->{score},$target->{value});
 				}
 				push @roids,{Wave => $i, Roids => $roids, XP => $xp};
 				if ($self->{AJAX}){
