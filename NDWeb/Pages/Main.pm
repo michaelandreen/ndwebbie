@@ -209,7 +209,7 @@ sub render_body {
 		, f.amount, tick, back
 FROM fleets f 
 LEFT OUTER JOIN current_planet_stats p ON f.target = p.id
-WHERE f.uid = ? AND f.sender = ? AND 
+WHERE NOT ingal AND f.uid = ? AND f.sender = ? AND 
 	(back >= ? OR (tick >= tick() -  24 AND name = 'Main'))
 GROUP BY f.id, x,y,z, mission, tick,back,f.amount
 ORDER BY x,y,z,mission,tick
