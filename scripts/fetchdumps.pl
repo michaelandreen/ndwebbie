@@ -51,7 +51,9 @@ for my $type ("planet","alliance","galaxy"){
 }
 
 if ($updated > 36){
-	`/var/www/ndawn/scripts/parsedumps.pl $updated`;
+	`/var/www/ndawn/scripts/parsealliances.pl $updated`;
+	`/var/www/ndawn/scripts/parseplanets.pl $updated`;
+	`/var/www/ndawn/scripts/parsegalaxies.pl $updated`;
 	`/var/www/ndawn/scripts/ndrank.pl`;
 	$dbh->do(q{UPDATE misc SET value = ? WHERE id = 'TICK'}, undef, $updated);
 	$dbh->do(q{VACUUM ANALYZE});
