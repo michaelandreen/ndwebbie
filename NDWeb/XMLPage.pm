@@ -115,7 +115,8 @@ sub render : method {
 		$template->param(UnreadPosts => $unread);
 		$template->param(NewPosts => $newposts);
 		$template->param(Tick => $TICK);
-		$template->param(isMember => (($TICK - $fleetupdate < 24) || $self->isScanner()) && $self->{PLANET} && $self->isMember);
+		$template->param(isMember => $self->isMember);
+		$template->param(Planet => $self->{PLANET});
 		$template->param(isHC => $self->isHC);
 		$template->param(isDC => $self->isDC());
 		$template->param(isBC => $self->isBC());

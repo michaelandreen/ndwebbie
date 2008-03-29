@@ -22,6 +22,7 @@
 		<li><a href="/forum/search">Forum search</a></li>
 	</ul>	<p>Tick: <TMPL_VAR NAME=TICK></p>
 	<TMPL_IF isMEMBER>
+	<TMPL_IF isATTACKER>
 	<p>Member menu</p>
 	<ul class="linkbar">
 		<li><a href="/points">Top members</a></li>
@@ -34,6 +35,18 @@
 		<li><a href="/galaxyrankings">Galaxy Rankings</a></li>
 		<li><a href="/defrequest">Request defense</a></li>
 	</ul>
+	<TMPL_ELSE>
+		<TMPL_IF Planet>
+		<p><b>Update your fleet to see member menu</b></p>
+		<TMPL_ELSE>
+		<form action="/main" method="post">
+			<p>We need your planet's coordinates: 
+			<input type="text" name="planet" value=""/>
+			<input type="submit" value="Submit"/>
+			</p>
+		</form>
+		</TMPL_IF>
+	</TMPL_IF>
 	</TMPL_IF>
 	<TMPL_IF isATTACKER>
 	<p>Attack menu</p>

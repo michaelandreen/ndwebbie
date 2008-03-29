@@ -76,16 +76,6 @@
 	</TMPL_IF>
 	<li> Member of the following groups: <TMPL_LOOP Groups><TMPL_VAR NAME=Name><TMPL_UNLESS __last__>, </TMPL_UNLESS></TMPL_LOOP></li>
 	</ul>
-	<TMPL_UNLESS PLANET>
-		<TMPL_IF isMEMBER>
-		<form action="<TMPL_VAR NAME=PAGE>" method="post">
-			<p>We need your planet's coordinates: 
-			<input type="text" name="planet" value=""/>
-			<input type="submit" value="Submit"/>
-			</p>
-		</form>
-		</TMPL_IF>
-	</TMPL_UNLESS>
 </fieldset>
 
 <fieldset class="forum-post"> <legend>Fleets</legend>
