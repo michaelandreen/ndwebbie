@@ -54,13 +54,25 @@ CREATE TABLE alliance_stats (
 
 
 --
+-- Name: ead_status; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE ead_status AS ENUM (
+    '',
+    'NAP',
+    'Friendly',
+    'Hostile'
+);
+
+
+--
 -- Name: alliances; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE alliances (
     id integer NOT NULL,
     name character varying NOT NULL,
-    relationship text
+    relationship ead_status DEFAULT ''::ead_status NOT NULL
 );
 
 
@@ -160,7 +172,7 @@ CREATE TABLE planets (
     planet character varying NOT NULL,
     race character varying,
     nick character varying,
-    planet_status text,
+    planet_status ead_status DEFAULT ''::ead_status NOT NULL,
     hit_us integer DEFAULT 0 NOT NULL,
     alliance_id integer,
     channel text,
@@ -964,8 +976,8 @@ return "$x:$y:$z";$_$
 --
 
 CREATE FUNCTION find_alliance_id(character varying) RETURNS integer
-    AS $_$my ($name) = @_;
-print "test";
+    AS $_$
+my ($name) = @_;
 my $query = spi_prepare('SELECT id FROM alliances WHERE name=$1','varchar');
 my $rv = spi_exec_prepared($query,$name);
 my $status = $rv->{status};
@@ -980,14 +992,15 @@ else {
 		return;
 	}
 	$id = $rv->{rows}[0]->{id};
-	my $query = spi_prepare('INSERT INTO alliances(id,name,relationship) VALUES($1,$2,NULL)','int4','varchar');
+	my $query = spi_prepare('INSERT INTO alliances(id,name) VALUES($1,$2)','int4','varchar');
 	$rv = spi_exec_prepared($query,$id,$name);
 	spi_freeplan($query);
 	if (rv->{status} != SPI_OK_INSERT){
 		return;
 	}
 }
-return $id;$_$
+return $id;
+$_$
     LANGUAGE plperl;
 
 
@@ -1222,6 +1235,7 @@ ALTER SEQUENCE alliances_id_seq OWNED BY alliances.id;
 --
 
 CREATE SEQUENCE calls_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1276,6 +1290,7 @@ ALTER SEQUENCE channels_id_seq OWNED BY channels.id;
 --
 
 CREATE SEQUENCE defense_requests_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1420,6 +1435,7 @@ ALTER SEQUENCE groups_gid_seq OWNED BY groups.gid;
 --
 
 CREATE SEQUENCE incomings_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1474,6 +1490,7 @@ ALTER SEQUENCE planets_id_seq OWNED BY planets.id;
 --
 
 CREATE SEQUENCE raid_targets_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1492,6 +1509,7 @@ ALTER SEQUENCE raid_targets_id_seq OWNED BY raid_targets.id;
 --
 
 CREATE SEQUENCE raids_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1510,6 +1528,7 @@ ALTER SEQUENCE raids_id_seq OWNED BY raids.id;
 --
 
 CREATE SEQUENCE scans_id_seq
+    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1995,14 +2014,6 @@ ALTER TABLE ONLY planet_stats
 
 ALTER TABLE ONLY planet_stats
     ADD CONSTRAINT planet_stats_pkey PRIMARY KEY (tick, x, y, z);
-
-
---
--- Name: planet_stats_x_key; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
---
-
-ALTER TABLE ONLY planet_stats
-    ADD CONSTRAINT planet_stats_x_key UNIQUE (x, y, z, tick);
 
 
 --
