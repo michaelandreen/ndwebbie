@@ -42,7 +42,7 @@ sub render_body {
 
 	return $self->noAccess unless $self->isMember;
 
-	my $show = q{AND ((planet_status IS NULL OR NOT planet_status IN ('Friendly','NAP')) AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP')))};
+	my $show = q{AND (NOT planet_status IN ('Friendly','NAP')) AND  (NOT relationship IN ('Friendly','NAP'))};
 	$show = '' if defined param('show') && param('show') eq 'all';
 	if (defined param('covop') && param('covop') =~ /^(\d+)$/){
 		my $update = $DBH->prepare('UPDATE covop_targets SET covop_by = ?, last_covop = tick() WHERE planet = ? ');

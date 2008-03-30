@@ -55,7 +55,7 @@ FROM current_planet_stats p
 	JOIN (SELECT g.x,g.y, sum(p.value) AS nfvalue
 	FROM galaxies g join current_planet_stats p on g.x = p.x AND g.y = p.y 
 	WHERE g.tick = (SELECT max(tick) from galaxies)
-		AND ((planet_status IS NULL OR NOT planet_status IN ('Friendly','NAP')) AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP'))) 
+		AND ((NOT planet_status IN ('Friendly','NAP')) AND  (NOT relationship IN ('Friendly','NAP'))) 
 	GROUP BY g.x,g.y
 	) g ON p.x = g.x AND p.y = g.y
 	JOIN current_planet_stats pa ON pa.x = g.x AND pa.y = g.y
