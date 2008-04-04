@@ -40,6 +40,14 @@
 			<td><input type="text" name="channel" value="<TMPL_VAR NAME=Channel>"/></td>
 			<td><input type="checkbox" name="cchannel"/></td>
 		</tr>
+		<tr><td>Government</td>
+			<td><select name="gov">
+				<TMPL_LOOP Gov>
+					<option value="<TMPL_VAR NAME=Gov>" <TMPL_IF NAME=Selected>selected="selected"</TMPL_IF>><TMPL_VAR NAME=Gov></option>
+				</TMPL_LOOP>
+				</select></td>
+			<td><input type="checkbox" name="cgov"/></td>
+		</tr>
 		<tr><td>Planet status</td>
 			<td><select name="status">
 				<TMPL_LOOP PlanetStatus>

@@ -78,7 +78,7 @@ sub render_body {
 		$extra_columns = ", planet_status,hit_us, alliance,relationship";
 	}
 
-	my $query = $DBH->prepare(qq{Select p.id,coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race,
+	my $query = $DBH->prepare(qq{Select p.id,coords(x,y,z), ((ruler || ' OF ') || p.planet) as planet,race,gov,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,

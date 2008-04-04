@@ -36,7 +36,7 @@
 <table>
 	<tr align="center"><th colspan="4">Rank</th>
 	</tr>
-	<tr><th>Size</th><th>Score</th><th>Value </th> <th>XP</th><th>Coords</th><th>Planet</th><th>Race</th><th>Size</th><th>Score</th><th>Value </th>
+	<tr><th>Size</th><th>Score</th><th>Value </th> <th>XP</th><th>Coords</th><th>Planet</th><th>Race</th><th>Gov</th><th>Size</th><th>Score</th><th>Value </th>
 		<th>XP</th><th>Fleet (Resource) value</th><TMPL_IF isBC><th>Nick</th><th>Hit us</th><th>Alliance</th></TMPL_IF>
 	</tr>
 	<TMPL_LOOP GPlanets>
@@ -50,6 +50,7 @@
 		<td align="left"><a href="/<TMPL_VAR NAME=PAGE>?coords=<TMPL_VAR NAME=Coords>"><TMPL_VAR NAME=Coords></a></td>
 		<td align="center"><TMPL_VAR NAME=Planet></td>
 		<td align="center"><TMPL_VAR NAME=Race></td>
+		<td align="center"><TMPL_VAR NAME=Gov></td>
 		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Size_Gain_day> Today | <TMPL_VAR NAME=Size_Gain> Tick"><TMPL_VAR NAME=Size> <img src="/images/<TMPL_VAR NAME=SizeImg>.png" alt="<TMPL_VAR NAME=SizeImg>"/> </td>
 		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Score_Gain_day> Today | <TMPL_VAR NAME=Score_Gain> Tick"><TMPL_VAR NAME=Score> <img src="/images/<TMPL_VAR NAME=ScoreImg>.png" alt="<TMPL_VAR NAME=ScoreImg>"/> </td>
 		<td style="padding-left: 0.5em" title="<TMPL_VAR NAME=Value_Gain_day> Today | <TMPL_VAR NAME=Value_Gain> Tick"><TMPL_VAR NAME=Value> <img src="/images/<TMPL_VAR NAME=ValueImg>.png" alt="<TMPL_VAR NAME=ValueImg>"/> </td>

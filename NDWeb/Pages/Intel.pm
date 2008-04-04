@@ -48,7 +48,7 @@ sub render_body {
 
 	my $planet;
 	if (defined param('coords') && param('coords') =~ /^(\d+)(?: |:)(\d+)(?: |:)(\d+)$/){
-		my $query = $DBH->prepare(q{SELECT x,y,z,coords(x,y,z),id, nick, alliance,alliance_id, planet_status,channel,ftid FROM current_planet_stats
+		my $query = $DBH->prepare(q{SELECT x,y,z,coords(x,y,z),id, nick, alliance,alliance_id, planet_status,channel,ftid,gov FROM current_planet_stats
 			WHERE  x = ? AND y = ? AND z = ?});
 		$planet = $DBH->selectrow_hashref($query,undef,$1,$2,$3) or $ND::ERROR .= p $DBH->errstr;
 	}
@@ -127,6 +127,16 @@ sub render_body {
 					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
 				}
 			}
+			if (param('cgov')){
+				my $value = escapeHTML(param('gov'));
+				if ($DBH->do(q{UPDATE planets SET gov = ? WHERE id =?}
+						,undef,$value,$planet->{id})){
+					intel_log $ND::UID,$planet->{id},"Set government to: $value";
+					$planet->{gov} = $value;
+				}else{
+					$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+				}
+			}
 			if (param('calliance')){
 				if ($DBH->do(q{UPDATE planets SET alliance_id = NULLIF(?,-1) WHERE id =?}
 						,undef,param('alliance'),$planet->{id})){
@@ -157,9 +167,14 @@ sub render_body {
 		$BODY->param(Planet => $planet->{id});
 		$BODY->param(Nick => escapeHTML($planet->{nick}));
 		$BODY->param(Channel => $planet->{channel});
+		my @gov;
+		for my $gov ("","Feu", "Dic", "Dem","Uni"){
+			push @gov,{Gov => $gov, Selected => $gov eq $planet->{gov}}
+		}
+		$BODY->param(Gov => \@gov);
 		my @status;
 		for my $status ("","Friendly", "NAP", "Hostile"){
-			push @status,{Status => $status, Selected => defined $planet->{planet_status} && $status eq $planet->{planet_status}}
+			push @status,{Status => $status, Selected => $status eq $planet->{planet_status}}
 		}
 		$BODY->param(PlanetStatus => \@status);
 		my @alliances = alliances($planet->{alliance_id});
