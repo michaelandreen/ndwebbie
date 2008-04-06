@@ -68,18 +68,20 @@ my $newscans = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
 	WHERE NOT groupscan AND NOT parsed FOR UPDATE
 });
 my $findplanet = $dbh->prepare(q{SELECT planetid(?,?,?,?)});
+my $findoldplanet = $dbh->prepare(q{SELECT id FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND tick <= $4 ORDER BY tick DESC LIMIT 1});
 my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
 my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,sender,target,tick,eta,back,amount,ingal,uid) VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
 my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (id,scan) VALUES(?,?)});
 my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount) VALUES(?,?,?)});
 my $addpdata = $dbh->prepare(q{INSERT INTO planet_data (id,tick,scan,rid,amount) VALUES(?,?,?,(SELECT id FROM planet_data_types WHERE category = ? AND name = ?), ?)});
 
+$dbh->begin_work;
 $newscans->execute or die $dbh->errstr;
+$dbh->pg_savepoint('scans');
 while (my $scan = $newscans->fetchrow_hashref){
 	my $file = get("http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}");
 	next unless defined $file;
 	if ($file =~ /((?:\w| )*) (?:Scan|Probe) on (\d+):(\d+):(\d+) in tick (\d+)/){
-		$dbh->begin_work;
 		eval {
 		my $type = $1;
 		my $x = $2;
@@ -114,6 +116,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 			while ($file =~ m/(\d+):(\d+):(\d+)\D+"left"\>(Attack|Defend|Return)<\/td><td>([^<]*)<\/td><td>(\d+)\D+(\d+)/g){
 				
 				my ($sender) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3,$tick) or die $dbh->errstr;
+				($sender) = $dbh->selectrow_array($findoldplanet,undef,$1,$2,$3,$tick) if ((not defined $sender) && $4 eq 'Return');
 				my $id = addfleet($5,$4,undef,$sender,$planet,$tick+$6,$6
 					,undef,$7, $x == $1 && $y == $2);
 				$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
@@ -169,12 +172,12 @@ while (my $scan = $newscans->fetchrow_hashref){
 			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}";
 		}
 		$parsedscan->execute($tick,$type,$planet,$scan->{id}) or die $dbh->errstr;
-		$dbh->commit;
+		$dbh->pg_savepoint('scans');
 		#$dbh->rollback;
 		};
 		if ($@) {
 			warn $@;
-			$dbh->rollback;
+			$dbh->pg_rollback_to('scans');
 		}
 	}else{
 		warn "Nothing useful in scan: $scan->{id} http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
@@ -182,6 +185,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 		$addpoints->execute(-1,$scan->{uid}) if $scan->{uid} > 0;
 	}
 }
+$dbh->commit;
 
 sub addfleet {
 	my ($name,$mission,$ships,$sender,$target,$tick,$eta,$back,$amount,$ingal) = @_;
