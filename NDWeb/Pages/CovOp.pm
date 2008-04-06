@@ -45,14 +45,14 @@ sub render_body {
 	my $show = q{AND (NOT planet_status IN ('Friendly','NAP')) AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP'))};
 	$show = '' if defined param('show') && param('show') eq 'all';
 	if (defined param('covop') && param('covop') =~ /^(\d+)$/){
-		my $update = $DBH->prepare('UPDATE covop_targets SET covop_by = ?, last_covop = tick() WHERE planet = ? ');
+		my $update = $DBH->prepare(q{INSERT INTO covop_attacks (uid,id,tick) VALUES(?,?,tick())});
 		$update->execute($ND::UID,$1);
 	}
 
 	my $list = '';
 	my $where = '';
 	if (defined param('list') && param('list') eq 'distwhores'){
-		$list = '&amp;list=distwhores';
+		$list = 'list=distwhores';
 		$where = qq{AND distorters > 0 $show
 		ORDER BY distorters DESC,COALESCE(seccents::float/structures*100,0)ASC}
 	}else{
@@ -60,10 +60,11 @@ sub render_body {
 		$show
 		ORDER BY COALESCE(seccents::float/structures*100,0) ASC,MaxResHack DESC,metal+crystal+eonium DESC};
 	}
+	$BODY->param(List => $list);
 
 	my $query = $DBH->prepare(qq{SELECT id, coords, metal, crystal, eonium
-		, seccents::float/structures*100 AS secs, distorters
-		, MaxResHack
+		, seccents::float/structures*100 AS seccents, distorters
+		, MaxResHack,co.tick AS lastcovop
 		FROM (SELECT p.id,coords(x,y,z), metal,crystal,eonium,
 			seccents,NULLIF(ss.total,0) AS structures,distorters
 			,max_bank_hack(metal,crystal,eonium,p.value
@@ -73,16 +74,15 @@ sub render_body {
 				LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
 				LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
 			) AS foo
+			LEFT OUTER JOIN (SELECT id,max(tick) AS tick FROM covop_attacks GROUP BY id) co USING (id)
 		WHERE (metal IS NOT NULL OR seccents IS NOT NULL)
 		$where
 	});
 	$query->execute($self->{PLANET});
 
 	my @targets;
-	while (my ($id,$coords,$metal,$crystal,$eonium,$seccents,$dists,$max) = $query->fetchrow){
-		push @targets,{Target => $id, Coords => $coords
-			, Metal => $metal, Crystal => $crystal, Eonium => $eonium, SecCents => $seccents
-			, Dists => $dists, MaxResHack => $max, List => $list};
+	while (my $target = $query->fetchrow_hashref){
+		push @targets,$target;
 	}
 	$BODY->param(Targets => \@targets);
 	return $BODY;
