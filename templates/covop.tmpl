@@ -1,6 +1,6 @@
 <table>
 	<tr>
-	<th>Coords</th><th>Metal</th><th>Crystal</th><th>Eonium</th><th>% Sec Centres</th><th>Dists</th><th>Max (15 agents)</th><th>Last covop (tick)</th>
+	<th>Coords</th><th>Metal</th><th>Crystal</th><th>Eonium</th><th>Gov</th><th>Alert</th><th>Dists</th><th>Max (15 agents)</th><th>Last covop (tick)</th>
 	</tr>
 	<TMPL_LOOP Targets>
 	<tr align="center" class="<TMPL_IF __odd__>odd<TMPL_ELSE>even</TMPL_IF>">
@@ -8,7 +8,8 @@
 	<td><TMPL_VAR NAME=Metal></td>
 	<td><TMPL_VAR NAME=Crystal></td>
 	<td><TMPL_VAR NAME=Eonium></td>
-	<td><TMPL_VAR NAME=SecCents></td>
+	<td><TMPL_VAR NAME=Gov></td>
+	<td><TMPL_VAR NAME=MinAlert> - <TMPL_VAR NAME=MaxAlert></td>
 	<td><TMPL_VAR NAME=Distorters></td>
 	<td><TMPL_VAR NAME=MaxResHack></td>
 	<td><TMPL_VAR NAME=LastCovOp></td>
