@@ -75,9 +75,9 @@ my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (id,scan) VALUES(?,?)});
 my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount) VALUES(?,?,?)});
 my $addpdata = $dbh->prepare(q{INSERT INTO planet_data (id,tick,scan,rid,amount) VALUES(?,?,?,(SELECT id FROM planet_data_types WHERE category = ? AND name = ?), ?)});
 
-$dbh->begin_work;
+$dbh->begin_work or die 'No transaction';
 $newscans->execute or die $dbh->errstr;
-$dbh->pg_savepoint('scans');
+$dbh->pg_savepoint('scans') or die "No savepoint";
 while (my $scan = $newscans->fetchrow_hashref){
 	my $file = get("http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}");
 	next unless defined $file;
@@ -172,12 +172,12 @@ while (my $scan = $newscans->fetchrow_hashref){
 			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}";
 		}
 		$parsedscan->execute($tick,$type,$planet,$scan->{id}) or die $dbh->errstr;
-		$dbh->pg_savepoint('scans');
+		$dbh->pg_savepoint('scans') or die "Couldn't save";
 		#$dbh->rollback;
 		};
 		if ($@) {
 			warn $@;
-			$dbh->pg_rollback_to('scans');
+			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
 		}
 	}else{
 		warn "Nothing useful in scan: $scan->{id} http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
