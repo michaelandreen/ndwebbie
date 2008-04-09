@@ -106,7 +106,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 		}
 		if ($type eq 'Planet'){
 			$file =~ s/(\d),(\d)/$1$2/g;
-			while($file =~ m/(Metal|Crystal|Eonium)\D+(\d+)\D+(\d+)/g){
+			while($file =~ m/"left">(Metal|Crystal|Eonium)\D+(\d+)\D+(\d+)/g){
 				$addpdata->execute($planet,$tick,$scan->{id}
 					,'roid',$1, $2) or die $dbh->errstr;
 				$addpdata->execute($planet,$tick,$scan->{id}
