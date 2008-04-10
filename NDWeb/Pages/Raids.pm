@@ -119,13 +119,18 @@ sub render_body {
 		my $target = param('target');
 		my $wave = param('wave');
 
-		my $findtarget = $DBH->prepare("SELECT rt.id FROM raid_targets rt NATURAL JOIN raid_access ra NATURAL JOIN groupmembers where uid = ? AND id = ?");
+		$DBH->begin_work;
+		my $findtarget = $DBH->prepare(q{SELECT rt.id FROM raid_targets rt 
+			NATURAL JOIN raid_access ra NATURAL JOIN groupmembers 
+			WHERE uid = ? AND id = ?
+			FOR UPDATE
+		});
 		my $result = $DBH->selectrow_array($findtarget,undef,$ND::UID,$target);
 		if ($result != $target){
+			$DBH->rollback;
 			return $self->noAccess;	
 		}
 
-		$DBH->begin_work;
 		if (param('cmd') eq 'Claim'){
 			my $claims = $DBH->prepare(qq{SELECT username FROM raid_claims NATURAL JOIN users WHERE target = ? AND wave = ?});
 			$claims->execute($target,$wave);
