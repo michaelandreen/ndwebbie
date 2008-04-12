@@ -33,7 +33,6 @@ sub render_body {
 	my ($BODY) = @_;
 	$self->{TITLE} = 'Alliances';
 	my $DBH = $self->{DBH};
-	my $error;
 
 	return $self->noAccess unless $self->isHC;
 
@@ -49,9 +48,9 @@ sub render_body {
 			if ($DBH->do(q{UPDATE alliances SET relationship = ? WHERE id =?}
 					,undef,$value,$alliance->{id})){
 				$alliance->{relationship} = $value;
-				log_message $ND::UID,"HC set alliance: $alliance->{id} relationship: $value";
+				log_message $ND::UID,"HC set alliance: $alliance->{id} ($alliance->{name}) relationship: $value";
 			}else{
-				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+				warn $DBH->errstr;
 			}
 		}
 		my $coords = param('coords');
@@ -65,13 +64,29 @@ sub render_body {
 			if ($addplanet->execute($id,$alliance->{id},$4)){
 				my $nick = '';
 				$nick = "(nick $4)" if defined $4;
-				$error .= "<p> Added planet $1:$2:$3 $nick to this alliance</p>";
+				warn "Added planet $1:$2:$3 $nick to this alliance\n";
 				intel_log $ND::UID,$id,"HC Added planet $1:$2:$3 $nick to alliance: $alliance->{id} ($alliance->{name})";
 			}else{
-				$error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+				warn $DBH->errstr;
 			}
 		}
-		$DBH->commit or $error .= "<p> Something went wrong: ".$DBH->errstr."</p>";
+		$DBH->commit or warn $DBH->errstr;
+	}elsif ($alliance && defined param('cmd') && param ('cmd') eq 'remove_all'){
+		$DBH->begin_work;
+		my ($coords) = $DBH->selectrow_array(q{SELECT CONCAT(coords(x,y,z) || ' ') 
+				FROM current_planet_stats where alliance_id = $1
+			},undef,$alliance->{id});
+		my $removeplanets = $DBH->prepare(q{
+			UPDATE planets SET alliance_id = NULL
+			WHERE alliance_id = $1;
+		}) or warn $DBH->errstr;
+		if ($removeplanets->execute($alliance->{id})){
+			log_message $ND::UID, "HC cleaned alliance: $alliance->{id} ($alliance->{name})\n\n$coords";
+			$DBH->commit or warn $DBH->errstr;
+		}else{
+			warn $DBH->errstr;
+			$DBH->rollback;
+		}
 	}
 
 	if ($alliance){
@@ -105,7 +120,7 @@ sub render_body {
 				AND ((( t.alliance_id != o.alliance_id OR t.alliance_id IS NULL OR o.alliance_id IS NULL)))
 				AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
 				}));
-		$query->execute($alliance->{id}) or $error .= $DBH->errstr;
+		$query->execute($alliance->{id}) or warn $DBH->errstr;
 
 		my @intel;
 		while (my $intel = $query->fetchrow_hashref){
@@ -133,8 +148,8 @@ sub render_body {
 			LEFT OUTER JOIN current_planet_stats p ON p.alliance_id = a.id
 			GROUP BY a.id,a.name,s.score,s.size,s.members
 			ORDER BY $order
-			})or $error .= $DBH->errstr;
-		$query->execute or $error .= $DBH->errstr;
+			})or warn $DBH->errstr;
+		$query->execute or warn $DBH->errstr;
 		my @alliances;
 		while (my $alliance = $query->fetchrow_hashref){
 			next unless (defined $alliance->{score} || $alliance->{kscore} > 0);
@@ -142,7 +157,6 @@ sub render_body {
 		}
 		$BODY->param(Alliances => \@alliances);
 	}
-	$BODY->param(Error => $error);
 	return $BODY;
 }
 1;

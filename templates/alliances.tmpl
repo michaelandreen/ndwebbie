@@ -1,10 +1,9 @@
-<TMPL_VAR NAME=Error>
 <TMPL_IF Alliance>
-<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Alliances: </legend>
+<fieldset> <legend>Alliances: </legend><form action="<TMPL_VAR NAME=PAGE>" method="post">
+<div class="leftinfo">
 	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
 	<input type="hidden" name="cmd" value="change"/>
 	<input type="hidden" name="alliance" value="<TMPL_VAR NAME=Id>"/>
-<div class="leftinfo">
 	<p>Alliance: <TMPL_VAR NAME=Alliance></p>
 	<p>Relationship: <select name="relationship">
 		<TMPL_LOOP Relationships>
@@ -12,15 +11,22 @@
 		</TMPL_LOOP>
 		</select>
 		<input type="checkbox" name="crelationship"/></p>
-</div>
 
-<div class="leftinfo">
 	<p>Paste a list of coords that you want to add to this alliance</p>
 	<textarea rows="10" cols="40" name="coords"></textarea>
-</div>
-<div class="clear">&nbsp;</div>
 	<p class="claimlinks"><input type="submit" value="Submit"/></p>
+</div>
+</form>
+<div class="leftinfo">
+<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend></legend>
+	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
+	<input type="hidden" name="cmd" value="remove_all"/>
+	<input type="hidden" name="alliance" value="<TMPL_VAR NAME=Id>"/>
+	<p>Yes, remove all planets <input type="checkbox" name="crelationship"/></p>
+	<input type="submit" value="Remove All Planets"/>
 </fieldset></form>
+</div>
+</fieldset>
 <div class="leftinfo">
 <img class="graph" src="/graph/alliance/<TMPL_VAR NAME=Id>" alt="Alliance size and score vs members" height="300" width="500"/>
 <img class="graph" src="/graph/allianceavg/<TMPL_VAR NAME=Id>" alt="Avg alliance size and score vs members" height="300" width="500"/>
