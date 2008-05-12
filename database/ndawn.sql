@@ -126,6 +126,43 @@ CREATE TABLE channels (
 
 
 --
+-- Name: covop_attacks; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE covop_attacks (
+    uid integer NOT NULL,
+    tick integer NOT NULL,
+    id integer NOT NULL
+);
+
+
+--
+-- Name: governments; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE governments AS ENUM (
+    '',
+    'Feu',
+    'Dic',
+    'Dem',
+    'Uni'
+);
+
+
+--
+-- Name: race; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE race AS ENUM (
+    'Ter',
+    'Cat',
+    'Xan',
+    'Zik',
+    'Etd'
+);
+
+
+--
 -- Name: planet_stats; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -170,13 +207,14 @@ CREATE TABLE planets (
     id integer NOT NULL,
     ruler character varying NOT NULL,
     planet character varying NOT NULL,
-    race character varying,
+    race race NOT NULL,
     nick character varying,
     planet_status ead_status DEFAULT ''::ead_status NOT NULL,
     hit_us integer DEFAULT 0 NOT NULL,
     alliance_id integer,
     channel text,
-    ftid integer
+    ftid integer NOT NULL,
+    gov governments DEFAULT ''::governments NOT NULL
 );
 
 
@@ -185,7 +223,7 @@ CREATE TABLE planets (
 --
 
 CREATE VIEW current_planet_stats AS
-    SELECT p.id, p.nick, p.planet_status, p.hit_us, ps.x, ps.y, ps.z, p.ruler, p.planet, p.race, ps.size, ps.score, ps.value, ps.xp, ps.sizerank, ps.scorerank, ps.valuerank, ps.xprank, alliances.name AS alliance, alliances.relationship, p.alliance_id, p.channel, p.ftid FROM (((SELECT planet_stats.id, planet_stats.tick, planet_stats.x, planet_stats.y, planet_stats.z, planet_stats.size, planet_stats.score, planet_stats.value, planet_stats.xp, planet_stats.sizerank, planet_stats.scorerank, planet_stats.valuerank, planet_stats.xprank FROM planet_stats WHERE (planet_stats.tick = (SELECT max(planet_stats.tick) AS max FROM planet_stats))) ps NATURAL JOIN planets p) LEFT JOIN alliances ON ((alliances.id = p.alliance_id)));
+    SELECT p.id, p.nick, p.planet_status, p.hit_us, ps.x, ps.y, ps.z, p.ruler, p.planet, p.race, ps.size, ps.score, ps.value, ps.xp, ps.sizerank, ps.scorerank, ps.valuerank, ps.xprank, alliances.name AS alliance, alliances.relationship, p.alliance_id, p.channel, p.ftid, p.gov FROM (((SELECT planet_stats.id, planet_stats.tick, planet_stats.x, planet_stats.y, planet_stats.z, planet_stats.size, planet_stats.score, planet_stats.value, planet_stats.xp, planet_stats.sizerank, planet_stats.scorerank, planet_stats.valuerank, planet_stats.xprank FROM planet_stats WHERE (planet_stats.tick = (SELECT max(planet_stats.tick) AS max FROM planet_stats))) ps NATURAL JOIN planets p) LEFT JOIN alliances ON ((alliances.id = p.alliance_id)));
 
 
 --
@@ -193,7 +231,7 @@ CREATE VIEW current_planet_stats AS
 --
 
 CREATE VIEW current_planet_stats_full AS
-    SELECT p.id, p.nick, p.planet_status, p.hit_us, ps.x, ps.y, ps.z, p.ruler, p.planet, p.race, ps.size, ps.score, ps.value, ps.xp, ps.sizerank, ps.scorerank, ps.valuerank, ps.xprank, alliances.name AS alliance, alliances.relationship, p.alliance_id, p.channel, p.ftid, ps.size_gain, ps.score_gain, ps.value_gain, ps.xp_gain, ps.sizerank_gain, ps.scorerank_gain, ps.valuerank_gain, ps.xprank_gain, ps.size_gain_day, ps.score_gain_day, ps.value_gain_day, ps.xp_gain_day, ps.sizerank_gain_day, ps.scorerank_gain_day, ps.valuerank_gain_day, ps.xprank_gain_day FROM (((SELECT planet_stats.id, planet_stats.tick, planet_stats.x, planet_stats.y, planet_stats.z, planet_stats.size, planet_stats.score, planet_stats.value, planet_stats.xp, planet_stats.sizerank, planet_stats.scorerank, planet_stats.valuerank, planet_stats.xprank, planet_stats.size_gain, planet_stats.score_gain, planet_stats.value_gain, planet_stats.xp_gain, planet_stats.sizerank_gain, planet_stats.scorerank_gain, planet_stats.valuerank_gain, planet_stats.xprank_gain, planet_stats.size_gain_day, planet_stats.score_gain_day, planet_stats.value_gain_day, planet_stats.xp_gain_day, planet_stats.sizerank_gain_day, planet_stats.scorerank_gain_day, planet_stats.valuerank_gain_day, planet_stats.xprank_gain_day FROM planet_stats WHERE (planet_stats.tick = (SELECT max(planet_stats.tick) AS max FROM planet_stats))) ps NATURAL JOIN planets p) LEFT JOIN alliances ON ((alliances.id = p.alliance_id)));
+    SELECT p.id, p.nick, p.planet_status, p.hit_us, ps.x, ps.y, ps.z, p.ruler, p.planet, p.race, ps.size, ps.score, ps.value, ps.xp, ps.sizerank, ps.scorerank, ps.valuerank, ps.xprank, alliances.name AS alliance, alliances.relationship, p.alliance_id, p.channel, p.ftid, ps.size_gain, ps.score_gain, ps.value_gain, ps.xp_gain, ps.sizerank_gain, ps.scorerank_gain, ps.valuerank_gain, ps.xprank_gain, ps.size_gain_day, ps.score_gain_day, ps.value_gain_day, ps.xp_gain_day, ps.sizerank_gain_day, ps.scorerank_gain_day, ps.valuerank_gain_day, ps.xprank_gain_day, p.gov FROM (((SELECT planet_stats.id, planet_stats.tick, planet_stats.x, planet_stats.y, planet_stats.z, planet_stats.size, planet_stats.score, planet_stats.value, planet_stats.xp, planet_stats.sizerank, planet_stats.scorerank, planet_stats.valuerank, planet_stats.xprank, planet_stats.size_gain, planet_stats.score_gain, planet_stats.value_gain, planet_stats.xp_gain, planet_stats.sizerank_gain, planet_stats.scorerank_gain, planet_stats.valuerank_gain, planet_stats.xprank_gain, planet_stats.size_gain_day, planet_stats.score_gain_day, planet_stats.value_gain_day, planet_stats.xp_gain_day, planet_stats.sizerank_gain_day, planet_stats.scorerank_gain_day, planet_stats.valuerank_gain_day, planet_stats.xprank_gain_day FROM planet_stats WHERE (planet_stats.tick = (SELECT max(planet_stats.tick) AS max FROM planet_stats))) ps NATURAL JOIN planets p) LEFT JOIN alliances ON ((alliances.id = p.alliance_id)));
 
 
 --
@@ -972,6 +1010,23 @@ return "$x:$y:$z";$_$
 
 
 --
+-- Name: covop_alert(integer, integer, governments, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION covop_alert(secs integer, strucs integer, gov governments, population integer) RETURNS integer
+    AS $_$
+	SELECT (70*(1.0+LEAST(COALESCE($1::float/$2,$4),0.30)*2 +
+		(CASE $3 
+			WHEN 'Dic' THEN 0.20
+			WHEN 'Feu' THEN -0.20
+			WHEN 'Uni' THEN -0.10
+			ELSE 0
+		END) + $4/100.0))::integer;
+$_$
+    LANGUAGE sql IMMUTABLE;
+
+
+--
 -- Name: find_alliance_id(character varying); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -1009,7 +1064,8 @@ $_$
 --
 
 CREATE FUNCTION findplanetid(character varying, character varying, character varying) RETURNS integer
-    AS $_$my ($ruler, $planet, $race) = @_;
+    AS $_$
+my ($ruler, $planet, $race) = @_;
 my $query = spi_prepare('SELECT id, race FROM planets WHERE ruler=$1 AND planet=$2','varchar','varchar');
 my $rv = spi_exec_prepared($query,$ruler,$planet);
 spi_freeplan($query);
@@ -1019,7 +1075,7 @@ my $id;
 if ($nrows == 1){
     $id = $rv->{rows}[0]->{id};
     unless ($race eq $rv->{rows}[0]->{race}){
-        $query = spi_prepare('UPDATE planets SET race=$1 where id=$2','varchar','int4');
+        $query = spi_prepare('UPDATE planets SET race=$1 where id=$2','race','int4');
         spi_exec_prepared($query,$race,$id);
         spi_freeplan($query);
     }
@@ -1040,7 +1096,7 @@ if ($nrows == 1){
         return;
     }
     $id = $rv->{rows}[0]->{id};
-    $query = spi_prepare('INSERT INTO planets(id,ruler,planet,race,ftid) VALUES($1,$2,$3,$4,$5)','int4','varchar','varchar','varchar','int4
+    $query = spi_prepare('INSERT INTO planets(id,ruler,planet,race,ftid) VALUES($1,$2,$3,$4,$5)','int4','varchar','varchar','race','int4
 ');
     $rv = spi_exec_prepared($query,$id,$ruler,$planet,$race,$ftid);
     spi_freeplan($query);
@@ -1049,7 +1105,8 @@ if ($nrows == 1){
     }
 
 }
-return $id;$_$
+return $id;
+$_$
     LANGUAGE plperl;
 
 
@@ -1067,7 +1124,11 @@ CREATE FUNCTION groups(uid integer) RETURNS SETOF integer
 --
 
 CREATE FUNCTION max_bank_hack(metal integer, crystal integer, eonium integer, tvalue integer, value integer) RETURNS integer
-    AS $_$SELECT LEAST(2000*15*$4::numeric/$5,$1*0.10, 15*7500)::integer + LEAST(2000*15*$4::numeric/$5,$2*0.10, 15*7500)::integer+LEAST(2000*15*$4::numeric/$5,$3*0.10, 15*7500)::integer$_$
+    AS $_$
+SELECT LEAST(2000.0*15*$4/$5,$1*0.10, 15*7500.0)::integer
+    + LEAST(2000.0*15*$4/$5,$2*0.10, 15*7500.0)::integer
+    + LEAST(2000.0*15*$4/$5,$3*0.10, 15*7500.0)::integer
+$_$
     LANGUAGE sql IMMUTABLE;
 
 
@@ -1235,7 +1296,6 @@ ALTER SEQUENCE alliances_id_seq OWNED BY alliances.id;
 --
 
 CREATE SEQUENCE calls_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1290,7 +1350,6 @@ ALTER SEQUENCE channels_id_seq OWNED BY channels.id;
 --
 
 CREATE SEQUENCE defense_requests_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1435,7 +1494,6 @@ ALTER SEQUENCE groups_gid_seq OWNED BY groups.gid;
 --
 
 CREATE SEQUENCE incomings_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1490,7 +1548,6 @@ ALTER SEQUENCE planets_id_seq OWNED BY planets.id;
 --
 
 CREATE SEQUENCE raid_targets_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1509,7 +1566,6 @@ ALTER SEQUENCE raid_targets_id_seq OWNED BY raid_targets.id;
 --
 
 CREATE SEQUENCE raids_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1528,7 +1584,6 @@ ALTER SEQUENCE raids_id_seq OWNED BY raids.id;
 --
 
 CREATE SEQUENCE scans_id_seq
-    START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
     NO MINVALUE
@@ -1790,6 +1845,14 @@ ALTER TABLE ONLY channels
 
 ALTER TABLE ONLY channels
     ADD CONSTRAINT channels_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: covop_attacks_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY covop_attacks
+    ADD CONSTRAINT covop_attacks_pkey PRIMARY KEY (id, tick, uid);
 
 
 --
@@ -2434,6 +2497,22 @@ ALTER TABLE ONLY channel_group_flags
 
 ALTER TABLE ONLY channel_group_flags
     ADD CONSTRAINT channel_group_flags_group_fkey FOREIGN KEY ("group") REFERENCES groups(gid) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: covop_attacks_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY covop_attacks
+    ADD CONSTRAINT covop_attacks_id_fkey FOREIGN KEY (id) REFERENCES planets(id);
+
+
+--
+-- Name: covop_attacks_uid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY covop_attacks
+    ADD CONSTRAINT covop_attacks_uid_fkey FOREIGN KEY (uid) REFERENCES users(uid);
 
 
 --
