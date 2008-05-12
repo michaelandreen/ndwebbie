@@ -90,14 +90,14 @@ while (my $scan = $newscans->fetchrow_hashref){
 		my $tick = $5;
 
 		if($dbh->selectrow_array(q{SELECT * FROM scans WHERE scan_id = ? AND tick = ? AND id <> ?},undef,$scan->{scan_id},$tick,$scan->{id})){
-			$dbh->rollback;
+			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
 			$delscan->execute($scan->{id});
 			$addpoints->execute(-1,$scan->{uid}) if $scan->{uid} > 0;
 			die "Duplicate scan: $scan->{id} http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
 		}
 		my ($planet) = $dbh->selectrow_array($findplanet,undef,$x,$y,$z,$tick);
 		unless ($planet){
-			$dbh->rollback;
+			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
 			next;
 		}
 		my $scantext = "";
@@ -172,6 +172,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}";
 		}
 		$parsedscan->execute($tick,$type,$planet,$scan->{id}) or die $dbh->errstr;
+		$dbh->pg_release('scans') or die "Couldn't save";
 		$dbh->pg_savepoint('scans') or die "Couldn't save";
 		#$dbh->rollback;
 		};
