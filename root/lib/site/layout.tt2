@@ -1,0 +1,8 @@
+<div id="leftbar">[% PROCESS site/leftbar.tt2 %]</div>
+<div id="header">[%# PROCESS site/header.tt2 %]</div>
+
+<div id="body">
+[% content %]
+</div>
+
+<div id="footer">[%# PROCESS site/footer.tt2 %]</div>

@@ -1,0 +1,6 @@
+[% base = c.req.base;
+
+   site.url = {
+     base    = base
+   }
+-%]

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html  xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<title>[% template.title or site.title %]</title>
+	<meta http-equiv="Content-Type" content="application/xhtml+xml;charset=UTF-8"/>
+	<link rel="stylesheet" type="text/css" href="/static/default.css"/>
+	<link rel="stylesheet" type="text/css" href="/static/css/[% user.css or "black" %].css"/>
+	<link rel="icon" type="image/ico" href="/favicon.ico"/>
+	<script type="text/javascript" src="/static/js/raid.js"></script>
+	<script type="text/javascript" src="/static/js/misc.js"></script>
+	<TMPL_VAR NAME=HEADER>
+</head>
+ <body>
+[% content %]
+</body>
