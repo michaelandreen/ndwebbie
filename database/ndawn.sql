@@ -489,7 +489,7 @@ CREATE TABLE planet_data (
     scan integer NOT NULL,
     tick integer NOT NULL,
     rid integer NOT NULL,
-    amount integer NOT NULL
+    amount bigint NOT NULL
 );
 
 

@@ -106,11 +106,28 @@ while (my $scan = $newscans->fetchrow_hashref){
 		}
 		if ($type eq 'Planet'){
 			$file =~ s/(\d),(\d)/$1$2/g;
-			while($file =~ m/"left">(Metal|Crystal|Eonium)\D+(\d+)\D+(\d+)/g){
+			while($file =~ m/"center">(Metal|Crystal|Eonium)\D+(\d+)\D+([\d,]+)/g){
+				my ($roids,$res) = ($2,$3);
+				$roids =~ s/,//g;
 				$addpdata->execute($planet,$tick,$scan->{id}
-					,'roid',$1, $2) or die $dbh->errstr;
+					,'roid',$1, $roids) or die $dbh->errstr;
+				$res =~ s/,//g;
 				$addpdata->execute($planet,$tick,$scan->{id}
-					,'resource',$1, $3) or die $dbh->errstr;
+					,'resource',$1, $res) or die $dbh->errstr;
+			}
+			#if($file =~ m{"center">([^<]+)</td><td class="center">([^<]+)</td><td class="center">([^<]+)</td>}){
+			#	$addpdata->execute($planet,$tick,$scan->{id}
+			#		,'planet','Light Usage', $1) or die $dbh->errstr;
+			#	$addpdata->execute($planet,$tick,$scan->{id}
+			#		,'planet','Medium Usage', $2) or die $dbh->errstr;
+			#	$addpdata->execute($planet,$tick,$scan->{id}
+			#		,'planet','Heavy Usage', $3) or die $dbh->errstr;
+			#}
+			if($file =~ m{<span class="superhighlight">([\d,]+)</span>}){
+				my $res = $1;
+				$res =~ s/,//g;
+				$addpdata->execute($planet,$tick,$scan->{id}
+					,'planet','Production', $res) or die $dbh->errstr;
 			}
 		}elsif ($type eq 'Jumpgate'){
 			while ($file =~ m/(\d+):(\d+):(\d+)\D+"left"\>(Attack|Defend|Return)<\/td><td>([^<]*)<\/td><td>(\d+)\D+(\d+)/g){
@@ -186,6 +203,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 		$addpoints->execute(-1,$scan->{uid}) if $scan->{uid} > 0;
 	}
 }
+#$dbh->rollback;
 $dbh->commit;
 
 sub addfleet {
@@ -203,7 +221,7 @@ sub addfleet {
 
 	my @ships;
 	my $total = 0;
-	while(defined $ships && $ships =~ m{((?:[a-zA-Z]| )+)</td><td>(\d+)}sg){
+	while(defined $ships && $ships =~ m{((?:[a-zA-Z]| )+)</td><td(?: class="right")?>(\d+)}sg){
 		$total += $2;
 		push @ships, [$1,$2];
 	}
