@@ -14,6 +14,7 @@ DELETE FROM scans;
 DELETE FROM raids;
 DELETE FROM calls;
 DELETE FROM fleets;
+DELETE FROM covop_attacks;
 DELETE FROM planets ;
 DELETE FROM alliances WHERE id > 1;
 SELECT * FROM alliances;

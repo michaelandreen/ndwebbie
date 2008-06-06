@@ -50,7 +50,7 @@ for my $type ("planet","alliance","galaxy"){
 	$select->finish;
 }
 
-if ($updated > 36){
+if ($updated){
 	`/var/www/ndawn/scripts/parsealliances.pl $updated`;
 	`/var/www/ndawn/scripts/parseplanets.pl $updated`;
 	`/var/www/ndawn/scripts/parsegalaxies.pl $updated`;
