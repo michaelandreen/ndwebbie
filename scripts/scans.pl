@@ -130,7 +130,8 @@ while (my $scan = $newscans->fetchrow_hashref){
 					,'planet','Production', $res) or die $dbh->errstr;
 			}
 		}elsif ($type eq 'Jumpgate'){
-			while ($file =~ m/(\d+):(\d+):(\d+)\D+"left"\>(Attack|Defend|Return)<\/td><td>([^<]*)<\/td><td>(\d+)\D+(\d+)/g){
+		#print "$file\n";
+			while ($file =~ m{(\d+):(\d+):(\d+)\D+(Attack|Defend|Return)</td><td class="left">([^<]*)\D+(\d+)\D+(\d+)}g){
 				
 				my ($sender) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3,$tick) or die $dbh->errstr;
 				($sender) = $dbh->selectrow_array($findoldplanet,undef,$1,$2,$3,$tick) if ((not defined $sender) && $4 eq 'Return');
