@@ -40,7 +40,7 @@ sub render_body {
 	my $user;
 	if (defined param('user') && param('user') =~ /^(\d+)$/){
 		my $query = $DBH->prepare(q{
-			SELECT uid,username,hostmask,CASE WHEN u.planet IS NULL THEN '' ELSE coords(x,y,z) END AS planet,attack_points,defense_points,scan_points,humor_points,info 
+			SELECT uid,username,hostmask,CASE WHEN u.planet IS NULL THEN '' ELSE coords(x,y,z) END AS planet,attack_points,defense_points,scan_points,humor_points,info, email, sms
 			FROM users u LEFT OUTER JOIN current_planet_stats p ON u.planet = p.id
 			WHERE uid = ?;
 			}) or $error .= "<p> Something went wrong: </p>";
@@ -51,7 +51,7 @@ sub render_body {
 	if ($user && defined param('cmd') && param('cmd') eq 'change'){
 		$DBH->begin_work;
 		for my $param (param()){
-			if ($param =~ /^c:(planet|\w+_points|hostmask|info|username)$/){
+			if ($param =~ /^c:(planet|\w+_points|hostmask|info|username|email|sms)$/){
 				my $column = $1;
 				my $value = param($column);
 				if ($column eq 'planet'){
@@ -106,7 +106,9 @@ sub render_body {
 		$BODY->param(Defense_points => $user->{defense_points});
 		$BODY->param(Scan_points => $user->{scan_points});
 		$BODY->param(humor_points => $user->{humor_points});
-		$BODY->param(info => escapeHTML $user->{info});
+		$BODY->param(info => $user->{info});
+		$BODY->param(Email => $user->{email});
+		$BODY->param(SMS => $user->{sms});
 
 		my $groups = $DBH->prepare(q{SELECT g.gid,g.groupname,uid FROM groups g LEFT OUTER JOIN (SELECT gid,uid FROM groupmembers WHERE uid = ?) AS gm ON g.gid = gm.gid});
 		$groups->execute($user->{uid});
