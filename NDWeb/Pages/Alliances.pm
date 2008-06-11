@@ -119,6 +119,7 @@ sub render_body {
 				AND (i.mission = 'Defend' OR i.mission = 'AllyDef')
 				AND ((( t.alliance_id != o.alliance_id OR t.alliance_id IS NULL OR o.alliance_id IS NULL)))
 				AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
+				AND NOT (i.back IS NOT NULL AND i.back = i.tick + 4)
 				}));
 		$query->execute($alliance->{id}) or warn $DBH->errstr;
 
