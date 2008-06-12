@@ -1,5 +1,5 @@
 <ul class="linkbar">
-	<li><a href="/main">Main page</a></li>
+	<li><a href="/index">Main page</a></li>
 	<li><a href="/settings">Settings</a></li>
 	<li><a href="/forum">Forum</a></li>
 [% IF user %]

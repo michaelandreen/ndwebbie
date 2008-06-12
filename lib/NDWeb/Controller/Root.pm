@@ -29,15 +29,24 @@ NDWeb::Controller::Root - Root Controller for NDWeb
 sub index : Local Path Args(0) {
     my ( $self, $c ) = @_;
 
-    # Hello World
-	#$c->response->body( $c->welcome_message );
+	$c->stash(abc => $c->req->base);
 }
 
 sub default : Path {
     my ( $self, $c ) = @_;
-    $c->response->body( 'Page not found' );
+	$c->res->body( 'Page not found' );
     $c->response->status(404);
     
+}
+
+sub auto : Private {
+	my ($self, $c) = @_;
+
+	my $dbh = $c ->model;
+	$c->stash(dbh => $dbh);
+
+	$c->stash->{game}->{tick} = $dbh->selectrow_array('SELECT tick()',undef);
+
 }
 
 =head2 end
