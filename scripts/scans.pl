@@ -78,6 +78,8 @@ my $addpdata = $dbh->prepare(q{INSERT INTO planet_data (id,tick,scan,rid,amount)
 $dbh->begin_work or die 'No transaction';
 $newscans->execute or die $dbh->errstr;
 $dbh->pg_savepoint('scans') or die "No savepoint";
+
+my %production = (None => 0, Low => 35, Medium => 65, High => 100);
 while (my $scan = $newscans->fetchrow_hashref){
 	my $file = get("http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}");
 	next unless defined $file;
@@ -115,14 +117,14 @@ while (my $scan = $newscans->fetchrow_hashref){
 				$addpdata->execute($planet,$tick,$scan->{id}
 					,'resource',$1, $res) or die $dbh->errstr;
 			}
-			#if($file =~ m{"center">([^<]+)</td><td class="center">([^<]+)</td><td class="center">([^<]+)</td>}){
-			#	$addpdata->execute($planet,$tick,$scan->{id}
-			#		,'planet','Light Usage', $1) or die $dbh->errstr;
-			#	$addpdata->execute($planet,$tick,$scan->{id}
-			#		,'planet','Medium Usage', $2) or die $dbh->errstr;
-			#	$addpdata->execute($planet,$tick,$scan->{id}
-			#		,'planet','Heavy Usage', $3) or die $dbh->errstr;
-			#}
+			if($file =~ m{<td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td>}){
+				$addpdata->execute($planet,$tick,$scan->{id}
+					,'planet','Light Usage', $production{$1}) or die $dbh->errstr;
+				$addpdata->execute($planet,$tick,$scan->{id}
+					,'planet','Medium Usage', $production{$2}) or die $dbh->errstr;
+				$addpdata->execute($planet,$tick,$scan->{id}
+					,'planet','Heavy Usage', $production{$3}) or die $dbh->errstr;
+			}
 			if($file =~ m{<span class="superhighlight">([\d,]+)</span>}){
 				my $res = $1;
 				$res =~ s/,//g;
