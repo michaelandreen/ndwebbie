@@ -205,6 +205,7 @@ sub render_body {
 					COALESCE(avg(total),0) FROM
 					structure_scans)::int)*1500 AS fleetvalue
 			,(metal+crystal+eonium)/100 AS resvalue, comment
+			, hidden, light, medium, heavy
 			FROM current_planet_stats p 
 			JOIN raid_targets r ON p.id = r.planet 
 			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
@@ -214,6 +215,7 @@ sub render_body {
 			ORDER BY size});
 		$targetquery->execute($raid->{id});
 		my @targets;
+		my %production = (0 => 'None', 35 => 'Light', 65 => 'Medium', 100 => 'High');
 		while (my $target = $targetquery->fetchrow_hashref){
 			my %target;
 			if ($planet){
@@ -239,6 +241,11 @@ sub render_body {
 				$target{ResValue} = floor($target->{resvalue}/$num)*$num;
 			}
 			$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
+			
+			$target{Hidden} = int($target->{hidden} / 100);
+			$target{Light} = $production{$target->{light}};
+			$target{Medium} = $production{$target->{medium}};
+			$target{Heavy} = $production{$target->{heavy}};
 
 			my $unitscans = $DBH->prepare(q{ 
 				SELECT DISTINCT ON (name) i.id,i.name, i.tick, i.amount 
