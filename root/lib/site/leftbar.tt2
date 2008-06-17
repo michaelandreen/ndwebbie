@@ -1,14 +1,25 @@
 <ul class="linkbar">
 	<li><a href="/index">Main page</a></li>
-	<li><a href="/settings">Settings</a></li>
 	<li><a href="/forum">Forum</a></li>
-[% IF user %]
-	<li><a href="/forum/allUnread">New posts [% IF user.forum.unread %](<span class="[% user.newposts or "unreadposts"%]">[% user.forum.unread %]</span>)[% END %]</a></li>
-[% END %]
 	<li><a href="/forum/search">Forum search</a></li>
+[% IF user %]
+	<li><a href="/forum/allUnread">New posts [% IF user.unreadposts %](<span class="[% IF user.newposts %]newposts[% ELSE %]unreadposts[% END %]">[% user.unreadposts %]</span>)[% END %]</a></li>
+	<li><a href="/settings">Settings</a></li>
+	<li><a href="/logout">Log out ([% c.user.username %])</a></li>
+[% ELSE %]
+	<li>
+	<form action="/login" method="post">
+		<p>
+		Username: <input type="text" name="user" value="">
+		Password: <input type="password" name="password" value="">
+		<input type="submit" value="Login">
+		</p>
+	</form>
+	</li>
+[% END %]
 </ul>	<p>Tick: [% game.tick %]</p>
-[% IF user.isMember %]
-	[% IF user.isAttacker %]
+[% IF c.check_user_roles("member_menu") %]
+	[% IF user.attacker %]
 <p>Member menu</p>
 <ul class="linkbar">
 	<li><a href="/points">Top members</a></li>
@@ -22,37 +33,39 @@
 	<li><a href="/defrequest">Request defense</a></li>
 </ul>
 	[% ELSE %]
-		[% IF user.planet %]
+		[% IF c.user.planet %]
 	<p><b>Update your fleet to see member menu</b></p>
 		[% ELSE %]
-	<form action="/main" method="post">
+	<form action="/main/setcoords" method="post">
 		<p>We need your planet's coordinates: 
-		<input type="text" name="planet" value=""/>
-		<input type="submit" value="Submit"/>
+		<input type="text" name="planet" value="">
+		<input type="submit" value="Submit">
 		</p>
 	</form>
 		[% END %]
 	[% END %]
 [% END %]
-[% IF user.isAttacker %]
+[% IF user.attacker %]
 <p>Attack menu</p>
 <ul class="linkbar">
 	<li><form action="/check" method="post"><p>
-		<input type="hidden" name="page" value="check"/>
-		<input class="coordsinput" type="text" name="coords" value="<TMPL_VAR NAME=Coords>"/>
-		<input class="coordsbutton" type="submit" value="Check"/>
+		<input class="coordsinput" type="text" name="coords" value="[% cords or '1:1:1' %]">
+		<input class="coordsinput" type="submit" value="Check">
 		</p></form></li>
 	<li><a href="/raids">Web raids</a></li>
 </ul>
-<div id="targets"><TMPL_VAR NAME=Targets></div>
+<p><input type="button" value="Update target list"
+		onclick = "listTargets('/jsrpc/targetList')">
+</p>
+<div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
 [% END %]
-[% IF user.isBC %]
+[% IF c.check_user_roles("bc_menu") %]
 <p>BC menu</p>
 <ul class="linkbar">
 	<li><a href="/editRaid">Create raid</a></li>
 </ul>
 [% END %]
-[% IF user.isDC %]
+[% IF c.check_user_roles("dc_menu") %]
 <p>DC menu</p>
 <ul class="linkbar">
 	<li><a href="/defLeeches">Def Leeches</a></li>
@@ -62,11 +75,16 @@
 	<li><a href="/calls?show=all">All calls</a></li>
 </ul>
 [% END %]
-[% IF user.isHC %]
+[% IF c.check_user_roles("intel_menu") %]
+<p>Intel menu</p>
+<ul class="linkbar">
+	<li><a href="intel">Intel</a></li>
+</ul>
+[% END %]
+[% IF c.check_user_roles("hc_menu") %]
 <p>HC menu</p>
 <ul class="linkbar">
 	<li><a href="/users">List users</a></li>
-	<li><a href="/intel">Intel</a></li>
 	<li><a href="/alliances">Alliances</a></li>
 	<li><a href="/hostileAlliances">Hostile Alliances</a></li>
 	<li><a href="/memberIntel">Member Intel</a></li>
@@ -74,11 +92,4 @@
 	<li><a href="/planetNaps">Planet Naps</a></li>
 	<li><a href="/mail">Mail</a></li>
 </ul>
-[% ELSE %]
-	[% IF user.isIntel %]
-<p>Intel menu</p>
-<ul class="linkbar">
-	<li><a href="intel">Intel</a></li>
-</ul>
-	[% END %]
 [% END %]

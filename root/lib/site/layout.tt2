@@ -2,6 +2,11 @@
 <div id="header">[%# PROCESS site/header.tt2 %]</div>
 
 <div id="body">
+[% IF error %]
+	<div id="error">
+	[% error %]
+	</div>
+[% END %]
 [% content %]
 </div>
 

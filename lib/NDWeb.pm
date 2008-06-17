@@ -27,10 +27,27 @@ our $VERSION = '0.01';
 # local deployment.
 
 __PACKAGE__->config( name => 'NDWeb' );
+__PACKAGE__->config->{'Plugin::Authentication'}{'use_session'} = 1;
+
+
 
 # Start the application
-__PACKAGE__->setup(qw/-Debug ConfigLoader Static::Simple/);
+__PACKAGE__->setup(qw/
+	-Debug
+	ConfigLoader
+	Static::Simple
 
+	Authentication
+	Authentication::Store::NDWeb
+	Authentication::Credential::Password
+
+	Authorization::Roles
+	Authorization::ACL
+	
+	Session
+	Session::Store::File
+	Session::State::Cookie
+	/);
 
 =head1 NAME
 

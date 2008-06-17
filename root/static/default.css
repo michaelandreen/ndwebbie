@@ -94,8 +94,11 @@ ul.linkbar a {
 	width: 100%;
 	display: block;
 }
-input.coordsinput {
-	width: 4em;
+ul.linkbar input {
+	width: 12em;
+}
+ul.linkbar input.coordsinput {
+	width: 5em;
 }
 input.small {
 	width: 1.7em;

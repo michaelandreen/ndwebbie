@@ -7,7 +7,7 @@
 
    IF c.debug;
      # define a debug() macro directed to Catalyst's log
-     MACRO debug(message) CALL Catalyst.log.debug(message);
+     MACRO debug(message) CALL c.log.debug(message);
    END;
 
    # define a data structure to hold sitewide data

@@ -20,7 +20,6 @@
 package NDWeb::Include;
 use strict;
 use warnings;
-use CGI qw{:standard};
 require Exporter;
 use BBCode::Parser;
 

@@ -14,6 +14,7 @@ __PACKAGE__->config({
 	TIMER        => 0,
 	#DEBUG        => 'undef',
 	TEMPLATE_EXTENSION => '.tt2',
+	#CACHE_SIZE => 256,
 });
 
 =head1 NAME
