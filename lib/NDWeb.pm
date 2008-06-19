@@ -53,6 +53,8 @@ __PACKAGE__->setup(qw/
 	Session::State::Cookie
 	/);
 
+__PACKAGE__->deny_access_unless('/users',[qw/admin_users/]);
+
 =head1 NAME
 
 NDWeb - Catalyst based application

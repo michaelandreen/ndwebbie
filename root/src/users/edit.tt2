@@ -1,0 +1,69 @@
+[% META title = 'Edit user' %]
+
+<form action="[% c.uri_for('updateUser', u.uid) %]" method="post"><fieldset> <legend>User details</legend>
+	<table>
+	<tr>
+		<th></th>
+		<th>Value</th>
+		<th>Change?</th>
+	</tr>
+	<tr><td>Username</td>
+		<td><input type="text" name="username" value="[% u.username %]"></td>
+		<td><input type="checkbox" name="c:username"></td>
+	</tr>
+	<tr><td>Email</td>
+		<td><input type="text" name="email" value="[% u.email %]"></td>
+		<td><input type="checkbox" name="c:email"></td>
+	</tr>
+	<tr><td>SMS</td>
+		<td><input type="text" name="sms" value="[% u.sms %]"></td>
+		<td><input type="checkbox" name="c:sms"></td>
+	</tr>
+	<tr><td>Host</td>
+		<td><input type="text" name="hostmask" value="[% u.hostmask %]"></td>
+		<td><input type="checkbox" name="c:hostmask"></td>
+	</tr>
+	<tr><td>Planet</td>
+		<td><input type="text" name="planet" value="[% u.planet %]"></td>
+		<td><input type="checkbox" name="c:planet"></td>
+	</tr>
+	<tr><td>Attack points</td>
+		<td><input type="text" name="attack_points" value="[% u.attack_points %]"></td>
+		<td><input type="checkbox" name="c:attack_points"></td>
+	</tr>
+	<tr><td>Defense points</td>
+		<td><input type="text" name="defense_points" value="[% u.defense_points %]"></td>
+		<td><input type="checkbox" name="c:defense_points"></td>
+	</tr>
+	<tr><td>Scan points</td>
+		<td><input type="text" name="scan_points" value="[% u.scan_points %]"></td>
+		<td><input type="checkbox" name="c:scan_points"></td>
+	</tr>
+	<tr><td>Humor points</td>
+		<td><input type="text" name="humor_points" value="[% u.humor_points %]"></td>
+		<td><input type="checkbox" name="c:humor_points"></td>
+	</tr>
+	</table>
+	<p>Other information. Change?<input type="checkbox" name="c:info"></p>
+	<textarea rows="15" cols="80" name="info">[% u.info | html %]</textarea>
+[% IF membergroups.size > 0 %]
+	<p>[% u.username %] is a member of the following groups</p>
+	<table>
+		<tr><th>Group</th><th>Remove</th></tr>
+	[% FOR g IN  membergroups %]
+		<tr><td>[% g.groupname %]</td><td><input type="checkbox" name="gr:[% g.gid %]" value="remove"></td></tr>
+	[% END %]
+	</table>
+[% END %]
+[% IF othergroups.size > 0 %]
+	<p>[% u.username %] is a not member of the following groups</p>
+	<table>
+		<tr><th>Group</th><th>Add</th></tr>
+	[% FOR g IN  othergroups %]
+		<tr><td>[% g.groupname %]</td><td><input type="checkbox" name="gr:[% g.gid %]" value="add"></td></tr>
+	[% END %]
+	</table>
+[% END %]
+		<p><input type="submit" name="cmd" value="Submit"></p>
+</fieldset>
+</form>

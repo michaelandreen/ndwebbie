@@ -14,6 +14,7 @@ INSERT INTO roles VALUES('dc_menu');
 INSERT INTO roles VALUES('intel_menu');
 INSERT INTO roles VALUES('attack_menu');
 INSERT INTO roles VALUES('no_fleet_update');
+INSERT INTO roles VALUES('admin_users');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
@@ -26,8 +27,10 @@ INSERT INTO group_roles (gid,role) VALUES(1,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(1,'bc_menu');
 INSERT INTO group_roles (gid,role) VALUES(1,'hc_menu');
 INSERT INTO group_roles (gid,role) VALUES(1,'intel_menu');
+INSERT INTO group_roles (gid,role) VALUES(1,'admin_users');
 
 INSERT INTO group_roles (gid,role) VALUES(3,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(3,'bc_menu');
 INSERT INTO group_roles (gid,role) VALUES(3,'hc_menu');
 INSERT INTO group_roles (gid,role) VALUES(3,'intel_menu');
+INSERT INTO group_roles (gid,role) VALUES(3,'admin_users');
