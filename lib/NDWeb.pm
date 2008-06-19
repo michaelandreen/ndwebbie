@@ -5,6 +5,10 @@ use warnings;
 
 use Catalyst::Runtime '5.70';
 
+#Need to preload, otherwise the first hit is slow
+use CGI qw/:standard/;
+escapeHTML('');
+
 # Set flags and add plugins for the application
 #
 #         -Debug: activates the debug mode for very useful log messages

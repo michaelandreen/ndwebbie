@@ -1,0 +1,28 @@
+[% META title = 'Forum thread' %]
+<h2>[% thread.subject %]</h2>
+<h3>[% thread.category %] - <a href="[% c.uri_for('board',thread.fbid) %]">[% thread.board %]</a></h3>
+[% IF thread.moderate %]
+<a href="[% c.uri_for('setSticky',thread.ftid, (thread.sticky ? 0 : 1)) %]">Make this thread [% thread.sticky ? 'unsticky' : 'sticky' %]</a>
+[% END %]
+
+[% createNewPostHr = 1 %]
+[% FOR post IN posts %]
+	[% IF createNewPostHr AND post.unread%]
+	[% createNewPostHr = 0 %]
+<hr>
+<p><a name="NewPosts">New posts below:</a></p>
+	[% END %]
+<fieldset class="forum-post">
+<legend class="unread:[% post.unread %]"><b>[% post.username %]</b> : [% post.time %]</legend>
+	[% post.message %]
+</fieldset>
+[% END %]
+
+[% IF thread.post %]
+<form action="[% c.uri_for('addPost',thread.ftid) %]" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
+	<textarea rows="25" cols="60" name="message">[% previewMessage %]</textarea>
+	<br>
+	<input type="submit" name="cmd" value="Submit">
+	<input type="submit" name="cmd" value="Preview">
+</fieldset></form>
+[% END %]

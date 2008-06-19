@@ -22,11 +22,16 @@ use strict;
 use warnings;
 require Exporter;
 use BBCode::Parser;
+use CGI qw/:standard/;
 
 our @ISA = qw/Exporter/;
 
 our @EXPORT = qw/parseMarkup min max
-	alliances intelquery /;
+	alliances intelquery html_escape/;
+
+sub html_escape($) {
+	return CGI::escapeHTML @_;
+}
 
 sub parseMarkup ($) {
 	my ($text) = @_;

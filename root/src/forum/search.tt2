@@ -1,0 +1,53 @@
+[% META title = 'Forum search' %]
+
+<form action="[% c.uri_for('search') %]" method="post">
+
+<fieldset class="forum-post"> <legend>Topic</legend>
+	Find posts with these words in the thread's topic<br>
+	<input style="width:98%" type="text" name="topic" value=""><br>
+	Require all words: <input type="checkbox" name="alltopic" value="1"><br>
+</fieldset>
+
+<fieldset class="forum-post"> <legend>Body</legend>
+	Find posts with these words in the body<br>
+	<input style="width:98%" type="text" name="body" value=""><br>
+	Require all words: <input type="checkbox" name="allbody" value="1"><br>
+</fieldset>
+
+<fieldset class="forum-post"> <legend>Usernames</legend>
+	Find posts written by one these users<br>
+	<input style="width:98%" type="text" name="author" value=""><br>
+</fieldset>
+
+<fieldset class="forum-post"> <legend>Custom search</legend>
+	Use | (OR) or &amp; (AND) to separate words. Word:A searches for Word in
+	topic and Word:B searches for Word as author. 'Two words' to search for a
+	longer string. Word:D limits the search to just the message body.
+	<p><input style="width:98%" type="text" name="search" value=""></p>
+</fieldset>
+<p><input type="submit" name="cmd" value="Search"></p>
+</form>
+
+[% IF searcherror %]
+<p> Could not search, because of: </p>
+<p> [% searcherror | html %] </p>
+[% END %]
+
+[% IF searchresults %]
+<table>
+<tr>
+	<th>Thread</th>
+	<th>Author</th>
+	<th>Message</th>
+	<th>Rank</th>
+</tr>
+	[% FOR post IN searchresults %]
+	<tr align="left" class="[% IF loop.count % 2 == 0 %]even[% ELSE %]odd[% END %]">
+		<td><a href="[% c.uri_for('thread',post.ftid) %]">&nbsp;[% post.subject %]&nbsp;</a></td>
+		<td>[% post.username %]</td>
+		<td align="center">[% post.headline %]</td>
+		<td>[% post.rank %]</td>
+	</tr>
+	[% END %]
+</table>
+[% END %]
