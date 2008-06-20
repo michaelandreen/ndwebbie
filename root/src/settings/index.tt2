@@ -1,0 +1,20 @@
+[% META title = 'Site preferences' %]
+
+<form action="[% c.uri_for('changeStylesheet') %]" method="post"><fieldset> <legend>Style</legend>
+	Stylesheet: <select name="stylesheet">
+[% FOR style IN stylesheets %]
+		<option value="[% style %]" [% IF style == user.css %]selected[% END %]>[% style %]</option>
+[% END %]
+	</select>
+	<br>
+	<input type="submit" value="Change">
+</fieldset></form>
+<form action="[% c.uri_for('changePassword') %]" method="post"> <fieldset> <legend>Change password</legend>
+	<p>Old password: 
+	<input type="password" name="oldpass" value="">
+	New password: 
+	<input type="password" name="pass" value="">
+	<input type="submit" value="Submit">
+	</p>
+</fieldset>
+</form>
