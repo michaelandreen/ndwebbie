@@ -1,5 +1,6 @@
 <ul class="linkbar">
 	<li><a href="/index">Main page</a></li>
+
 	<li><a href="/forum">Forum</a></li>
 	<li><a href="/forum/search">Forum search</a></li>
 [% IF user %]
@@ -18,6 +19,11 @@
 	</li>
 [% END %]
 </ul>	<p>Tick: [% game.tick %]</p>
+<ul class="linkbar">
+	<li><a href="/rankings/planets">Planet Rankings</a></li>
+	<li><a href="/rankings/alliances">Alliance Rankings</a></li>
+	<li><a href="/rankings/galaxies">Galaxy Rankings</a></li>
+</ul>
 [% IF c.check_user_roles("member_menu") %]
 	[% IF user.attacker %]
 <p>Member menu</p>
@@ -27,9 +33,6 @@
 	<li><a href="/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/covop">CovOp targets</a></li>
 	<li><a href="/covop?list=distwhores">Distwhores</a></li>
-	<li><a href="/planetrankings">Planet Rankings</a></li>
-	<li><a href="/alliancerankings">Alliance Rankings</a></li>
-	<li><a href="/galaxyrankings">Galaxy Rankings</a></li>
 	<li><a href="/defrequest">Request defense</a></li>
 </ul>
 	[% ELSE %]

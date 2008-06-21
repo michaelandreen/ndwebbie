@@ -1,0 +1,40 @@
+[% META title = 'Alliance Rankings' %]
+<p><a href="[% c.uri_for('alliances', order, offset - 100) %]">Previous 100</a>
+	<a href="[% c.uri_for('alliances', order, offset + 100) %]">Next 100</a>
+</p>
+<table class="stats">
+	<tr align="center"><th colspan="2">Rank</th>
+	</tr>
+	<tr>
+	<th><a href="[% c.uri_for('alliances', 'sizerank', offset) %]">Size</a></th>
+	<th><a href="[% c.uri_for('alliances', 'scorerank', offset) %]">Score</a></th>
+	<th>Name</th>
+	<th><a href="[% c.uri_for('alliances', 'members', offset) %]">Members</a></th>
+	<th><a href="[% c.uri_for('alliances', 'sizerank', offset) %]">Size</a></th>
+	<th><a href="[% c.uri_for('alliances', 'scorerank', offset) %]">Score</a></th>
+	<th><a href="[% c.uri_for('alliances', 'avgsize', offset) %]">Avg Size</a></th>
+	<th><a href="[% c.uri_for('alliances', 'avgscore', offset) %]">Avg Score</a></th>
+	</tr>
+[% FOR a IN alliances %]
+	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		[% a.sizerankimg = (a.sizerank_gain_day == 0 ? 'stay' : (a.sizerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% a.sizerank_gain_day %] Today | [% a.sizerank_gain %] Tick">[% a.sizerank %] <img src="/static/images/[% a.sizerankimg %].png" alt="[% a.sizerankimg %]"> </td>
+		[% a.scorerankimg = (a.scorerank_gain_day == 0 ? 'stay' : (a.scorerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% a.scorerank_gain_day %] Today | [% a.scorerank_gain %] Tick">[% a.scorerank %] <img src="/static/images/[% a.scorerankimg %].png" alt="[% a.scorerankimg %]"> </td>
+		<td align="center">[% a.name %]</td>
+		[% a.membersimg = (a.members_gain_day == 0 ? 'stay' : (a.members_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% a.members_gain_day %] Today | [% a.members_gain %] Tick">[% a.members %] <img src="/static/images/[% a.membersimg %].png" alt="[% a.membersimg %]"> </td>
+		[% a.sizeimg = (a.size_gain_day == 0 ? 'stay' : (a.size_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(a.size_gain_day) %] Today | [% comma(a.size_gain) %] Tick">[% comma(a.size) %] <img src="/static/images/[% a.sizeimg %].png" alt="[% a.sizeimg %]"> </td>
+		[% a.scoreimg = (a.score_gain_day == 0 ? 'stay' : (a.score_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(a.score_gain_day) %] Today | [% comma(a.score_gain) %] Tick">[% comma(a.score) %] <img src="/static/images/[% a.scoreimg %].png" alt="[% a.scoreimg %]"> </td>
+		[% a.avgsizeimg = (a.avgsize_gain_day == 0 ? 'stay' : (a.avgsize_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(a.avgsize_gain_day) %] Today | [% comma(a.avgsize_gain) %] Tick">[% comma(a.avgsize) %] <img src="/static/images/[% a.avgsizeimg %].png" alt="[% a.avgsizeimg %]"> </td>
+		[% a.avgscoreimg = (a.avgscore_gain_day == 0 ? 'stay' : (a.avgscore_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(a.avgscore_gain_day) %] Today | [% comma(a.avgscore_gain) %] Tick">[% comma(a.avgscore) %] <img src="/static/images/[% a.avgscoreimg %].png" alt="[% a.avgscoreimg %]"> </td>
+	</tr>
+[% END %]
+</table>
+<p><a href="[% c.uri_for('alliances', order, offset - 100) %]">Previous 100</a>
+	<a href="[% c.uri_for('alliances', order, offset + 100) %]">Next 100</a>
+</p>

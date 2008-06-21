@@ -27,10 +27,17 @@ use CGI qw/:standard/;
 our @ISA = qw/Exporter/;
 
 our @EXPORT = qw/parseMarkup min max
-	alliances intelquery html_escape/;
+	alliances intelquery html_escape
+	comma_value/;
 
 sub html_escape($) {
 	return CGI::escapeHTML @_;
+}
+
+sub comma_value ($) {
+	my ($v) = @_;
+	$v =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g;
+	return $v;
 }
 
 sub parseMarkup ($) {
