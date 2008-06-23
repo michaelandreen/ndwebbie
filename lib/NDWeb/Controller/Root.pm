@@ -56,8 +56,16 @@ sub logout : Local {
 	$c->res->redirect($c->uri_for('index'));
 }
 
-#sub begin : private {
-#}
+sub begin : Private {
+	my ($self, $c) = @_;
+
+	 $c->res->header( 'Cache-Control' =>
+		'no-store, no-cache, must-revalidate,'.
+		'post-check=0, pre-check=0, max-age=0'
+	);
+	$c->res->header( 'Pragma' => 'no-cache' );
+	$c->res->header( 'Expires' => 'Thu, 01 Jan 1970 00:00:00 GMT' );
+}
 
 sub listTargets : Private {
 	my ($self, $c) = @_;
