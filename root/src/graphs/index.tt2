@@ -1,0 +1,8 @@
+[% FILTER null;
+	USE g = GD.Graph.lines(width,height);
+
+	g.set(settings);
+	g.set_legend(legend);
+END;
+	g.plot(data).png;
+-%]

@@ -32,7 +32,21 @@ our $VERSION = '0.01';
 
 __PACKAGE__->config( name => 'NDWeb' );
 __PACKAGE__->config->{'Plugin::Authentication'}{'use_session'} = 1;
+__PACKAGE__->config(session => {
+	storage => "/tmp/ndweb-$>/sesession",
+	directory_umask => 077,
+});
+__PACKAGE__->config( cache => {
+	backend => {
+		class => "Cache::FileCache",
+		cache_root => "/tmp/ndweb-$>",
+		directory_umask => 077,
+	},
+});
 
+__PACKAGE__->config( page_cache => {
+	set_http_headers => 1,
+});
 
 
 # Start the application
@@ -51,10 +65,16 @@ __PACKAGE__->setup(qw/
 	Session
 	Session::Store::File
 	Session::State::Cookie
+
+	Cache
+	PageCache
 	/);
+
 
 __PACKAGE__->deny_access_unless('/users',[qw/admin_users/]);
 __PACKAGE__->deny_access_unless('/alliances/resources',[qw/alliances_resources/]);
+__PACKAGE__->deny_access_unless('/graphs/alliancevsintel',[qw/graphs_intel/]);
+__PACKAGE__->deny_access_unless('/graphs/avgalliancevsintel',[qw/graphs_intel/]);
 
 =head1 NAME
 
