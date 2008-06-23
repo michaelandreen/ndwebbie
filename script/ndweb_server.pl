@@ -13,6 +13,10 @@ use Pod::Usage;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 
+#Need to preload, otherwise the first hit is slow
+use CGI qw/:standard/;
+escapeHTML('');
+
 my $debug             = 0;
 my $fork              = 0;
 my $help              = 0;
