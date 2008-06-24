@@ -19,13 +19,22 @@ INSERT INTO roles VALUES('admin_users');
 INSERT INTO roles VALUES('rankings_planet_intel');
 INSERT INTO roles VALUES('alliances_resources');
 INSERT INTO roles VALUES('graphs_intel');
+INSERT INTO roles VALUES('members');
+INSERT INTO roles VALUES('members_points_nolimit');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
+INSERT INTO group_roles (gid,role) VALUES(2,'members');
+
 INSERT INTO group_roles (gid,role) VALUES(6,'dc_menu');
+
 INSERT INTO group_roles (gid,role) VALUES(4,'bc_menu');
+
 INSERT INTO group_roles (gid,role) VALUES(5,'intel_menu');
+
 INSERT INTO group_roles (gid,role) VALUES(8,'no_fleet_update');
+
+INSERT INTO group_roles (gid,role) VALUES(9,'members_points_nolimit');
 
 INSERT INTO group_roles (gid,role) VALUES(1,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(1,'bc_menu');

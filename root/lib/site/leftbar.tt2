@@ -28,18 +28,18 @@
 	[% IF user.attacker %]
 <p>Member menu</p>
 <ul class="linkbar">
-	<li><a href="/points">Top members</a></li>
-	<li><a href="/addintel">Add intel/scans</a></li>
-	<li><a href="/launchConfirmation">Launch confirmation</a></li>
+	<li><a href="/members/points">Top members</a></li>
+	<li><a href="/members/addintel">Add intel/scans</a></li>
+	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/covop">CovOp targets</a></li>
 	<li><a href="/covop?list=distwhores">Distwhores</a></li>
-	<li><a href="/defrequest">Request defense</a></li>
+	<li><a href="/members/defrequest">Request defense</a></li>
 </ul>
 	[% ELSE %]
 		[% IF c.user.planet %]
 	<p><b>Update your fleet to see member menu</b></p>
 		[% ELSE %]
-	<form action="/main/setcoords" method="post">
+	<form action="/members/setcoords" method="post">
 		<p>We need your planet's coordinates: 
 		<input type="text" name="planet" value="">
 		<input type="submit" value="Submit">
