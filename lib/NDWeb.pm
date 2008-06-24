@@ -54,6 +54,7 @@ __PACKAGE__->setup(qw/
 	/);
 
 __PACKAGE__->deny_access_unless('/users',[qw/admin_users/]);
+__PACKAGE__->deny_access_unless('/alliances/resources',[qw/alliances_resources/]);
 
 =head1 NAME
 
