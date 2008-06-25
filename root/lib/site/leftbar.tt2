@@ -32,7 +32,7 @@
 	<li><a href="/members/addintel">Add intel/scans</a></li>
 	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/covop">CovOp targets</a></li>
-	<li><a href="/covop?list=distwhores">Distwhores</a></li>
+	<li><a href="/covop/distwhores">Distwhores</a></li>
 	<li><a href="/members/defrequest">Request defense</a></li>
 </ul>
 	[% ELSE %]

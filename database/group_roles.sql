@@ -21,10 +21,12 @@ INSERT INTO roles VALUES('alliances_resources');
 INSERT INTO roles VALUES('graphs_intel');
 INSERT INTO roles VALUES('members');
 INSERT INTO roles VALUES('members_points_nolimit');
+INSERT INTO roles VALUES('covop');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'members');
+INSERT INTO group_roles (gid,role) VALUES(2,'covop');
 
 INSERT INTO group_roles (gid,role) VALUES(6,'dc_menu');
 

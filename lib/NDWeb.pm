@@ -72,6 +72,7 @@ __PACKAGE__->deny_access_unless('/alliances/resources',[qw/alliances_resources/]
 __PACKAGE__->deny_access_unless('/graphs/alliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/graphs/avgalliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/members',[qw/members/]);
+__PACKAGE__->deny_access_unless('/covop',[qw/covop/]);
 
 =head1 NAME
 

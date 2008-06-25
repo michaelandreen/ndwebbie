@@ -1,7 +1,7 @@
 [% IF targets%]
 <table>
 	<tr><th>Target</th><th>Tick</th></tr>
-	[% FOR target IN targets %]
+	[% FOR target IN claimedtargets %]
 	<tr>
 		<td><a href="[% target.released_coords and c.uri_for('/check',target.coords)%]">
 			[% target.released_coords and target.coords%][% IF target.launched%]*[% END %]</a></td>

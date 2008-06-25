@@ -86,7 +86,7 @@ ORDER BY r.tick+c.wave,x,y,z});
 		push @targets, $target;
 	}
 
-	$c->stash(targets => \@targets);
+	$c->stash(claimedtargets => \@targets);
 }
 
 sub auto : Private {
