@@ -1,0 +1,46 @@
+[% META title = 'Add intel and scans' %]
+[% IF scans.size > 0 %]
+<div class="leftinfo">
+<h3>Added the following scans:</h3>
+	[% FOR s IN scans %]
+<p>[%IF s.group %]<b>Group </b>[%END%][% s.id %]: [% IF s.added %]<i>added</i>
+		[%ELSE%]<b>[% s.message %]</b>[%END%]</p>
+	[% END %]
+</div>
+[% END %]
+
+[% IF intel.size > 0 %]
+<div class="leftinfo">
+<h3>Added the following intel:</h3>
+	[% FOR i IN intel %]
+<p>[% i %]</p>
+	[% END %]
+</div>
+[% END %]
+
+[% IF intelmessage %]
+<p style="clear: both"><b>Intel message has been forwarrded to intel dept</b></p>
+[% END %]
+
+<div style="clear: left" class="leftinfo">
+	<form action="[% c.uri_for('postintel') %]" method="post"><fieldset> <legend>Intel/scans</legend>
+		<p>Paste <b>scan urls</b> and intel from <b>gal status</b> here</p>
+		<textarea rows="20" cols="50" name="message"></textarea>
+		<p>Tick:<input type="text" name="tick" value="[% game.tick %]">
+		<input type="submit" name="cmd" value="Submit">
+		</p>
+	</fieldset></form>
+</div>
+
+<div class="leftinfo">
+<form action="[% c.uri_for('postintelmessage') %]" method="post"><fieldset> <legend>Intel</legend>
+	<p>Write other messages to intel dept here (sms numbers, relay channels, bots etc) (<b>NOT gal status</b>):</p>
+	<textarea rows="20" cols="50" name="message"></textarea>
+	<p>Subject: <input type="text" name="subject" value="">
+	Tick:<input style='width: 4em' type="text" name="tick" value="[% game.tick %]">
+	<input type="submit" name="cmd" value="Submit"></p>
+</fieldset></form>
+</div>
+
+
+

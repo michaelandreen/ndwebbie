@@ -314,7 +314,6 @@ sub moveThreads : Local {
 
 sub newThread : Local {
 	my ( $self, $c, $board ) = @_;
-	my $dbh = $c->model;
 
 	$c->forward('findBoard');
 	$board = $c->stash->{board};
@@ -322,16 +321,21 @@ sub newThread : Local {
 	unless ($c->stash->{board}->{post}){
 		$c->acl_access_denied('test',$c->action,'No post access to board.')
 	}
-	
+
+	$c->forward('insertThread');
+	$c->forward('addPost',[$c->stash->{thread}]);
+}
+
+sub insertThread : Private {
+	my ( $self, $c, $board ) = @_;
+	my $dbh = $c->model;
+
 	my $insert = $dbh->prepare(q{INSERT INTO forum_threads (ftid,fbid,subject,uid)
 		VALUES(DEFAULT,$1,$2,$3) RETURNING (ftid);
 		});
-	
-	$insert->execute($board->{fbid},html_escape($c->req->param('subject')),$c->stash->{UID});
-	my $thread = $insert->fetchrow;
+	$insert->execute($board,html_escape($c->req->param('subject')),$c->stash->{UID});
+	$c->stash(thread => $insert->fetchrow);
 	$insert->finish;
-	$c->forward('addPost',[$thread]);
-
 }
 
 sub addPost : Local {
