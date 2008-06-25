@@ -146,6 +146,143 @@ sub insertintel : Private {
 	$c->flash(scans => \@scans);
 }
 
+sub launchConfirmation : Local {
+	my ( $self, $c ) = @_;
+
+	$c->stash(missions => $c->flash->{missions});
+}
+
+sub postconfirmation : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	eval {
+		my $missions = $c->req->param('mission');
+		my $findplanet = $dbh->prepare("SELECT planetid(?,?,?,?)");
+		my $findattacktarget = $dbh->prepare(q{SELECT c.target,c.wave,c.launched
+			FROM  raid_claims c
+				JOIN raid_targets t ON c.target = t.id
+				JOIN raids r ON t.raid = r.id
+			WHERE c.uid = ? AND r.tick+c.wave-1 = ? AND t.planet = ?
+				AND r.open AND not r.removed
+			});
+		my $finddefensetarget = $dbh->prepare(q{SELECT c.id FROM calls c
+				JOIN users u ON c.member = u.uid
+			WHERE u.planet = $1 AND c.landing_tick = $2
+		});
+		my $informDefChannel = $dbh->prepare(q{INSERT INTO defense_missions
+			(fleet,call) VALUES (?,?)
+			});
+		my $addattackpoint = $dbh->prepare(q{UPDATE users SET
+			attack_points = attack_points + 1 WHERE uid = ?
+			});
+		my $launchedtarget = $dbh->prepare(q{UPDATE raid_claims SET launched = True
+			WHERE uid = ? AND target = ? AND wave = ?
+			});
+		my $addfleet = $dbh->prepare(q{INSERT INTO fleets
+			(uid,name,mission,sender,target,tick,eta,back,amount)
+			VALUES ($1,$2,$3,(SELECT planet FROM users WHERE uid = $1),$4,$5,$6,$7,$8)
+			RETURNING id
+			});
+		my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount)
+			VALUES (?,?,?)
+			});
+		my $log = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
+			(SELECT ftid FROM users WHERE uid = $1),$1,$2)
+			});
+		my @missions;
+		$dbh->begin_work;
+		while ($missions =~ m/([^\n]+)\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)
+			\s+\((?:(\d+)\+)?(\d+)\).*?(?:\d+hrs\s+)?\d+mins?\s+
+			(Attack|Defend|Return|Fake\ Attack|Fake\ Defend)
+			(.*?)
+			(?:Launching\ in\ tick\ (\d+),\ arrival\ in\ tick\ (\d+)
+				|ETA:\ \d+,\ Return\ ETA:\ (\d+)
+				|Return\ ETA:\ (\d+)
+				)/sgx){
+			next if $10 eq 'Return';
+			my %mission;
+			my $name = $1;
+			my $tick = $c->stash->{TICK}+$9;
+			$tick += $8 if defined $8;
+			my $eta = $9;
+			my $mission = $10;
+			my $x = $5;
+			my $y = $6;
+			my $z = $7;
+			my $back = $tick + $eta - 1;
+			if ($13){
+				$tick = $13;
+			}elsif ($14){
+				$back += $14;
+			}
+			$mission{tick} = $tick;
+			$mission{mission} = $mission;
+			$mission{target} = "$x:$y:$z";
+			$mission{back} = $back;
+
+			my ($planet_id) = $dbh->selectrow_array($findplanet,undef,$x,$y,$z,$c->stash->{TICK});
+
+			my $findtarget = $finddefensetarget;
+			if ($mission eq 'Attack'){
+				$findtarget = $findattacktarget;
+				$findtarget->execute($c->user->id,$tick,$planet_id);
+			}elsif ($mission eq 'Defend'){
+				$findtarget = $finddefensetarget;
+				$findtarget->execute($planet_id,$tick);
+			}
+
+			my $ships = $11;
+			my @ships;
+			my $amount = 0;
+			while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+(?:(?:\w+|-)\s+){3}(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Structure Killer)\s+(\d+)/g){
+				$amount += $2;
+				push @ships,{ship => $1, amount => $2};
+			}
+			$mission{ships} = \@ships;
+
+			if ($amount == 0){
+				warn "No ships in: $ships";
+				next;
+			}
+			my $fleet = $dbh->selectrow_array($addfleet,undef,$c->user->id,$name,$mission
+				,$planet_id,$tick,$eta,$back,$amount);
+			$mission{fleet} = $fleet;
+			for my $ship (@ships){
+				$addships->execute($fleet,$ship->{ship},$ship->{amount});
+			}
+
+			if ($findtarget->rows == 0){
+				$mission{warning} = 'No matching target!';
+			}elsif ($mission eq 'Attack'){
+				my $claim = $findtarget->fetchrow_hashref;
+				if ($claim->{launched}){
+					$mission{warning} = "Already launched on this target:$claim->{target},$claim->{wave},$claim->{launched}";
+				}else{
+					$addattackpoint->execute($c->user->id);
+					$launchedtarget->execute($c->user->id,$claim->{target},$claim->{wave});
+					$mission{warning} = "OK:$claim->{target},$claim->{wave},$claim->{launched}";
+					$log->execute($c->user->id,"Gave attack point for confirmation on $mission mission to $x:$y:$z, landing tick $tick");
+				}
+			}elsif ($mission eq 'Defend'){
+				my $call = $findtarget->fetchrow_hashref;
+				$informDefChannel->execute($fleet,$call->{id});
+			}
+
+			$log->execute($c->user->id,"Pasted confirmation for $mission mission to $x:$y:$z, landing tick $tick");
+			push @missions,\%mission;
+		}
+		$dbh->commit;
+		$c->flash(missions => \@missions);
+	};
+	if ($@){
+		$dbh->rollback;
+		die $@;
+	}
+
+	$c->res->redirect($c->uri_for('launchConfirmation'));
+}
+
 =head1 AUTHOR
 
 Michael Andreen (harv@ruin.nu)

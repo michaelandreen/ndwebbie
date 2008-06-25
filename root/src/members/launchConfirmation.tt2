@@ -1,20 +1,24 @@
-<TMPL_VAR NAME=Error>
-<TMPL_LOOP Missions>
-<TMPL_IF Warning><p><b><TMPL_VAR NAME=Warning></b></p></TMPL_IF>
-<p>Adding the following fleet: <TMPL_VAR NAME=Fleet>
-<br/>Target: <TMPL_VAR NAME=Target>
-<br/>Mission: <TMPL_VAR NAME=Mission>
-<br/>Landing tick: <TMPL_VAR NAME=Tick>
-<br/>Back: <TMPL_VAR NAME=Back>
+[% META title = 'Launch confirmation' %]
+[% FOR m IN missions %]
+[% IF m.warning %]<h4 style="color: red">[% m.warning %]</h4>[% END %]
+<p>Adding the following fleet: [% m.fleet %]
+<br>Target: [% m.target %]
+<br>Mission: [% m.mission %]
+<br>Landing tick: [% m.tick %]
+<br>Back: [% m.back %]
 </p>
 <table>
-<TMPL_LOOP Ships>
-	<tr><td><TMPL_VAR NAME=Ship></td><td><TMPL_VAR NAME=Amount></td></tr>
-</TMPL_LOOP>
+	[% FOR s IN m.ships %]
+	<tr><td>[% s.ship %]</td><td>[% s.amount %]</td></tr>
+	[% END %]
 </table>
 <hr/>
-</TMPL_LOOP>
-<form action="<TMPL_VAR NAME=PAGE>" method="post"><fieldset> <legend>Launch confirmation</legend>
+[% END %]
+
+[% IF missions.size == 0 %]
+<h3 style="color: red">COULD NOT PARSE YOUR MISSIONS, MAKE SURE YOU'VE READ THE INSTRUCTIONS AND PASTED WHAT WE ASK FOR</h3>
+[% END %]
+<form action="[% c.uri_for('postconfirmation') %]" method="post"><fieldset> <legend>Launch confirmation</legend>
 	<p>Paste all (ctrl+a should be ok, but try with just single mission if you get an error, save the ctrl+a output and contact harv) information from <b>missions page</b> here (NOT from news page, and not overview, nor gal status). It's ok to paste when prelaunched, as long as you're sure you won't change your plans.</p>
 	<p>A valid launch confirmation looks like this, but can also be after the fleet has launched and has ETA/Return ETA shown as last line:</p>
 	<pre>
@@ -26,8 +30,6 @@ Viper	Corvette	Frigate	Emp 	50
 Launching in tick 117, arrival in tick 124, Return ETA: Instant
 	</pre>
 	<textarea rows="25" cols="80" name="mission"></textarea>
-	<input type="hidden" name="cmd" value="submit"/>
-	<input type="hidden" name="page" value="<TMPL_VAR NAME=PAGE>"/>
-	<br/>
-	<input type="submit" value="Submit"/>
+	<br>
+	<input type="submit" name="cmd" value="Submit">
 </fieldset></form>
