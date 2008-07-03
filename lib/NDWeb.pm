@@ -73,6 +73,10 @@ __PACKAGE__->deny_access_unless('/graphs/alliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/graphs/avgalliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/members',[qw/members/]);
 __PACKAGE__->deny_access_unless('/covop',[qw/covop/]);
+__PACKAGE__->deny_access_unless('/calls/list',[qw/calls_list/]);
+__PACKAGE__->deny_access_unless('/calls/postcallcomment',[qw/calls_edit/]);
+__PACKAGE__->deny_access_unless('/calls/postcallupdate',[qw/calls_edit/]);
+__PACKAGE__->deny_access_unless('/calls/postattackerupdate',[qw/calls_edit/]);
 
 =head1 NAME
 

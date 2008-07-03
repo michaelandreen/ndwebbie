@@ -208,7 +208,13 @@ sub thread : Local {
 	my $dbh = $c->model;
 
 	$c->forward('findThread');
-	$thread = $c->stash->{thread};
+	$c->forward('findPosts') if $c->stash->{thread};
+	$c->forward('markThreadAsRead') if $c->user_exists;
+}
+
+sub findPosts :Private {
+	my ( $self, $c, $thread ) = @_;
+	my $dbh = $c->model;
 
 	my $posts = $dbh->prepare(q{
 		SELECT u.username,date_trunc('seconds',fp.time::timestamp) AS time
@@ -221,7 +227,7 @@ sub thread : Local {
 		WHERE ft.ftid = $1
 		ORDER BY fp.time ASC
 		});
-	$posts->execute($c->stash->{thread}->{ftid},$c->stash->{UID});
+	$posts->execute($thread,$c->stash->{UID});
 
 	my @posts;
 	while (my $post = $posts->fetchrow_hashref){
@@ -230,7 +236,6 @@ sub thread : Local {
 	}
 
 	$c->stash(posts => \@posts);
-	$c->forward('markThreadAsRead') if $c->user_exists;
 }
 
 

@@ -1,0 +1,140 @@
+[% META title = 'Edit call' %]
+
+[% BLOCK missiontable %]
+<table>
+		<tr><th></th><th>Coords</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
+	[% FOR m IN missions %]
+		<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]" onclick="$('#fleet[% m.id %]').toggle()">
+			<td>
+		[% IF m.ships %]
+				<b>&dArr;</b>
+		[% END %]
+			</td><td>
+		[% IF m.planet %]
+				<a href="[% c.uri_for('/stats/planet', m.planet) %]">[% m.coords %]</a>
+		[% END %]
+			</td>
+			<td>[% m.name %]</td>
+			<td class="[% m.mission %]">[% m.mission %]</td>
+			<td>[% m.tick %]</td>
+			<td>[% m.eta %]</td>
+			<td>[% m.amount %]</td>
+			[% IF m.fleetcatch %]
+			<td class="Hostile">FLEETCATCH!!</td>
+			[% END %]
+		</tr>
+		[% IF m.ships %]
+		<tr id="fleet[% m.id %]" class="missionrow">
+			<td>
+			<td colspan="5"><table>
+			[% FOR s IN m.ships %]
+				<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+					<td>[% s.ship %]</td><td>[% s.amount %]</td>
+				</tr>
+			[% END %]
+			</table></td>
+		</tr>
+		[% END %]
+	[% END %]
+	</table>
+[% END %]
+
+<form action="[% c.uri_for('postcallupdate',call.id) %]" method="post">
+<fieldset> <legend>Call details, call# [% call.id %]</legend>
+<table>
+<tr>
+<td>
+<ul>
+	<li>Current DC: [% call.dc %]</li>
+	<li>Member: [% call.member %] </li>
+	<li>SMS: [% call.sms %] </li>
+	<li>Coords: <a href="[% c.uri_for('/stats/planet', call.planet) %]">[% call.coords %]</a></li>
+	<li>Landing at tick: <br>
+		<input type="text" name="tick" value="[% call.landing_tick %]">
+		<input type="checkbox" name="ctick"></li>
+	<li>Current ETA: [% call.landing_tick - TICK %]</li>
+</ul>
+</td>
+<td>
+	<textarea rows="8" cols="40" name="info">[% call.info %]</textarea>
+</td>
+<td><ul>
+	<li>Change Notes? <input type="checkbox" name="cinfo"></li>
+	<li><input type="submit" name="cmd" value="Submit"></li>
+	<li><input type="submit" name="cmd" value="Take call"></li>
+	<li><input type="submit" name="cmd" value="[% cover %] call"></li>
+	<li><input type="submit" name="cmd" value="[% ignore %] call"></li>
+</ul></td>
+</tr>
+</table>
+</fieldset>
+</form>
+<fieldset><legend>Attackers:</legend>
+<form action="[% c.uri_for('postattackerupdate',call.id) %]" method="post">
+	<table>
+	<tr>
+	<th></th>
+	<th>Coords</th>
+	<th>Planet status</th>
+	<th>Alliance</th>
+	<th>Race</th>
+	<th>Initial ETA</th>
+	<th>Amount</th>
+	<th>Shiptypes</th>
+	<th>Fleet</th>
+	<th>Change/remove?</th>
+	</tr>
+[% FOR a IN attackers %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td><input type="button" onclick="$('#attacker[% a.id %]').toggle()" value="&dArr;" title="Show fleets"></td>
+		<td><a href="[% c.uri_for('/stats/planet',a.id) %]">[% a.coords %]</a></td>
+		<td class="[% a.planet_status %]">[% a.planet_status %]</td>
+		<td class="[% a.relationship %]">[% a.alliance %] ([% a.relationship %])</td>
+		<td>[% a.race %]</td>
+		<td>[% a.eta %]</td>
+		<td>[% a.amount %]</td>
+		<td><input class="coord" type="text" name="shiptype:[% a.id %]" value="[% a.shiptype %]"></td>
+		<td>[% a.fleet %]</td>
+		<td><input type="checkbox" name="change:[% a.id %]"></td>
+	</tr>
+	<tr id="attacker[% a.id %]" class="missionrow">
+	<td></td>
+	<td colspan="8">
+	[% PROCESS missiontable missions=a.missions %]
+	</td></tr>
+[% END %]
+	</table>
+	<p>
+	<input type="submit" name="cmd" value="Change">
+	<input type="submit" name="cmd" value="Remove">
+	</p>
+</form>
+</fieldset>
+<fieldset><legend>Member fleet</legend>
+[% PROCESS missiontable missions=fleets %]
+</fieldset>
+<fieldset><legend>Defenders</legend>
+[% PROCESS missiontable missions=defenders %]
+</fieldset>
+
+<div>
+[% FOR post IN posts %]
+<fieldset class="forum-post">
+<legend class="unread:[% post.unread %]"><b>[% post.username %]</b> : [% post.time %]</legend>
+	[% post.message %]
+</fieldset>
+[% END %]
+
+<form action="[% c.uri_for('postcallcomment', call.id) %]" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
+	<textarea rows="10" cols="60" name="message"></textarea>
+	<input type="submit" value="Submit">
+</fieldset></form>
+</div>
+
+<script type="text/javascript">
+<!--
+$(document).ready(function(){
+	$('.missionrow').hide();
+});
+-->
+</script>

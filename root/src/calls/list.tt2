@@ -1,0 +1,30 @@
+[% META title = 'Defense calls' %]
+<table>
+	<tr><th>Call</th><th>DC</th><th>Def Fleets</th><th>Member (defprio)</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>ETA</th><th>Alliance</th><th>Attackers</th></tr>
+[% newday = game.tick %]
+[% FOR call IN calls %]
+	[% WHILE newday - 24 > call.landing_tick %]
+		[%	newday = newday - 24 %]
+	<tr align="center"><td colspan="4">New day</td></tr>
+	[% END %]
+	<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td class="[% UNLESS call.dc %]Hostile[%END%]"><a href="[% c.uri_for('edit',call.id) %]">[% call.id %]</a></td>
+		<td>[% call.dc %]</td>
+		<td>[% call.fleets %]</td>
+		[% prio = call.defprio < minprio ? 'LowestPrio' :
+			(call.defprio < maxprio ? 'MediumPrio' : 'HighestPrio') %]
+		<td class="[% prio %]"><a href="[% c.uri_for('/stats/planet',call.planet) %]">
+			[% call.coords %] ([% call.defprio %])</a></td>
+		<td>[% call.landing_tick %]</td>
+		<td>[% call.race.unique.join('/') %]</td>
+		<td>[% call.amount.join('/') %]</td>
+		<td>[% call.shiptype.unique.join('/') | html %]</td>
+		<td>[% call.curreta %] ([% call.eta.unique.join('/') %])</td>
+		<td>[% call.alliance.unique.join('/') %]</td>
+		<td>[% FOR a IN call.attackers %]
+			<a href="[% c.uri_for('/stats/find',a) %]">[% a %]</a>
+			[% UNLESS loop.last %]/[%END%]
+		[%END%]</td>
+	</tr>
+[% END %]
+</table>

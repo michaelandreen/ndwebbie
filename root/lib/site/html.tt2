@@ -7,7 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="/static/css/[% user.css or "black" %].css">
 	<link rel="icon" type="image/ico" href="/favicon.ico">
 	<script type="text/javascript" src="/static/js/raid.js"></script>
-	<script type="text/javascript" src="/static/js/misc.js"></script>
+	<script type="text/javascript" src="/static/js/jquery-1.2.6.min.js"></script>
 </head>
  <body>
 [% content %]

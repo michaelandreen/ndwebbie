@@ -22,6 +22,8 @@ INSERT INTO roles VALUES('graphs_intel');
 INSERT INTO roles VALUES('members');
 INSERT INTO roles VALUES('members_points_nolimit');
 INSERT INTO roles VALUES('covop');
+INSERT INTO roles VALUES('calls_list');
+INSERT INTO roles VALUES('calls_edit');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
@@ -29,6 +31,8 @@ INSERT INTO group_roles (gid,role) VALUES(2,'members');
 INSERT INTO group_roles (gid,role) VALUES(2,'covop');
 
 INSERT INTO group_roles (gid,role) VALUES(6,'dc_menu');
+INSERT INTO group_roles (gid,role) VALUES(6,'calls_list');
+INSERT INTO group_roles (gid,role) VALUES(6,'calls_edit');
 
 INSERT INTO group_roles (gid,role) VALUES(4,'bc_menu');
 
@@ -46,6 +50,8 @@ INSERT INTO group_roles (gid,role) VALUES(1,'admin_users');
 INSERT INTO group_roles (gid,role) VALUES(1,'rankings_planet_intel');
 INSERT INTO group_roles (gid,role) VALUES(1,'alliances_resources');
 INSERT INTO group_roles (gid,role) VALUES(1,'graphs_intel');
+INSERT INTO group_roles (gid,role) VALUES(1,'calls_list');
+INSERT INTO group_roles (gid,role) VALUES(1,'calls_edit');
 
 INSERT INTO group_roles (gid,role) VALUES(3,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(3,'bc_menu');
@@ -55,3 +61,5 @@ INSERT INTO group_roles (gid,role) VALUES(3,'admin_users');
 INSERT INTO group_roles (gid,role) VALUES(3,'rankings_planet_intel');
 INSERT INTO group_roles (gid,role) VALUES(3,'alliances_resources');
 INSERT INTO group_roles (gid,role) VALUES(3,'graphs_intel');
+INSERT INTO group_roles (gid,role) VALUES(3,'calls_list');
+INSERT INTO group_roles (gid,role) VALUES(3,'calls_edit');

@@ -72,10 +72,11 @@
 <p>DC menu</p>
 <ul class="linkbar">
 	<li><a href="/defLeeches">Def Leeches</a></li>
-	<li><a href="/calls">Defense calls</a></li>
-	<li><a href="/calls?show=uncovered">Not covered calls</a></li>
-	<li><a href="/calls?show=covered">Covered calls</a></li>
-	<li><a href="/calls?show=all">All calls</a></li>
+	<li><a href="/calls/list">Active calls</a></li>
+	<li><a href="/calls/list/recent">Recent calls</a></li>
+	<li><a href="/calls/list/uncovered">Not covered calls</a></li>
+	<li><a href="/calls/list/covered">Covered calls</a></li>
+	<li><a href="/calls/list/all">All calls</a></li>
 </ul>
 [% END %]
 [% IF c.check_user_roles("intel_menu") %]
