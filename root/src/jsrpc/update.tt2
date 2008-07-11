@@ -1,0 +1,19 @@
+[% IF timestamp %]
+	<timestamp>[% timestamp %]</timestamp>
+[% END %]
+[% FOR t IN targets %]
+	<target id="[% t.id %]">
+	[% FOR w IN t.waves %]
+		<wave id="[% w.id %]">
+			<command>[% w.command %]</command>
+			<claimers>[% w.claimers %]</claimers>
+			<joinable>[% w.joinable %]</joinable>
+		</wave>
+	[% END %]
+	</target>
+[% END %]
+[% IF claimedtargets %]
+<targetlist>
+[% PROCESS inc/targetlist.tt2 | html %]
+</targetlist>
+[% END %]

@@ -1,0 +1,55 @@
+[% META title = 'List raids' %]
+[% IF launched %]
+	<p>Total launched fleets: [% launched %]</p>
+[% END %]
+<h3> Open raids </h3>
+[% FOR r IN raids %]
+	<p><a href="[% c.uri_for('view',r.id) %]">Raid [% r.id %]</a>
+	Landing tick: [% r.tick %]
+	[% IF c.check_user_roles('raids_edit') %]
+		<a href="[% c.uri_for('edit',r.id) %]">Edit</a>
+		<a href="[% c.uri_for('close',r.id) %]">Close raid.</a>
+		[% UNLESS r.releasedcoords %]
+		<a href="[% c.uri_for('showcoords',r.id) %]">Show coords.</a>
+		[% END %]
+	[% END %]
+	[% IF c.check_user_roles('raids_info') %]
+		Waves: [% r.waves %]
+		Claims: [% r.claims %]
+		Launched: [% r.launched %]
+	[% END %]
+	</p>
+[% END %]
+
+[% IF c.check_user_roles('raids_info') %]
+<h3> Closed raids </h3>
+	[% FOR r IN closedraids %]
+	<p>
+		[% IF c.check_user_roles('raids_edit') %]
+		<a href="[% c.uri_for('edit',r.id) %]">Edit Raid [% r.id %]</a>
+		<a href="[% c.uri_for('open',r.id) %]">Open raid.</a>
+			[% UNLESS r.releasedcoords %]
+		<a href="[% c.uri_for('showcoords',r.id) %]">Show coords.</a>
+			[% END %]
+		[% END %]
+		Landing tick: [% r.tick %]
+		Waves: [% r.waves %]
+		Claims: [% r.claims %]
+		Launched: [% r.launched %]
+	</p>
+	[% END %]
+
+<h3> Removed raids </h3>
+	[% FOR r IN removedraids %]
+	<p>
+		[% IF c.check_user_roles('raids_edit') %]
+		<a href="[% c.uri_for('edit',r.id) %]">Edit Raid [% r.id %]</a>
+		<a href="[% c.uri_for('open',r.id) %]">Open raid.</a>
+		[% END %]
+		Landing tick: [% r.tick %]
+		Waves: [% r.waves %]
+		Claims: [% r.claims %]
+		Launched: [% r.launched %]
+	</p>
+	[% END %]
+[% END %]

@@ -129,20 +129,19 @@ td.Attack{
 	color: black;
 }
 
-a.Unclaim{
-	color: green;
-}
-input.Unclaim{
+input.unclaim{
 	background: green;
 }
-a.Claim{
-	color: blue;
-}
-a.Join{
-	color: #00AAAA;
-}
-input.Join{
+input.join{
 	background: #00AAAA;
+}
+input.taken{
+	background: #AA0000;
+}
+
+input.blocked{
+	background: black;
+	color: gray;
 }
 
 td.Friendly{

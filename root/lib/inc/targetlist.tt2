@@ -1,18 +1,19 @@
-[% IF targets%]
+[% IF claimedtargets.size > 0 %]
 <table>
 	<tr><th>Target</th><th>Tick</th></tr>
 	[% FOR target IN claimedtargets %]
 	<tr>
-		<td><a href="[% target.released_coords and c.uri_for('/check',target.coords)%]">
-			[% target.released_coords and target.coords%][% IF target.launched%]*[% END %]</a></td>
-		<td><a href="[% c.uri_for('/raid',target.raid)%]#target[% target.id %]">
+		<td>[% IF target.released_coords %]<a href="[% c.uri_for('/stats/find',target.coords)%]">
+				[% target.coords%][% IF target.launched%]*[% END %]</a>
+			[%ELSE%]Target [%target.id%][% END %]</td>
+		<td><a href="[% c.uri_for('/raids/view',target.raid)%]#target[% target.id %]">
 			[% target.landingtick %]</a></td>
 		<td>
-			<input title="Unclaim target" type="button" value="U" class="small" onclick = 
-			"claim('/raids?xml=1&amp;raid=[% target.raid %]',[% target.id %],[% target.wave %],'Unclaim')" />
+			<input title="Unclaim target" type="button" value="U" class="small" onclick =
+			"$.get('/jsrpc/unclaim/[% target.raid %]//[% target.id %]/[% target.wave %]',{},parseUpdate)">
 			<input title="[% IF target.joinable %]Disable joinable[% ELSE %]Make target joinable[% END %]"
 				type="button" class="small" value="[% IF target.joinable %]N[% ELSE %]J[% END %]" onclick = 
-			"claim('/raids?xml=1&amp;raid=[% target.raid %]',[% target.id %],[% target.wave %],'set&amp;joinable=[% target.joinable %]')" />
+			"$.get('/jsrpc/joinable/[% target.raid %]//[% target.id %]/[% target.wave %]/[% target.joinable %]',{},parseUpdate)">
 		</td>
 	</tr>
 	[% END %]

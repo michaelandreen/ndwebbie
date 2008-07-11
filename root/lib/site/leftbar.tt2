@@ -58,7 +58,7 @@
 	<li><a href="/raids">Web raids</a></li>
 </ul>
 <p><input type="button" value="Update target list"
-		onclick = "listTargets('/jsrpc/targetList')">
+		onclick = "listTargets()">
 </p>
 <div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
 [% END %]
