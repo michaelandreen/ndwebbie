@@ -89,6 +89,18 @@ ORDER BY r.tick+c.wave,x,y,z});
 	$c->stash(claimedtargets => \@targets);
 }
 
+sub listAlliances : Private {
+	my ($self, $c) = @_;
+	my @alliances;
+	push @alliances,{id => -1, name => ''};
+	my $query = $c->model->prepare(q{SELECT id,name FROM alliances ORDER BY LOWER(name)});
+	$query->execute;
+	while (my $ally = $query->fetchrow_hashref){
+		push @alliances,$ally;
+	}
+	$c->stash(alliances => \@alliances);
+}
+
 sub auto : Private {
 	my ($self, $c) = @_;
 	my $dbh = $c ->model;

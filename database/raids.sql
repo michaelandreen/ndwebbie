@@ -1,4 +1,6 @@
-INSERT INTO forum_boards (fcid,fbid,board) VALUES(9,-5,'Raid logs');
+INSERT INTO forum_boards (fcid,fbid,board) VALUES(7,-5,'Raid logs');
+INSERT INTO forum_access (fbid,gid) VALUES(-5,1);
+INSERT INTO forum_access (fbid,gid) VALUES(-5,3);
 
 ALTER TABLE raids ADD COLUMN ftid INTEGER;
 

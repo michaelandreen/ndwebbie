@@ -1,0 +1,123 @@
+[% META title = 'Edit raid' %]
+[% FOR e IN errors %]
+<h3 style="color: red">[% e %]</h3>
+[% END %]
+<div class="leftinfo">
+<form action="[% c.uri_for('postraidupdate',raid.id) %]" method="post">
+	<fieldset> <legend>Edit raid</legend>
+		<div class="leftinfo">
+			<p><a href="[% c.uri_for((raid.open ? 'close' : 'open'),raid.id) %]">[% raid.open ? 'Close' : 'Open'%] raid.</a></p>
+			<p><a href="[% c.uri_for((raid.released_coords ? 'hidecoords' : 'showcoords'),raid.id) %]">[% raid.released_coords ? 'Hide' : 'Show' %] coords.</a></p>
+			<p><a href="[% c.uri_for('remove',raid.id) %]">Remove raid</a></p>
+			<p>Landing tick: <input type="text" name="tick" value="[% raid.tick %]"></p>
+			<p>Number of waves: <input type="text" name="waves" value="[% raid.waves %]"></p>
+		[% IF removegroups.size > 0 %]
+			<p>The following groups has access to the raid</p>
+			<table>
+			<tr><th>Group</th><th>Remove</th></tr>
+			[% FOR g IN removegroups %]
+			<tr><td>[% g.groupname %]</td><td><input type="checkbox"
+				name="[% g.gid %]" value="remove"></td>
+			</tr>
+			[% END %]
+			</table>
+		[% END %]
+		[% IF addgroups.size > 0 %]
+			<p>These does not have access to the raid</p>
+			<table>
+			<tr><th>Group</th><th>Add</th></tr>
+			[% FOR g IN addgroups %]
+			<tr><td>[% g.groupname %]</td><td><input type="checkbox"
+				name="[% g.gid %]" value="add"></td>
+			</tr>
+			[% END %]
+			</table>
+		[% END %]
+		</div>
+		<p>Raid message here</p>
+		<textarea rows="15" cols="40" name="message">[% raid.message %]</textarea>
+		<p><input type="submit" value="Change"></p>
+	</fieldset>
+</form>
+</div>
+<div class="leftinfo">
+<form action="[% c.uri_for('postaddtargets',raid.id) %]" method="post">
+	<fieldset> <legend>Add targets</legend>
+		<p>List all target coords here</p>
+		<textarea rows="15" cols="40" name="targets"></textarea>
+		<p>Add all coords from: <select name="alliance">
+		[% FOR a IN alliances %]
+				<option value="[% a.id %]" [% IF selected %]selected="selected"[% END %]>[% a.name %]</option>
+		[% END %]
+			</select>
+			<br>Size limit (Filters out smaller planets): 
+			<input type="text" name="sizelimit" value="">
+			<br><input type="submit" value="Add">
+		</p>
+	</fieldset>
+</form>
+</div>
+<div class="clear">&nbsp;</div>
+<p>Sort by:
+	<a href="[% c.uri_for('edit',raid.id,'coords') %]">Coords</a>
+	<a href="[% c.uri_for('edit',raid.id,'race') %]">Race</a>
+	<a href="[% c.uri_for('edit',raid.id,'sizerank') %]">Size</a>
+	<a href="[% c.uri_for('edit',raid.id,'scorerank') %]">Score</a>
+	<a href="[% c.uri_for('edit',raid.id,'valuerank') %]">Value</a>
+	<a href="[% c.uri_for('edit',raid.id,'xprank') %]">XP</a>
+</p>
+<div class="leftinfo">
+<form action="[% c.uri_for('posttargetupdates',raid.id) %]" method="post">
+[% FOR t IN targets %]
+	<fieldset> <legend>Target: #[% t.id %] [% t.coords %]</legend>
+	<div class="leftinfo">
+	<p style="color:red;font-weight:bold">Remove target: <input type="checkbox" name="remove:[% t.id %]" value="remove"></p>
+		<ul>
+			<li>Size: [% t.size %]</li>
+			<li>Score: [% t.score %]</li>
+			<li>Value: [% t.value %]</li>
+			<li>Race: [% t.race %]</li>
+		</ul>
+		<table>
+			<tr><th>Planet status</th><th>Alliance relationship</th></tr>
+			<tr>
+				<td class="[% t.planet_status %]">[% t.planet_status %]</td>
+				<td class="[% t.relationship %]">[% t.relationship %]</td>
+			</tr>
+		</table>
+	</div>
+	<div class="leftinfo">
+	<p>	Comment:<br>
+		<textarea rows="5" cols="20" name="comment:[% t.id %]">[% t.comment %]</textarea>
+	</p>
+	[% t.planetscan %]
+	</div>
+	<table>
+	<tr><th>Tick</th><th>Scan</th></tr>
+	[% FOR s IN t.scans %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td>[% s.3 %]</td>
+		<td><a href="http://game.planetarion.com/showscan.pl?scan_id=[% s.1 %]">[% s.2 %]</a></td>
+	</tr>
+	[% END %]
+	</table>
+	<div class="clear">&nbsp;</div>
+	<table>
+	[% FOR w IN t.waves %]
+		<tr>
+		<td>
+		[% IF w.claimers %]
+			Unclaim wave [% w.wave %] ([% w.claimers %]): <input type="checkbox" name="unclaim:[% t.id %]:[% w.wave %]" value="unclaim">
+		[% ELSE %]
+			Block wave [% w.wave %]: <input type="checkbox" name="block:[% t.id %]:[% w.wave %]" value="block">
+		[% END %]
+		</td>
+		<td><input type="text" name="claim:[% t.id %]:[% w.wave %]" value=""></td>
+		</tr>
+	[% END %]
+	</table>
+	</fieldset>
+[% END %]
+<p><input type="submit" value="Submit target changes"></p>
+</form>
+</div>

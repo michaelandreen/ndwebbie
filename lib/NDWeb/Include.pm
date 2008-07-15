@@ -27,8 +27,8 @@ use CGI qw/:standard/;
 our @ISA = qw/Exporter/;
 
 our @EXPORT = qw/parseMarkup min max
-	alliances intelquery html_escape
-	comma_value/;
+	intelquery html_escape
+	comma_value array_expand/;
 
 sub html_escape($) {
 	return CGI::escapeHTML @_;
@@ -71,20 +71,6 @@ sub max {
     return ($x < $y ? $y : $x);
 }
 
-
-sub alliances {
-	my ($alliance) = @_;
-	my @alliances;
-	$alliance = -1 unless defined $alliance;
-	push @alliances,{Id => -1, Name => '', Selected => not $alliance};
-	my $query = $ND::DBH->prepare(q{SELECT id,name FROM alliances ORDER BY LOWER(name)});
-	$query->execute;	
-	while (my $ally = $query->fetchrow_hashref){
-		push @alliances,{Id => $ally->{id}, Name => $ally->{name}, Selected => $alliance == $ally->{id}};
-	}
-	return @alliances;
-}
-
 sub intelquery {
 	my ($columns,$where) = @_;
 	return qq{
@@ -95,6 +81,19 @@ FROM (fleets i NATURAL JOIN users u)
 WHERE $where 
 GROUP BY i.tick,i.mission,t.x,t.y,t.z,o.x,o.y,o.z,i.amount,i.ingal,u.username,t.alliance,o.alliance,t.nick,o.nick
 ORDER BY i.tick DESC, i.mission};
+}
+
+sub array_expand ($) {
+	my ($array) = @_;
+
+	my @arrays;
+	for my $string (@{$array}){
+		$string =~ s/^\((.*)\)$/$1/;
+		$string =~ s/"//g;
+		my @array = split /,/, $string;
+		push @arrays,\@array;
+	}
+	return \@arrays;
 }
 
 

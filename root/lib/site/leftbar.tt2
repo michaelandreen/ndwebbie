@@ -65,7 +65,7 @@
 [% IF c.check_user_roles("bc_menu") %]
 <p>BC menu</p>
 <ul class="linkbar">
-	<li><a href="/editRaid">Create raid</a></li>
+	<li><a href="/raids/create">Create raid</a></li>
 </ul>
 [% END %]
 [% IF c.check_user_roles("dc_menu") %]

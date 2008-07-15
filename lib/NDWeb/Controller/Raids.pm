@@ -220,6 +220,297 @@ sub view : Local {
 	$c->stash(targets => \@targets);
 }
 
+sub edit : Local {
+	my ($self, $c, $raid, $order) = @_;
+	my $dbh = $c->model;
+
+	my $query = $dbh->prepare(q{SELECT id,tick,waves,message,released_coords,open,ftid
+		FROM raids WHERE id = ?
+	});
+	$raid = $dbh->selectrow_hashref($query,undef,$raid);
+
+	$c->stash(raid => $raid);
+
+	$c->stash(errors => $c->flash->{errors});
+
+	my $groups = $dbh->prepare(q{SELECT g.gid,g.groupname,raid FROM groups g LEFT OUTER JOIN (SELECT gid,raid FROM raid_access WHERE raid = ?) AS ra ON g.gid = ra.gid WHERE g.attack});
+	$groups->execute($raid ? $raid->{id} : undef);
+
+	my @addgroups;
+	my @remgroups;
+	while (my $group = $groups->fetchrow_hashref){
+		if ($group->{raid}){
+			push @remgroups,$group;
+		}else{
+			push @addgroups,$group;
+		}
+	}
+	$c->stash(removegroups => \@remgroups);
+	$c->stash(addgroups => \@addgroups);
+
+	if ($order =~ /^(score|size|value|xp)rank$/){
+		$order .= " ASC";
+	}elsif ($order eq 'race'){
+		$order .= ' ASC';
+	}else {
+		$order .= 'p.x,p.y,p.z';
+	}
+
+	my $targetquery = $dbh->prepare(qq{SELECT r.id,coords(x,y,z),comment,size,score,value,race,planet_status AS planetstatus,relationship,comment,r.planet, s.scans
+		FROM raid_targets r
+			JOIN current_planet_stats p ON p.id = r.planet
+			LEFT OUTER JOIN ( SELECT planet, array_accum(s::text) AS scans
+				FROM ( SELECT DISTINCT ON (planet,type) planet,scan_id,type, tick
+					FROM scans
+					WHERE tick > tick() - 24
+					ORDER BY planet,type ,tick DESC
+					) s
+				GROUP BY planet
+			) s ON s.planet = r.planet
+		WHERE r.raid = ?
+		ORDER BY $order
+		});
+	my $claims =  $dbh->prepare(q{ SELECT username,launched FROM raid_claims
+		NATURAL JOIN users WHERE target = ? AND wave = ?});
+
+	$targetquery->execute($raid->{id});
+	my @targets;
+	while (my $target = $targetquery->fetchrow_hashref){
+		my @waves;
+		for my $i (1 .. $raid->{waves}){
+			$claims->execute($target->{id},$i);
+			my $claimers;
+			if ($claims->rows != 0){
+				my $owner = 0;
+				my @claimers;
+				while (my $claim = $claims->fetchrow_hashref){
+					$claim->{username} .= '*' if ($claim->{launched});
+					push @claimers,$claim->{username};
+				}
+				$claimers = join '/', @claimers;
+			}
+			push @waves,{wave => $i, claimers => $claimers};
+		}
+		$target->{waves} = \@waves;
+
+		$target->{scans} = array_expand $target->{scans};
+		push @targets,$target;
+	}
+	$c->stash(targets => \@targets);
+
+	$c->forward('/listAlliances');
+}
+
+sub postraidupdate : Local {
+	my ($self, $c, $raid) = @_;
+	my $dbh = $c->model;
+
+	$dbh->begin_work;
+	$dbh->do(q{UPDATE raids SET message = ?, tick = ?, waves = ? WHERE id = ?}
+		,undef,html_escape $c->req->param('message')
+		,$c->req->param('tick'),$c->req->param('waves')
+		,$raid);
+
+	$c->forward('log',[$raid, 'BC updated raid']);
+
+	my $groups = $dbh->prepare(q{SELECT gid,groupname FROM groups WHERE attack});
+	my $delgroup = $dbh->prepare(q{DELETE FROM raid_access WHERE raid = ? AND gid = ?});
+	my $addgroup = $dbh->prepare(q{INSERT INTO raid_access (raid,gid) VALUES(?,?)});
+
+	$groups->execute();
+	while (my $group = $groups->fetchrow_hashref){
+		my $query;
+		next unless defined $c->req->param($group->{gid});
+		my $command = $c->req->param($group->{gid});
+		if ( $command eq 'remove'){
+			$query = $delgroup;
+		}elsif($command eq 'add'){
+			$query = $addgroup;
+		}
+		if ($query){
+			$query->execute($raid,$group->{gid});
+			$c->forward('log',[$raid, "BC '$command' access for $group->{gid} ($group->{groupname})"]);
+		}
+	}
+	$dbh->commit;
+
+	$c->res->redirect($c->uri_for('edit',$raid));
+}
+
+sub postaddtargets : Local {
+	my ($self, $c, $raid) = @_;
+	my $dbh = $c->model;
+
+	my $sizelimit = $c->req->param('sizelimit');
+	$sizelimit = -1 unless $sizelimit;
+
+	my $targets = $c->req->param('targets');
+	my $addtarget = $dbh->prepare(qq{INSERT INTO raid_targets(raid,planet) (
+		SELECT ?, id FROM current_planet_stats p
+		WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE)
+		AND p.size > ?
+		)});
+	my @errors;
+	while ($targets =~ m/(\d+):(\d+)(?::(\d+))?/g){
+		my ($x,$y,$z) = ($1, $2, $3);
+		eval {
+			$addtarget->execute($raid,$1,$2,$3,$sizelimit);
+		};
+
+		if ($@ =~ /duplicate key value violates unique constraint "raid_targets_raid_key"/){
+			if ($z){
+				push @errors, "Planet already exists: $x:$y:$z";
+			}else{
+				push @errors, "A planet from $x:$y already exists in the raid,"
+					." either remove it or add the planets separately.";
+			}
+		}else {
+			push @errors, $@;
+		}
+	}
+	if ($c->req->param('alliance') =~ /^(\d+)$/ && $1 != 1){
+		my $addtarget = $dbh->prepare(qq{INSERT INTO raid_targets(raid,planet) (
+			SELECT ?,id FROM current_planet_stats p WHERE alliance_id = ? AND p.size > ?)
+			});
+		eval {
+			$addtarget->execute($raid,$1,$sizelimit);
+			$c->forward('log',[$raid,"BC adding alliance $1 to raid"]);
+		};
+		if ($@ =~ /duplicate key value violates unique constraint "raid_targets_raid_key"/){
+			push @errors, "A planet from this alliance has already been added to the raid,"
+				." either remove it or add the planets separately.";
+		}else {
+			push @errors, $@;
+		}
+	}
+
+	$c->flash(errors => \@errors) if @errors;
+	$c->res->redirect($c->uri_for('edit',$raid));
+}
+
+sub posttargetupdates : Local {
+	my ($self, $c, $raid) = @_;
+	my $dbh = $c->model;
+
+	my @errors;
+	my $comment = $dbh->prepare(q{UPDATE raid_targets SET comment = ? WHERE id = ?});
+	my $unclaim =  $dbh->prepare(q{DELETE FROM raid_claims WHERE target = ? AND wave = ?});
+	my $block = $dbh->prepare(q{INSERT INTO raid_claims (target,uid,wave) VALUES(?,-2,?)});
+	my $claim = $dbh->prepare(q{INSERT INTO raid_claims (target,uid,wave)
+		VALUES($1,(SELECT uid FROM users WHERE username ILIKE $3),$2)
+		});
+	my $unblock =  $dbh->prepare(q{DELETE FROM raid_claims
+		WHERE target = ? AND wave = ? AND uid = -2
+		});
+	my $remove = $dbh->prepare(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?});
+	for $_ ($c->req->param()){
+		if (/^comment:(\d+)$/){
+			$comment->execute(html_escape $c->req->param($_),$1);
+		}elsif(/^unclaim:(\d+):(\d+)$/){
+			$unclaim->execute($1,$2);
+			$c->forward('log',[$raid,"BC unclaimed target $1 wave $2."]);
+		}elsif(/^block:(\d+):(\d+)$/){
+			$block->execute($1,$2);
+			$c->forward('log',[$raid,"BC blocked target $1 wave $2."]);
+		}elsif(/^claim:(\d+):(\d+)$/){
+			my $target = $1;
+			my $wave = $2;
+			my @claims = split /[, ]+/, $c->req->param($_);
+			for (@claims){
+				eval {
+					$claim->execute($target,$wave,$_);
+				};
+				if ($@ =~ /null value in column "uid"/){
+					push @errors, "Could not find user: " . html_escape $_;
+				}elsif ($@ =~ /more than one row returned by a subquery/){
+					push @errors, "This matched several users, please refine: " . html_escape $_;
+				}else {
+					push @errors, $@;
+				}
+			}
+			if(@claims){
+				$unblock->execute($target,$wave);
+				$c->forward('log',[$raid,"BC claimed target $1 wave $2 for @claims."]);
+			}
+		}elsif(/^remove:(\d+)$/){
+			$remove->execute($raid,$1);
+			$c->forward('log',[$raid,"BC removed target $1"]);
+		}
+	}
+
+	$c->flash(errors => \@errors) if @errors;
+	$c->res->redirect($c->uri_for('edit',$raid));
+}
+
+sub open : Local {
+	my ($self, $c, $raid) = @_;
+
+	$c->model->do(q{UPDATE raids SET open = TRUE, removed = FALSE WHERE id = ?}
+		,undef,$raid);
+	$c->forward('log',[$raid, "BC opened raid"]);
+
+	$c->res->redirect($c->req->referer);
+}
+
+sub close : Local {
+	my ($self, $c, $raid) = @_;
+
+	$c->model->do(q{UPDATE raids SET open = FALSE WHERE id = ?}
+		,undef,$raid);
+	$c->forward('log',[$raid, "BC closed raid"]);
+
+	$c->res->redirect($c->req->referer);
+}
+
+sub remove : Local {
+	my ($self, $c, $raid) = @_;
+
+	$c->model->do(q{UPDATE raids SET open = FALSE, removed = TRUE WHERE id = ?}
+		,undef,$raid);
+	$c->forward('log',[$raid, "BC removed raid"]);
+
+	$c->res->redirect($c->req->referer);
+}
+
+sub showcoords : Local {
+	my ($self, $c, $raid) = @_;
+
+	$c->model->do(q{UPDATE raids SET released_coords = TRUE WHERE id = ?}
+		,undef,$raid);
+	$c->forward('log',[$raid, "BC released coords"]);
+
+	$c->res->redirect($c->req->referer);
+}
+
+sub hidecoords : Local {
+	my ($self, $c, $raid) = @_;
+
+	$c->model->do(q{UPDATE raids SET released_coords = FALSE WHERE id = ?}
+		,undef,$raid);
+	$c->forward('log',[$raid, "BC hid coords"]);
+
+	$c->res->redirect($c->req->referer);
+}
+
+sub create : Local {
+	my ($self, $c) = @_;
+	$c->stash(waves => 3);
+	my @time = gmtime;
+	$c->stash(landingtick => $c->stash->{TICK} + 24 - $time[2] + 12);
+}
+
+sub postcreate : Local {
+	my ($self, $c) = @_;
+	my $dbh = $c->model;
+
+	my $query = $dbh->prepare(q{INSERT INTO raids (tick,waves,message) VALUES(?,?,?) RETURNING (id)});
+	$query->execute($c->req->param('tick'),$c->req->param('waves')
+		,html_escape $c->req->param('message'));
+	my $raid = $query->fetchrow_array;
+	$c->forward('log',[$raid,"Created raid landing at tick: ".$c->req->param('tick')]);
+	$c->res->redirect($c->uri_for('edit',$raid));
+}
+
 sub log : Private {
 	my ($self, $c, $raid, $message) = @_;
 	my $dbh = $c->model;

@@ -1,0 +1,12 @@
+[% META title = 'Create raid' %]
+<form action="[% c.uri_for('postcreate') %]" method="post">
+	<fieldset> <legend>Create raid</legend>
+		<div class="leftinfo">
+			<p>Landing tick: <input type="text" name="tick" value="[% landingtick %]"></p>
+			<p>Number of waves: <input type="text" name="waves" value="[% waves %]"></p>
+		<p><input type="submit" value="Create"></p>
+		</div>
+		<p>Raid message here</p>
+		<textarea rows="15" cols="40" name="message"></textarea>
+	</fieldset>
+</form>
