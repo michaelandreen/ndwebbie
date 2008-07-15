@@ -1,0 +1,19 @@
+[% META title = 'Def Leeches' %]
+<table>
+	<tr>
+	<th>User</th>
+	<th>Def Points</th>
+	<th>Def Missions</th>
+	<th>Recalled missions</th>
+	<th>Calls</th>
+	</tr>
+[% FOR m IN members %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td>[% m.username %]</td>
+	<td>[% m.defense_points %]</td>
+	<td>[% m.fleets %]</td>
+	<td>[% m.recalled %]</td>
+	<td>[% m.calls %]</td>
+	</tr>
+[% END %]
+</table>

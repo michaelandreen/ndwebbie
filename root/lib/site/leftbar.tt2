@@ -72,7 +72,7 @@
 [% IF c.check_user_roles("dc_menu") %]
 <p>DC menu</p>
 <ul class="linkbar">
-	<li><a href="/defLeeches">Def Leeches</a></li>
+	<li><a href="/calls/defleeches">Def Leeches</a></li>
 	<li><a href="/calls/list">Active calls</a></li>
 	<li><a href="/calls/list/recent">Recent calls</a></li>
 	<li><a href="/calls/list/uncovered">Not covered calls</a></li>

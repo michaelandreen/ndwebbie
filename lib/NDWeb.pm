@@ -77,6 +77,7 @@ __PACKAGE__->deny_access_unless('/calls/list',[qw/calls_list/]);
 __PACKAGE__->deny_access_unless('/calls/postcallcomment',[qw/calls_edit/]);
 __PACKAGE__->deny_access_unless('/calls/postcallupdate',[qw/calls_edit/]);
 __PACKAGE__->deny_access_unless('/calls/postattackerupdate',[qw/calls_edit/]);
+__PACKAGE__->deny_access_unless('/calls/defleeches',[qw/calls_leeches/]);
 __PACKAGE__->deny_access_unless('/raids',[qw/raids_edit/]);
 __PACKAGE__->allow_access_if('/raids/index',1);
 __PACKAGE__->allow_access_if('/raids/view',1);
