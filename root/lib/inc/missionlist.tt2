@@ -1,0 +1,36 @@
+	<table>
+		<tr><th></th><th>Coords</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
+	[% FOR m IN missions %]
+		<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]" onclick="$('#fleet[% m.id %]').toggle()">
+			<td>
+		[% IF m.ships %]
+				<b>&dArr;</b>
+		[% END %]
+			</td><td>
+		[% IF m.planet %]
+				<a href="[% c.uri_for('/stats/planet', m.planet) %]">[% m.coords %]</a>
+		[% END %]
+			</td>
+			<td>[% m.name %]</td>
+			<td class="[% m.mission %]">[% m.mission %]</td>
+			<td>[% m.tick %]</td>
+			<td>[% m.eta %]</td>
+			<td>[% m.amount %]</td>
+			[% IF m.fleetcatch %]
+			<td class="Hostile">FLEETCATCH!!</td>
+			[% END %]
+		</tr>
+		[% IF m.ships %]
+		<tr id="fleet[% m.id %]" class="hidden">
+			<td>
+			<td colspan="5"><table>
+			[% FOR s IN m.ships %]
+				<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+					<td>[% s.ship %]</td><td>[% s.amount %]</td>
+				</tr>
+			[% END %]
+			</table></td>
+		</tr>
+		[% END %]
+	[% END %]
+	</table>

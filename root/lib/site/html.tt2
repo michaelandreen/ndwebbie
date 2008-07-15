@@ -11,5 +11,17 @@
 </head>
  <body>
 [% content %]
+
+<script type="text/javascript">
+<!--
+$(document).ready(function(){
+	$('.hidden').hide();
+	$('a[rel="external"]').click(function() {
+		window.open( $(this).attr('href') );
+		return false;
+	});
+});
+-->
+</script>
 </body>
 </html>

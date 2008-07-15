@@ -23,6 +23,11 @@
 	<li><a href="/rankings/planets">Planet Rankings</a></li>
 	<li><a href="/rankings/alliances">Alliance Rankings</a></li>
 	<li><a href="/rankings/galaxies">Galaxy Rankings</a></li>
+	<li><form action="/stats/find" method="post"><p>
+		<input class="coordsinput" type="text" name="coords" value="[% checkcoords %]">
+		<input class="coordsinput" type="submit" value="Check">
+		</p></form>
+	</li>
 </ul>
 [% IF c.check_user_roles("member_menu") %]
 	[% IF user.attacker %]
@@ -51,10 +56,6 @@
 [% IF user.attacker %]
 <p>Attack menu</p>
 <ul class="linkbar">
-	<li><form action="/check" method="post"><p>
-		<input class="coordsinput" type="text" name="coords" value="[% cords or '1:1:1' %]">
-		<input class="coordsinput" type="submit" value="Check">
-		</p></form></li>
 	<li><a href="/raids">Web raids</a></li>
 </ul>
 <p><input type="button" value="Update target list"

@@ -110,6 +110,7 @@ sub auto : Private {
 	$dbh->do(q{SET timezone = 'GMT'});
 
 	$c->stash(TICK =>$dbh->selectrow_array('SELECT tick()',undef));
+	$c->stash(STICK =>$dbh->selectrow_array('SELECT max(tick) FROM planet_stats',undef));
 	$c->stash->{game}->{tick} = $c->stash->{TICK};
 
 	if ($c->user_exists){

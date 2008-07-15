@@ -26,11 +26,20 @@ INSERT INTO roles VALUES('calls_list');
 INSERT INTO roles VALUES('calls_edit');
 INSERT INTO roles VALUES('raids_info');
 INSERT INTO roles VALUES('raids_edit');
+INSERT INTO roles VALUES('stats_intel');
+INSERT INTO roles VALUES('stats_details');
+INSERT INTO roles VALUES('stats_missions');
+INSERT INTO roles VALUES('stats_scans');
+INSERT INTO roles VALUES('stats_planetdata');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'members');
 INSERT INTO group_roles (gid,role) VALUES(2,'covop');
+INSERT INTO group_roles (gid,role) VALUES(2,'stats_details');
+INSERT INTO group_roles (gid,role) VALUES(2,'stats_missions');
+INSERT INTO group_roles (gid,role) VALUES(2,'stats_scans');
+INSERT INTO group_roles (gid,role) VALUES(2,'stats_planetdata');
 
 INSERT INTO group_roles (gid,role) VALUES(6,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(6,'calls_list');
@@ -45,6 +54,7 @@ INSERT INTO group_roles (gid,role) VALUES(5,'intel_menu');
 INSERT INTO group_roles (gid,role) VALUES(8,'no_fleet_update');
 
 INSERT INTO group_roles (gid,role) VALUES(9,'members_points_nolimit');
+INSERT INTO group_roles (gid,role) VALUES(9,'stats_intel');
 
 INSERT INTO group_roles (gid,role) VALUES(1,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(1,'bc_menu');

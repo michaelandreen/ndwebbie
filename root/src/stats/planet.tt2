@@ -1,0 +1,61 @@
+[% META title = 'Planet stats' %]
+[% PROCESS inc/stats.tt2 %]
+
+[% IF planetdata %]
+<div class="leftinfo">
+<table>
+	<tr><th>Tick</th><th>Type</th><th>Amount</th></tr>
+	[% FOR pd IN planetdata %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td>[% pd.tick %]</td>
+		<td>[% pd.category %] [% pd.name %]</td>
+		<td>[% comma(pd.amount) %]</td>
+	</tr>
+	[% END %]
+</table>
+</div>
+[% END %]
+<div class="leftinfo">
+<table>
+	<tr><th>Tick</th><th>Value</th><th>Gain</th></tr>
+[% FOR v IN values %]
+	<tr>
+		<td>[% v.tick %]</td><td>[% v.value %]</td>
+		<td class="[% v.gain < 0 ? 'Attack' : 'Defend' %]">[% v.gain %]</td>
+	</tr>
+[% END %]
+</table>
+</div>
+<div class="leftinfo">
+<table>
+[% IF scans %]
+	<tr><th>Tick</th><th>Scan</th></tr>
+	[% FOR s IN scans %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td>[% s.tick %]</td>
+		<td><a href="http://game.planetarion.com/showscan.pl?scan_id=[% s.scan_id %]" rel="external">[% s.type %]</a></td>
+</tr>
+	[% END %]
+[% END %]
+	<tr><th>Tick</th><th>Coords</th></tr>
+[% FOR coords IN oldcoords %]
+	<tr>
+		<td>[% coords.tick %]</td>
+		<td>[% coords.x %]:[% coords.y %]:[% coords.z %]</td>
+	</tr>
+[% END %]
+</table>
+</div>
+[% IF outgoings %]
+<div class="leftinfo">
+<p>Outgoing fleets</p>
+	[% PROCESS inc/missionlist.tt2 missions=outgoings %]
+<p>Incoming fleets</p>
+	[% PROCESS inc/missionlist.tt2 missions=incomings %]
+</div>
+[% END %]
+
+<div class="leftinfo">
+<img class="graph" src="[% c.uri_for('/graphs/planetstats',p.id,STICK) %]" alt="stats" height="300" width="500">
+<img class="graph" src="[% c.uri_for('/graphs/planetranks',p.id,STICK) %]" alt="ranks" height="300" width="500">
+</div>

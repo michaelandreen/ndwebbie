@@ -1,44 +1,5 @@
 [% META title = 'Edit call' %]
 
-[% BLOCK missiontable %]
-<table>
-		<tr><th></th><th>Coords</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
-	[% FOR m IN missions %]
-		<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]" onclick="$('#fleet[% m.id %]').toggle()">
-			<td>
-		[% IF m.ships %]
-				<b>&dArr;</b>
-		[% END %]
-			</td><td>
-		[% IF m.planet %]
-				<a href="[% c.uri_for('/stats/planet', m.planet) %]">[% m.coords %]</a>
-		[% END %]
-			</td>
-			<td>[% m.name %]</td>
-			<td class="[% m.mission %]">[% m.mission %]</td>
-			<td>[% m.tick %]</td>
-			<td>[% m.eta %]</td>
-			<td>[% m.amount %]</td>
-			[% IF m.fleetcatch %]
-			<td class="Hostile">FLEETCATCH!!</td>
-			[% END %]
-		</tr>
-		[% IF m.ships %]
-		<tr id="fleet[% m.id %]" class="missionrow">
-			<td>
-			<td colspan="5"><table>
-			[% FOR s IN m.ships %]
-				<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-					<td>[% s.ship %]</td><td>[% s.amount %]</td>
-				</tr>
-			[% END %]
-			</table></td>
-		</tr>
-		[% END %]
-	[% END %]
-	</table>
-[% END %]
-
 <form action="[% c.uri_for('postcallupdate',call.id) %]" method="post">
 <fieldset> <legend>Call details, call# [% call.id %]</legend>
 <table>
@@ -97,10 +58,10 @@
 		<td>[% a.fleet %]</td>
 		<td><input type="checkbox" name="change:[% a.id %]"></td>
 	</tr>
-	<tr id="attacker[% a.id %]" class="missionrow">
+	<tr id="attacker[% a.id %]" class="hidden">
 	<td></td>
 	<td colspan="8">
-	[% PROCESS missiontable missions=a.missions %]
+	[% PROCESS inc/missionlist.tt2 missions=a.missions %]
 	</td></tr>
 [% END %]
 	</table>
@@ -111,10 +72,10 @@
 </form>
 </fieldset>
 <fieldset><legend>Member fleet</legend>
-[% PROCESS missiontable missions=fleets %]
+[% PROCESS inc/missionlist.tt2 missions=fleets %]
 </fieldset>
 <fieldset><legend>Defenders</legend>
-[% PROCESS missiontable missions=defenders %]
+[% PROCESS inc/missionlist.tt2 missions=defenders %]
 </fieldset>
 
 <div>
@@ -130,11 +91,3 @@
 	<input type="submit" value="Submit">
 </fieldset></form>
 </div>
-
-<script type="text/javascript">
-<!--
-$(document).ready(function(){
-	$('.missionrow').hide();
-});
--->
-</script>

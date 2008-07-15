@@ -1,0 +1,85 @@
+<table class="stats">
+	<tr align="center"><th colspan="4">Rank</th>
+	</tr>
+	<tr>
+	<th>Size</th>
+	<th>Score</th>
+	<th>Value</th>
+	<th>XP</th>
+	<th>Coords</th>
+	<th>Planets</th>
+	<th>Size</th>
+	<th>Score</th>
+	<th>Value</th>
+	<th>XP</th>
+	<th>Roided</th>
+	<th>Roiding</th>
+	</tr>
+	<tr align="right" class="odd">
+		[% g.sizerankimg = (g.sizerank_gain_day == 0 ? 'stay' : (g.sizerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% g.sizerank_gain_day %] Today | [% g.sizerank_gain %] Tick">[% g.sizerank %] <img src="/static/images/[% g.sizerankimg %].png" alt="[% g.sizerankimg %]"> </td>
+		[% g.scorerankimg = (g.scorerank_gain_day == 0 ? 'stay' : (g.scorerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% g.scorerank_gain_day %] Today | [% g.scorerank_gain %] Tick">[% g.scorerank %] <img src="/static/images/[% g.scorerankimg %].png" alt="[% g.scorerankimg %]"> </td>
+		[% g.valuerankimg = (g.valuerank_gain_day == 0 ? 'stay' : (g.valuerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% g.valuerank_gain_day %] Today | [% g.valuerank_gain %] Tick">[% g.valuerank %] <img src="/static/images/[% g.valuerankimg %].png" alt="[% g.valuerankimg %]"> </td>
+		[% g.xprankimg = (g.xprank_gain_day == 0 ? 'stay' : (g.xprank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% g.xprank_gain_day %] Today | [% g.xprank_gain %] Tick">[% g.xprank %] <img src="/static/images/[% g.xprankimg %].png" alt="[% g.xprankimg %]"> </td>
+		<td><a href="[% c.uri_for('/stats','galaxy',g.x,g.y) %]">[% g.x %]:[% g.y %]</a></td>
+		[% g.planetsimg = (g.planets_gain_day == 0 ? 'stay' : (g.planets_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% g.planets_gain_day %] Today | [% g.planets_gain %] Tick">[% comma(g.planets) %] <img src="/static/images/[% g.planetsimg %].png" alt="[% g.planetsimg %]"> </td>
+		[% g.sizeimg = (g.size_gain_day == 0 ? 'stay' : (g.size_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% g.size_gain_day %] Today | [% g.size_gain %] Tick">[% comma(g.size) %] <img src="/static/images/[% g.sizeimg %].png" alt="[% g.sizeimg %]"> </td>
+		[% g.scoreimg = (g.score_gain_day == 0 ? 'stay' : (g.score_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(g.score_gain_day) %] Today | [% comma(g.score_gain) %] Tick">[% comma(g.score) %] <img src="/static/images/[% g.scoreimg %].png" alt="[% g.scoreimg %]"> </td>
+		[% g.valueimg = (g.value_gain_day == 0 ? 'stay' : (g.value_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(g.value_gain_day) %] Today | [% comma(g.value_gain) %] Tick">[% comma(g.value) %] <img src="/static/images/[% g.valueimg %].png" alt="[% g.valueimg %]"> </td>
+		[% g.xpimg = (g.xp_gain_day == 0 ? 'stay' : (g.xp_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(g.xp_gain_day) %] Today | [% comma(g.xp_gain) %] Tick">[% comma(g.xp) %] <img src="/static/images/[% g.xpimg %].png" alt="[% g.xpimg %]"> </td>
+		<td>[% g.ticks_roided %]</td>
+		<td>[% g.ticks_roiding %]</td>
+	</tr>
+</table>
+
+<table>
+	<tr align="center"><th colspan="4">Rank</th>
+	</tr>
+	<tr><th>Size</th><th>Score</th><th>Value </th> <th>XP</th>
+		<th>Coords</th><th>Planet</th><th>Race</th>
+		<th>Size</th><th>Score</th><th>Value </th><th>XP</th>
+		[% IF details %]<th>Gov</th><th>Fleet (Resource) value</th>[% END %]
+		[% IF intel %]<th>Nick</th><th>Hit us</th><th>Alliance</th>[% END %]
+	</tr>
+[% FOR p IN planets %]
+	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		[% p.sizerankimg = (p.sizerank_gain_day == 0 ? 'stay' : (p.sizerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% p.sizerank_gain_day %] Today | [% p.sizerank_gain %] Tick">[% p.sizerank %] <img src="/static/images/[% p.sizerankimg %].png" alt="[% p.sizerankimg %]"> </td>
+		[% p.scorerankimg = (p.scorerank_gain_day == 0 ? 'stay' : (p.scorerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% p.scorerank_gain_day %] Today | [% p.scorerank_gain %] Tick">[% p.scorerank %] <img src="/static/images/[% p.scorerankimg %].png" alt="[% p.scorerankimg %]"> </td>
+		[% p.valuerankimg = (p.valuerank_gain_day == 0 ? 'stay' : (p.valuerank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% p.valuerank_gain_day %] Today | [% p.valuerank_gain %] Tick">[% p.valuerank %] <img src="/static/images/[% p.valuerankimg %].png" alt="[% p.valuerankimg %]"> </td>
+		[% p.xprankimg = (p.xprank_gain_day == 0 ? 'stay' : (p.xprank_gain_day < 0 ? 'up' : 'down')) %]
+		<td title="[% p.xprank_gain_day %] Today | [% p.xprank_gain %] Tick">[% p.xprank %] <img src="/static/images/[% p.xprankimg %].png" alt="[% p.xprankimg %]"> </td>
+
+		<td><a href="[% c.uri_for('/stats','planet',p.id) %]">[% p.coords %]</a></td>
+		<td align="center">[% p.ruler %] <b>OF</b> [% p.planet %]</td>
+		<td align="center">[% p.race %]</td>
+		[% p.sizeimg = (p.size_gain_day == 0 ? 'stay' : (p.size_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% p.size_gain_day %] Today | [% p.size_gain %] Tick">[% comma(p.size) %] <img src="/static/images/[% p.sizeimg %].png" alt="[% p.sizeimg %]"> </td>
+		[% p.scoreimg = (p.score_gain_day == 0 ? 'stay' : (p.score_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(p.score_gain_day) %] Today | [% comma(p.score_gain) %] Tick">[% comma(p.score) %] <img src="/static/images/[% p.scoreimg %].png" alt="[% p.scoreimg %]"> </td>
+		[% p.valueimg = (p.value_gain_day == 0 ? 'stay' : (p.value_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(p.value_gain_day) %] Today | [% comma(p.value_gain) %] Tick">[% comma(p.value) %] <img src="/static/images/[% p.valueimg %].png" alt="[% p.valueimg %]"> </td>
+		[% p.xpimg = (p.xp_gain_day == 0 ? 'stay' : (p.xp_gain_day > 0 ? 'up' : 'down')) %]
+		<td title="[% comma(p.xp_gain_day) %] Today | [% comma(p.xp_gain) %] Tick">[% comma(p.xp) %] <img src="/static/images/[% p.xpimg %].png" alt="[% p.xpimg %]"> </td>
+	[% IF details %]
+		<td align="center">[% p.gov %]</td>
+		<td align="center">[% p.fleetvalue %] ([% p.resvalue %])</td>
+	[% END %]
+	[% IF intel %]
+	<td align="center" class="[% p.planet_status %]"><a href="[% c.uri_for('/intel','planet',p.id) %]">[% p.nick %]([% p.planet_stats %])</a></td>
+	<td>[% p.hit_us %]</td>
+	<td align="center" class="[% p.relationship %]">[% p.alliance %]</td>
+	[% END %]
+	</tr>
+[% END %]
+</table>

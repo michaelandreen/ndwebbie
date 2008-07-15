@@ -1,0 +1,6 @@
+[% META title = 'Galaxy stats' %]
+[% PROCESS inc/stats.tt2 %]
+<div class="leftinfo">
+<img class="graph" src="[% c.uri_for('/graphs/galaxystats',g.x,g.y,STICK) %]" alt="stats" height="300" width="500">
+<img class="graph" src="[% c.uri_for('/graphs/galaxyranks',g.x,g.y,STICK) %]" alt="ranks" height="300" width="500">
+</div>
