@@ -79,7 +79,7 @@ FROM (fleets i NATURAL JOIN users u)
 	JOIN current_planet_stats t ON i.target = t.id
 	JOIN current_planet_stats o ON i.sender = o.id
 WHERE $where 
-GROUP BY i.tick,i.mission,t.x,t.y,t.z,o.x,o.y,o.z,i.amount,i.ingal,u.username,t.alliance,o.alliance,t.nick,o.nick
+GROUP BY i.tick,i.mission,t.x,t.y,t.z,o.x,o.y,o.z,i.amount,i.ingal,u.username,t.alliance,o.alliance,t.nick,o.nick,i.sender,i.target
 ORDER BY i.tick DESC, i.mission};
 }
 

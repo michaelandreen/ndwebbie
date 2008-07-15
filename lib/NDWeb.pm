@@ -82,6 +82,7 @@ __PACKAGE__->allow_access_if('/raids/index',1);
 __PACKAGE__->allow_access_if('/raids/view',1);
 __PACKAGE__->allow_access_if('/raids/findRaid',1);
 __PACKAGE__->allow_access_if('/raids/log',1);
+__PACKAGE__->deny_access_unless('/intel',[qw/intel/]);
 
 =head1 NAME
 

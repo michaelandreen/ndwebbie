@@ -1,0 +1,117 @@
+[% META title = 'Intel' %]
+
+<div class="leftinfo">
+<form action="[% c.uri_for('planet',p.id) %]" method="post">
+	<p>Show last <input type="text" name="ticks" value="[% showticks %]"> ticks <input type="submit" value="Show"></p>
+</form>
+<form action="[% c.uri_for('postplanetupdate',p.id) %]" method="post">
+	<table>
+		<tr>
+			<th></th>
+			<th>Value</th>
+			<th>Change?</th>
+		</tr>
+		<tr><td>Nick</td>
+			<td><input type="text" name="nick" value="[% p.nick %]"></td>
+			<td><input type="checkbox" name="cnick"></td>
+		</tr>
+		<tr><td>Channel</td>
+			<td><input type="text" name="channel" value="[% p.channel %]"></td>
+			<td><input type="checkbox" name="cchannel"></td>
+		</tr>
+		<tr><td>Government</td>
+			<td><select name="gov">
+[% FOR gov IN govs %]
+				<option value="[% gov %]" [% IF gov == p.gov %]selected[% END %]> [% gov %]</option>
+[% END %]
+				</select></td>
+			<td><input type="checkbox" name="cgov"></td>
+		</tr>
+		<tr><td>Planet status</td>
+			<td><select name="status">
+[% FOR ps IN planetstatus %]
+				<option value="[% ps %]" [% IF ps == p.planet_status %]selected[% END %]> [% ps %]</option>
+[% END %]
+				</select></td>
+			<td><input type="checkbox" name="cstatus"></td>
+		</tr>
+		<tr><td>Alliance</td>
+			<td><select name="alliance">
+[% FOR a IN alliances %]
+				<option value="[% a.id %]" [% IF a.id == p.alliance_id %]selected[% END %]> [% a.name %]</option>
+[% END %]
+				</select></td>
+			<td><input type="checkbox" name="calliance"></td>
+		</tr>
+	</table>
+	<p><input type="submit" value="Change">
+	</p>
+</form>
+
+[% IF channelusers.size > 0 %]
+<table class="stats">
+	<tr>
+	<th>Coords</th><th>Alliance</th><th>Nick</th><th>Channel</th>
+	</tr>
+	[% FOR cu IN channelusers %]
+	<tr>
+		<td><a href="[% c.uri_for('planet',cu.id) %]">[% cu.coords %]</a></td>
+		<td>[% cu.alliance %]</td><td>[% cu.nick %]</td><td>[% cu.channel %]</td>
+	</tr>
+	[% END %]
+</table>
+[% END %]
+<table class="stats">
+	<tr>
+		<th>Alliance</th><th>Sender</th>
+		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>
+		<th>Ingal</th><th>Reported by</th>
+	</tr>
+[% FOR i IN incoming %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td>[% i.oalliance %]</td>
+	<td><a href="[% c.uri_for('planet',i.sender) %]">[% i.ocoords %]</a></td>
+	<td class="[% i.ingal ? 'ingal' : i.mission %]">[% i.mission %]</td>
+	<td align="center">[% i.landingtick %]</td>
+	<td align="center">[% i.eta %]</td>
+	<td>[% i.amount %]</td>
+	<td>[% i.ingal %]</td>
+	<td>[% i.username %]</td>
+	</tr>
+[% END %]
+</table>
+
+<table class="stats">
+	<tr>
+		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>
+		<th>Target</th><th>Alliance</th>
+		<th>Ingal</th><th>Reported by</th>
+	</tr>
+[% FOR i IN outgoing %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td class="[% i.ingal ? 'ingal' : i.mission %]">[% i.mission %]</td>
+	<td align="center">[% i.landingtick %]</td>
+	<td align="center">[% i.eta %]</td>
+	<td>[% i.amount %]</td>
+	<td><a href="[% c.uri_for('planet',i.target) %]">[% i.tcoords %]</a></td>
+	<td>[% i.talliance %]</td>
+	<td>[% i.ingal %]</td>
+	<td>[% i.username %]</td>
+	</tr>
+[% END %]
+</table>
+</div>
+
+<div class="leftinfo">
+[% FOR post IN posts %]
+<fieldset class="forum-post">
+<legend class="unread:[% post.unread %]"><b>[% post.username %]</b> : [% post.time %]</legend>
+	[% post.message %]
+</fieldset>
+[% END %]
+
+<form action="[% c.uri_for('postplanetcomment', p.id) %]" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
+	<textarea rows="10" cols="60" name="message"></textarea>
+	<input type="submit" value="Submit">
+</fieldset></form>
+</div>

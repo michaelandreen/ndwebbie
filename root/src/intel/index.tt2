@@ -1,0 +1,46 @@
+[% META title = 'Intel' %]
+
+[% IF coordslist %]
+<table class="stats">
+	<tr><th>Coords</th><th>Alliance</th></tr>
+	[% FOR p IN coordslist %]
+	<tr>
+		<td><a href="[% c.uri_for('planet',p.id) %]">[% p.coords %]</a></td>
+		<td>[% p.alliance %]</td>
+	</tr>
+	[% END %]
+</table>
+[% END %]
+
+
+<form action="[% c.uri_for('') %]" method="post">
+	<p>Show last <input type="text" name="ticks" value="[% showticks %]"> ticks <input type="submit" value="Show"></p>
+</form>
+
+<table class="stats">
+	<tr>
+		<th>Alliance</th><th>Sender</th>
+		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>
+		<th>Target</th><th>Alliance</th>
+		<th>Reported by</th>
+	</tr>
+[% FOR i IN intel %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td>[% i.oalliance %]</td>
+	<td><a href="[% c.uri_for('planet',i.sender) %]">[% i.ocoords %]</a></td>
+	<td class="[% i.mission %]">[% i.mission %]</td>
+	<td align="center">[% i.landingtick %]</td>
+	<td align="center">[% i.eta %]</td>
+	<td>[% i.amount %]</td>
+	<td><a href="[% c.uri_for('planet',i.target) %]">[% i.tcoords %]</a></td>
+	<td>[% i.talliance %]</td>
+	<td>[% i.username %]</td>
+	</tr>
+[% END %]
+</table>
+
+<form action="[% c.uri_for('') %]" method="post"><fieldset> <legend>Coords</legend>
+	<p>Paste a list of coords that you want to check here</p>
+	<textarea rows="25" cols="80" name="coords"></textarea>
+	<br><input type="submit" value="Submit">
+</fieldset></form>
