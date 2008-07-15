@@ -5,6 +5,8 @@ use warnings;
 use parent 'Catalyst::Controller';
 
 use ND::Include;
+use Geo::IP;
+
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -40,19 +42,32 @@ sub default : Path {
 
 sub login : Local {
 	my ($self, $c) = @_;
+
 	if ($c->login){
-		$c->res->redirect($c->uri_for('index'));
+		my $gi = Geo::IP->new(GEOIP_STANDARD);
+		my $country = $gi->country_code_by_addr($c->req->address) || '??';
+
+		my $remember = 0;
+		if ($c->req->param('remember')){
+			$c->session_time_to_live( 604800 ); # expire in one week.
+			$remember = 1;
+		}
+		my $log = $c->model->prepare(q{INSERT INTO session_log
+			(uid,time,ip,country,session,remember)
+			VALUES ($1,NOW(),$2,$3,$4,$5)
+		});
+		$log->execute($c->user->id,$c->req->address
+			,$country,$c->sessionid,$remember);
+
+		$c->res->redirect($c->req->referer);
 		return;
 	}
-
-	$c->stash(error => 'Bad password');
-	$c->stash(template => 'index.tt2');
-	$c->forward('index');
 }
 
 sub logout : Local {
 	my ($self, $c) = @_;
 	$c->logout;
+	$c->delete_session("logout");
 	$c->res->redirect($c->uri_for('index'));
 }
 
@@ -124,9 +139,6 @@ sub auto : Private {
 sub access_denied : Private {
 	my ($self, $c, $action) = @_;
 
-	$c->log->debug('moo' . $action);
-
-	# Set the error message
 	$c->stash->{template} = 'access_denied.tt2';
 
 }
@@ -141,6 +153,16 @@ sub end : ActionClass('RenderView') {
 	my ($self, $c) = @_;
 
 	my $dbh = $c ->model;
+
+	if (scalar @{ $c->error } ){
+		if ($c->error->[0] =~ m/Can't call method "id" on an undefined value at/){
+			$c->stash->{template} = 'access_denied.tt2';
+			$c->clear_errors;
+		}elsif ($c->error->[0] =~ m/Missing roles: /){
+			$c->stash->{template} = 'access_denied.tt2';
+			$c->clear_errors;
+		}
+	}
 
 	if ($c->user_exists && $c->res->status == 200){
 		my $fleetupdate = 0;

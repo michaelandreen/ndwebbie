@@ -31,6 +31,8 @@ __PACKAGE__->config->{'Plugin::Authentication'}{'use_session'} = 1;
 __PACKAGE__->config(session => {
 	storage => "/tmp/ndweb-$>/sesession",
 	directory_umask => 077,
+	expires => 300,
+	verify_address => 1,
 });
 __PACKAGE__->config( cache => {
 	backend => {
@@ -58,6 +60,7 @@ __PACKAGE__->setup(qw/
 	Authorization::Roles
 	Authorization::ACL
 	
+	Session::DynamicExpiry
 	Session
 	Session::Store::File
 	Session::State::Cookie

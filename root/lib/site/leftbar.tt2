@@ -14,6 +14,7 @@
 		Username: <input type="text" name="user" value="">
 		Password: <input type="password" name="password" value="">
 		<input type="submit" value="Login">
+		Secure computer: <input style="width:1em" type="checkbox" name="remember">
 		</p>
 	</form>
 	</li>
