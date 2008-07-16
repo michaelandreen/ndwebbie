@@ -39,7 +39,7 @@
 	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/covop">CovOp targets</a></li>
 	<li><a href="/covop/distwhores">Distwhores</a></li>
-	<li><a href="/members/defrequest">Request defense</a></li>
+	<li><a href="/members/ircrequest">IRC request</a></li>
 </ul>
 	[% ELSE %]
 		[% IF c.user.planet %]

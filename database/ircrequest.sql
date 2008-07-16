@@ -1,0 +1,7 @@
+CREATE TABLE irc_requests (
+	id SERIAL PRIMARY KEY,
+	channel TEXT NOT NULL,
+	message TEXT NOT NULL,
+	sent BOOL NOT NULL DEFAULT FALSE,
+	uid INTEGER NOT NULL REFERENCES users(uid)
+);

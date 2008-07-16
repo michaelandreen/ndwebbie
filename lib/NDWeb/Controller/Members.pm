@@ -225,6 +225,26 @@ sub postfleetsupdates : Local {
 	$c->res->redirect($c->uri_for(''));
 }
 
+sub ircrequest : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	$c->stash(reply => $c->flash->{reply});
+	$c->stash(channels => ['def','scan','members']);
+}
+
+sub postircrequest : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $query = $dbh->prepare(q{INSERT INTO irc_requests
+		(uid,channel,message) VALUES($1,$2,$3)
+		});
+	$query->execute($c->user->id,$c->req->param('channel'),$c->req->param('message'));
+
+	$c->flash(reply => "Msg sent to: ".$c->req->param('channel'));
+	$c->res->redirect($c->uri_for('ircrequest'));
+}
 
 sub points : Local {
 	my ( $self, $c, $order ) = @_;
