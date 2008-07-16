@@ -27,6 +27,35 @@ sub index :Path :Args(0) {
     $c->response->body('Matched NDWeb::Controller::Alliances in Alliances.');
 }
 
+sub hostile : Local {
+    my ( $self, $c, $order ) = @_;
+	my $dbh = $c->model;
+
+	my $begintick = 0;
+	my $endtick = $c->stash->{TICK};
+	if ($c->req->param('ticks')){
+		$begintick = $endtick - $c->req->param('ticks');
+	}elsif(defined $c->req->param('begintick') && defined $c->req->param('endtick')){
+		$begintick = $c->req->param('begintick');
+		$endtick = $c->req->param('endtick');
+	}
+
+	my $query = $dbh->prepare(q{
+		SELECT s.alliance_id AS id,s.alliance AS name,count(*) AS hostile_count
+FROM calls c 
+	JOIN incomings i ON i.call = c.id
+	JOIN current_planet_stats s ON i.sender = s.id
+WHERE c.landing_tick - i.eta > $1 and c.landing_tick - i.eta < $2
+GROUP BY s.alliance_id,s.alliance
+ORDER BY hostile_count DESC
+		});
+	$query->execute($begintick,$endtick);
+	$c->stash(alliances => $query->fetchall_arrayref({}) );
+	$c->stash(ticks => $endtick - $begintick);
+	$c->stash(begin_tick => $begintick);
+	$c->stash(end_tick => $endtick);
+}
+
 sub resources : Local {
     my ( $self, $c, $order ) = @_;
 	my $dbh = $c->model;

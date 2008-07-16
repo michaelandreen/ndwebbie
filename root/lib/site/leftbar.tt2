@@ -97,7 +97,7 @@
 <ul class="linkbar">
 	<li><a href="/users">List users</a></li>
 	<li><a href="/alliances">Alliances</a></li>
-	<li><a href="/hostileAlliances">Hostile Alliances</a></li>
+	<li><a href="/alliances/hostile">Hostile Alliances</a></li>
 	<li><a href="/memberIntel">Member Intel</a></li>
 	<li><a href="/alliances/resources">Alliance resources</a></li>
 	<li><a href="/planetNaps">Planet Naps</a></li>

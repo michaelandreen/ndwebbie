@@ -1,0 +1,23 @@
+[% META title = 'Hostile Alliances' %]
+<form action="[% c.uri_for('hostile') %]" method="post"><p>
+	Show last <input style="width: 4em" type="text" name="ticks" value="[% ticks %]"> ticks
+	<input type="submit" value="Submit">
+	</p>
+</form>
+<form action="[% c.uri_for('hostile') %]" method="post"><p>
+	Show hostile counts between <input style="width: 4em" type="text" name="begintick" value="[% begin_tick %]"> and <input style="width: 4em" type="text" name="endtick" value="[% end_tick %]">
+	<input type="submit" value="Submit">
+	</p>
+</form>
+<table class="stats">
+	<tr>
+		<th>Alliance</th>
+		<th>Hostile Counts</th>
+	</tr>
+[% FOR a IN alliances %]
+	<tr class="[% loop.count % 2 ? 'even' : 'odd' %]">
+		<td><a href="[% c.uri_for('edit',a.id) %]">[% a.name %]</a></td>
+		<td>[% a.hostile_count %]</td>
+	</tr>
+[% END %]
+</table>
