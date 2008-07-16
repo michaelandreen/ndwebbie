@@ -1,5 +1,5 @@
 <ul class="linkbar">
-	<li><a href="/index">Main page</a></li>
+	<li><a href="[% c.check_user_roles("member_menu") ? '/members' : '/index' %]">Main page</a></li>
 
 	<li><a href="/forum">Forum</a></li>
 	<li><a href="/forum/search">Forum search</a></li>

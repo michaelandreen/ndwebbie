@@ -1,5 +1,1 @@
 [% META title = 'Main' %]
-<p>
-Hello [% user.name %]
-</p>
-

@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 
+use NDWeb::Include;
+
 =head1 NAME
 
 NDWeb::Controller::Members - Catalyst Controller
@@ -20,6 +22,209 @@ Catalyst Controller.
 =head2 index 
 
 =cut
+
+sub index : Path : Args(0) {
+	my ( $self, $c, $order ) = @_;
+	my $dbh = $c->model;
+
+	$c->stash(error => $c->flash->{error});
+
+	$c->stash(comma => \&comma_value);
+	$c->stash(u => $dbh->selectrow_hashref(q{SELECT planet,defense_points
+			,attack_points,scan_points,humor_points
+			, (attack_points+defense_points+scan_points/20) as total_points
+			, sms,rank,hostmask FROM users WHERE uid = ?
+			},undef,$c->user->id)
+	);
+
+	$c->stash(groups => $dbh->selectrow_array(q{SELECT array_accum(groupname)
+		FROM groups g NATURAL JOIN groupmembers gm
+		WHERE uid = $1
+			},undef,$c->user->id)
+	);
+
+	$c->stash(p => $dbh->selectrow_hashref(q{SELECT id,x,y,z, ruler, planet,race,
+		size, size_gain, size_gain_day,
+		score,score_gain,score_gain_day,
+		value,value_gain,value_gain_day,
+		xp,xp_gain,xp_gain_day,
+		sizerank,sizerank_gain,sizerank_gain_day,
+		scorerank,scorerank_gain,scorerank_gain_day,
+		valuerank,valuerank_gain,valuerank_gain_day,
+		xprank,xprank_gain,xprank_gain_day
+		from current_planet_stats_full p
+			WHERE id = ?
+			},undef,$c->user->planet)
+	);
+
+	my $calls = $dbh->prepare(q{
+		SELECT id,landing_tick,dc,curreta
+			,array_accum(race::text) AS race
+			,array_accum(amount) AS amount
+			,array_accum(eta) AS eta
+			,array_accum(shiptype) AS shiptype
+			,array_accum(coords) AS attackers
+		FROM (SELECT c.id, c.landing_tick
+			,dc.username AS dc, (c.landing_tick - tick()) AS curreta
+			,p2.race, i.amount, i.eta, i.shiptype, p2.alliance
+			,coords(p2.x,p2.y,p2.z)
+			FROM calls c
+				LEFT OUTER JOIN incomings i ON i.call = c.id
+				LEFT OUTER JOIN current_planet_stats p2 ON i.sender = p2.id
+				LEFT OUTER JOIN users dc ON c.dc = dc.uid
+			WHERE c.member = $1 AND c.landing_tick >= tick()
+			GROUP BY c.id, c.landing_tick, dc.username
+				,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z
+			) c
+		GROUP BY id, landing_tick,dc,curreta
+		});
+
+	$calls->execute($c->user->id);
+	$c->stash(calls => $calls->fetchall_arrayref({}) );
+
+	my $query = $dbh->prepare(q{SELECT f.id, coords(x,y,z), target, mission
+		, f.amount, tick, back
+FROM fleets f
+LEFT OUTER JOIN current_planet_stats p ON f.target = p.id
+WHERE NOT ingal AND f.uid = ? AND f.sender = ? AND
+	(back >= ? OR (tick >= tick() -  24 AND name = 'Main'))
+GROUP BY f.id, x,y,z, mission, tick,back,f.amount,f.target
+ORDER BY x,y,z,mission,tick
+		});
+
+	my $ships = $dbh->prepare(q{SELECT ship,amount FROM fleet_ships
+		WHERe id = ? ORDER BY num
+		});
+
+	$query->execute($c->user->id,$c->user->planet,$c->stash->{TICK});
+	my @fleets;
+	while (my $fleet = $query->fetchrow_hashref){
+		my @ships;
+		$ships->execute($fleet->{id});
+		while (my $ship = $ships->fetchrow_hashref){
+			push @ships,$ship;
+		}
+		$fleet->{ships} = \@ships;
+		push @fleets,$fleet;
+	}
+	$c->stash(fleets => \@fleets);
+
+	my $announcements = $dbh->prepare(q{SELECT ft.ftid, u.username,ft.subject,
+		count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts,
+		date_trunc('seconds',max(fp.time)::timestamp) as last_post,
+		min(fp.time)::date as posting_date, ft.sticky
+		FROM forum_threads ft JOIN forum_posts fp USING (ftid)
+			JOIN users u ON u.uid = ft.uid
+			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
+		WHERE ft.fbid = 1
+		GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
+		HAVING count(NULLIF(COALESCE(ft.sticky OR fp.time > ftv.time,TRUE),FALSE)) >= 1
+		ORDER BY sticky DESC,last_post DESC
+		});
+	$announcements->execute($c->user->id);
+	$c->stash(announcements => $announcements->fetchall_arrayref({}) );
+}
+
+sub posthostupdate : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	$dbh->do(q{UPDATE users SET hostmask = ? WHERE uid = ?
+		},undef, html_escape $c->req->param('hostname'), $c->user->id);
+
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub postsmsupdate : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	$dbh->do(q{UPDATE users SET sms = ? WHERE uid = ?
+		},undef, html_escape $c->req->param('sms'), $c->user->id);
+
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub postfleetupdate : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $fleet = $c->req->param('fleet');
+	$fleet =~ s/,//g;
+	my $amount = 0;
+	my @ships;
+	while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+(\d+)/g){
+		$amount += $2;
+		push @ships, [$1,$2];
+	}
+	if ($amount){
+		$dbh->begin_work;
+		eval{
+			my $insert = $dbh->prepare(q{INSERT INTO fleets
+				(uid,sender,name,mission,tick,amount)
+				VALUES (?,?,'Main','Full fleet',tick(),?) RETURNING id});
+			my ($id) = $dbh->selectrow_array($insert,undef,$c->user->id
+				,$c->user->planet,$amount);
+			$insert = $dbh->prepare(q{INSERT INTO fleet_ships
+				(id,ship,amount) VALUES (?,?,?)});
+			for my $s (@ships){
+				unshift @{$s},$id;
+				$insert->execute(@{$s});
+			}
+			$dbh->commit;
+		};
+		if ($@){
+			if ($@ =~ m/insert or update on table "fleet_ships" violates foreign key constraint "fleet_ships_ship_fkey"\s+DETAIL:\s+Key \(ship\)=\(([^)]+)\)/){
+				$c->flash( error => "'$1' is NOT a valid ship");
+			}else{
+				$c->flash( error => $@);
+			}
+			$dbh->rollback;
+		}
+	}else{
+		$c->flash( error => 'Fleet does not contain any ships');
+	}
+
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub postfleetsupdates : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $log = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
+		(SELECT ftid FROM users WHERE uid = $1),$1,$2)
+		});
+	$dbh->begin_work;
+	if ($c->req->param('cmd') eq 'Recall Fleets'){
+		my $updatefleets = $dbh->prepare(q{UPDATE fleets
+			SET back = tick() + (tick() - (tick - eta))
+			WHERE uid = ? AND id = ? AND back > tick()+eta
+		});
+
+		for my $param ($c->req->param()){
+			if ($param =~ /^change:(\d+)$/){
+				$updatefleets->execute($c->user->id,$1);
+				$log->execute($c->user->id,"Member recalled fleet $1");
+			}
+		}
+	}elsif ($c->req->param('cmd') eq 'Change Fleets'){
+		my $updatefleets = $dbh->prepare(q{UPDATE fleets
+			SET back = ? WHERE uid = ? AND id = ?});
+
+		for my $param ($c->req->param()){
+			if ($param =~ /^change:(\d+)$/){
+				my $back = $c->req->param("back:$1");
+				$updatefleets->execute($back,$c->user->id,$1);
+				$log->execute($c->user->id,"Member set fleet $1 to be back tick: $back");
+			}
+		}
+	}
+	$dbh->commit;
+
+	$c->res->redirect($c->uri_for(''));
+}
+
 
 sub points : Local {
 	my ( $self, $c, $order ) = @_;
