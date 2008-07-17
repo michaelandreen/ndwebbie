@@ -1,0 +1,40 @@
+[% META title = 'List Alliances' %]
+
+<table class="stats">
+	<tr>
+		<th>Alliance</th>
+		<th>Kmembers</th>
+		<th>Members</th>
+		<th><a href="[% c.uri_for('list','score') %]">Score</a></th>
+		<th><a href="[% c.uri_for('list','kscore') %]">KScore</a></th>
+		<th><a href="[% c.uri_for('list','scavg') %]">Avg Score</a></th>
+		<th><a href="[% c.uri_for('list','kscavg') %]">KAvg score</a></th>
+		<th><a href="[% c.uri_for('list','size') %]">Size</a></th>
+		<th><a href="[% c.uri_for('list','ksize') %]">KSize</a></th>
+		<th><a href="[% c.uri_for('list','siavg') %]">Avg Size</a></th>
+		<th><a href="[% c.uri_for('list','ksiavg') %]">KAvg size</a></th>
+		<th><a href="[% c.uri_for('list','kxp') %]">XP</a></th>
+		<th><a href="[% c.uri_for('list','kxpavg') %]">XP avg</a></th>
+		<th><a href="[% c.uri_for('list','kvalue') %]">Value</a></th>
+		<th><a href="[% c.uri_for('list','kvalueavg') %]">Val avg</a></th>
+	</tr>
+[% FOR a IN alliances %]
+	<tr align="right" class="[% loop.count % 2 ? 'even' : 'odd' %]">
+		<td align="left"><a href="[% c.uri_for('edit',a.id) %]">[% a.name %]</a></td>
+		<td>[% a.kmem %]</td>
+		<td>[% a.members %]</td>
+		<td>[% comma(a.score) %]</td>
+		<td>[% comma(a.kscore) %]</td>
+		<td>[% comma(a.scavg) %]</td>
+		<td>[% comma(a.kscavg) %]</td>
+		<td>[% comma(a.size) %]</td>
+		<td>[% comma(a.ksize) %]</td>
+		<td>[% comma(a.siavg) %]</td>
+		<td>[% comma(a.ksiavg) %]</td>
+		<td>[% comma(a.kxp) %]</td>
+		<td>[% comma(a.kxpavg) %]</td>
+		<td>[% comma(a.kvalue) %]</td>
+		<td>[% comma(a.kvalavg) %]</td>
+	</tr>
+[% END %]
+</table>

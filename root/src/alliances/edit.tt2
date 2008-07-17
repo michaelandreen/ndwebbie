@@ -1,0 +1,85 @@
+[% META title = 'Edit Alliance' %]
+
+<fieldset> <legend>Alliances: </legend>
+<form action="[% c.uri_for('postallianceupdate',a.id) %]" method="post">
+<div class="leftinfo">
+	<p>Alliance: [% a.name %]</p>
+	<p>Relationship: <select name="relationship">
+[% FOR rel IN ['','Friendly','NAP','Hostile'] %]
+		<option value="[% rel %]"[% IF rel == a.relationship %]selected[% END %]>[% rel %]</option>
+[% END %]
+		</select>
+		<input type="checkbox" name="crelationship"></p>
+	<p>Paste a list of coords that you want to add to this alliance</p>
+	<textarea rows="10" cols="40" name="coords"></textarea>
+	<p class="claimlinks"><input type="submit" value="Submit"></p>
+</div>
+</form>
+<div class="leftinfo">
+<fieldset> <legend></legend>
+<form action="[% c.uri_for('postremoveallplanets',a.id) %]" method="post">
+	<p>Yes, remove all planets <input type="checkbox" name="cremoveall"
+		onclick="$('#removeall').attr('disabled',null)"></p>
+	<p><input type="submit" id='removeall' disabled value="Remove All Planets"></p>
+</form>
+</fieldset>
+</div>
+</fieldset>
+<div class="leftinfo">
+<img class="graph" src="[% c.uri_for('/graphs/alliancevsintel',a.id,STICK) %]" alt="Alliance size and score vs members" height="300" width="500">
+<img class="graph" src="[% c.uri_for('/graphs/avgalliancevsintel',a.id,STICK) %]" alt="Avg alliance size and score vs members" height="300" width="500">
+</div>
+<div class="leftinfo">
+<table class="stats">
+	<tr>
+		<th><a href="[% c.uri_for('edit',a.id,'coords') %]">Coords</a></th>
+		<th>Nick</th>
+		<th><a href="[% c.uri_for('edit',a.id,'hit_us') %]">Hit us</a></th>
+		<th>Planet</th>
+		<th><a href="[% c.uri_for('edit',a.id,'race') %]">Race</a></th>
+		<th><a href="[% c.uri_for('edit',a.id,'sizerank') %]">Size (rank)</a></th>
+		<th><a href="[% c.uri_for('edit',a.id,'scorerank') %]">Score (rank)</a></th>
+		<th><a href="[% c.uri_for('edit',a.id,'valuerank') %]">Value (rank)</a></th>
+		<th><a href="[% c.uri_for('edit',a.id,'xprank') %]">XP (rank)</a></th>
+	</tr>
+[% FOR m IN members %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td><a href="[% c.uri_for('/stats/planet',m.id) %]">[% m.coords %]</a></td>
+		<td class="[% m.planet_status %]"><a href="[% c.uri_for('/intel/planet',m.id) %]">[% m.nick %]([% m.planet_status %])</a></td>
+		<td>[% m.hit_us %]</td>
+		<td>[% m.ruler %] <b>OF</b> [% m.planet %]</td>
+		<td>[% m.race %]</td>
+		<td>[% m.size %] ([% m.sizerank %])</td>
+		<td>[% m.score %] ([% m.scorerank %])</td>
+		<td>[% m.value %] ([% m.valuerank %])</td>
+		<td>[% m.xp %] ([% m.xprank %])</td>
+	</tr>
+[% END %]
+</table>
+</div>
+<div class="leftinfo">
+<form action="[% c.uri_for('edit',a.id,order) %]" method="post">
+	<p>Show last <input type="text" name="ticks" value="[% showticks %]"> ticks <input type="submit" value="Show"></p>
+</form>
+<table class="stats">
+	<tr>
+		<th>Alliance</th><th>Sender</th>
+		<th>Mission</th><th>Landing tick</th><th>ETA</th><th>Amount</th>
+		<th>Target</th><th>Alliance</th>
+		<th>Reported by</th>
+	</tr>
+[% FOR i IN intel %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td>[% i.oalliance %]</td>
+	<td><a href="[% c.uri_for('planet',i.sender) %]">[% i.ocoords %]</a></td>
+	<td class="[% i.mission %]">[% i.mission %]</td>
+	<td align="center">[% i.landingtick %]</td>
+	<td align="center">[% i.eta %]</td>
+	<td>[% i.amount %]</td>
+	<td><a href="[% c.uri_for('planet',i.target) %]">[% i.tcoords %]</a></td>
+	<td>[% i.talliance %]</td>
+	<td>[% i.username %]</td>
+	</tr>
+[% END %]
+</table>
+</div>
