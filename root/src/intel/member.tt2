@@ -1,0 +1,26 @@
+[% META title = 'Member intel' %]
+
+[% BLOCK missionlists %]
+[% FOR l IN lists %]
+		<tr><td class="[% l.class %]">[% l.name %]</td></tr>
+	[% FOR m IN l.missions %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td>[% m.target %]</td>
+		<td align="right">[% m.tick %]</td>
+		<td>[% m.other %]</td>
+	</tr>
+	[% END %]
+[% END %]
+[% END %]
+<table class="boards">
+	<tr>
+		<th>Attack</th><th>Tick</th><th></th>
+	</tr>
+[% PROCESS missionlists lists=attacks %]
+</table>
+<table class="boards">
+	<tr>
+		<th>Defense</th><th>Tick</th><th></th>
+	</tr>
+[% PROCESS missionlists lists=defenses %]
+</table>

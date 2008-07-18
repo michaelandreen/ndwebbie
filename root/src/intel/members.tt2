@@ -1,0 +1,23 @@
+[% META title = 'Member intel' %]
+<table>
+	<tr>
+		<th>Member</th>
+		<th><a href="[% c.uri_for('members','attacks') %]">Attacks</a></th>
+		<th><a href="[% c.uri_for('members','defenses') %]">Defenses</a></th>
+		<th><a href="[% c.uri_for('members','attack_points') %]">Attack Points</a></th>
+		<th><a href="[% c.uri_for('members','defense_points') %]">Defense Points</a></th>
+		<th><a href="[% c.uri_for('members','solo') %]">Solo attacks</a></th>
+		<th><a href="[% c.uri_for('members','bad_def') %]">Def outside ND/Gal</a></th>
+	</tr>
+[% FOR m IN members %]
+	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td align="left" class="[% IF not m.tick OR TICK > m.tick + 60  %]Hostile[% END %]"><a href="[% c.uri_for('member',m.uid) %]">[% m.username %]</a></td>
+		<td>[% m.attacks %]</td>
+		<td>[% m.defenses %]</td>
+		<td>[% m.attack_points %]</td>
+		<td>[% m.defense_points %]</td>
+		<td>[% m.solo %]</td>
+		<td>[% m.bad_def %]</td>
+	</tr>
+[% END %]
+</table>
