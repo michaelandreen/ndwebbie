@@ -5,6 +5,7 @@ use warnings;
 use parent 'Catalyst::Controller';
 
 use ND::Include;
+use Mail::Sendmail;
 
 =head1 NAME
 
@@ -137,6 +138,58 @@ sub findUser : Private {
 	$user = $dbh->selectrow_hashref($query,undef,$user);
 
 	$c->stash(u => $user);
+}
+
+sub mail : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	$c->stash(ok => $c->flash->{ok});
+	$c->stash(error => $c->flash->{error});
+	$c->stash(subject => $c->flash->{subject});
+	$c->stash(message => $c->flash->{message});
+
+	my $groups = $dbh->prepare(q{SELECT gid,groupname FROM groups WHERE gid > 0 ORDER BY gid});
+	$groups->execute;
+	my @groups;
+	push @groups,{gid => -1, groupname => 'Pick a group'};
+	while (my $group = $groups->fetchrow_hashref){
+		push @groups,$group;
+	}
+	$c->stash(groups => \@groups);
+}
+
+sub postmail : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $emails = $dbh->prepare(q{SELECT email FROM users
+		WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = $1)
+			AND email is not null});
+	$emails->execute($c->req->param('group'));
+	my @emails;
+	while (my $email = $emails->fetchrow_hashref){
+		push @emails,$email->{email};
+	}
+
+	my %mail = (
+		smtp => 'ruin.nu',
+		BCC      => (join ',',@emails),
+		From    => 'NewDawn Command <nd@ruin.nu>',
+		'Content-type' => 'text/plain; charset="UTF-8"',
+		Subject => $c->req->param('subject'),
+		Message => $c->req->param('message'),
+	);
+
+	if (sendmail %mail) {
+		$c->flash(ok => );
+	}else {
+		$c->flash(error => $Mail::Sendmail::error);
+		$c->flash(subject => $c->req->param('subject'));
+		$c->flash(message => $c->req->param('message'));
+	}
+
+	$c->res->redirect($c->uri_for('mail'));
 }
 
 =head1 AUTHOR

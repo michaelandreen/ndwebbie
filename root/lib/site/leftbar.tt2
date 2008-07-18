@@ -101,6 +101,6 @@
 	<li><a href="/intel/members">Member Intel</a></li>
 	<li><a href="/alliances/resources">Alliance resources</a></li>
 	<li><a href="/planetNaps">Planet Naps</a></li>
-	<li><a href="/mail">Mail</a></li>
+	<li><a href="/users/mail">Mail</a></li>
 </ul>
 [% END %]

@@ -1,0 +1,17 @@
+[% META title = 'Mail' %]
+
+[% IF ok %]
+<h3>Mail sent successfully</h3>
+<p>[% ok.join(', ') %]</p>
+[% END %]
+
+<form action="[% c.uri_for('postmail') %]" method="post"><fieldset> <legend>Mail</legend>
+	<p>Subject: <input type="text" name="subject" value="[% subject %]"></p>
+	<p>To: <select name="group">
+[% FOR g IN groups %]
+		<option value="[% g.gid %]">[% g.groupname %]</option>
+[% END %]
+	</select></p>
+	<br><textarea rows="20" cols="50" name="message">[% message %]</textarea>
+	<br><input type="submit" name="cmd" value="Submit">
+</fieldset></form>
