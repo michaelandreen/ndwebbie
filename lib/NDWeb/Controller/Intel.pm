@@ -281,6 +281,26 @@ sub member : Local {
 	$c->stash(defenses => \@defenses);
 }
 
+sub naps : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $query = $dbh->prepare(q{SELECT p.id,coords(x,y,z)
+		,ruler, p.planet,race, size, score, value
+		, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 
+			- COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150
+			- COALESCE(ss.total ,(SELECT COALESCE(avg(total),0)
+				FROM structure_scans)::int)*1500 AS fleetvalue
+		,(metal+crystal+eonium)/100 AS resvalue, planet_status,hit_us
+		, alliance,relationship,nick
+		FROM current_planet_stats p
+			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
+			LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
+		WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc
+		});
+	$query->execute;
+	$c->stash(planets => $query->fetchall_arrayref({}) );
+}
 
 =head1 AUTHOR
 

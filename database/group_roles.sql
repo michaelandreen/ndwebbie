@@ -36,6 +36,7 @@ INSERT INTO roles VALUES('stats_planetdata');
 INSERT INTO roles VALUES('intel');
 INSERT INTO roles VALUES('intel_members');
 INSERT INTO roles VALUES('intel_member');
+INSERT INTO roles VALUES('intel_naps');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
@@ -80,6 +81,7 @@ INSERT INTO group_roles (gid,role) VALUES(1,'raids_edit');
 INSERT INTO group_roles (gid,role) VALUES(1,'intel');
 INSERT INTO group_roles (gid,role) VALUES(1,'intel_members');
 INSERT INTO group_roles (gid,role) VALUES(1,'intel_member');
+INSERT INTO group_roles (gid,role) VALUES(1,'intel_naps');
 
 INSERT INTO group_roles (gid,role) VALUES(3,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(3,'bc_menu');
@@ -98,3 +100,4 @@ INSERT INTO group_roles (gid,role) VALUES(3,'raids_edit');
 INSERT INTO group_roles (gid,role) VALUES(3,'intel');
 INSERT INTO group_roles (gid,role) VALUES(3,'intel_members');
 INSERT INTO group_roles (gid,role) VALUES(3,'intel_member');
+INSERT INTO group_roles (gid,role) VALUES(3,'intel_naps');

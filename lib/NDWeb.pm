@@ -90,6 +90,7 @@ __PACKAGE__->allow_access_if('/raids/log',1);
 __PACKAGE__->deny_access_unless('/intel',[qw/intel/]);
 __PACKAGE__->deny_access_unless('/intel/members',[qw/intel_members/]);
 __PACKAGE__->deny_access_unless('/intel/member',[qw/intel_member/]);
+__PACKAGE__->deny_access_unless('/intel/naps',[qw/intel_naps/]);
 
 =head1 NAME
 

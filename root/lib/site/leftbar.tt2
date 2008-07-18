@@ -100,7 +100,7 @@
 	<li><a href="/alliances/hostile">Hostile Alliances</a></li>
 	<li><a href="/intel/members">Member Intel</a></li>
 	<li><a href="/alliances/resources">Alliance resources</a></li>
-	<li><a href="/planetNaps">Planet Naps</a></li>
+	<li><a href="/intel/naps">Planet Naps</a></li>
 	<li><a href="/users/mail">Mail</a></li>
 </ul>
 [% END %]

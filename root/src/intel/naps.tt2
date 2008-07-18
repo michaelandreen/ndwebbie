@@ -1,0 +1,21 @@
+[% META title = 'Planet NAPs' %]
+<table>
+	<tr><th>Coords</th><th>Planet</th><th>Race</th><th>Size (rank)</th><th>Score (rank)</th><th>Value (rank)</th>
+		<th>XP (rank)</th><th>Fleet (Resouce) value</th><th>Nick</th><th>Hit us</th><th>Alliance</th>
+	</tr>
+[% FOR p IN planets %]
+	<tr align="center"  class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td><a href="[% c.uri_for('/stats/planet',p.id) %]">[% p.coords %]</a></td>
+		<td>[% p.ruler %] <b>OF</b> [% p.planet %]</td>
+		<td>[% p.race %]</td>
+		<td>[% p.size %] ([% p.sizerank %])</td>
+		<td>[% p.score %] ([% p.scorerank %])</td>
+		<td>[% p.value %] ([% p.valuerank %])</td>
+		<td>[% p.xp %] ([% p.xprank %])</td>
+		<td>[% p.fleetvalue %] ([% p.resvalue %])</td>
+		<td class="[% p.planet_status %]"><a href="[% c.uri_for('planet',p.id) %]">[% p.nick %]([% p.planet_status %])</a></td>
+		<td>[% p.hit_us %]</td>
+		<td class="[% p.relationship %]">[% p.alliance %]</td>
+	</tr>
+[% END %]
+</table>
