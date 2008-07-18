@@ -21,8 +21,4 @@
    # load up any other configuration items 
    PROCESS config/url.tt2;
 
-   # set defaults for variables, etc.
-   DEFAULT 
-     message = 'There is no message';
-
 -%]
