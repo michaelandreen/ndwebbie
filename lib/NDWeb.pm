@@ -65,6 +65,9 @@ __PACKAGE__->setup(qw/
 	Session::Store::File
 	Session::State::Cookie
 
+	Compress::Gzip
+	Compress::Deflate
+
 	Cache
 	PageCache
 	/);
