@@ -56,6 +56,7 @@ if ($updated){
 	`/var/www/ndawn/scripts/parsegalaxies.pl $updated`;
 	`/var/www/ndawn/scripts/ndrank.pl`;
 	$dbh->do(q{UPDATE misc SET value = ? WHERE id = 'TICK'}, undef, $updated);
+	local $dbh->{Warn} = 0;
 	$dbh->do(q{VACUUM ANALYZE});
 }
 

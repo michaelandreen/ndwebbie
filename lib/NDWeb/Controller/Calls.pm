@@ -57,10 +57,10 @@ sub list : Local {
 			,(0.2*(attack_points/a.attack)+ 0.4*(defense_points/a.defense)
 				+ 0.2*(c.size/a.size) + 0.05*(c.score/a.score)
 				+ 0.15*(c.value/a.value))::Numeric(3,2) AS defprio
-			,array_accum(race::text) AS race
-			,array_accum(amount) AS amount
-			,array_accum(eta) AS eta
-			,array_accum(shiptype) AS shiptype
+			,array_accum(COALESCE(race::text,'')) AS race
+			,array_accum(COALESCE(amount,0)) AS amount
+			,array_accum(COALESCE(eta,0)) AS eta
+			,array_accum(COALESCE(shiptype,'')) AS shiptype
 			,array_accum(COALESCE(alliance,'?')) AS alliance
 			,array_accum(coords) AS attackers
 		FROM (SELECT c.id, p.x,p.y,p.z,p.id AS planet, p.size, p.value, p.score
@@ -329,7 +329,7 @@ sub findCall : Private {
 
 	my $query = $dbh->prepare(q{
 		SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered
-			,open, dc.username AS dc, u.defense_points,c.member
+			,open, dc.username AS dc, u.defense_points,c.member AS uid
 			,u.planet, u.username AS member, u.sms,c.ftid
 		FROM calls c 
 		JOIN users u ON c.member = u.uid
@@ -339,7 +339,7 @@ sub findCall : Private {
 		});
 	$call = $dbh->selectrow_hashref($query,undef,$call);
 
-	$c->assert_user_roles(qw/calls_edit/) unless $c->user->id == $call->{member};
+	$c->assert_user_roles(qw/calls_edit/) unless $c->user->id == $call->{uid};
 	$c->stash(call => $call);
 }
 

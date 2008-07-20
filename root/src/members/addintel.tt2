@@ -1,5 +1,5 @@
 [% META title = 'Add intel and scans' %]
-[% IF scans.size > 0 %]
+[% IF scans.size %]
 <div class="leftinfo">
 <h3>Added the following scans:</h3>
 	[% FOR s IN scans %]
@@ -9,7 +9,7 @@
 </div>
 [% END %]
 
-[% IF intel.size > 0 %]
+[% IF intel.size %]
 <div class="leftinfo">
 <h3>Added the following intel:</h3>
 	[% FOR i IN intel %]

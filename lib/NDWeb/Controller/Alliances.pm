@@ -96,7 +96,7 @@ sub edit : Local {
 	my $ticks = $c->req->param('ticks') || 48;
 	$c->stash(showticks => $ticks);
 
-	my $query = $dbh->prepare(intelquery q{
+	$query = $dbh->prepare(intelquery q{
 			o.alliance AS oalliance ,coords(o.x,o.y,o.z) AS ocoords, i.sender
 			,t.alliance AS talliance,coords(t.x,t.y,t.z) AS tcoords, i.target
 		},q{NOT ingal AND (o.alliance_id = $1 OR t.alliance_id = $1)
@@ -242,12 +242,11 @@ sub resources : Local {
 
 =head1 AUTHOR
 
-A clever guy
+Michael Andreen (harv@ruin.nu)
 
 =head1 LICENSE
 
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
+GPL 2.0, or later.
 
 =cut
 

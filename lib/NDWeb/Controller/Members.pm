@@ -250,7 +250,7 @@ sub points : Local {
 	my ( $self, $c, $order ) = @_;
 	my $dbh = $c->model;
 
-	if ($order =~ /^((?:defense|attack|total|humor|scan|raid)_points)$/){
+	if ($order && $order =~ /^((?:defense|attack|total|humor|scan|raid)_points)$/){
 		$order = "$1 DESC";
 	}else{
 		$order = 'total_points DESC';
@@ -417,7 +417,7 @@ sub postconfirmation : Local {
 			});
 		my @missions;
 		$dbh->begin_work;
-		while ($missions =~ m/([^\n]+)\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)
+		while ($missions && $missions =~ m/([^\n]+)\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)
 			\s+\((?:(\d+)\+)?(\d+)\).*?(?:\d+hrs\s+)?\d+mins?\s+
 			(Attack|Defend|Return|Fake\ Attack|Fake\ Defend)
 			(.*?)

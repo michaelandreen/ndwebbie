@@ -248,9 +248,9 @@ sub edit : Local {
 	$c->stash(removegroups => \@remgroups);
 	$c->stash(addgroups => \@addgroups);
 
-	if ($order =~ /^(score|size|value|xp)rank$/){
+	if ($order && $order =~ /^(score|size|value|xp)rank$/){
 		$order .= " ASC";
-	}elsif ($order eq 'race'){
+	}elsif ($order && $order eq 'race'){
 		$order .= ' ASC';
 	}else {
 		$order .= 'p.x,p.y,p.z';
@@ -534,11 +534,12 @@ sub targetlist : Local {
 
 	$c->stash(comma => \&comma_value);
 	$c->stash(allies => $alliances);
+	$alliances ||= '';
 	my @alliances = split /,/, $alliances;
 
 	$c->forward('listAlliances');
 
-	if ($order =~ /^(sizerank|valuerank|scorerank|xprank|nfvalue|nfvalue2)$/){
+	if ($order && $order =~ /^(sizerank|valuerank|scorerank|xprank|nfvalue|nfvalue2)$/){
 		$order = "$1";
 	}else{
 		$order = "nfvalue";
