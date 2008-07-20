@@ -2,7 +2,7 @@
 
 [% IF ok %]
 <h3>Mail sent successfully</h3>
-<p>[% ok.join(', ') %]</p>
+<p>[% ok.join(', ') | html %]</p>
 [% END %]
 
 <form action="[% c.uri_for('postmail') %]" method="post"><fieldset> <legend>Mail</legend>

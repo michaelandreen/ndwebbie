@@ -182,7 +182,7 @@ sub postmail : Local {
 	);
 
 	if (sendmail %mail) {
-		$c->flash(ok => );
+		$c->flash(ok => \@emails);
 	}else {
 		$c->flash(error => $Mail::Sendmail::error);
 		$c->flash(subject => $c->req->param('subject'));
