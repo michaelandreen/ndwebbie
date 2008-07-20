@@ -10,10 +10,10 @@
 			[% target.landingtick %]</a></td>
 		<td>
 			<input title="Unclaim target" type="button" value="U" class="small" onclick =
-			"$.get('/jsrpc/unclaim/[% target.raid %]//[% target.id %]/[% target.wave %]',{},parseUpdate)">
+			"$.get('/jsrpc/unclaim/[% target.raid %]/0/[% target.id %]/[% target.wave %]',{},parseUpdate)">
 			<input title="[% IF target.joinable %]Disable joinable[% ELSE %]Make target joinable[% END %]"
 				type="button" class="small" value="[% IF target.joinable %]N[% ELSE %]J[% END %]" onclick = 
-			"$.get('/jsrpc/joinable/[% target.raid %]//[% target.id %]/[% target.wave %]/[% target.joinable %]',{},parseUpdate)">
+			"$.get('/jsrpc/joinable/[% target.raid %]/0/[% target.id %]/[% target.wave %]/[% target.joinable %]',{},parseUpdate)">
 		</td>
 	</tr>
 	[% END %]
