@@ -81,6 +81,8 @@ $dbh->pg_savepoint('scans') or die "No savepoint";
 
 my %production = (None => 0, Low => 35, Medium => 65, High => 100);
 while (my $scan = $newscans->fetchrow_hashref){
+	$dbh->pg_release('scans') or die "Couldn't save";
+	$dbh->pg_savepoint('scans') or die "Couldn't save";
 	my $file = get("http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}");
 	next unless defined $file;
 	if ($file =~ /((?:\w| )*) (?:Scan|Probe) on (\d+):(\d+):(\d+) in tick (\d+)/){
@@ -192,8 +194,6 @@ while (my $scan = $newscans->fetchrow_hashref){
 			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}";
 		}
 		$parsedscan->execute($tick,$type,$planet,$scan->{id}) or die $dbh->errstr;
-		$dbh->pg_release('scans') or die "Couldn't save";
-		$dbh->pg_savepoint('scans') or die "Couldn't save";
 		#$dbh->rollback;
 		};
 		if ($@) {
