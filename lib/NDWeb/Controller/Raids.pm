@@ -298,7 +298,7 @@ sub edit : Local {
 	}
 	$c->stash(targets => \@targets);
 
-	$c->forward('/listAlliances');
+	$c->forward('listAlliances');
 }
 
 sub postraidupdate : Local {
@@ -508,7 +508,87 @@ sub postcreate : Local {
 		,html_escape $c->req->param('message'));
 	my $raid = $query->fetchrow_array;
 	$c->forward('log',[$raid,"Created raid landing at tick: ".$c->req->param('tick')]);
+
+	if ($c->req->param('gal') || $c->req->param('target')) {
+		my @gals = $c->req->param('gal');
+		my @targets = $c->req->param('target');
+
+		my $addtarget = $dbh->prepare(q{INSERT INTO raid_targets(raid,planet) (
+			SELECT $1,id FROM current_planet_stats p WHERE (planet_status IN ('','Hostile')
+				AND (relationship IS NULL OR relationship IN ('','Hostile')))
+				AND (id = ANY ($2) OR ( size > $4 AND (x,y) IN (
+					SELECT x,y FROM current_planet_stats WHERE id = ANY ($3)))
+				)
+			)
+		});
+		$addtarget->execute($raid,\@targets,\@gals,$c->req->param('sizelimit'));
+		$c->forward('log',[$raid,"BC added planets (@targets) and the gals for (@gals)"]);
+	}
+
 	$c->res->redirect($c->uri_for('edit',$raid));
+}
+
+sub targetlist : Local {
+	my ($self, $c, $alliances, $order) = @_;
+	my $dbh = $c->model;
+
+	$c->stash(comma => \&comma_value);
+	$c->stash(allies => $alliances);
+	my @alliances = split /,/, $alliances;
+
+	$c->forward('listAlliances');
+
+	if ($order =~ /^(sizerank|valuerank|scorerank|xprank|nfvalue|nfvalue2)$/){
+		$order = "$1";
+	}else{
+		$order = "nfvalue";
+	}
+	$order = "p.$order" if $order =~ /rank$/;
+
+	my $query = $dbh->prepare(q{
+SELECT p.id, coords(p.x,p.y,p.z),p.x,p.y,p.alliance, p.score, p.value, p.size, p.xp,nfvalue, nfvalue - sum(pa.value) AS nfvalue2, p.race
+FROM current_planet_stats p
+	JOIN (SELECT g.x,g.y, sum(p.value) AS nfvalue
+		FROM galaxies g join current_planet_stats p on g.x = p.x AND g.y = p.y
+		WHERE g.tick = (SELECT max(tick) from galaxies)
+			AND (planet_status IN ('','Hostile')
+				AND (relationship IS NULL OR relationship IN ('','Hostile')))
+		GROUP BY g.x,g.y
+	) g ON p.x = g.x AND p.y = g.y
+	JOIN current_planet_stats pa ON pa.x = g.x AND pa.y = g.y
+WHERE p.x <> 200
+	AND p.alliance_id = ANY ($1)
+	AND pa.alliance_id = ANY ($1)
+	AND p.relationship IN ('','Hostile')
+GROUP BY p.id, p.x,p.y,p.z,p.alliance, p.score, p.value, p.size, p.xp, nfvalue,p.race
+	,p.scorerank,p.valuerank,p.sizerank,p.xprank
+ORDER BY
+		} . $order);
+	$query->execute(\@alliances);
+	$c->stash(planets => $query->fetchall_arrayref({}) );
+	$c->forward('create');
+}
+
+sub posttargetalliances : Local {
+	my ($self, $c) = @_;
+
+	$c->res->redirect($c->uri_for('targetlist',join ',',$c->req->param('alliances')));
+}
+
+sub listAlliances : Private {
+	my ($self, $c) = @_;
+	my @alliances;
+	my $query = $c->model->prepare(q{SELECT id,name FROM alliances
+		WHERE relationship IN ('','Hostile')
+			AND id IN (SELECT alliance_id FROM planets)
+		 ORDER BY LOWER(name)
+		});
+	$query->execute;
+	push @alliances,{id => -1, name => ''};
+	while (my $ally = $query->fetchrow_hashref){
+		push @alliances,$ally;
+	}
+	$c->stash(alliances => \@alliances);
 }
 
 sub log : Private {

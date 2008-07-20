@@ -1,0 +1,56 @@
+[% META title = 'Target List' %]
+
+<form action="[% c.uri_for('posttargetalliances',raid.id) %]" method="post">
+	<fieldset> <legend>Pick alliances</legend>
+		<select name="alliances" multiple size="5">
+		[% FOR a IN alliances %]
+				<option value="[% a.id %]" [% IF selected %]selected="selected"[% END %]>[% a.name %]</option>
+		[% END %]
+			</select>
+			<br><input type="submit" value="Show">
+	</fieldset>
+</form>
+
+<form action="[% c.uri_for('postcreate') %]" method="post">
+<table class="stats">
+	<tr>
+		<th>Coords</th>
+		<th>Alliance</th>
+		<th>Race</th>
+		<th><a href="[% c.uri_for('targetlist',allies,'scorerank') %]">Score</a></th>
+		<th><a href="[% c.uri_for('targetlist',allies,'valuerank') %]">Value</a></th>
+		<th><a href="[% c.uri_for('targetlist',allies,'xprank') %]">XP</a></th>
+		<th><a href="[% c.uri_for('targetlist',allies,'sizerank') %]">Size</a></th>
+		<th><a href="[% c.uri_for('targetlist',allies,'nfvalue') %]">NF Value</a></th>
+		<th><a href="[% c.uri_for('targetlist',allies,'nfvalue2') %]">NF Value - Ally Value</a></th>
+		<th>Add to raid</th>
+		<th>Add whole gal</th>
+	</tr>
+[% x = 0; y = 0; %]
+[% FOR p IN planets %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd ' %]">
+		<td><a href="[% c.uri_for('/stats/planet',p.id) %]">[% p.coords %]</a></td>
+		<td>[% p.alliance %]</td>
+		<td>[% p.race %]</td>
+		<td>[% comma(p.score) %]</td>
+		<td>[% comma(p.value) %]</td>
+		<td>[% comma(p.xp) %]</td>
+		<td>[% comma(p.size) %]</td>
+		<td>[% comma(p.nfvalue) %]</td>
+		<td>[% comma(p.nfvalue2) %]</td>
+		<td><input type="checkbox" name="target" value="[% p.id %]"></td>
+	[% IF x != p.x OR y != p.y %]
+		[% x = p.x; y = p.y; %]
+		<td><input type="checkbox" name="gal" value="[% p.id %]"> [% p.x %]:[% p.y %]</td>
+	[% END %]
+	</tr>
+[% END %]
+</table>
+<p>Landing tick: <input type="text" name="tick" value="[% landingtick %]"></p>
+<p>Number of waves: <input type="text" name="waves" value="[% waves %]"></p>
+<p>Sizelimit: <input type="text" name="sizelimit" value="0"></p>
+
+<p>Raid message here</p>
+<p><textarea rows="15" cols="40" name="message"></textarea></p>
+<p><input type="submit" value="Create raid"></p>
+</form>
