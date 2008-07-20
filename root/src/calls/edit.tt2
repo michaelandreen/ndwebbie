@@ -48,7 +48,7 @@
 [% FOR a IN attackers %]
 	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
 		<td><input type="button" onclick="$('#attacker[% a.id %]').toggle()" value="&dArr;" title="Show fleets"></td>
-		<td><a href="[% c.uri_for('/stats/planet',a.id) %]">[% a.coords %]</a></td>
+		<td><a href="[% c.uri_for('/stats/planet',a.planet) %]">[% a.coords %]</a></td>
 		<td class="[% a.planet_status %]">[% a.planet_status %]</td>
 		<td class="[% a.relationship %]">[% a.alliance %] ([% a.relationship %])</td>
 		<td>[% a.race %]</td>

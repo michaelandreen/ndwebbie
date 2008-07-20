@@ -196,7 +196,6 @@ sub edit : Local {
 			}
 			push @missions,$mission;
 		}
-		delete $attacker->{planet};
 		$attacker->{missions} = \@missions;
 		push @attackers,$attacker;
 	}
