@@ -80,20 +80,22 @@ __PACKAGE__->deny_access_unless('/graphs/alliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/graphs/avgalliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/members',[qw/members/]);
 __PACKAGE__->deny_access_unless('/covop',[qw/covop/]);
-__PACKAGE__->deny_access_unless('/calls/list',[qw/calls_list/]);
-__PACKAGE__->deny_access_unless('/calls/postcallcomment',[qw/calls_edit/]);
-__PACKAGE__->deny_access_unless('/calls/postcallupdate',[qw/calls_edit/]);
-__PACKAGE__->deny_access_unless('/calls/postattackerupdate',[qw/calls_edit/]);
-__PACKAGE__->deny_access_unless('/calls/defleeches',[qw/calls_leeches/]);
+__PACKAGE__->deny_access_unless('/calls',[qw/calls_edit/]);
+__PACKAGE__->allow_access_if('/calls/index',[qw/calls_list/]);
+__PACKAGE__->allow_access_if('/calls/list',[qw/calls_list/]);
+__PACKAGE__->allow_access_if('/calls/edit',[qw/members/]);
 __PACKAGE__->deny_access_unless('/raids',[qw/raids_edit/]);
-__PACKAGE__->allow_access_if('/raids/index',1);
-__PACKAGE__->allow_access_if('/raids/view',1);
-__PACKAGE__->allow_access_if('/raids/findRaid',1);
-__PACKAGE__->allow_access_if('/raids/log',1);
+__PACKAGE__->allow_access_if('/raids/index',[qw//]);
+__PACKAGE__->allow_access_if('/raids/view',[qw//]);
+__PACKAGE__->allow_access_if('/raids/findRaid',[qw//]);
+__PACKAGE__->allow_access_if('/raids/log',[qw//]);
 __PACKAGE__->deny_access_unless('/intel',[qw/intel/]);
 __PACKAGE__->deny_access_unless('/intel/members',[qw/intel_members/]);
 __PACKAGE__->deny_access_unless('/intel/member',[qw/intel_member/]);
 __PACKAGE__->deny_access_unless('/intel/naps',[qw/intel_naps/]);
+__PACKAGE__->deny_access_unless('/jsrpc',[qw//]);
+__PACKAGE__->deny_access_unless('/forum/allUnread',[qw//]);
+__PACKAGE__->deny_access_unless('/settings',[qw//]);
 
 =head1 NAME
 
