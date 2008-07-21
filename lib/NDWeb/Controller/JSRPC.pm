@@ -187,10 +187,9 @@ sub listTargets : Local {
 	$c->forward('/listTargets');
 }
 
-sub access_denied : Local {
+sub access_denied : Private {
 	my ($self, $c) = @_;
-
-	$c->stash(template => 'jsrcp/access_denied.tt2');
+	$c->stash(template => 'jsrpc/access_denied.tt2');
 }
 
 sub assertTarget : Private {
