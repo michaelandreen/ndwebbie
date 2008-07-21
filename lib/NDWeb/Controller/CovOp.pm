@@ -25,12 +25,14 @@ sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
 	$c->stash( where => q{AND MaxResHack > 130000
 		ORDER BY minalert ASC,MaxResHack DESC});
+	$c->forward('list');
 }
 
 sub distwhores : Local {
 	my ( $self, $c ) = @_;
 	$c->stash( where =>  qq{AND distorters > 0
 		ORDER BY distorters DESC, minalert ASC});
+	$c->forward('list');
 }
 
 sub marktarget : Local {
@@ -43,7 +45,7 @@ sub marktarget : Local {
 	$c->res->redirect($c->req->referer);
 }
 
-sub end : Private {
+sub list : Private {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
@@ -75,7 +77,6 @@ sub end : Private {
 	$c->stash(targets => \@targets);
 
 	$c->stash(template => 'covop/index.tt2');
-	$c->forward('/end');
 }
 =head1 AUTHOR
 
