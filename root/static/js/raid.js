@@ -57,6 +57,9 @@ function parseUpdate(xml){
 	if ($('targetlist',xml).text()){
 		$('#targets').empty().html($('targetlist',xml).text());
 	}
+	if ($('noaccess',xml).text()){
+		alert($('noaccess',xml).text());
+	}
 }
 
 

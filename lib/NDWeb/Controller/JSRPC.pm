@@ -187,6 +187,12 @@ sub listTargets : Local {
 	$c->forward('/listTargets');
 }
 
+sub access_denied : Local {
+	my ($self, $c) = @_;
+
+	$c->stash(template => 'jsrcp/access_denied.tt2');
+}
+
 sub assertTarget : Private {
 	my ($self, $c, $raid, $from, $target, $wave) = @_;
 	my $dbh = $c->model;
@@ -207,6 +213,16 @@ sub assertTarget : Private {
 sub end : ActionClass('RenderView') {
 	my ($self,$c) = @_;
 	$c->res->content_type('application/xml');
+
+	if (scalar @{ $c->error } ){
+		if ($c->error->[0] =~ m/Can't call method "id" on an undefined value at/){
+			$c->stash->{template} = 'jsrpc/access_denied.tt2';
+			$c->clear_errors;
+		}elsif ($c->error->[0] =~ m/Missing roles: /){
+			$c->stash->{template} = 'jsrpc/access_denied.tt2';
+			$c->clear_errors;
+		}
+	}
 }
 
 =head1 AUTHOR
