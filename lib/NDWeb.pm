@@ -52,6 +52,7 @@ __PACKAGE__->setup(qw/
 	-Debug
 	ConfigLoader
 	Static::Simple
+	Unicode
 
 	Authentication
 	Authentication::Store::NDWeb
