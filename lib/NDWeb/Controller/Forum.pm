@@ -36,6 +36,7 @@ sub index :Path :Args(0) {
 				LEFT OUTER JOIN forum_posts fp USING (ftid)
 				LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv USING (ftid)
 			WHERE EXISTS (SELECT fbid FROM forum_access WHERE fbid = fb.fbid AND gid IN (SELECT groups($1)))
+				OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $1)
 			GROUP BY fcid,category,fb.fbid, fb.board
 			ORDER BY fcid,fb.fbid
 		});
@@ -67,8 +68,9 @@ sub allUnread : Local {
 			JOIN forum_posts fp USING (ftid) 
 			JOIN users u ON u.uid = ft.uid
 			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
-		WHERE fbid > 0 AND
-			fb.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1)))
+		WHERE (fbid > 0 AND
+				fb.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1)))
+			) OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $1)
 		GROUP BY fcid,category,fbid,board,ft.ftid, ft.subject,ft.sticky,u.username
 		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= 1 
 		ORDER BY fcid,fbid,sticky DESC,last_post DESC
@@ -127,9 +129,10 @@ sub search : Local {
 				JOIN forum_threads ft USING (fbid)
 				JOIN forum_posts fp USING (ftid)
 				JOIN users u ON fp.uid = u.uid
-			WHERE fb.fbid IN (SELECT fbid FROM forum_access 
-					WHERE gid IN (SELECT groups($1)))
-				AND fp.textsearch @@@ to_tsquery($2)
+			WHERE (fb.fbid IN (SELECT fbid FROM forum_access
+						WHERE gid IN (SELECT groups($1)))
+					OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $1)
+				) AND fp.textsearch @@@ to_tsquery($2)
 			ORDER BY rank DESC
 		});
 		eval {
@@ -162,10 +165,13 @@ sub board : Local {
 		,date_trunc('seconds',max(fp.time)::timestamp) as last_post
 		,min(fp.time)::date as posting_date, ft.sticky
 		FROM forum_threads ft 
-			JOIN forum_posts fp USING (ftid) 
+			JOIN forum_posts fp USING (ftid)
 			JOIN users u ON u.uid = ft.uid
 			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
-		WHERE ft.fbid = $1
+		WHERE ft.fbid = $1 AND (
+			ft.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($2)))
+			OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $2)
+			)
 		GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
 		ORDER BY sticky DESC,last_post DESC
 	});
@@ -208,7 +214,11 @@ sub thread : Local {
 	my $dbh = $c->model;
 
 	$c->forward('findThread');
-	$c->forward('findPosts') if $c->stash->{thread};
+	unless ($c->stash->{thread}){
+		$c->stash(template => 'access_denied.tt2');
+		return;
+	}
+	$c->forward('findPosts');
 	$c->forward('markThreadAsRead') if $c->user_exists;
 }
 
@@ -217,7 +227,7 @@ sub findPosts :Private {
 	my $dbh = $c->model;
 
 	my $posts = $dbh->prepare(q{
-		SELECT u.username,date_trunc('seconds',fp.time::timestamp) AS time
+		SELECT u.uid,u.username,date_trunc('seconds',fp.time::timestamp) AS time
 			,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
 		FROM forum_threads ft
 			JOIN forum_posts fp USING (ftid)
@@ -378,13 +388,17 @@ sub setSticky : Local {
 sub findThread : Private {
 	my ( $self, $c, $thread ) = @_;
 	my $dbh = $c->model;
-	my $findThread = $dbh->prepare(q{SELECT ft.ftid,ft.subject, bool_or(fa.post) AS post
-		, bool_or(fa.moderate) AS moderate,ft.fbid,fb.board,fb.fcid,ft.sticky,fc.category
+	my $findThread = $dbh->prepare(q{SELECT ft.ftid,ft.subject
+		,COALESCE(bool_or(fa.post),true) AS post, bool_or(fa.moderate) AS moderate
+		,ft.fbid,fb.board,fb.fcid,ft.sticky,fc.category
 		FROM forum_boards fb
-			NATURAL JOIN forum_access fa
 			NATURAL JOIN forum_threads ft
 			NATURAL JOIN forum_categories fc
-		WHERE ft.ftid = $1 AND gid IN (SELECT groups($2))
+			LEFT OUTER JOIN (SELECT * FROM forum_access
+				WHERE gid IN (SELECT groups($2))
+			) fa USING (fbid)
+		WHERE ft.ftid = $1 AND (fa.post IS NOT NULL
+			OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $2))
 		GROUP BY ft.ftid,ft.subject,ft.fbid,fb.board,fb.fcid,ft.sticky,fc.category
 	});
 	$thread = $dbh->selectrow_hashref($findThread,undef,$thread,$c->stash->{UID});
@@ -396,11 +410,12 @@ sub findBoard : Private {
 	my $dbh = $c->model;
 
 	my $boards = $dbh->prepare(q{SELECT fb.fbid,fb.board, bool_or(fa.post) AS post, bool_or(fa.moderate) AS moderate,fb.fcid, fc.category
-			FROM forum_boards fb 
-				NATURAL JOIN forum_access fa
+			FROM forum_boards fb
 				NATURAL JOIN forum_categories fc
-			WHERE fb.fbid = $1 AND
-				gid IN (SELECT groups($2))
+				LEFT OUTER JOIN (SELECT * FROM forum_access
+					WHERE fbid = $1 AND gid IN (SELECT groups($2))
+				) fa USING (fbid)
+			WHERE fb.fbid = $1
 			GROUP BY fb.fbid,fb.board,fb.fcid,fc.category
 		});
 	$board = $dbh->selectrow_hashref($boards,undef,$board,$c->stash->{UID});

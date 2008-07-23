@@ -172,7 +172,8 @@ sub end : ActionClass('RenderView') {
 			$fleetupdate = 0 unless defined $fleetupdate;
 		}
 
-		my ($unread,$newposts) = $dbh->selectrow_array(unread_query,undef,$c->user->id) or die $dbh->errstr;
+		my ($unread,$newposts) = $dbh->selectrow_array(q{SELECT * FROM unread_posts($1)}
+			,undef,$c->user->id);
 
 		$c->stash(user => {
 			id => $c->user->id,
