@@ -218,6 +218,11 @@ sub thread : Local {
 		$c->stash(template => 'access_denied.tt2');
 		return;
 	}
+	my $query = $dbh->prepare(q{SELECT uid,username FROM users u
+		JOIN forum_priv_access fta USING (uid) WHERE fta.ftid = $1});
+	$query->execute($thread);
+	$c->stash(access => $query->fetchall_arrayref({}) );
+	$c->forward('findUsers') if $c->stash->{thread}->{moderate};
 	$c->forward('findPosts');
 	$c->forward('markThreadAsRead') if $c->user_exists;
 }
@@ -383,6 +388,69 @@ sub setSticky : Local {
 	$dbh->do(q{UPDATE forum_threads SET sticky = $2 WHERE ftid = $1}
 		, undef,$thread, $sticky);
 	$c->res->redirect($c->uri_for('thread',$thread));
+}
+
+sub postthreadaccess : Local {
+	my ( $self, $c, $thread) = @_;
+	my $dbh = $c->model;
+
+	$c->forward('findThread');
+	$dbh->begin_work;
+	unless ($c->stash->{thread}->{moderate}){
+		$c->acl_access_denied('test',$c->action,'No moderator access to board.')
+	}
+	if ($c->req->param('access')){
+		$c->req->parameters->{access} = [$c->req->parameters->{access}]
+			unless ref $c->req->parameters->{access} eq 'ARRAY';
+		my $query = $dbh->prepare(q{DELETE From forum_priv_access
+			WHERE ftid = $1 AND uid = ANY ($2)});
+		$query->execute($thread,$c->req->parameters->{access});
+		$dbh->do(q{INSERT INTO forum_posts (ftid,uid,message)
+			VALUES((SELECT ftid FROM users WHERE uid = $1),$1,$2)
+			}, undef, $c->user->id
+			,"Removed access on thread $thread for : @{$c->req->parameters->{access}}");
+	}
+	if ($c->req->param('uid')){
+		$c->forward('addaccess');
+	}
+	$dbh->commit;
+	$c->res->redirect($c->uri_for('thread',$thread));
+}
+
+sub removeownthreadaccess : Local {
+	my ( $self, $c, $thread) = @_;
+	my $dbh = $c->model;
+	$dbh->do(q{DELETE FROM forum_priv_access WHERE uid = $1 AND ftid = $2}
+		,undef,$c->user->id,$thread);
+	$c->res->redirect($c->uri_for('allUnread'));
+}
+
+sub addaccess : Private {
+	my ( $self, $c, $thread) = @_;
+	my $dbh = $c->model;
+
+	$c->req->parameters->{uid} = [$c->req->parameters->{uid}]
+		unless ref $c->req->parameters->{uid} eq 'ARRAY';
+	my $query = $dbh->prepare(q{INSERT INTO forum_priv_access (ftid,uid)
+		(SELECT $1,uid FROM users u WHERE uid = ANY ($2) AND NOT uid
+			IN (SELECT uid FROM forum_priv_access WHERE ftid = $1))});
+	$query->execute($thread,$c->req->parameters->{uid});
+	$dbh->do(q{INSERT INTO forum_posts (ftid,uid,message)
+		VALUES((SELECT ftid FROM users WHERE uid = $1),$1,$2)
+		}, undef, $c->user->id
+		,"Gave access on thread $thread to : @{$c->req->parameters->{uid}}");
+}
+
+sub findUsers : Private {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $query = $dbh->prepare(q{SELECT uid,username FROM users
+		WHERE uid > 0 AND uid IN (SELECT uid FROM groupmembers)
+		ORDER BY LOWER(username)});
+	$query->execute;
+
+	$c->stash(users => $query->fetchall_arrayref({}) );
 }
 
 sub findThread : Private {

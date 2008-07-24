@@ -26,3 +26,36 @@
 	<input type="submit" name="cmd" value="Preview">
 </fieldset></form>
 [% END %]
+
+[% IF access.size > 0 %]
+[% hasaccess = 0 %]
+<p>The following ppl have access to this thread: [% FOR a IN access %]
+		[% IF a.uid == UID; hasaccess = 1; END %]
+[% a.username %]
+	[% END %]</p>
+	[% IF hasaccess %]
+	<p><a href="[% c.uri_for('removeownthreadaccess',thread.ftid) %]">Remove your access</a></p>
+	[% END %]
+[% END %]
+
+[% IF thread.moderate %]
+<form action="[% c.uri_for('postthreadaccess',thread.ftid) %]#NewPosts" method="post">
+<fieldset class="forum-post"> <legend>Change thread access</legend>
+<table>
+	<tr><th>Add</th><th>Remove</th></tr>
+	<tr>
+		<td><select name="uid" multiple size="5">
+	[% FOR u IN users %]
+			<option value="[% u.uid %]">[% u.username %]</option>
+	[% END %]
+		</select></td>
+		<td><select name="access" multiple size="5">
+	[% FOR u IN access %]
+			<option value="[% u.uid %]">[% u.username %]</option>
+	[% END %]
+		</select></td>
+	</tr>
+</table>
+<input type="submit" name="cmd" value="Change access">
+</fieldset></form>
+[% END %]
