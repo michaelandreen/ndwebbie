@@ -97,11 +97,16 @@ while (my $scan = $newscans->fetchrow_hashref){
 			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
 			$delscan->execute($scan->{id});
 			$addpoints->execute(-1,$scan->{uid}) if $scan->{uid} > 0;
-			die "Duplicate scan: $scan->{id} http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
+			warn "Duplicate scan: $scan->{id} http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
+			next;
 		}
 		my ($planet) = $dbh->selectrow_array($findplanet,undef,$x,$y,$z,$tick);
 		unless ($planet){
 			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
+			if ( $x == 0 && $y == 0 && $z == 0 ){
+				$delscan->execute($scan->{id});
+				$addpoints->execute(-1,$scan->{uid}) if $scan->{uid} > 0;
+			}
 			next;
 		}
 		my $scantext = "";
