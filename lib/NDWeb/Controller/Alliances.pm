@@ -84,7 +84,7 @@ sub edit : Local {
 	$order .= ' DESC' if $order eq 'hit_us';
 
 	my $members = $dbh->prepare(q{
-		SELECT coords(x,y,z), nick, ruler, planet, race, size, score, value, xp
+		SELECT id, coords(x,y,z), nick, ruler, planet, race, size, score, value, xp
 			,planet_status,hit_us, sizerank, scorerank, valuerank, xprank
 		FROM current_planet_stats p
 		WHERE p.alliance_id = ?
