@@ -5,6 +5,7 @@
 	<li><a href="/forum/search">Forum search</a></li>
 [% IF user %]
 	<li><a href="/forum/allUnread">New posts [% IF user.unreadposts %](<span class="[% IF user.newposts %]newposts[% ELSE %]unreadposts[% END %]">[% user.unreadposts %]</span>)[% END %]</a></li>
+	<li><a href="/forum/privmsg">Priv msg</a></li>
 	<li><a href="/settings">Settings</a></li>
 	<li><a href="/logout">Log out ([% c.user.username %])</a></li>
 [% ELSE %]

@@ -425,6 +425,31 @@ sub removeownthreadaccess : Local {
 	$c->res->redirect($c->uri_for('allUnread'));
 }
 
+sub privmsg : Local {
+	my ( $self, $c, $uid ) = @_;
+
+	$uid ||= 0;
+	$c->stash(uid => $uid);
+
+	$c->forward('findUsers');
+}
+
+sub postprivmsg : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	$dbh->begin_work;
+	$c->forward('insertThread',[-1999]);
+
+	$c->req->parameters->{uid} = [$c->req->parameters->{uid}]
+		unless ref $c->req->parameters->{uid} eq 'ARRAY';
+	push @{$c->req->parameters->{uid}}, $c->user->id;
+	$c->forward('addaccess',[$c->stash->{thread}]);
+
+	$c->forward('addPost',[$c->stash->{thread}]);
+	$dbh->commit;
+}
+
 sub addaccess : Private {
 	my ( $self, $c, $thread) = @_;
 	my $dbh = $c->model;

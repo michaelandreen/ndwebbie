@@ -1,0 +1,45 @@
+[% META title = 'Private Message' %]
+
+<form action="[% c.uri_for('postprivmsg') %]" method="post" id="privmsg"><fieldset class="forum-post">
+<legend>New Private Message</legend>
+	<p><span id="recadd">Receiver(s): </span><select name="uid" multiple size="5">
+[% FOR u IN users %]
+		<option value="[% u.uid %]" [% IF uid == u.uid %]selected[% END %]>[% u.username %]</option>
+[% END %]
+		</select></p>
+	<div id="receivers"></div>
+	<p>Subject: <input type="text" name="subject" value=""></p>
+	<textarea rows="25" cols="60" name="message"></textarea>
+	<br>
+	<input type="submit" name="cmd" value="Submit">
+	<input type="submit" name="cmd" value="Preview">
+</fieldset>
+</form>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$('select').attr({name:'u', size: 1, multiple: null}).after($('<input type="button" id="add" value="Add">'));
+	$('#recadd').text('Users: ');
+	$('#receivers').append('Receiver(s):');
+
+	$('#add').click(function(){
+		var u = $('option:selected');
+		$('#receivers').append($('<p>'+u.text()+': <input type="checkbox" name="uid" checked value='+u.val()+'><\/p>'));
+	});
+
+	$('#privmsg').submit(function(){
+		if(!$('#privmsg :checkbox[@name=uid][@checked]').val()){
+			alert('You need to add a receiver.');
+			return false;
+		}
+		if($('#privmsg :input[@name=subject]').val() == ''){
+			alert('You need to write a subject');
+			return false;
+		}
+		if($('#privmsg :input[@name=message]').val() == ''){
+			alert('You need to write a message');
+			return false;
+		}
+	});
+});
+</script>
