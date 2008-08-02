@@ -1,5 +1,5 @@
 [% META title = 'Planet Rankings' %]
-<p><a href="[% c.uri_for('planets', order, offset - 100) %]">Previous 100</a>
+<p>[% IF offset > 0 %]<a href="[% c.uri_for('planets', order, offset - 100) %]">Previous 100</a>[% END %]
 	<a href="[% c.uri_for('planets', order, offset + 100) %]">Next 100</a>
 </p>
 <table class="stats">
@@ -54,6 +54,6 @@
 	</tr>
 [% END %]
 </table>
-<p><a href="[% c.uri_for('planets', order, offset - 100) %]">Previous 100</a>
+<p>[% IF offset > 0 %]<a href="[% c.uri_for('planets', order, offset - 100) %]">Previous 100</a>[% END %]
 	<a href="[% c.uri_for('planets', order, offset + 100) %]">Next 100</a>
 </p>
