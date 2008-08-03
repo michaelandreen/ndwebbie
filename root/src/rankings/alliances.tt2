@@ -1,6 +1,6 @@
 [% META title = 'Alliance Rankings' %]
 <p>[% IF offset > 0 %]<a href="[% c.uri_for('alliances', order, offset - 100) %]">Previous 100</a>[% END %]
-	<a href="[% c.uri_for('alliances', order, offset + 100) %]">Next 100</a>
+	[% IF alliances.size > 0 %]<a href="[% c.uri_for('alliances', order, offset + 100) %]">Next 100</a>[% END %]
 </p>
 <table class="stats">
 	<tr align="center"><th colspan="2">Rank</th>
@@ -36,5 +36,5 @@
 [% END %]
 </table>
 <p>[% IF offset > 0 %]<a href="[% c.uri_for('alliances', order, offset - 100) %]">Previous 100</a>[% END %]
-	<a href="[% c.uri_for('alliances', order, offset + 100) %]">Next 100</a>
+	[% IF alliances.size > 0 %]<a href="[% c.uri_for('alliances', order, offset + 100) %]">Next 100</a>[% END %]
 </p>
