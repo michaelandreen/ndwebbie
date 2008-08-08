@@ -114,15 +114,21 @@ while (my $scan = $newscans->fetchrow_hashref){
 			#TODO: something about planet being closed?
 		}
 		if ($type eq 'Planet'){
-			$file =~ s/(\d),(\d)/$1$2/g;
 			while($file =~ m/"center">(Metal|Crystal|Eonium)\D+(\d+)\D+([\d,]+)/g){
-				my ($roids,$res) = ($2,$3);
+				my ($type,$roids,$res) = ($1,$2,$3);
 				$roids =~ s/,//g;
 				$addpdata->execute($planet,$tick,$scan->{id}
-					,'roid',$1, $roids) or die $dbh->errstr;
+					,'roid',$type, $roids) or die $dbh->errstr;
 				$res =~ s/,//g;
 				$addpdata->execute($planet,$tick,$scan->{id}
-					,'resource',$1, $res) or die $dbh->errstr;
+					,'resource',$type, $res) or die $dbh->errstr;
+			}
+			if($file =~ m{Security\ Guards .+? "center">(\d+)</td>
+					.+? "center">(\d+)</td>}sx){
+				$addpdata->execute($planet,$tick,$scan->{id}
+					,'planet','Agents', $1) or die $dbh->errstr;
+				$addpdata->execute($planet,$tick,$scan->{id}
+					,'planet','Security Guards', $2) or die $dbh->errstr;
 			}
 			if($file =~ m{<td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td>}){
 				$addpdata->execute($planet,$tick,$scan->{id}
