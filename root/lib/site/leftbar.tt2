@@ -46,7 +46,7 @@
 		[% IF c.user.planet %]
 	<p><b>Update your fleet to see member menu</b></p>
 		[% ELSE %]
-	<form action="/members/setcoords" method="post">
+	<form action="/members/postowncoords" method="post">
 		<p>We need your planet's coordinates: 
 		<input type="text" name="planet" value="">
 		<input type="submit" value="Submit">

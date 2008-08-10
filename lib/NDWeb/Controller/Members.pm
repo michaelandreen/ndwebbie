@@ -145,6 +145,30 @@ sub postsmsupdate : Local {
 	$c->res->redirect($c->uri_for(''));
 }
 
+sub postowncoords : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	if ($c->user->planet){
+		$c->flash(error => 'You already have a planet set.'
+			.' Contact a HC if they need to be changed');
+	}elsif ($c->req->param('planet') =~ m/(\d+)\D+(\d+)\D+(\d+)/){
+		my $planet = $dbh->selectrow_array(q{SELECT planetid($1,$2,$3,TICK())
+			},undef,$1,$2,$3);
+
+		if ($planet){
+			$dbh->do(q{UPDATE users SET planet = ? WHERE uid = ?
+				},undef, $planet , $c->user->id);
+		}else{
+			$c->flash(error => "No planet at coords: $1:$2:$3");
+		}
+	}else{
+		$c->flash(error => $c->req->param('planet') . " are not valid coords.");
+	}
+
+	$c->res->redirect($c->uri_for(''));
+}
+
 sub postfleetupdate : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
