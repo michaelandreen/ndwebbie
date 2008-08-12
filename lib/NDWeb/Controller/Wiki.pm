@@ -152,6 +152,40 @@ sub postedit : Local {
 	$c->stash(template => 'wiki/edit.tt2');
 }
 
+sub search : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	if ($c->req->param('search')){
+		$c->stash(search => $c->req->param('search'));
+		my $queryfunc = 'plainto_tsquery';
+		$queryfunc = 'to_tsquery' if $c->req->param('advsearch');
+		my $posts = $dbh->prepare(q{SELECT wp.wpid,namespace,name
+			,(CASE WHEN namespace <> '' THEN namespace || ':' ELSE '' END) || name AS fullname
+			,ts_headline(wpr.text,}.$queryfunc.q{($2)) AS headline
+			,ts_rank_cd(textsearch, }.$queryfunc.q{($2),32) AS rank
+			FROM wiki_pages wp
+				JOIN wiki_page_revisions wpr USING (wprev)
+			WHERE (namespace IN (SELECT namespace FROM wiki_namespace_access WHERE gid IN (SELECT groups($1)))
+					OR wp.wpid IN (SELECT wpid FROM wiki_page_access WHERE uid = $1))
+				AND textsearch @@ }.$queryfunc.q{($2)
+			ORDER BY rank DESC
+		});
+		eval {
+			$posts->execute($c->stash->{UID},$c->req->param('search'));
+			my @posts;
+			while (my $post = $posts->fetchrow_hashref){
+				push @posts,$post;
+			}
+			$c->stash(searchresults => \@posts);
+		};
+		if ($@){
+			$c->stash( searcherror => $dbh->errstr);
+		}
+	}
+
+}
+
 sub findPage : Private {
 	my ( $self, $c, $p ) = @_;
 	my $dbh = $c->model;

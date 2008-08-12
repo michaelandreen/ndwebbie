@@ -1,0 +1,37 @@
+[% META title = 'Wiki search' %]
+
+<form action="[% c.uri_for('search') %]" method="post">
+
+<fieldset class="forum-post"> <legend>Wiki search</legend>
+	<p><input style="width:98%" type="text" name="search" value="[% search %]"></p>
+
+	<p>Use advanced search: <input type="checkbox" name="advsearch"></p>
+
+	Advanced search has the following syntax:
+	Use | (OR) or &amp; (AND) to separate words. Word:A searches for Word in
+	topic 'Two words' to search for a longer string. Word:D limits the search to just the message body.
+</fieldset>
+<p><input type="submit" name="cmd" value="Search"></p>
+</form>
+
+[% IF searcherror %]
+<p> Could not search, because of: </p>
+<p> [% searcherror | html %] </p>
+[% END %]
+
+[% IF searchresults %]
+<table>
+<tr>
+	<th>Page</th>
+	<th>Message</th>
+	<th>Rank</th>
+</tr>
+	[% FOR p IN searchresults %]
+	<tr align="left" class="[% IF loop.count % 2 == 0 %]even[% ELSE %]odd[% END %]">
+		<td><a href="[% c.uri_for('',p.fullname) %]">&nbsp;[% p.fullname %]&nbsp;</a></td>
+		<td align="center">[% p.headline %]</td>
+		<td>[% p.rank %]</td>
+	</tr>
+	[% END %]
+</table>
+[% END %]
