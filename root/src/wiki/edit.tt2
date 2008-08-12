@@ -1,0 +1,22 @@
+[% META title = 'Edit wiki page' %]
+<form action="[% c.uri_for('postedit',page.wpid) %]" method="post">
+[% IF page.wpid %]
+	<p><input type="radio" name="wpid" value="[% page.wpid %]" checked>Use old name: [% page.fullname %]
+[% END %]
+[% IF namespaces.size > 0 %]
+	<p><input type="radio" name="wpid" value="new"[% UNLESS page.wpid %] checked[%END%]>Save as new: <select name="namespace">
+	[% FOR n IN namespaces %]
+		<option value="[% n.namespace %]" [%IF n.namespace == page.namespace %]selected[%END%]>[% n.namespace %]</option>
+	[% END %]
+	</select> <input type="text" name="name" value="[% page.name %]"></p>
+[% END %]
+	<div><input type="hidden" name="parent" value="[% page.wprev %]"></div>
+	<p><textarea name="text" cols="80" rows="40">[% text | html %]</textarea></p>
+	<p>Comment: <input style="width: 40em" type="text" name="comment"></p>
+	<p><input type="submit" name="cmd" value="Preview"><input type="submit" name="cmd" value="Submit"></p>
+</form>
+
+<hr>
+
+[% wikiformat(text) %]
+

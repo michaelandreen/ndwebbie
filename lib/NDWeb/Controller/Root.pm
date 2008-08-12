@@ -32,6 +32,8 @@ NDWeb::Controller::Root - Root Controller for NDWeb
 
 sub index : Local Path Args(0) {
 	my ( $self, $c ) = @_;
+
+	$c->res->redirect($c->uri_for('/wiki'));
 }
 
 sub default : Path {

@@ -1,0 +1,14 @@
+<h1>[% page.fullname %]</h1>
+<hr>
+
+[% IF page.wpid %]
+[% wikiformat(text) %]
+
+<hr>
+[% IF page.edit %]<a href="[% c.uri_for('edit',page.fullname) %]">Edit this page</a>[% END %]
+<a href="[% c.uri_for('history',page.fullname) %]">View page history</a>
+[% ELSE %]
+
+<p>This page doesn't exist[% IF page.post %], <a href="[% c.uri_for('edit',page.fullname) %]">create it</a>[% END %].</p>
+
+[% END %]

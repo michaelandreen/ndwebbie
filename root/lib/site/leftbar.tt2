@@ -1,6 +1,7 @@
 <ul class="linkbar">
-	<li><a href="[% c.check_user_roles("member_menu") ? '/members' : '/index' %]">Main page</a></li>
+	[% IF c.check_user_roles("member_menu") %]<li><a href="/members">Main page</a></li>[% END %]
 
+	<li><a href="/wiki">Wiki</a></li>
 	<li><a href="/forum">Forum</a></li>
 	<li><a href="/forum/search">Forum search</a></li>
 [% IF user %]

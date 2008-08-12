@@ -1,0 +1,20 @@
+[% SET name = page.namespace ? "$page.namespace:" : '' %]
+[% name = "$name$page.name" %]
+<h1><a href="[% c.uri_for(name) %]">[% name %]</a></h1>
+<hr>
+
+<table>
+<tr>
+	<th>Time</th><th>User</th><th>Comment</th>
+</tr>
+[% FOR r IN revisions %]
+<tr>
+	<td>[% r.time %]</td>
+	<td>[% r.username %]</td>
+	<td>[% r.comment %]</td>
+</tr>
+[% END %]
+</table>
+
+<hr>
+<a href="[% c.uri_for('edit',name) %]">Edit this page</a>
