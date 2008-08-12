@@ -102,6 +102,9 @@ sub postedit : Local {
 
 		my $wpid = $c->req->param('wpid');
 		if ( $wpid eq 'new'){
+			unless ($c->req->param('name') =~ /([A-Z]\w*)/){
+				die 'The name is not valid, start with a capital letter and only use alphanumerical characters or _ for the rest';
+			}
 			my $namespace = $dbh->selectrow_array(q{SELECT namespace
 				FROM wiki_namespace_access
 				WHERE namespace = $1 AND post AND gid IN (SELECT groups($2))
