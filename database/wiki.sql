@@ -7,6 +7,7 @@ CREATE TABLE wiki_pages (
 	name VARCHAR(255) NOT NULL,
 	namespace TExt NOT NULL REFERENCES wiki_namespaces(namespace) DEFAULT '',
 	textsearch tsvector NOT NULL DEFAULT to_tsvector(''),
+	time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 	UNIQUE(namespace,name)
 );
 
@@ -35,6 +36,7 @@ BEGIN
 		WHERE NEW.wprev = wpr.wprev;
 	NEW.textsearch := rec.ts
 		|| setweight(to_tsvector(NEW.namespace || ':' || NEW.name), 'A');
+	NEW.time = NOW();
 	return NEW;
 END;
 $$ LANGUAGE plpgsql;
