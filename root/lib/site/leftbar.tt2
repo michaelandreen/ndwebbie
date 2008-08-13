@@ -19,7 +19,7 @@
 	<li><a href="/logout">Log out ([% c.user.username %])</a></li>
 [% ELSE %]
 	<li>
-	<form action="/login" method="post">
+	<form action="[% sslurl(c.uri_for('/login')) %]" method="post">
 		<p>
 		Username: <input type="text" name="user" value="">
 		Password: <input type="password" name="password" value="">

@@ -123,6 +123,11 @@ sub auto : Private {
 
 	$c->stash(dbh => $dbh);
 
+	$c->stash(sslurl => sub {
+			$_[0]->scheme('https') unless $c->debug;
+			return $_[0];
+		});
+
 	$dbh->do(q{SET timezone = 'GMT'});
 
 	$c->stash(TICK =>$dbh->selectrow_array('SELECT tick()',undef));
