@@ -17,4 +17,4 @@
 </table>
 
 <hr>
-<a href="[% c.uri_for('edit',name) %]">Edit this page</a>
+[% IF page.edit %]<a href="[% c.uri_for('edit',page.fullname) %]">Edit this page</a>[% END %]
