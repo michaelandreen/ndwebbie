@@ -60,7 +60,9 @@ sub login : Local {
 		$log->execute($c->user->id,$c->req->address
 			,$country,$c->sessionid,$remember);
 
-		$c->res->redirect($c->req->referer);
+		my $ref = $c->req->referer;
+		$ref =~ s/^http:/https:/;
+		$c->res->redirect($ref);
 		return;
 	}
 }
