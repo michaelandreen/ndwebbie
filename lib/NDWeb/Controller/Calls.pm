@@ -54,7 +54,8 @@ sub list : Local {
 
 	my $query = $dbh->prepare(qq{
 		SELECT id,coords(x,y,z),planet,landing_tick,dc,curreta,fleets
-			,(0.2*(attack_points/a.attack)+ 0.4*(defense_points/a.defense)
+			,(0.2*(attack_points/GREATEST(a.attack,1))
+				+ 0.4*(defense_points/GREATEST(a.defense,1))
 				+ 0.2*(c.size/a.size) + 0.05*(c.score/a.score)
 				+ 0.15*(c.value/a.value))::Numeric(3,2) AS defprio
 			,array_accum(COALESCE(race::text,'')) AS race
