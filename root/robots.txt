@@ -1,2 +1,11 @@
 User-agent: *
 Disallow: /stats/planet/
+Disallow: /ranks/planets/sizerank/
+Disallow: /ranks/planets/valuerank/
+Disallow: /ranks/planets/xprank/
+Disallow: /ranks/galaxies/sizerank/
+Disallow: /ranks/galaxies/valuerank/
+Disallow: /ranks/galaxies/xprank/
+Disallow: /ranks/alliances/sizerank/
+Disallow: /ranks/alliances/valuerank/
+Disallow: /ranks/alliances/xprank/
