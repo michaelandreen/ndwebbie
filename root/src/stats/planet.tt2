@@ -1,20 +1,90 @@
 [% META title = 'Planet stats' %]
 [% PROCESS inc/stats.tt2 %]
 
-[% IF planetdata %]
 <div class="leftinfo">
-<table>
-	<tr><th>Tick</th><th>Type</th><th>Amount</th></tr>
-	[% FOR pd IN planetdata %]
-	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-		<td>[% pd.tick %]</td>
-		<td>[% pd.category %] [% pd.name %]</td>
-		<td>[% comma(pd.amount) %]</td>
+[% IF planetscan.tick %]
+<table [% IF planetscan.tick < TICK - 24 %] class="old"[% END %]>
+	<tr><th>Tick:</th><td>[% planetscan.tick %]</td></tr>
+	<tr><th>Type</th><th>Roids</th><th>Resources</th></tr>
+	<tr align="right"><td align="left">Metal</td>
+		<td>[% planetscan.metal_roids %]</td>
+		<td>[% comma(planetscan.metal) %]</td>
 	</tr>
-	[% END %]
+	<tr align="right"><td align="left">Crystal</td>
+		<td>[% planetscan.crystal_roids %]</td>
+		<td>[% comma(planetscan.crystal) %]</td>
+	</tr>
+	<tr align="right"><td align="left">Eonium</td>
+		<td>[% planetscan.eonium_roids %]</td>
+		<td>[% comma(planetscan.eonium) %]</td>
+	</tr>
+	<tr><th>Agents</th><th><th>Guards</th></tr>
+	<tr align="right"><td>[% planetscan.agents %]</td>
+		<td></td><td>[% planetscan.guards %]</td>
+	</tr>
+	<tr><th colspan="3">Factory production</th></tr>
+	<tr><th>Light</th><th>Medium</th><th>Heavy</th></tr>
+	<tr align="right"><td>[% planetscan.light %]</td>
+		<td>[% planetscan.medium %]</td><td>[% planetscan.heavy %]</td>
+	</tr>
+	<tr><th>Hidden:</th><td colspan="2" align="right">[% comma(planetscan.hidden) %]</td></tr>
 </table>
-</div>
 [% END %]
+[% IF structurescan.tick %]
+<table [% IF structurescan.tick < TICK - 24 %] class="old"[% END %]>
+	<tr><th>Tick:</th><td>[% structurescan.tick %]</td></tr>
+	<tr><th colspan="3">Factories</th></tr>
+	<tr><th>Light</th><th>Medium</th><th>Heavy</th></tr>
+	<tr align="right"><td>[% structurescan.light_fac %]</td>
+		<td>[% structurescan.medium_fac %]</td>
+		<td>[% structurescan.heavy_fac %]</td>
+	</tr>
+	<tr><th>Amps</th><th></th><th>Distorters</th></tr>
+	<tr align="right"><td>[% structurescan.amps %]</td>
+		<td></td>
+		<td>[% structurescan.distorters %]</td>
+	</tr>
+	<tr><th colspan="3">Refinaries</th></tr>
+	<tr><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
+	<tr align="right"><td>[% structurescan.metal_ref %]</td>
+		<td>[% structurescan.crystal_ref %]</td>
+		<td>[% structurescan.eonium_ref %]</td>
+	</tr>
+	<tr><th>Reslabs</th><th>Finance</th><th>Seccents</th></tr>
+	<tr align="right"><td>[% structurescan.reslabs %]</td>
+		<td>[% structurescan.fincents %]</td>
+		<td>[% structurescan.seccents %]</td>
+	</tr>
+</table>
+[% END %]
+[% IF techscan.tick %]
+<table [% IF techscan.tick < TICK - 24 %] class="old"[% END %]>
+	<tr><th>Tick:</th><td>[% techscan.tick %]</td></tr>
+	<tr><th>Research</th><th>Level</th></tr>
+	<tr><td>Travel Time</td>
+		<td align="right">[% techscan.travel %]</td>
+	</tr>
+	<tr><td>Infrastructure</td>
+		<td align="right">[% techscan.infra %]</td>
+	</tr>
+	<tr><td>Hulls</td>
+		<td align="right">[% techscan.hulls %]</td>
+	</tr>
+	<tr><td>Waves</td>
+		<td align="right">[% techscan.waves %]</td>
+	</tr>
+	<tr><td>Core Extraction</td>
+		<td align="right">[% techscan.extraction %]</td>
+	</tr>
+	<tr><td>Covert Ops</td>
+		<td align="right">[% techscan.covert %]</td>
+	</tr>
+	<tr><td>Mining</td>
+		<td align="right">[% techscan.mining %]</td>
+	</tr>
+</table>
+[% END %]
+</div>
 <div class="leftinfo">
 <table>
 	<tr><th>Tick</th><th>Value</th><th>Gain</th></tr>

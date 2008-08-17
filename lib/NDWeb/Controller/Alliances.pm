@@ -224,9 +224,12 @@ sub resources : Local {
 		,((s.size::int8*(1400-tick())*250)/100 + score + (resources/planets*scoremem)/300
 			+ (hidden/planets*scoremem)/100)::bigint AS nscore3
 		,(s.size::int8*(1400-tick())*250)/100 AS scoregain3
-		FROM (SELECT alliance_id AS id,sum(metal+crystal+eonium) AS resources, sum(hidden) AS hidden, count(*) AS planets 
-		FROM planets p join planet_scans c ON p.id = c.planet GROUP by alliance_id) r 
-			NATURAL JOIN alliances a 
+		FROM (SELECT alliance_id AS id,sum(metal+crystal+eonium) AS resources
+				, sum(hidden) AS hidden, count(*) AS planets
+				FROM planets p join current_planet_scans c ON p.id = c.planet
+				GROUP by alliance_id
+			) r
+			NATURAL JOIN alliances a
 			LEFT OUTER JOIN (SELECT *,LEAST(members,60) AS scoremem FROM alliance_stats
 				WHERE tick = (SELECT max(tick) FROM alliance_stats)) s ON a.id = s.id
 		ORDER BY $order

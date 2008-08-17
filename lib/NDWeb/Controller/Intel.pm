@@ -294,8 +294,8 @@ sub naps : Local {
 		,(metal+crystal+eonium)/100 AS resvalue, planet_status,hit_us
 		, alliance,relationship,nick
 		FROM current_planet_stats p
-			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
-			LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
+			LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
+			LEFT OUTER JOIN current_structure_scans ss ON p.id = ss.planet
 		WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc
 		});
 	$query->execute;

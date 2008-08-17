@@ -73,7 +73,8 @@ sub galaxy : Local {
 		};
 	}
 
-	$query = $dbh->prepare(qq{SELECT p.id,coords(x,y,z), ruler, p.planet,race,
+	$query = $dbh->prepare(qq{SELECT DISTINCT ON (x,y,z,p.id)
+		p.id,coords(x,y,z), ruler, p.planet,race,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,
@@ -83,10 +84,11 @@ sub galaxy : Local {
 		valuerank,valuerank_gain,valuerank_gain_day,
 		xprank,xprank_gain,xprank_gain_day
 		$extra_columns
-		FROM current_planet_stats_full p 
+		FROM current_planet_stats_full p
 			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
 			LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
-		WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE) ORDER BY x,y,z ASC
+		WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE)
+		ORDER BY x,y,z,p.id,ps.tick DESC, ps.id DESC, ss.tick DESC, ss.id DESC
 		});
 
 	$query->execute($x,$y,$z);
@@ -177,12 +179,12 @@ sub planet : Local {
 	}
 
 	if ($c->check_user_roles(qw/stats_planetdata/)){
-		my $query = $dbh->prepare(q{SELECT DISTINCT ON(rid) tick,category,name,amount
-			FROM planet_data pd JOIN planet_data_types pdt ON pd.rid = pdt.id
-			WHERE pd.id = $1 ORDER BY rid,tick DESC
-		});
-		$query->execute($id);
-		$c->stash(planetdata => $query->fetchall_arrayref({}) );
+		$c->stash(planetscan => $dbh->selectrow_hashref(q{SELECT *
+			FROM current_planet_scans WHERE planet = $1},undef,$id));
+		$c->stash(structurescan => $dbh->selectrow_hashref(q{SELECT *
+			FROM current_structure_scans WHERE planet = $1},undef,$id));
+		$c->stash(techscan => $dbh->selectrow_hashref(q{SELECT *
+			FROM current_tech_scans WHERE planet = $1},undef,$id));
 	}
 
 	my $query = $dbh->prepare(q{SELECT value,value_gain AS gain,tick FROM planet_stats 

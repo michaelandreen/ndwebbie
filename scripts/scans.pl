@@ -73,13 +73,24 @@ my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
 my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,sender,target,tick,eta,back,amount,ingal,uid) VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
 my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (id,scan) VALUES(?,?)});
 my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount) VALUES(?,?,?)});
-my $addpdata = $dbh->prepare(q{INSERT INTO planet_data (id,tick,scan,rid,amount) VALUES(?,?,?,(SELECT id FROM planet_data_types WHERE category = ? AND name = ?), ?)});
+my $addplanetscan = $dbh->prepare(q{INSERT INTO planet_scans
+	(id,tick,planet,metal_roids,metal,crystal_roids,crystal,eonium_roids,eonium
+		,agents,guards,light,medium,heavy,hidden)
+	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
+my $addstrucscan = $dbh->prepare(q{INSERT INTO structure_scans
+	(id,tick,planet,light_fac,medium_fac,heavy_fac,amps,distorters
+		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,seccents,total)
+	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
+
+my $addtechscan = $dbh->prepare(q{INSERT INTO tech_scans
+	(id,tick,planet,travel,infra,hulls,waves,extraction,covert,mining)
+	VALUES(?,?,?,?,?,?,?,?,?,?)});
+
 
 $dbh->begin_work or die 'No transaction';
 $newscans->execute or die $dbh->errstr;
 $dbh->pg_savepoint('scans') or die "No savepoint";
 
-my %production = (None => 0, Low => 35, Medium => 65, High => 100);
 while (my $scan = $newscans->fetchrow_hashref){
 	$dbh->pg_release('scans') or die "Couldn't save";
 	$dbh->pg_savepoint('scans') or die "Couldn't save";
@@ -114,36 +125,23 @@ while (my $scan = $newscans->fetchrow_hashref){
 			#TODO: something about planet being closed?
 		}
 		if ($type eq 'Planet'){
+			my @values = ($scan->{id},$tick,$planet);
+			$file =~ s/(\d),(\d)/$1$2/g;
+
 			while($file =~ m/"center">(Metal|Crystal|Eonium)\D+(\d+)\D+([\d,]+)/g){
-				my ($type,$roids,$res) = ($1,$2,$3);
-				$roids =~ s/,//g;
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'roid',$type, $roids) or die $dbh->errstr;
-				$res =~ s/,//g;
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'resource',$type, $res) or die $dbh->errstr;
+				push @values,$2,$3;
 			}
 			if($file =~ m{Security\ Guards .+? "center">(\d+)</td>
 					.+? "center">(\d+)</td>}sx){
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'planet','Agents', $1) or die $dbh->errstr;
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'planet','Security Guards', $2) or die $dbh->errstr;
+				push @values,$1,$2;
 			}
 			if($file =~ m{<td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td>}){
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'planet','Light Usage', $production{$1}) or die $dbh->errstr;
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'planet','Medium Usage', $production{$2}) or die $dbh->errstr;
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'planet','Heavy Usage', $production{$3}) or die $dbh->errstr;
+				push @values,$1,$2,$3;
 			}
 			if($file =~ m{<span class="superhighlight">([\d,]+)</span>}){
-				my $res = $1;
-				$res =~ s/,//g;
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,'planet','Production', $res) or die $dbh->errstr;
+				push @values,$1;
 			}
+			$addplanetscan->execute(@values);
 		}elsif ($type eq 'Jumpgate'){
 		#print "$file\n";
 			while ($file =~ m{(\d+):(\d+):(\d+)\D+(Attack|Defend|Return)</td><td class="left">([^<]*)\D+(\d+)\D+(\d+)}g){
@@ -186,13 +184,21 @@ while (my $scan = $newscans->fetchrow_hashref){
 					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 				}
 			}
-		} elsif($type eq 'Surface Analysis' || $type eq 'Technology Analysis'){
-			my $cat = ($type eq 'Surface Analysis' ? 'struc' : 'tech');
+		} elsif($type eq 'Surface Analysis'){
+			my @values = ($scan->{id},$tick,$planet);
+			my $total = 0;
 			while($file =~ m{((?:[a-zA-Z]| )+)</t[dh]><td(?: class="right")?>(\d+)}sg){
-				$addpdata->execute($planet,$tick,$scan->{id}
-					,$cat,$1, $2) or die $dbh->errstr;
+				push @values,$2;
+				$total += $2;
 			}
-
+			push @values,$total;
+			$addstrucscan->execute(@values);
+		} elsif($type eq 'Technology Analysis'){
+			my @values = ($scan->{id},$tick,$planet);
+			while($file =~ m{((?:[a-zA-Z]| )+)</t[dh]><td(?: class="right")?>(\d+)}sg){
+				push @values,$2;
+			}
+			$addtechscan->execute(@values);
 		} elsif($type eq 'Unit' || $type eq 'Advanced Unit'){
 			my $id = addfleet($type,'Full fleet',$file,$planet,undef,$tick,undef,undef,undef);
 			$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;

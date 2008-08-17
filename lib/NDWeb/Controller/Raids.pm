@@ -109,17 +109,17 @@ sub view : Local {
 	$c->stash(landingtick => $raid->{tick});
 	my $targetquery = $dbh->prepare(qq{SELECT r.id, r.planet, size, score, value
 		, p.x,p.y,p.z, race
-		, p.value - p.size*200 - 
-			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 - 
+		, p.value - p.size*200 -
+			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 -
 			COALESCE(ss.total ,(SELECT
 				COALESCE(avg(total),0) FROM
 				structure_scans)::int)*1500 AS fleetvalue
 		,(metal+crystal+eonium)/100 AS resvalue, comment
 		, hidden, light, medium, heavy
-		FROM current_planet_stats p 
-		JOIN raid_targets r ON p.id = r.planet 
-		LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
-		LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
+		FROM current_planet_stats p
+		JOIN raid_targets r ON p.id = r.planet
+		LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
+		LEFT OUTER JOIN current_structure_scans ss ON p.id = ss.planet
 		WHERE r.raid = ?
 		$noingal
 		ORDER BY size});
