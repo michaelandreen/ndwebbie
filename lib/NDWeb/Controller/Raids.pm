@@ -96,7 +96,6 @@ sub view : Local {
 	$c->forward('findRaid');
 	$raid = $c->stash->{raid};
 
-
 	$c->stash(raid => $raid->{id});
 	my $noingal = '';
 	my $planet;
@@ -185,17 +184,14 @@ sub view : Local {
 		}
 		$target{missions} = \@missions;
 
-		my $query = $dbh->prepare(q{SELECT DISTINCT ON(rid) tick,category,name,amount
-			FROM planet_data pd JOIN planet_data_types pdt ON pd.rid = pdt.id
-			WHERE pd.id = $1 AND rid in (1,2,3,4,5,6,9,10,14,15,16,17,18)
-			ORDER BY rid,tick DESC
+		my $query = $dbh->prepare(q{SELECT ps.*, ss.*, ts.*
+			FROM current_planet_scans ps
+				LEFT OUTER JOIN current_structure_scans ss USING (planet)
+				LEFT OUTER JOIN current_tech_scans ts USING (planet)
+			WHERE planet = $1
 		});
 		$query->execute($target->{planet});
-		while (my $data = $query->fetchrow_hashref){
-			$data->{amount} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
-			$data->{name} =~ s/ /_/g;
-			$target{$data->{category}.$data->{name}} = $data->{amount};
-		}
+		$target{scans} = $query->fetchrow_hashref;
 
 		my @roids;
 		my @claims;

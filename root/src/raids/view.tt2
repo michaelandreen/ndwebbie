@@ -43,15 +43,15 @@
 	<tr><th></th><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
 	<tr align="center">
 		<th>Roids</th>
-		<td>[% t.roidMetal %]</td>
-		<td>[% t.roidCrystal %]</td>
-		<td>[% t.roidEonium %]</td>
+		<td>[% t.scans.metal_roids %]</td>
+		<td>[% t.scans.crystal_roids %]</td>
+		<td>[% t.scans.eonium_roids %]</td>
 	</tr>
 	<tr align="center">
 		<th>Resources</th>
-		<td>[% t.resourceMetal %]</td>
-		<td>[% t.resourceCrystal %]</td>
-		<td>[% t.resourceEonium %]</td>
+		<td>[% t.scans.metal %]</td>
+		<td>[% t.scans.crystal %]</td>
+		<td>[% t.scans.eonium %]</td>
 	</tr>
 
 	</table>
@@ -61,32 +61,32 @@
 	<tr><th>Waves</th></tr>
 	<tr>
 		<td>Research</td>
-		<td>[% t.techWaves %]</td>
+		<td>[% t.scans.waves %]</td>
 	</tr>
 	<tr>
 		<td>Amps</td>
-		<td>[% t.strucWave_Amplifier %]</td>
+		<td>[% t.scans.amps %]</td>
 	</tr>
 	<tr>
 		<td>Dists</td>
-		<td>[% t.strucWave_Distorter %]</td>
+		<td>[% t.scans.distorters %]</td>
 	</tr>
 	<tr><th>Production</th></tr>
 	<tr>
 		<td>Research</td>
-		<td>[% t.techHulls %]</td>
+		<td>[% t.scans.hulls %]</td>
 	</tr>
 	<tr>
 		<td>Light factory</td>
-		<td>[% t.strucLight_Factory %]</td>
+		<td>[% t.scans.light_fac %]</td>
 	</tr>
 	<tr>
 		<td>Medium factory</td>
-		<td>[% t.strucMedium_Factory %]</td>
+		<td>[% t.scans.medium_fac %]</td>
 	</tr>
 	<tr>
 		<td>Heavy factory</td>
-		<td>[% t.strucHeavy_Factory %]</td>
+		<td>[% t.scans.heavy_fac %]</td>
 	</tr>
 	</table>
 	</div>
