@@ -96,17 +96,17 @@ sub view : Local {
 	$c->forward('findRaid');
 	$raid = $c->stash->{raid};
 
+	$c->stash(comma => \&comma_value);
+
 	$c->stash(raid => $raid->{id});
-	my $noingal = '';
 	my $planet;
 	if ($c->user->planet){
 		my $query = $dbh->prepare("SELECT value, score,x,y FROM current_planet_stats WHERE id = ?");
 		$planet = $dbh->selectrow_hashref($query,undef,$c->user->planet);
-		$noingal = "AND NOT (x = $planet->{x} AND y = $planet->{y})";
 	}
 	$c->stash(message => parseMarkup($raid->{message}));
 	$c->stash(landingtick => $raid->{tick});
-	my $targetquery = $dbh->prepare(qq{SELECT r.id, r.planet, size, score, value
+	my $targetquery = $dbh->prepare(q{SELECT r.id, r.planet, size, score, value
 		, p.x,p.y,p.z, race
 		, p.value - p.size*200 -
 			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 -
@@ -114,47 +114,29 @@ sub view : Local {
 				COALESCE(avg(total),0) FROM
 				structure_scans)::int)*1500 AS fleetvalue
 		,(metal+crystal+eonium)/100 AS resvalue, comment
-		, hidden, light, medium, heavy
+		, hidden, light, medium, heavy, metal, crystal, eonium
+		,metal_roids, crystal_roids, eonium_roids
+		,amps, distorters, light_fac, medium_fac, heavy_fac
+		,hulls, waves
 		FROM current_planet_stats p
-		JOIN raid_targets r ON p.id = r.planet
-		LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-		LEFT OUTER JOIN current_structure_scans ss ON p.id = ss.planet
-		WHERE r.raid = ?
-		$noingal
+			JOIN raid_targets r ON p.id = r.planet
+			LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
+			LEFT OUTER JOIN current_structure_scans ss ON p.id = ss.planet
+			LEFT OUTER JOIN current_tech_scans ts ON p.id = ts.planet
+		WHERE r.raid = $1
+			AND NOT COALESCE(p.x = $2 AND p.y = $3,False)
 		ORDER BY size});
-	$targetquery->execute($raid->{id});
+	$targetquery->execute($raid->{id},$planet->{x},$planet->{y});
 	my @targets;
-	my %production = (0 => 'None', 35 => 'Light', 65 => 'Medium', 100 => 'High');
 	while (my $target = $targetquery->fetchrow_hashref){
-		my %target;
 		if ($planet){
 			if ($planet->{x} == $target->{x}){
-				$target{style} = 'incluster';
+				$target->{style} = 'incluster';
 			}
-			$target{scorebash} = 'bash' if ($target->{score}/$planet->{score} < 0.4);
-			$target{valuebash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
+			$target->{scorebash} = 'bash' if ($target->{score}/$planet->{score} < 0.4);
+			$target->{valuebash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
 			#next if ($target->{score}/$planet->{score} < 0.4) && ($target->{value}/$planet->{value} < 0.4);
 		}
-		$target{id} = $target->{id};
-		$target{race} = $target->{race};
-		my $num = pow(10,length($target->{score})-2);
-		$target{score} = "Hidden"; #ceil($target->{score}/$num)*$num;
-		$num = pow(10,length($target->{value})-2);
-		$target{value} = "Hidden"; #ceil($target->{value}/$num)*$num;
-		$num = pow(10,length($target->{size})-2);
-		$target{size} = floor($target->{size}/$num)*$num;
-		$num = pow(10,length($target->{fleetvalue})-2);
-		$target{fleetvalue} = floor($target->{fleetvalue}/$num)*$num;
-		if (defined $target->{resvalue}){
-			$num = pow(10,length($target->{resvalue})-2);
-			$target{resvalue} = floor($target->{resvalue}/$num)*$num;
-		}
-		$target{comment} = parseMarkup($target->{comment}) if ($target->{comment});
-		
-		$target{hidden} = int($target->{hidden} / 100);
-		$target{light} = $production{$target->{light}};
-		$target{medium} = $production{$target->{medium}};
-		$target{heavy} = $production{$target->{heavy}};
 
 		my $unitscans = $dbh->prepare(q{ 
 			SELECT DISTINCT ON (name) i.id,i.name, i.tick, i.amount 
@@ -178,24 +160,13 @@ sub view : Local {
 			}
 			push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
 			$mission->{ships} = \@ships;
-			$mission->{amount} =~ s/(^[-+]?\d+?(?=(?>(?:\d{3})+)(?!\d))|\G\d{3}(?=\d))/$1,/g; #Add comma for ever 3 digits, i.e. 1000 => 1,000
-			delete $mission->{id};
 			push @missions,$mission;
 		}
-		$target{missions} = \@missions;
-
-		my $query = $dbh->prepare(q{SELECT ps.*, ss.*, ts.*
-			FROM current_planet_scans ps
-				LEFT OUTER JOIN current_structure_scans ss USING (planet)
-				LEFT OUTER JOIN current_tech_scans ts USING (planet)
-			WHERE planet = $1
-		});
-		$query->execute($target->{planet});
-		$target{scans} = $query->fetchrow_hashref;
+		$target->{missions} = \@missions;
 
 		my @roids;
 		my @claims;
-		my $size = $target{size};
+		my $size = $target->{size};
 		for (my $i = 1; $i <= $raid->{waves}; $i++){
 			my $roids = floor(0.25*$size);
 			$size -= $roids;
@@ -206,10 +177,25 @@ sub view : Local {
 			push @roids,{wave => $i, roids => $roids, xp => $xp};
 			push @claims,{wave => $i}
 		}
-		$target{roids} = \@roids;
-		$target{claims} = \@claims;
+		$target->{roids} = \@roids;
+		$target->{claims} = \@claims;
 
-		push @targets,\%target;
+		my $num = pow(10,length($target->{score})-2);
+		$target->{score} = "Hidden"; #ceil($target->{score}/$num)*$num;
+		$num = pow(10,length($target->{value})-2);
+		$target->{value} = "Hidden"; #ceil($target->{value}/$num)*$num;
+		$num = pow(10,length($target->{size})-2);
+		$target->{size} = floor($target->{size}/$num)*$num;
+		$num = pow(10,length($target->{fleetvalue})-2);
+		$target->{fleetvalue} = floor($target->{fleetvalue}/$num)*$num;
+		if (defined $target->{resvalue}){
+			$num = pow(10,length($target->{resvalue})-2);
+			$target->{resvalue} = floor($target->{resvalue}/$num)*$num;
+		}
+		$target->{comment} = parseMarkup($target->{comment}) if ($target->{comment});
+		$target->{hidden} = int($target->{hidden} / 100);
+
+		push @targets,$target;
 	}
 	@targets = sort {$b->{roids}[0]{xp} <=> $a->{roids}[0]{xp} or $b->{size} <=> $a->{size}} @targets;
 

@@ -31,7 +31,7 @@
 		<li>Factory Usage: [% t.light %], [% t.medium %], [% t.heavy %]</li>
 		<li>Race: [% t.race %]</li>
 		[% FOR r IN t.roids %]
-			<li>Roids wave [% r.wave %]: [% r.roids %] ([% r.xp %] xp)</li>
+			<li>Roids wave [% r.wave %]: [% r.roids %] ([% comma(r.xp) %] xp)</li>
 		[% END %]
 	</ul>
 	[% IF t.comment %]
@@ -43,15 +43,15 @@
 	<tr><th></th><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
 	<tr align="center">
 		<th>Roids</th>
-		<td>[% t.scans.metal_roids %]</td>
-		<td>[% t.scans.crystal_roids %]</td>
-		<td>[% t.scans.eonium_roids %]</td>
+		<td>[% comma(t.metal_roids) %]</td>
+		<td>[% comma(t.crystal_roids) %]</td>
+		<td>[% comma(t.eonium_roids) %]</td>
 	</tr>
 	<tr align="center">
 		<th>Resources</th>
-		<td>[% t.scans.metal %]</td>
-		<td>[% t.scans.crystal %]</td>
-		<td>[% t.scans.eonium %]</td>
+		<td>[% comma(t.metal) %]</td>
+		<td>[% comma(t.crystal) %]</td>
+		<td>[% comma(t.eonium) %]</td>
 	</tr>
 
 	</table>
@@ -61,32 +61,32 @@
 	<tr><th>Waves</th></tr>
 	<tr>
 		<td>Research</td>
-		<td>[% t.scans.waves %]</td>
+		<td>[% t.waves %]</td>
 	</tr>
 	<tr>
 		<td>Amps</td>
-		<td>[% t.scans.amps %]</td>
+		<td>[% t.amps %]</td>
 	</tr>
 	<tr>
 		<td>Dists</td>
-		<td>[% t.scans.distorters %]</td>
+		<td>[% t.distorters %]</td>
 	</tr>
 	<tr><th>Production</th></tr>
 	<tr>
 		<td>Research</td>
-		<td>[% t.scans.hulls %]</td>
+		<td>[% t.hulls %]</td>
 	</tr>
 	<tr>
 		<td>Light factory</td>
-		<td>[% t.scans.light_fac %]</td>
+		<td>[% t.light_fac %]</td>
 	</tr>
 	<tr>
 		<td>Medium factory</td>
-		<td>[% t.scans.medium_fac %]</td>
+		<td>[% t.medium_fac %]</td>
 	</tr>
 	<tr>
 		<td>Heavy factory</td>
-		<td>[% t.scans.heavy_fac %]</td>
+		<td>[% t.heavy_fac %]</td>
 	</tr>
 	</table>
 	</div>
@@ -100,7 +100,7 @@
 		<table>
 		[% FOR s IN m.ships %]
 		<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-			<td>[% s.ship %]</td><td>[% s.amount %]</td>
+			<td>[% s.ship %]</td><td>[% comma(s.amount) %]</td>
 		</tr>
 		[% END %]
 		</table>
