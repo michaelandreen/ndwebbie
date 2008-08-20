@@ -1,11 +1,13 @@
 User-agent: *
 Disallow: /stats/planet/
-Disallow: /ranks/planets/sizerank/
-Disallow: /ranks/planets/valuerank/
-Disallow: /ranks/planets/xprank/
-Disallow: /ranks/galaxies/sizerank/
-Disallow: /ranks/galaxies/valuerank/
-Disallow: /ranks/galaxies/xprank/
-Disallow: /ranks/alliances/sizerank/
-Disallow: /ranks/alliances/valuerank/
-Disallow: /ranks/alliances/xprank/
+Disallow: /rankings/planets/sizerank/
+Disallow: /rankings/planets/valuerank/
+Disallow: /rankings/planets/xprank/
+Disallow: /rankings/galaxies/sizerank/
+Disallow: /rankings/galaxies/valuerank/
+Disallow: /rankings/galaxies/xprank/
+Disallow: /rankings/alliances/sizerank/
+Disallow: /rankings/alliances/avgsize/
+Disallow: /rankings/alliances/avgscore/
+Disallow: /rankings/alliances/members/
+
