@@ -99,6 +99,7 @@ __PACKAGE__->allow_access_if('/jsrpc/end',1);
 __PACKAGE__->deny_access_unless('/forum/allUnread',[qw//]);
 __PACKAGE__->deny_access_unless('/forum/privmsg',[qw//]);
 __PACKAGE__->deny_access_unless('/settings',[qw//]);
+__PACKAGE__->deny_access_unless('/textexport/alliance',[qw/textexport_alliance/]);
 
 =head1 NAME
 

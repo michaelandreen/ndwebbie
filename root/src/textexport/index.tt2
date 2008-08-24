@@ -1,0 +1,4 @@
+[% titles.join("\t") %]
+[% FOR v IN values %]
+	[%- v.join("\t") %]
+[% END %]
