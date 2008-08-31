@@ -119,16 +119,17 @@ sub listAlliances : Private {
 	$c->stash(alliances => \@alliances);
 }
 
+sub sslurl {
+	return $_[0];
+}
+
 sub auto : Private {
 	my ($self, $c) = @_;
 	my $dbh = $c ->model;
 
 	$c->stash(dbh => $dbh);
 
-	$c->stash(sslurl => sub {
-			$_[0]->scheme('https') unless $c->debug;
-			return $_[0];
-		});
+	$c->stash(sslurl => \&sslurl);
 
 	$dbh->do(q{SET timezone = 'GMT'});
 
