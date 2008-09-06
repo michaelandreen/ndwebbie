@@ -518,6 +518,8 @@ sub postcreate : Local {
 		$addtarget->execute($raid,\@targets,\@gals,$c->req->param('sizelimit'));
 		$c->forward('log',[$raid,"BC added planets (@targets) and the gals for (@gals)"]);
 	}
+	$dbh->do(q{INSERT INTO raid_access (raid,gid) VALUES(?,2)}
+		,undef,$raid);
 	$dbh->commit;
 
 	$c->res->redirect($c->uri_for('edit',$raid));
