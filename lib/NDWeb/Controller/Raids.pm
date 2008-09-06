@@ -385,6 +385,7 @@ sub posttargetupdates : Local {
 		WHERE target = ? AND wave = ? AND uid = -2
 		});
 	my $remove = $dbh->prepare(q{DELETE FROM raid_targets WHERE raid = ? AND id = ?});
+
 	for $_ ($c->req->param()){
 		if (/^comment:(\d+)$/){
 			$comment->execute(html_escape $c->req->param($_),$1);
@@ -427,9 +428,11 @@ sub posttargetupdates : Local {
 sub open : Local {
 	my ($self, $c, $raid) = @_;
 
+	$c->model->begin_work;
 	$c->model->do(q{UPDATE raids SET open = TRUE, removed = FALSE WHERE id = ?}
 		,undef,$raid);
 	$c->forward('log',[$raid, "BC opened raid"]);
+	$c->model->commit;
 
 	$c->res->redirect($c->req->referer);
 }
@@ -437,9 +440,11 @@ sub open : Local {
 sub close : Local {
 	my ($self, $c, $raid) = @_;
 
+	$c->model->begin_work;
 	$c->model->do(q{UPDATE raids SET open = FALSE WHERE id = ?}
 		,undef,$raid);
 	$c->forward('log',[$raid, "BC closed raid"]);
+	$c->model->commit;
 
 	$c->res->redirect($c->req->referer);
 }
@@ -447,9 +452,11 @@ sub close : Local {
 sub remove : Local {
 	my ($self, $c, $raid) = @_;
 
+	$c->model->begin_work;
 	$c->model->do(q{UPDATE raids SET open = FALSE, removed = TRUE WHERE id = ?}
 		,undef,$raid);
 	$c->forward('log',[$raid, "BC removed raid"]);
+	$c->model->commit;
 
 	$c->res->redirect($c->req->referer);
 }
@@ -457,9 +464,11 @@ sub remove : Local {
 sub showcoords : Local {
 	my ($self, $c, $raid) = @_;
 
+	$c->model->begin_work;
 	$c->model->do(q{UPDATE raids SET released_coords = TRUE WHERE id = ?}
 		,undef,$raid);
 	$c->forward('log',[$raid, "BC released coords"]);
+	$c->model->commit;
 
 	$c->res->redirect($c->req->referer);
 }
@@ -467,9 +476,11 @@ sub showcoords : Local {
 sub hidecoords : Local {
 	my ($self, $c, $raid) = @_;
 
+	$c->model->begin_work;
 	$c->model->do(q{UPDATE raids SET released_coords = FALSE WHERE id = ?}
 		,undef,$raid);
 	$c->forward('log',[$raid, "BC hid coords"]);
+	$c->model->commit;
 
 	$c->res->redirect($c->req->referer);
 }
@@ -485,6 +496,7 @@ sub postcreate : Local {
 	my ($self, $c) = @_;
 	my $dbh = $c->model;
 
+	$dbh->begin_work;
 	my $query = $dbh->prepare(q{INSERT INTO raids (tick,waves,message) VALUES(?,?,?) RETURNING (id)});
 	$query->execute($c->req->param('tick'),$c->req->param('waves')
 		,html_escape $c->req->param('message'));
@@ -506,6 +518,7 @@ sub postcreate : Local {
 		$addtarget->execute($raid,\@targets,\@gals,$c->req->param('sizelimit'));
 		$c->forward('log',[$raid,"BC added planets (@targets) and the gals for (@gals)"]);
 	}
+	$dbh->commit;
 
 	$c->res->redirect($c->uri_for('edit',$raid));
 }
