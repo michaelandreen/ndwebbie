@@ -27,7 +27,11 @@
 	<p>
 		[% IF c.check_user_roles('raids_edit') %]
 		<a href="[% c.uri_for('edit',r.id) %]">Edit Raid [% r.id %]</a>
+			[% IF r.open %]
+		<a href="[% c.uri_for('close',r.id) %]">Close raid.</a>
+			[% ELSE %]
 		<a href="[% c.uri_for('open',r.id) %]">Open raid.</a>
+			[% END %]
 			[% UNLESS r.releasedcoords %]
 		<a href="[% c.uri_for('showcoords',r.id) %]">Show coords.</a>
 			[% END %]
