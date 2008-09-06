@@ -61,7 +61,7 @@ sub login : Local {
 			,$country,$c->sessionid,$remember);
 
 		my $ref = $c->req->referer;
-		$ref =~ s/^http:/https:/;
+		$ref =~ s/^http:/https:/ unless $c->debug;
 		$c->res->redirect($ref);
 		return;
 	}
