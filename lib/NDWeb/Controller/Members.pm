@@ -32,7 +32,7 @@ sub index : Path : Args(0) {
 	$c->stash(comma => \&comma_value);
 	$c->stash(u => $dbh->selectrow_hashref(q{SELECT planet,defense_points
 			,attack_points,scan_points,humor_points
-			, (attack_points+defense_points+scan_points/20) as total_points
+			, (attack_points+defense_points+scan_points/20)::NUMERIC(5,1) as total_points
 			, sms,rank,hostmask FROM users WHERE uid = ?
 			},undef,$c->user->id)
 	);
@@ -285,7 +285,7 @@ sub points : Local {
 
 	my $query = $dbh->prepare(qq{SELECT username,defense_points,attack_points
 		,scan_points,humor_points
-		,(attack_points+defense_points+scan_points/20) as total_points
+		,(attack_points+defense_points+scan_points/20)::NUMERIC(4,0) as total_points
 		, count(NULLIF(rc.launched,FALSE)) AS raid_points
 		FROM users u LEFT OUTER JOIN raid_claims rc USING (uid)
 		WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
