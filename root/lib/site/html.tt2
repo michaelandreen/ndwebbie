@@ -5,6 +5,9 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<link rel="stylesheet" type="text/css" href="/static/default.css">
 	<link rel="stylesheet" type="text/css" href="/static/css/[% user.css or "black" %].css">
+[%- FOR s IN site.stylesheets %]
+	<link rel="stylesheet" type="text/css" href="/static/[% s %]">
+[%- END %]
 	<link rel="icon" type="image/ico" href="/favicon.ico">
 	<script type="text/javascript" src="/static/js/raid.js"></script>
 	<script type="text/javascript" src="/static/js/jquery-1.2.6.min.js"></script>

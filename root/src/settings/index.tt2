@@ -9,6 +9,11 @@
 	<br>
 	<input type="submit" value="Change">
 </fieldset></form>
+<form action="[% c.uri_for('changeBirthday') %]" method="post"><fieldset> <legend>Birthday</legend>
+	YYYY-MM-DD:
+	<input type="text" name="birthday" value="[% birthday %]" id="birthday">
+	<br><input type="submit" value="Change">
+</fieldset></form>
 <form action="[% c.uri_for('changePassword') %]" method="post"> <fieldset> <legend>Change password</legend>
 	<p>Old password: 
 	<input type="password" name="oldpass" value="">
@@ -18,3 +23,17 @@
 	</p>
 </fieldset>
 </form>
+[%- site.stylesheets = ['ui/ui.datepicker.css'] %]
+<script type="text/javascript" src="/static/ui/ui.core.min.js"></script>
+<script type="text/javascript" src="/static/ui/ui.datepicker.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#birthday").datepicker({
+		yearRange: "-80:+0",
+		dateFormat: $.datepicker.ATOM,
+		firstDay: 1,
+		showOn: "both",
+	});
+});
+</script>

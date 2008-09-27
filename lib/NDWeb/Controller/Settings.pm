@@ -25,7 +25,10 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
-		
+	my $dbh = $c->model;
+
+	$c->stash(error => $c->flash->{error});
+
 	my @stylesheets = ('Default');
 	my $dir = $c->path_to('root/static/css/black.css')->dir;
 	while (my $file = $dir->next){
@@ -34,7 +37,10 @@ sub index :Path :Args(0) {
 		}
 	}
 	$c->stash(stylesheets => \@stylesheets);
-
+	$c->stash(birthday => $dbh->selectrow_array(q{
+			SELECT birthday FROM users WHERE uid = $1
+			},undef,$c->user->id)
+	);
 }
 
 sub changeStylesheet : Local {
@@ -46,6 +52,26 @@ sub changeStylesheet : Local {
 	});
 	$query->execute($c->user->id,html_escape $c->req->param('stylesheet'));
 
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub changeBirthday : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $query = $dbh->prepare(q{UPDATE users SET birthday = NULLIF($2,'')::date
+		WHERE uid = $1
+		});
+	eval{
+		$query->execute($c->user->id,html_escape $c->req->param('birthday'));
+	};
+	if ($@){
+		if ($@ =~ /invalid input syntax for type date/){
+			$c->flash(error => 'Bad syntax for day, use YYYY-MM-DD.');
+		}else{
+			$c->flash(error => $@);
+		}
+	}
 	$c->res->redirect($c->uri_for(''));
 }
 
