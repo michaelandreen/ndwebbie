@@ -29,7 +29,16 @@
 	</form>
 	</li>
 [% END %]
-</ul>	<p>Tick: [% game.tick %]</p>
+</ul>
+[% IF birthdays.size > 0 %]
+<table>
+<tr><th colspan="2">Birthdays today</th></tr>
+[% FOR b IN birthdays %]
+	<tr><td>[% b.username %]</td><td>[% b.age %]</td></tr>
+[% END %]
+</table>
+[% END %]
+<p>Tick: [% game.tick %]</p>
 <ul class="linkbar">
 	<li><a href="/rankings/planets">Planet Rankings</a></li>
 	<li><a href="/rankings/alliances">Alliance Rankings</a></li>

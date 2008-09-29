@@ -198,6 +198,15 @@ sub end : ActionClass('RenderView') {
 					|| $c->check_user_roles(qw/no_fleet_update/)))),
 		$c->forward('listTargets');
 	}
+	if ($c->res->status == 200){
+		my $birthdays = $dbh->prepare(q{SELECT username
+			,date_part('year',age(birthday)) AS age
+			FROM users WHERE birthday IS NOT NULL
+				AND mmdd(birthday) = mmdd(CURRENT_DATE)
+		});
+		$birthdays->execute;
+		$c->stash(birthdays => $birthdays->fetchall_arrayref({}));
+	}
 }
 
 =head1 AUTHOR
