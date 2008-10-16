@@ -173,7 +173,7 @@ sub end : ActionClass('RenderView') {
 		}
 	}
 
-	if ($c->user_exists && $c->res->status == 200){
+	if ($c->user_exists){
 		my $fleetupdate = 0;
 		if ($c->check_user_roles(qw/member_menu/)){
 			$fleetupdate = $dbh->selectrow_array(q{SELECT tick FROM fleets WHERE sender = ?
@@ -198,15 +198,13 @@ sub end : ActionClass('RenderView') {
 					|| $c->check_user_roles(qw/no_fleet_update/)))),
 		$c->forward('listTargets');
 	}
-	if ($c->res->status == 200){
-		my $birthdays = $dbh->prepare(q{SELECT username
+	my $birthdays = $dbh->prepare(q{SELECT username
 			,date_part('year',age(birthday)) AS age
 			FROM users WHERE birthday IS NOT NULL
 				AND mmdd(birthday) = mmdd(CURRENT_DATE)
 		});
-		$birthdays->execute;
-		$c->stash(birthdays => $birthdays->fetchall_arrayref({}));
-	}
+	$birthdays->execute;
+	$c->stash(birthdays => $birthdays->fetchall_arrayref({}));
 }
 
 =head1 AUTHOR
