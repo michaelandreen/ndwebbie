@@ -1,3 +1,4 @@
+[% IF g %]
 <table class="stats">
 	<tr align="center"><th colspan="4">Rank</th>
 	</tr>
@@ -39,6 +40,7 @@
 		<td>[% g.ticks_roiding %]</td>
 	</tr>
 </table>
+[% END %]
 
 <table>
 	<tr align="center"><th colspan="4">Rank</th>

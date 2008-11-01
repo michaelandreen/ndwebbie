@@ -26,7 +26,7 @@ use CGI qw/:standard/;
 
 our @ISA = qw/Exporter/;
 
-our @EXPORT = qw/parseMarkup min max
+our @EXPORT = qw/parseMarkup
 	intelquery html_escape
 	comma_value array_expand/;
 
@@ -58,17 +58,6 @@ sub parseMarkup ($) {
 	$text =~ s/\x{3}\d\d?//g; #mirc color TODO: possibly match until \x{0F} and change to [color] block
 	$text =~ s/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]//g;
 	return $text;
-}
-
-
-sub min {
-    my ($x,$y) = @_;
-    return ($x > $y ? $y : $x);
-}
-
-sub max {
-    my ($x,$y) = @_;
-    return ($x < $y ? $y : $x);
 }
 
 sub intelquery {

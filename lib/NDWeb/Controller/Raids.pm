@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 
-use POSIX;
+use POSIX qw/floor pow/;
 use NDWeb::Include;
 use ND::Include;
 
@@ -129,7 +129,7 @@ sub view : Local {
 	$targetquery->execute($raid->{id},$planet->{x},$planet->{y});
 	my @targets;
 	while (my $target = $targetquery->fetchrow_hashref){
-		if ($planet){
+		if ($planet && $planet->{x}){
 			if ($planet->{x} == $target->{x}){
 				$target->{style} = 'incluster';
 			}
@@ -171,7 +171,7 @@ sub view : Local {
 			my $roids = floor(0.25*$size);
 			$size -= $roids;
 			my $xp = 0;
-			if ($planet){
+			if ($planet && $planet->{score}){
 				$xp = pa_xp($roids,$planet->{score},$planet->{value},$target->{score},$target->{value});
 			}
 			push @roids,{wave => $i, roids => $roids, xp => $xp};

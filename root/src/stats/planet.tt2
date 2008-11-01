@@ -1,5 +1,9 @@
 [% META title = 'Planet stats' %]
+[% IF p.id %]
 [% PROCESS inc/stats.tt2 %]
+[% ELSE %]
+<p> No such planet</p>
+[% END %]
 
 <div class="leftinfo">
 [% IF planetscan.tick %]
@@ -125,7 +129,9 @@
 </div>
 [% END %]
 
+[% IF p.id %]
 <div class="leftinfo">
 <img class="graph" src="[% c.uri_for('/graphs/planetstats',p.id,STICK) %]" alt="stats" height="300" width="500">
 <img class="graph" src="[% c.uri_for('/graphs/planetranks',p.id,STICK) %]" alt="ranks" height="300" width="500">
 </div>
+[% END %]

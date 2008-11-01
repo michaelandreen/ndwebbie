@@ -18,7 +18,7 @@
 [% END %]
 <div class="clear"></div>
 
-[% IF c.user.planet %]
+[% IF p %]
 <table class="stats">
 	<tr align="center"><th colspan="4">Rank</th>
 	</tr>
