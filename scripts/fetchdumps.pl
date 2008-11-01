@@ -27,7 +27,9 @@ use DBD::Pg qw(:pg_types);
 
 use LWP::Simple;
 
-use lib qw{/var/www/ndawn/lib/};
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
 use ND::DB;
 
 our $dbh = ND::DB::DB();
@@ -51,11 +53,12 @@ for my $type ("planet","alliance","galaxy"){
 }
 
 if ($updated){
-	`/var/www/ndawn/scripts/parsealliances.pl $updated`;
-	`/var/www/ndawn/scripts/parseplanets.pl $updated`;
-	`/var/www/ndawn/scripts/parsegalaxies.pl $updated`;
-	`/var/www/ndawn/scripts/ndrank.pl`;
+	`perl $FindBin::Bin/parsealliances.pl $updated`;
+	`perl $FindBin::Bin/parseplanets.pl $updated`;
+	`perl $FindBin::Bin/parsegalaxies.pl $updated`;
+	`perl $FindBin::Bin/ndrank.pl`;
 	$dbh->do(q{UPDATE misc SET value = ? WHERE id = 'TICK'}, undef, $updated);
+	system 'killall','-USR1', 'irssi';
 	local $dbh->{Warn} = 0;
 	$dbh->do(q{VACUUM ANALYZE});
 }

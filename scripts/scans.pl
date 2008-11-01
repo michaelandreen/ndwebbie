@@ -91,6 +91,8 @@ $dbh->begin_work or die 'No transaction';
 $newscans->execute or die $dbh->errstr;
 $dbh->pg_savepoint('scans') or die "No savepoint";
 
+my $parsedscans = 0;
+
 while (my $scan = $newscans->fetchrow_hashref){
 	$dbh->pg_release('scans') or die "Couldn't save";
 	$dbh->pg_savepoint('scans') or die "Couldn't save";
@@ -206,6 +208,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 		}
 		$parsedscan->execute($tick,$type,$planet,$scan->{id}) or die $dbh->errstr;
 		#$dbh->rollback;
+		++$parsedscans;
 		};
 		if ($@) {
 			warn $@;
@@ -219,6 +222,8 @@ while (my $scan = $newscans->fetchrow_hashref){
 }
 #$dbh->rollback;
 $dbh->commit;
+
+system 'killall','-USR1', 'irssi' if $parsedscans;
 
 sub addfleet {
 	my ($name,$mission,$ships,$sender,$target,$tick,$eta,$back,$amount,$ingal) = @_;

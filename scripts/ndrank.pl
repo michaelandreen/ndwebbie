@@ -27,7 +27,9 @@ use DBD::Pg qw(:pg_types);
 
 use LWP::Simple;
 
-use lib qw{/var/www/ndawn/lib/};
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
 use ND::DB;
 
 our $dbh = ND::DB::DB();

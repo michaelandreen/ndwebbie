@@ -265,6 +265,7 @@ sub postircrequest : Local {
 		(uid,channel,message) VALUES($1,$2,$3)
 		});
 	$query->execute($c->user->id,$c->req->param('channel'),$c->req->param('message'));
+	system 'killall','-USR1', 'irssi';
 
 	$c->flash(reply => "Msg sent to: ".$c->req->param('channel'));
 	$c->res->redirect($c->uri_for('ircrequest'));
