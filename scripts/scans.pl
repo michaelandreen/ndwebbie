@@ -26,7 +26,10 @@ use CGI;
 use DBI;
 use DBD::Pg qw(:pg_types);
 use LWP::Simple;
-use lib qw{/var/www/ndawn/lib/};
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
 use ND::DB;
 
 our $dbh = ND::DB::DB();
@@ -77,15 +80,12 @@ my $addplanetscan = $dbh->prepare(q{INSERT INTO planet_scans
 	(id,tick,planet,metal_roids,metal,crystal_roids,crystal,eonium_roids,eonium
 		,agents,guards,light,medium,heavy,hidden)
 	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
-my $addstrucscan = $dbh->prepare(q{INSERT INTO structure_scans
+my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
 	(id,tick,planet,light_fac,medium_fac,heavy_fac,amps,distorters
-		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,seccents,total)
-	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
-
-my $addtechscan = $dbh->prepare(q{INSERT INTO tech_scans
-	(id,tick,planet,travel,infra,hulls,waves,extraction,covert,mining)
-	VALUES(?,?,?,?,?,?,?,?,?,?)});
-
+		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,seccents
+		,travel,infra,hulls,waves,extraction,covert,mining,total)
+	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	});
 
 $dbh->begin_work or die 'No transaction';
 $newscans->execute or die $dbh->errstr;
@@ -184,21 +184,15 @@ while (my $scan = $newscans->fetchrow_hashref){
 					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 				}
 			}
-		} elsif($type eq 'Surface Analysis'){
+		} elsif($type eq 'Development'){
 			my @values = ($scan->{id},$tick,$planet);
 			my $total = 0;
 			while($file =~ m{((?:[a-zA-Z]| )+)</t[dh]><td(?: class="right")?>(\d+)}sg){
 				push @values,$2;
-				$total += $2;
+				$total += $2 if $#values <= 13;
 			}
 			push @values,$total;
-			$addstrucscan->execute(@values);
-		} elsif($type eq 'Technology Analysis'){
-			my @values = ($scan->{id},$tick,$planet);
-			while($file =~ m{((?:[a-zA-Z]| )+)</t[dh]><td(?: class="right")?>(\d+)}sg){
-				push @values,$2;
-			}
-			$addtechscan->execute(@values);
+			$adddevscan->execute(@values);
 		} elsif($type eq 'Unit' || $type eq 'Advanced Unit'){
 			my $id = addfleet($type,'Full fleet',$file,$planet,undef,$tick,undef,undef,undef);
 			$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;

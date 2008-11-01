@@ -289,13 +289,13 @@ sub naps : Local {
 		,ruler, p.planet,race, size, score, value
 		, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 
 			- COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150
-			- COALESCE(ss.total ,(SELECT COALESCE(avg(total),0)
-				FROM structure_scans)::int)*1500 AS fleetvalue
+			- COALESCE(ds.total ,(SELECT COALESCE(avg(total),0)
+				FROM current_development_scans)::int)*1500 AS fleetvalue
 		,(metal+crystal+eonium)/100 AS resvalue, planet_status,hit_us
 		, alliance,relationship,nick
 		FROM current_planet_stats p
 			LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-			LEFT OUTER JOIN current_structure_scans ss ON p.id = ss.planet
+			LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
 		WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc
 		});
 	$query->execute;

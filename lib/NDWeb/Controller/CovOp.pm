@@ -55,13 +55,13 @@ sub list : Private {
 		, distorters,gov
 		, MaxResHack,co.tick AS lastcovop
 		FROM (SELECT p.id,coords(x,y,z),size, metal,crystal,eonium,guards
-			,seccents,NULLIF(ss.total::integer,0) AS structures,distorters
+			,seccents,NULLIF(ds.total::integer,0) AS structures,distorters
 			,max_bank_hack(metal,crystal,eonium,p.value
 				,(SELECT value FROM current_planet_stats WHERE id = ?)) AS MaxResHack
 			, planet_status, relationship,gov
 			FROM current_planet_stats p
 				LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-				LEFT OUTER JOIN current_structure_scans ss ON p.id = ss.planet
+				LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
 			) AS foo
 			LEFT OUTER JOIN (SELECT id,max(tick) AS tick FROM covop_attacks GROUP BY id) co USING (id)
 		WHERE (metal IS NOT NULL OR seccents IS NOT NULL)

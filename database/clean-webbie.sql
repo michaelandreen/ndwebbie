@@ -7,10 +7,10 @@ TRUNCATE fleet_ships;
 TRUNCATE incomings;
 TRUNCATE raid_claims;
 /*TRUNCATE dumps;*/
+TRUNCATE scan_requests;
 TRUNCATE fleet_scans;
 TRUNCATE planet_scans;
-TRUNCATE structure_scans;
-TRUNCATE tech_scans;
+TRUNCATE development_scans;
 TRUNCATE irc_requests;
 UPDATE users SET scan_points = 0, defense_points = 0, attack_points = 0, humor_points = 0, rank = NULL, planet = NULL;
 DELETE FROM scans;
@@ -36,3 +36,4 @@ ALTER SEQUENCE raid_targets_id_seq RESTART 1;
 ALTER SEQUENCE raids_id_seq RESTART 1;
 ALTER SEQUENCE scans_id_seq RESTART 1;
 ALTER SEQUENCE irc_requests_id_seq RESTART 1;
+ALTER SEQUENCE scan_requests_id_seq RESTART 1;

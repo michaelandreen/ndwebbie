@@ -34,57 +34,52 @@
 	<tr><th>Hidden:</th><td colspan="2" align="right">[% comma(planetscan.hidden) %]</td></tr>
 </table>
 [% END %]
-[% IF structurescan.tick %]
-<table [% IF structurescan.tick < TICK - 24 %] class="old"[% END %]>
-	<tr><th>Tick:</th><td>[% structurescan.tick %]</td></tr>
+[% IF devscan.tick %]
+<table [% IF devscan.tick < TICK - 24 %] class="old"[% END %]>
+	<tr><th>Tick:</th><td>[% devscan.tick %]</td></tr>
 	<tr><th colspan="3">Factories</th></tr>
 	<tr><th>Light</th><th>Medium</th><th>Heavy</th></tr>
-	<tr align="right"><td>[% structurescan.light_fac %]</td>
-		<td>[% structurescan.medium_fac %]</td>
-		<td>[% structurescan.heavy_fac %]</td>
+	<tr align="right"><td>[% devscan.light_fac %]</td>
+		<td>[% devscan.medium_fac %]</td>
+		<td>[% devscan.heavy_fac %]</td>
 	</tr>
 	<tr><th>Amps</th><th></th><th>Distorters</th></tr>
-	<tr align="right"><td>[% structurescan.amps %]</td>
+	<tr align="right"><td>[% devscan.amps %]</td>
 		<td></td>
-		<td>[% structurescan.distorters %]</td>
+		<td>[% devscan.distorters %]</td>
 	</tr>
 	<tr><th colspan="3">Refinaries</th></tr>
 	<tr><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
-	<tr align="right"><td>[% structurescan.metal_ref %]</td>
-		<td>[% structurescan.crystal_ref %]</td>
-		<td>[% structurescan.eonium_ref %]</td>
+	<tr align="right"><td>[% devscan.metal_ref %]</td>
+		<td>[% devscan.crystal_ref %]</td>
+		<td>[% devscan.eonium_ref %]</td>
 	</tr>
 	<tr><th>Reslabs</th><th>Finance</th><th>Seccents</th></tr>
-	<tr align="right"><td>[% structurescan.reslabs %]</td>
-		<td>[% structurescan.fincents %]</td>
-		<td>[% structurescan.seccents %]</td>
+	<tr align="right"><td>[% devscan.reslabs %]</td>
+		<td>[% devscan.fincents %]</td>
+		<td>[% devscan.seccents %]</td>
 	</tr>
-</table>
-[% END %]
-[% IF techscan.tick %]
-<table [% IF techscan.tick < TICK - 24 %] class="old"[% END %]>
-	<tr><th>Tick:</th><td>[% techscan.tick %]</td></tr>
-	<tr><th>Research</th><th>Level</th></tr>
-	<tr><td>Travel Time</td>
-		<td align="right">[% techscan.travel %]</td>
+	<tr><th colspan="2">Research</th><th>Level</th></tr>
+	<tr><td colspan="2">Travel Time</td>
+		<td align="right">[% devscan.travel %]</td>
 	</tr>
-	<tr><td>Infrastructure</td>
-		<td align="right">[% techscan.infra %]</td>
+	<tr><td colspan="2">Infrastructure</td>
+		<td align="right">[% devscan.infra %]</td>
 	</tr>
-	<tr><td>Hulls</td>
-		<td align="right">[% techscan.hulls %]</td>
+	<tr><td colspan="2">Hulls</td>
+		<td align="right">[% devscan.hulls %]</td>
 	</tr>
-	<tr><td>Waves</td>
-		<td align="right">[% techscan.waves %]</td>
+	<tr><td colspan="2">Waves</td>
+		<td align="right">[% devscan.waves %]</td>
 	</tr>
-	<tr><td>Core Extraction</td>
-		<td align="right">[% techscan.extraction %]</td>
+	<tr><td colspan="2">Core Extraction</td>
+		<td align="right">[% devscan.extraction %]</td>
 	</tr>
-	<tr><td>Covert Ops</td>
-		<td align="right">[% techscan.covert %]</td>
+	<tr><td colspan="2">Covert Ops</td>
+		<td align="right">[% devscan.covert %]</td>
 	</tr>
-	<tr><td>Mining</td>
-		<td align="right">[% techscan.mining %]</td>
+	<tr><td colspan="2">Mining</td>
+		<td align="right">[% devscan.mining %]</td>
 	</tr>
 </table>
 [% END %]

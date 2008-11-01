@@ -110,9 +110,9 @@ sub view : Local {
 		, p.x,p.y,p.z, race
 		, p.value - p.size*200 -
 			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 -
-			COALESCE(ss.total ,(SELECT
+			COALESCE(ds.total ,(SELECT
 				COALESCE(avg(total),0) FROM
-				structure_scans)::int)*1500 AS fleetvalue
+				current_development_scans)::int)*1500 AS fleetvalue
 		,(metal+crystal+eonium)/100 AS resvalue, comment
 		, hidden, light, medium, heavy, metal, crystal, eonium
 		,metal_roids, crystal_roids, eonium_roids
@@ -121,8 +121,7 @@ sub view : Local {
 		FROM current_planet_stats p
 			JOIN raid_targets r ON p.id = r.planet
 			LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-			LEFT OUTER JOIN current_structure_scans ss ON p.id = ss.planet
-			LEFT OUTER JOIN current_tech_scans ts ON p.id = ts.planet
+			LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
 		WHERE r.raid = $1
 			AND NOT COALESCE(p.x = $2 AND p.y = $3,False)
 		ORDER BY size});
@@ -193,7 +192,7 @@ sub view : Local {
 			$target->{resvalue} = floor($target->{resvalue}/$num)*$num;
 		}
 		$target->{comment} = parseMarkup($target->{comment}) if ($target->{comment});
-		$target->{hidden} = int($target->{hidden} / 100);
+		$target->{hidden} = int($target->{hidden} / 100) if $target->{hidden};
 
 		push @targets,$target;
 	}

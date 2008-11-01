@@ -67,8 +67,8 @@ sub galaxy : Local {
 		$extra_columns .= q{
 			,gov, p.value - p.size*200 -
 			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 -
-			COALESCE(ss.total ,(SELECT COALESCE(avg(total),0)
-				FROM structure_scans)::int)*1500 AS fleetvalue
+			COALESCE(ds.total ,(SELECT COALESCE(avg(total),0)
+				FROM current_development_scans)::int)*1500 AS fleetvalue
 			,(metal+crystal+eonium)/100 AS resvalue
 		};
 	}
@@ -86,9 +86,9 @@ sub galaxy : Local {
 		$extra_columns
 		FROM current_planet_stats_full p
 			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
-			LEFT OUTER JOIN structure_scans ss ON p.id = ss.planet
+			LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
 		WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE)
-		ORDER BY x,y,z,p.id,ps.tick DESC, ps.id DESC, ss.tick DESC, ss.id DESC
+		ORDER BY x,y,z,p.id,ps.tick DESC, ps.id DESC, ds.tick DESC, ds.id DESC
 		});
 
 	$query->execute($x,$y,$z);
@@ -181,10 +181,8 @@ sub planet : Local {
 	if ($c->check_user_roles(qw/stats_planetdata/)){
 		$c->stash(planetscan => $dbh->selectrow_hashref(q{SELECT *
 			FROM current_planet_scans WHERE planet = $1},undef,$id));
-		$c->stash(structurescan => $dbh->selectrow_hashref(q{SELECT *
-			FROM current_structure_scans WHERE planet = $1},undef,$id));
-		$c->stash(techscan => $dbh->selectrow_hashref(q{SELECT *
-			FROM current_tech_scans WHERE planet = $1},undef,$id));
+		$c->stash(devscan => $dbh->selectrow_hashref(q{SELECT *
+			FROM current_development_scans WHERE planet = $1},undef,$id));
 	}
 
 	my $query = $dbh->prepare(q{SELECT value,value_gain AS gain,tick FROM planet_stats 
