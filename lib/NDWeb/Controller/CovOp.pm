@@ -42,7 +42,7 @@ sub marktarget : Local {
 	my $update = $dbh->prepare(q{INSERT INTO covop_attacks (uid,id,tick) VALUES(?,?,tick())});
 	$update->execute($c->user->id,$target);
 
-	$c->res->redirect($c->req->referer);
+	$c->forward('/redirect');
 }
 
 sub list : Private {

@@ -433,7 +433,7 @@ sub open : Local {
 	$c->forward('log',[$raid, "BC opened raid"]);
 	$c->model->commit;
 
-	$c->res->redirect($c->req->referer);
+	$c->forward('/redirect');
 }
 
 sub close : Local {
@@ -445,7 +445,7 @@ sub close : Local {
 	$c->forward('log',[$raid, "BC closed raid"]);
 	$c->model->commit;
 
-	$c->res->redirect($c->req->referer);
+	$c->forward('/redirect');
 }
 
 sub remove : Local {
@@ -457,7 +457,7 @@ sub remove : Local {
 	$c->forward('log',[$raid, "BC removed raid"]);
 	$c->model->commit;
 
-	$c->res->redirect($c->req->referer);
+	$c->forward('/redirect');
 }
 
 sub showcoords : Local {
@@ -469,7 +469,7 @@ sub showcoords : Local {
 	$c->forward('log',[$raid, "BC released coords"]);
 	$c->model->commit;
 
-	$c->res->redirect($c->req->referer);
+	$c->forward('/redirect');
 }
 
 sub hidecoords : Local {
@@ -481,7 +481,7 @@ sub hidecoords : Local {
 	$c->forward('log',[$raid, "BC hid coords"]);
 	$c->model->commit;
 
-	$c->res->redirect($c->req->referer);
+	$c->forward('/redirect');
 }
 
 sub create : Local {

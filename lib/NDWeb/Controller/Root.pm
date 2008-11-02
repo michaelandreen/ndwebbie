@@ -60,10 +60,10 @@ sub login : Local {
 		$log->execute($c->user->id,$c->req->address
 			,$country,$c->sessionid,$remember);
 
-		my $ref = $c->req->referer;
-		$ref =~ s/^http:/https:/ unless $c->debug;
-		$c->res->redirect($ref);
+		$c->forward('redirect');
 		return;
+	} elsif ($c->req->method eq 'POST'){
+		$c->res->status(400);
 	}
 }
 
@@ -142,7 +142,11 @@ sub auto : Private {
 	}else{
 		$c->stash(UID => -4);
 	}
+}
 
+sub redirect : Private {
+	my ($self, $c) = @_;
+	$c->res->redirect($c->uri_for('/'.$c->flash->{referrer}));
 }
 
 sub access_denied : Private {
@@ -160,6 +164,10 @@ Attempt to render a view, if needed.
 
 sub end : ActionClass('RenderView') {
 	my ($self, $c) = @_;
+
+	if ($c->res->status == 302){
+		return;
+	}
 
 	my $dbh = $c ->model;
 
@@ -205,6 +213,10 @@ sub end : ActionClass('RenderView') {
 		});
 	$birthdays->execute;
 	$c->stash(birthdays => $birthdays->fetchall_arrayref({}));
+
+	if ($c->res->status == 200){
+		$c->flash(referrer => $c->req->path);
+	}
 }
 
 =head1 AUTHOR

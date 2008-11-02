@@ -277,7 +277,7 @@ sub markBoardAsRead : Local {
 		$c->forward('markThreadAsRead',[$thread->{ftid}]);
 	}
 	$dbh->commit;
-	$c->res->redirect($c->req->referer);
+	$c->forward('/redirect');
 }
 
 sub markThreadAsRead : Private {
