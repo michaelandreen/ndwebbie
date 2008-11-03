@@ -39,6 +39,23 @@
 [% END %]
 
 [% IF thread.moderate %]
+
+<form action="[% c.uri_for('moveThreads',thread.fbid) %]" method="post">
+<p>Move checked threads to:
+<input type="hidden" name="t:[% thread.ftid %]" value="1">
+<select name="board">
+[% FOR category IN categories %]
+	<optgroup label="[% category.category %]">
+	[% FOR targetboard IN category.boards %]
+		<option value="[% targetboard.fbid %]">[% targetboard.board %]</option>
+	[% END %]
+	</optgroup>
+[% END %]
+</select>
+<input type="submit" name="cmd" value="Move">
+</p>
+</form>
+
 <form action="[% c.uri_for('postthreadaccess',thread.ftid) %]#NewPosts" method="post">
 <fieldset class="forum-post"> <legend>Change thread access</legend>
 <table>

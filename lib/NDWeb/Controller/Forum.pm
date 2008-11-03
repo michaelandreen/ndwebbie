@@ -182,32 +182,9 @@ sub board : Local {
 	}
 	$c->stash(threads => \@threads);
 
-	if ($board->{moderate}){
-		my $categories = $dbh->prepare(q{SELECT fcid,category FROM forum_categories ORDER BY fcid});
-		my $boards = $dbh->prepare(q{SELECT fb.fbid,fb.board, bool_or(fa.post) AS post
-			FROM forum_boards fb NATURAL JOIN forum_access fa
-			WHERE fb.fcid = $1 AND
-				gid IN (SELECT groups($2))
-			GROUP BY fb.fbid,fb.board
-			ORDER BY fb.fbid
-		});
-		$categories->execute;
-		my @categories;
-		while (my $category = $categories->fetchrow_hashref){
-			$boards->execute($category->{fcid},$c->stash->{UID});
-
-			my @boards;
-			while (my $b = $boards->fetchrow_hashref){
-				next if (not $b->{post} or $b->{fbid} == $board->{fbid});
-				push @boards,$b;
-			}
-			$category->{boards} = \@boards;
-			push @categories,$category if @boards;
-		}
-		$c->stash(categories => \@categories);
-	}
+	$c->forward('listModeratorBoards', [$board->{fbid}]) if $board->{moderate};
+	
 }
-
 
 sub thread : Local {
 	my ( $self, $c, $thread ) = @_;
@@ -222,9 +199,12 @@ sub thread : Local {
 		JOIN forum_priv_access fta USING (uid) WHERE fta.ftid = $1});
 	$query->execute($thread);
 	$c->stash(access => $query->fetchall_arrayref({}) );
-	$c->forward('findUsers') if $c->stash->{thread}->{moderate};
 	$c->forward('findPosts');
 	$c->forward('markThreadAsRead') if $c->user_exists;
+	if ($c->stash->{thread}->{moderate}) {
+		$c->forward('findUsers');
+		$c->forward('listModeratorBoards', [$c->stash->{thread}->{fbid}]);
+	}
 }
 
 sub findPosts :Private {
@@ -533,6 +513,35 @@ sub insertPost : Private {
 	my $insert = $dbh->prepare(q{INSERT INTO forum_posts (ftid,message,uid)
 		VALUES($1,$2,$3)});
 	$insert->execute($thread,html_escape($c->req->param('message')),$c->stash->{UID});
+}
+
+sub listModeratorBoards : Private {
+	my ( $self, $c, $fbid ) = @_;
+	my $dbh = $c->model;
+
+	my $categories = $dbh->prepare(q{SELECT fcid,category FROM forum_categories ORDER BY fcid});
+	my $boards = $dbh->prepare(q{SELECT fb.fbid,fb.board, bool_or(fa.post) AS post
+		FROM forum_boards fb NATURAL JOIN forum_access fa
+		WHERE fb.fcid = $1
+			AND gid IN (SELECT groups($2))
+			AND moderate
+		GROUP BY fb.fbid,fb.board
+		ORDER BY fb.fbid
+		});
+	$categories->execute;
+	my @categories;
+	while (my $category = $categories->fetchrow_hashref){
+		$boards->execute($category->{fcid},$c->stash->{UID});
+
+		my @boards;
+		while (my $b = $boards->fetchrow_hashref){
+			next if ($b->{fbid} == $fbid);
+			push @boards,$b;
+		}
+		$category->{boards} = \@boards;
+		push @categories,$category if @boards;
+	}
+	$c->stash(categories => \@categories);
 }
 
 =head1 AUTHOR
