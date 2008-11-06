@@ -38,6 +38,7 @@ INSERT INTO roles VALUES('intel_members');
 INSERT INTO roles VALUES('intel_member');
 INSERT INTO roles VALUES('intel_naps');
 INSERT INTO roles VALUES('textexport_alliance');
+INSERT INTO roles VALUES('stats_find_nick');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
@@ -64,6 +65,7 @@ INSERT INTO group_roles (gid,role) VALUES(8,'no_fleet_update');
 
 INSERT INTO group_roles (gid,role) VALUES(9,'members_points_nolimit');
 INSERT INTO group_roles (gid,role) VALUES(9,'stats_intel');
+INSERT INTO group_roles (gid,role) VALUES(9,'stats_find_nick');
 
 INSERT INTO group_roles (gid,role) VALUES(1,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(1,'bc_menu');

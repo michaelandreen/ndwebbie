@@ -210,6 +210,7 @@ sub find : Local {
 	my $dbh = $c->model;
 
 	local $_ = $find || $c->req->param('coords');
+	$c->stash(searchterm => $_);
 
 	if (/(\d+)(?: |:)(\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?/){
 		my $planet = $dbh->selectrow_array(q{SELECT planetid($1,$2,$3,$4)}
@@ -217,8 +218,19 @@ sub find : Local {
 		$c->res->redirect($c->uri_for('planet',$planet));
 	}elsif (/(\d+)(?: |:)(\d+)/){
 		$c->res->redirect($c->uri_for('galaxy',$1,$2));
+	}elsif($c->check_user_roles(qw/stats_find_nick/)) {
+		my $query = $dbh->prepare(q{SELECT id,coords(x,y,z),nick
+			FROM current_planet_stats p
+			WHERE nick ilike $1
+		});
+		$query->execute($_);
+		my $planets = $query->fetchall_arrayref({});
+		if (@{$planets} == 1){
+			$c->res->redirect($c->uri_for('planet',$planets->[0]->{id}));
+		}else{
+			$c->stash(planets => $planets);
+		}
 	}
-
 }
 
 
