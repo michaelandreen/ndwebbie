@@ -80,12 +80,41 @@ my $addplanetscan = $dbh->prepare(q{INSERT INTO planet_scans
 	(id,tick,planet,metal_roids,metal,crystal_roids,crystal,eonium_roids,eonium
 		,agents,guards,light,medium,heavy,hidden)
 	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
+
+sub parse_planet {
+	my ($scan,$file) = @_;
+
+	my @values = ($scan->{id},$scan->{tick},$scan->{planet});
+	$file =~ s/(\d),(\d)/$1$2/g;
+
+	while($file =~ m/"center">(Metal|Crystal|Eonium)\D+(\d+)\D+([\d,]+)/g){
+		push @values,$2,$3;
+	}
+	if($file =~ m{Security\ Guards .+? "center">(\d+)</td>
+			.+? "center">(\d+)</td>}sx){
+		push @values,$1,$2;
+	}
+	if($file =~ m{<td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td>}){
+		push @values,$1,$2,$3;
+	}
+	if($file =~ m{<span class="superhighlight">([\d,]+)</span>}){
+		push @values,$1;
+	}
+	$addplanetscan->execute(@values);
+}
+
 my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
 	(id,tick,planet,light_fac,medium_fac,heavy_fac,amps,distorters
 		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,seccents
 		,travel,infra,hulls,waves,extraction,covert,mining,total)
 	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	});
+
+
+my %parsers = (
+	Planet => \&parse_planet,
+);
+
 
 $dbh->begin_work or die 'No transaction';
 $newscans->execute or die $dbh->errstr;
@@ -105,6 +134,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 		my $y = $3;
 		my $z = $4;
 		my $tick = $5;
+		$scan->{tick} = $5;
 
 		if($dbh->selectrow_array(q{SELECT * FROM scans WHERE scan_id = ? AND tick = ? AND id <> ?},undef,$scan->{scan_id},$tick,$scan->{id})){
 			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
@@ -114,6 +144,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 			next;
 		}
 		my ($planet) = $dbh->selectrow_array($findplanet,undef,$x,$y,$z,$tick);
+		$scan->{planet} = $planet;
 		unless ($planet){
 			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
 			if ( $x == 0 && $y == 0 && $z == 0 ){
@@ -126,24 +157,8 @@ while (my $scan = $newscans->fetchrow_hashref){
 		if ($file =~ /(Note: [^<]*)/){
 			#TODO: something about planet being closed?
 		}
-		if ($type eq 'Planet'){
-			my @values = ($scan->{id},$tick,$planet);
-			$file =~ s/(\d),(\d)/$1$2/g;
-
-			while($file =~ m/"center">(Metal|Crystal|Eonium)\D+(\d+)\D+([\d,]+)/g){
-				push @values,$2,$3;
-			}
-			if($file =~ m{Security\ Guards .+? "center">(\d+)</td>
-					.+? "center">(\d+)</td>}sx){
-				push @values,$1,$2;
-			}
-			if($file =~ m{<td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td><td class="center">([A-Z][a-z]+)</td>}){
-				push @values,$1,$2,$3;
-			}
-			if($file =~ m{<span class="superhighlight">([\d,]+)</span>}){
-				push @values,$1;
-			}
-			$addplanetscan->execute(@values);
+		if (exists $parsers{$type}){
+			$parsers{$type}->($scan,$file);
 		}elsif ($type eq 'Jumpgate'){
 		#print "$file\n";
 			while ($file =~ m{(\d+):(\d+):(\d+)\D+(Attack|Defend|Return)</td><td class="left">([^<]*)\D+(\d+)\D+(\d+)}g){
