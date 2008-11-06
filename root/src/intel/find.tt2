@@ -1,9 +1,22 @@
 [% META title = 'Find' %]
 
-<p>Could not find: &quot;[% c.req.param('coords') | html %]&quot;</p>
+<p>Could not find a single planet matching: &quot;[% searchterm | html %]&quot;</p>
+
+[% IF planets %]
+<table>
+	<tr><th>Coords</th><th>Nick</th></tr>
+	[% FOR p IN planets %]
+	<tr>
+		<td><a href="[% c.uri_for('planet',p.id) %]">[% p.coords %]</a></td>
+		<td>[% p.nick %]</td>
+	</tr>
+	[% END %]
+</table>
+[% END %]
 
 <p>The following syntaxes are possible:</p>
 <ul>
 	<li>X:Y:Z tick (i.e. &quot;1:1:1 37&quot;) Finds the planet that had the coords at the specified tick</li>
 	<li>X:Y:Z (i.e.  &quot;1:1:1&quot;) Finds the planet that had the coords at the current tick</li>
+	<li>A nick, with or without wildcard like %</li>
 </ul>

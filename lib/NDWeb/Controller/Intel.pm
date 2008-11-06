@@ -159,11 +159,24 @@ sub find : Local {
 	my $dbh = $c->model;
 
 	local $_ = $find || $c->req->param('coords');
+	$c->stash(searchterm => $_);
 
 	if (/(\d+)(?: |:)(\d+)(?: |:)(\d+)(?:(?: |:)(\d+))?/){
 		my $planet = $dbh->selectrow_array(q{SELECT planetid($1,$2,$3,$4)}
 			,undef,$1,$2,$3,$4);
 		$c->res->redirect($c->uri_for('planet',$planet));
+	}else{
+		my $query = $dbh->prepare(q{SELECT id,coords(x,y,z),nick
+			FROM current_planet_stats p
+			WHERE nick ilike $1
+		});
+		$query->execute($_);
+		my $planets = $query->fetchall_arrayref({});
+		if (@{$planets} == 1){
+			$c->res->redirect($c->uri_for('planet',$planets->[0]->{id}));
+		}else{
+			$c->stash(planets => $planets);
+		}
 	}
 }
 
