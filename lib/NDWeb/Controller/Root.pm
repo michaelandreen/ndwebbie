@@ -38,7 +38,8 @@ sub index : Local Path Args(0) {
 
 sub default : Path {
 	my ( $self, $c ) = @_;
-	$c->response->status(404);
+	$c->stash(template => 'default.tt2');
+	$c->response->status(410);
 }
 
 sub login : Local {
@@ -166,7 +167,7 @@ Attempt to render a view, if needed.
 sub end : ActionClass('RenderView') {
 	my ($self, $c) = @_;
 
-	if ($c->res->status == 302){
+	if ($c->res->status >= 300 && $c->res->status <= 400 ){
 		return;
 	}
 

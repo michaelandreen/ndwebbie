@@ -55,7 +55,10 @@ sub galaxy : Local {
 		});
 
 	$query->execute($x,$y);
-	$c->stash(g => $query->fetchrow_hashref );
+	my $g = $query->fetchrow_hashref;
+	$c->detach('/default') unless $g;
+	$c->stash(g => $g);
+
 
 	my $extra_columns = '';
 	if ($c->check_user_roles(qw/stats_intel/)){
@@ -101,6 +104,8 @@ sub planet : Local {
 
 	my $p = $dbh->selectrow_hashref(q{SELECT id,x,y,z FROM current_planet_stats
 		WHERE id = $1},undef,$id);
+
+	$c->detach('/default') unless $p;
 
 	$c->forward('galaxy',[$p->{x},$p->{y},$p->{z}]);
 	$c->stash(p => $p);

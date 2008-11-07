@@ -159,6 +159,9 @@ sub board : Local {
 
 	$c->forward('findBoard');
 	$board = $c->stash->{board};
+	if ( !defined $board->{fbid}){
+		$c->detach('/default');
+	}
 
 	my $threads = $dbh->prepare(q{SELECT ft.ftid,u.username,ft.subject
 		,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
@@ -180,6 +183,10 @@ sub board : Local {
 	while (my $thread = $threads->fetchrow_hashref){
 		push @threads,$thread;
 	}
+
+	if ( !(defined $board->{post}) && @threads == 0){
+		$c->acl_access_denied('test',$c->action,'No access to board')
+	}
 	$c->stash(threads => \@threads);
 
 	$c->forward('listModeratorBoards', [$board->{fbid}]) if $board->{moderate};
@@ -192,7 +199,8 @@ sub thread : Local {
 
 	$c->forward('findThread');
 	unless ($c->stash->{thread}){
-		$c->stash(template => 'access_denied.tt2');
+		$c->stash(template => 'default.tt2');
+		$c->res->status(404);
 		return;
 	}
 	my $query = $dbh->prepare(q{SELECT uid,username FROM users u

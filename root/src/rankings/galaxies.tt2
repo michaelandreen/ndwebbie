@@ -1,6 +1,6 @@
 [% META title = 'Galaxy Rankings' %]
 <p>[% IF offset > 0 %]<a href="[% c.uri_for('galaxies', order, offset - 100) %]">Previous 100</a>[% END %]
-	[% IF galaxies.size > 0 %]<a href="[% c.uri_for('galaxies', order, offset + 100) %]">Next 100</a>[% END %]
+	[% IF galaxies.size == 100 %]<a href="[% c.uri_for('galaxies', order, offset + 100) %]">Next 100</a>[% END %]
 </p>
 <table class="stats">
 	<tr align="center"><th colspan="4">Rank</th>
@@ -42,5 +42,5 @@
 [% END %]
 </table>
 <p>[% IF offset > 0 %]<a href="[% c.uri_for('galaxies', order, offset - 100) %]">Previous 100</a>[% END %]
-	[% IF galaxies.size > 0 %]<a href="[% c.uri_for('galaxies', order, offset + 100) %]">Next 100</a>[% END %]
+	[% IF galaxies.size == 100 %]<a href="[% c.uri_for('galaxies', order, offset + 100) %]">Next 100</a>[% END %]
 </p>

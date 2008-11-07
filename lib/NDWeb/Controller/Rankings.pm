@@ -36,6 +36,7 @@ sub planets : Local {
 	my $error = '';
 
 	$offset = 0 unless $offset;
+	$c->detach('/default') if $offset < 0;
 	$c->stash(offset => $offset);
 
 	$c->stash( comma => \&comma_value);
@@ -74,6 +75,7 @@ sub planets : Local {
 	while (my $planet = $query->fetchrow_hashref){
 		push @planets,$planet;
 	}
+	$c->detach('/default') unless @planets;
 	$c->stash(planets => \@planets);
 }
 
@@ -84,6 +86,7 @@ sub galaxies : Local {
 	my $error = '';
 
 	$offset = 0 unless $offset;
+	$c->detach('/default') if $offset < 0;
 	$c->stash(offset => $offset);
 
 	$c->stash( comma => \&comma_value);
@@ -118,6 +121,7 @@ sub galaxies : Local {
 	while (my $galaxy = $query->fetchrow_hashref){
 		push @galaxies,$galaxy;
 	}
+	$c->detach('/default') unless @galaxies;
 	$c->stash(galaxies => \@galaxies);
 }
 
@@ -129,6 +133,7 @@ sub alliances : Local {
 	my $error = '';
 
 	$offset = 0 unless $offset;
+	$c->detach('/default') if $offset < 0;
 	$c->stash(offset => $offset);
 
 	$c->stash( comma => \&comma_value);
@@ -170,6 +175,7 @@ sub alliances : Local {
 	while (my $alliance = $query->fetchrow_hashref){
 		push @alliances,$alliance;
 	}
+	$c->detach('/default') unless @alliances;
 	$c->stash(alliances => \@alliances);
 }
 
