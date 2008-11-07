@@ -190,6 +190,7 @@ sub listTargets : Local {
 sub access_denied : Private {
 	my ($self, $c) = @_;
 	$c->stash(template => 'jsrpc/access_denied.tt2');
+	$c->res->status(403);
 }
 
 sub assertTarget : Private {
@@ -216,9 +217,11 @@ sub end : ActionClass('RenderView') {
 	if (scalar @{ $c->error } ){
 		if ($c->error->[0] =~ m/Can't call method "id" on an undefined value at/){
 			$c->stash->{template} = 'jsrpc/access_denied.tt2';
+			$c->res->status(403);
 			$c->clear_errors;
 		}elsif ($c->error->[0] =~ m/Missing roles: /){
 			$c->stash->{template} = 'jsrpc/access_denied.tt2';
+			$c->res->status(403);
 			$c->clear_errors;
 		}
 	}

@@ -153,6 +153,7 @@ sub access_denied : Private {
 	my ($self, $c, $action) = @_;
 
 	$c->stash->{template} = 'access_denied.tt2';
+	$c->res->status(403);
 
 }
 
@@ -174,9 +175,11 @@ sub end : ActionClass('RenderView') {
 	if (scalar @{ $c->error } ){
 		if ($c->error->[0] =~ m/Can't call method "id" on an undefined value at/){
 			$c->stash->{template} = 'access_denied.tt2';
+			$c->res->status(403);
 			$c->clear_errors;
 		}elsif ($c->error->[0] =~ m/Missing roles: /){
 			$c->stash->{template} = 'access_denied.tt2';
+			$c->res->status(403);
 			$c->clear_errors;
 		}
 	}
@@ -214,7 +217,7 @@ sub end : ActionClass('RenderView') {
 	$birthdays->execute;
 	$c->stash(birthdays => $birthdays->fetchall_arrayref({}));
 
-	if ($c->res->status == 200){
+	if ($c->res->status == 200 || $c->req->method eq 'GET'){
 		$c->flash(referrer => $c->req->path);
 	}
 }
