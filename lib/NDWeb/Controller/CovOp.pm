@@ -52,13 +52,13 @@ sub list : Private {
 	my $query = $dbh->prepare(q{SELECT id, coords, metal, crystal, eonium
 		, covop_alert(seccents,structures,size,guards,gov,0) AS minalert
 		, covop_alert(seccents,structures,size,guards,gov,50) AS maxalert
-		, distorters,gov
+		, distorters,gov,pstick,dstick
 		, MaxResHack,co.tick AS lastcovop
 		FROM (SELECT p.id,coords(x,y,z),size, metal,crystal,eonium,guards
 			,seccents,NULLIF(ds.total::integer,0) AS structures,distorters
 			,max_bank_hack(metal,crystal,eonium,p.value
 				,(SELECT value FROM current_planet_stats WHERE id = ?)) AS MaxResHack
-			, planet_status, relationship,gov
+			, planet_status, relationship,gov,ps.tick AS pstick, ds.tick AS dstick
 			FROM current_planet_stats p
 				LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
 				LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
