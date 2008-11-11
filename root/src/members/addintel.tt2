@@ -19,7 +19,7 @@
 [% END %]
 
 [% IF intelmessage %]
-<p style="clear: both"><b>Intel message has been forwarrded to intel dept</b></p>
+<p style="clear: both"><b>Intel message has been forwarded to intel dept</b></p>
 [% END %]
 
 <div style="clear: left" class="leftinfo">
