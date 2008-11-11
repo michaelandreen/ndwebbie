@@ -1,3 +1,15 @@
+[%- BLOCK style -%]
+	[%- IF not tick -%]
+ class="old"
+	[%- ELSIF TICK - tick > 24 -%]
+ class="old"
+	[%- ELSIF TICK - tick > 12 -%]
+ class="semiold"
+	[%- ELSIF TICK - tick < 6 -%]
+ class="new"
+	[%- END -%]
+[%- END -%]
+
 [% META title = 'Covert operations' %]
 <table>
 	<tr>
@@ -10,13 +22,13 @@
 [% FOR t IN targets %]
 	<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
 	<td><a href="[% c.uri_for('/stats/planet',t.id) %]">[% t.coords %]</a></td>
-	<td[% IF TICK - t.pstick > 6 %] class="OLD"[%END%]>[% t.pstick %]</td>
+	<td[% PROCESS style tick=t.pstick%]>[% t.pstick %]</td>
 	<td>[% t.metal %]</td>
 	<td>[% t.crystal %]</td>
 	<td>[% t.eonium %]</td>
 	<td>[% t.gov %]</td>
 	<td>[% t.minalert %] - [% t.maxalert %]</td>
-	<td[% IF TICK - t.dstick > 6 %] class="OLD"[%END%]>[% t.dstick %]</td>
+	<td[% PROCESS style tick=t.dstick%]>[% t.dstick %]</td>
 	<td>[% t.distorters %]</td>
 	<td>[% t.maxreshack %]</td>
 	<td>[% t.lastcovop %]</td>

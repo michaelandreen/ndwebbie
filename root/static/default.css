@@ -165,8 +165,16 @@ td.NAP a{
 	background: blue;
 }
 
-td.OLD{
+td.old{
 	background: red;
+	color: black;
+}
+td.semiold{
+	background: yellow;
+	color: black;
+}
+td.new{
+	background: green;
 	color: black;
 }
 table.old{
