@@ -203,8 +203,9 @@ while (my $scan = $newscans->fetchrow_hashref){
 				my $id = addfleet($1,$2,$3,$planet,undef,$tick,undef,undef,$4);
 				$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 			}
+		} elsif($type eq 'Landing'){
 		} else {
-			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}";
+			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
 		}
 		$parsedscan->execute($tick,$type,$planet,$scan->{id}) or die $dbh->errstr;
 		#$dbh->rollback;
