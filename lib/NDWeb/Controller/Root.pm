@@ -147,7 +147,7 @@ sub auto : Private {
 
 sub redirect : Private {
 	my ($self, $c) = @_;
-	$c->res->redirect($c->uri_for('/'.$c->flash->{referrer}));
+	$c->res->redirect($c->uri_for('/'.$c->session->{referrer}));
 }
 
 sub access_denied : Private {
@@ -219,7 +219,7 @@ sub end : ActionClass('RenderView') {
 	$c->stash(birthdays => $birthdays->fetchall_arrayref({}));
 
 	if ($c->res->status == 200 || $c->req->method eq 'GET'){
-		$c->flash(referrer => $c->req->path);
+		$c->session->{referrer} = $c->req->path;
 	}
 }
 
