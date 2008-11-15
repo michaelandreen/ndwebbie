@@ -38,10 +38,10 @@ sub distwhores : Local {
 sub marktarget : Local {
 	my ( $self, $c, $target ) = @_;
 	my $dbh = $c->model;
-
 	my $update = $dbh->prepare(q{INSERT INTO covop_attacks (uid,id,tick) VALUES(?,?,tick())});
-	$update->execute($c->user->id,$target);
-
+	eval{
+		$update->execute($c->user->id,$target);
+	};
 	$c->forward('/redirect');
 }
 
