@@ -101,7 +101,7 @@ sub updateUser : Local {
 				}
 				$dbh->do(qq{UPDATE users SET $column = ? WHERE uid = ? }
 					,undef,$value,$user->{uid});
-				$log->execute($c->user->id,"HC changed $column from $c->{$column} to $value for user: $user->{uid} ($user->{username})");
+				$log->execute($c->user->id,"HC changed $column from $user->{$column} to $value for user: $user->{uid} ($user->{username})");
 			}elsif ($param =~ /^gr:(\d+)$/){
 				my $query;
 				if ($c->req->param($param) eq 'remove'){
