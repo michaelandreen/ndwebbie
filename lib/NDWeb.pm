@@ -38,12 +38,15 @@ __PACKAGE__->config( cache => {
 	backend => {
 		class => "Cache::FileCache",
 		cache_root => "/tmp/ndweb-$>",
+		namespace => "cache",
+		default_expires_in => 3600,
 		directory_umask => 077,
 	},
 });
 
 __PACKAGE__->config( page_cache => {
 	set_http_headers => 1,
+	disable_index => 1,
 });
 
 
