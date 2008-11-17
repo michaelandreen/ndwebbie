@@ -23,8 +23,8 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
-	$c->stash( where => q{AND MaxResHack > 130000
-		ORDER BY minalert ASC,MaxResHack DESC});
+	$c->stash( where => q{AND max_bank_hack > 60000
+		ORDER BY max_bank_hack DESC, minalert ASC});
 	$c->forward('list');
 }
 
@@ -53,15 +53,16 @@ sub list : Private {
 		, covop_alert(seccents,structures,size,guards,gov,0) AS minalert
 		, covop_alert(seccents,structures,size,guards,gov,50) AS maxalert
 		, distorters,gov,pstick,dstick
-		, MaxResHack,co.tick AS lastcovop
+		, max_bank_hack,hack15,co.tick AS lastcovop
 		FROM (SELECT p.id,coords(x,y,z),size, metal,crystal,eonium,guards
 			,seccents,NULLIF(ds.total::integer,0) AS structures,distorters
-			,max_bank_hack(metal,crystal,eonium,p.value
-				,(SELECT value FROM current_planet_stats WHERE id = ?)) AS MaxResHack
+			,max_bank_hack(metal,crystal,eonium,p.value,c.value,5)
+			,max_bank_hack(metal,crystal,eonium,p.value,c.value,15) AS hack15
 			, planet_status, relationship,gov,ps.tick AS pstick, ds.tick AS dstick
 			FROM current_planet_stats p
 				LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
 				LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
+				CROSS JOIN (SELECT value FROM current_planet_stats WHERE id = $1) c
 			) AS foo
 			LEFT OUTER JOIN (SELECT id,max(tick) AS tick FROM covop_attacks GROUP BY id) co USING (id)
 		WHERE (metal IS NOT NULL OR seccents IS NOT NULL)
@@ -70,11 +71,7 @@ sub list : Private {
 		} . $c->stash->{where});
 	$query->execute($c->user->planet);
 
-	my @targets;
-	while (my $target = $query->fetchrow_hashref){
-		push @targets,$target;
-	}
-	$c->stash(targets => \@targets);
+	$c->stash(targets => $query->fetchall_arrayref({}));
 
 	$c->stash(template => 'covop/index.tt2');
 }
