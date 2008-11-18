@@ -28,6 +28,13 @@ sub index :Path :Args(0) {
 	$c->forward('list');
 }
 
+sub easy : Local {
+	my ( $self, $c ) = @_;
+	$c->stash( where =>  qq{AND minalert < 70
+		ORDER BY minalert ASC,max_bank_hack DESC});
+	$c->forward('list');
+}
+
 sub distwhores : Local {
 	my ( $self, $c ) = @_;
 	$c->stash( where =>  qq{AND distorters > 0
@@ -49,13 +56,11 @@ sub list : Private {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT id, coords, metal, crystal, eonium
-		, covop_alert(seccents,structures,size,guards,gov,0) AS minalert
-		, covop_alert(seccents,structures,size,guards,gov,50) AS maxalert
-		, distorters,gov,pstick,dstick
-		, max_bank_hack,hack15,co.tick AS lastcovop
-		FROM (SELECT p.id,coords(x,y,z),size, metal,crystal,eonium,guards
-			,seccents,NULLIF(ds.total::integer,0) AS structures,distorters
+	my $query = $dbh->prepare(q{SELECT *
+		FROM (SELECT p.id,coords(x,y,z),size, metal,crystal,eonium
+			,distorters,guards
+			,covop_alert(seccents,ds.total,size,guards,gov,0) AS minalert
+			,covop_alert(seccents,ds.total,size,guards,gov,50) AS maxalert
 			,max_bank_hack(metal,crystal,eonium,p.value,c.value,5)
 			,max_bank_hack(metal,crystal,eonium,p.value,c.value,15) AS hack15
 			, planet_status, relationship,gov,ps.tick AS pstick, ds.tick AS dstick
@@ -64,8 +69,9 @@ sub list : Private {
 				LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
 				CROSS JOIN (SELECT value FROM current_planet_stats WHERE id = $1) c
 			) AS foo
-			LEFT OUTER JOIN (SELECT id,max(tick) AS tick FROM covop_attacks GROUP BY id) co USING (id)
-		WHERE (metal IS NOT NULL OR seccents IS NOT NULL)
+			LEFT OUTER JOIN (SELECT id,max(tick) AS lastcovop FROM covop_attacks
+				GROUP BY id) co USING (id)
+		WHERE (metal IS NOT NULL OR distorters IS NOT NULL)
 			AND (NOT planet_status IN ('Friendly','NAP'))
 			AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP'))
 		} . $c->stash->{where});
