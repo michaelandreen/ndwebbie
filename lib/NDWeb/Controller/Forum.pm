@@ -189,6 +189,8 @@ sub board : Local {
 	}
 	$c->stash(threads => \@threads);
 
+	$c->stash(title => "$board->{board} ($board->{category})");
+
 	$c->forward('listModeratorBoards', [$board->{fbid}]) if $board->{moderate};
 	
 }
@@ -198,15 +200,18 @@ sub thread : Local {
 	my $dbh = $c->model;
 
 	$c->forward('findThread');
-	unless ($c->stash->{thread}){
+	$thread = $c->stash->{thread};
+	unless ($thread){
 		$c->stash(template => 'default.tt2');
 		$c->res->status(404);
 		return;
 	}
 	my $query = $dbh->prepare(q{SELECT uid,username FROM users u
 		JOIN forum_priv_access fta USING (uid) WHERE fta.ftid = $1});
-	$query->execute($thread);
+	$query->execute($thread->{ftid});
 	$c->stash(access => $query->fetchall_arrayref({}) );
+	$c->stash(title => $thread->{subject}
+		. " ($thread->{category} - $thread->{board})");
 	$c->forward('findPosts');
 	$c->forward('markThreadAsRead') if $c->user_exists;
 	if ($c->stash->{thread}->{moderate}) {
