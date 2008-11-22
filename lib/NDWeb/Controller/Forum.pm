@@ -26,19 +26,22 @@ sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $boards = $dbh->prepare(q{SELECT fcid,category,fb.fbid,fb.board
-			,count(NULLIF(COALESCE(fp.fpid::BOOLEAN,FALSE)
-				AND COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread
-			,date_trunc('seconds',max(fp.time)::timestamp) as last_post
-			FROM forum_categories
-				JOIN forum_boards fb USING (fcid)
-				LEFT OUTER JOIN forum_threads ft USING (fbid)
-				LEFT OUTER JOIN forum_posts fp USING (ftid)
-				LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv USING (ftid)
-			WHERE EXISTS (SELECT fbid FROM forum_access WHERE fbid = fb.fbid AND gid IN (SELECT groups($1)))
-				OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $1)
-			GROUP BY fcid,category,fb.fbid, fb.board
-			ORDER BY fcid,fb.fbid
+	my $boards = $dbh->prepare(q{
+SELECT fcid,category,fb.fbid,fb.board
+	,SUM((SELECT count(*) FROM forum_posts WHERE ftid = ft.ftid
+		AND COALESCE(time > ftv.time,TRUE))) AS unread
+	,date_trunc('seconds',max(ft.mtime)::timestamp ) AS last_post
+FROM forum_categories fc
+	JOIN forum_boards fb USING (fcid)
+	JOIN forum_threads ft USING (fbid)
+	LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1)
+		ftv USING (ftid)
+WHERE fbid IN (SELECT fbid FROM forum_access
+		WHERE gid IN (SELECT groups($1)))
+	OR ftid IN (SELECT ftid FROM forum_priv_access
+		WHERE uid = $1)
+GROUP BY fcid,category,fb.fbid, fb.board
+ORDER BY fcid,fb.fbid
 		});
 		$boards->execute($c->stash->{UID});
 
@@ -58,22 +61,24 @@ sub allUnread : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $threads = $dbh->prepare(q{SELECT fcid,category,fbid,board,ft.ftid,u.username,ft.subject,
-		count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts,
-		date_trunc('seconds',max(fp.time)::timestamp) as last_post,
-		min(fp.time)::date as posting_date, ft.sticky
-		FROM forum_categories fc 
-			JOIN forum_boards fb USING (fcid) 
-			JOIN forum_threads ft USING (fbid)
-			JOIN forum_posts fp USING (ftid) 
-			JOIN users u ON u.uid = ft.uid
-			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
-		WHERE (fbid > 0 AND
-				fb.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1)))
-			) OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $1)
-		GROUP BY fcid,category,fbid,board,ft.ftid, ft.subject,ft.sticky,u.username
-		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= 1 
-		ORDER BY fcid,fbid,sticky DESC,last_post DESC
+	my $threads = $dbh->prepare(q{
+SELECT fcid,category,fbid,board,ft.ftid,u.username,ft.subject,ft.sticky
+	,(SELECT count(*) FROM forum_posts WHERE ftid = ft.ftid
+		AND COALESCE(time > ftv.time,TRUE)) AS unread
+	,ft.posts,date_trunc('seconds',ft.mtime::timestamp) as last_post
+	,ft.ctime::DATE as posting_date
+FROM forum_categories fc
+	JOIN forum_boards fb USING (fcid)
+	JOIN forum_threads ft USING (fbid)
+	JOIN users u ON u.uid = ft.uid
+	LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1)
+		ftv ON ftv.ftid = ft.ftid
+WHERE COALESCE(ft.mtime > ftv.time,TRUE)
+	AND ft.ftid IN (SELECT ftid FROM forum_posts WHERE ftid = ft.ftid)
+	AND ((fbid > 0 AND
+			fb.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1))))
+		OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $1))
+ORDER BY fcid,fbid,sticky DESC,last_post DESC
 		});
 
 	$threads->execute($c->stash->{UID});
@@ -163,20 +168,22 @@ sub board : Local {
 		$c->detach('/default');
 	}
 
-	my $threads = $dbh->prepare(q{SELECT ft.ftid,u.username,ft.subject
-		,count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts
-		,date_trunc('seconds',max(fp.time)::timestamp) as last_post
-		,min(fp.time)::date as posting_date, ft.sticky
-		FROM forum_threads ft 
-			JOIN forum_posts fp USING (ftid)
-			JOIN users u ON u.uid = ft.uid
-			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2) ftv ON ftv.ftid = ft.ftid
-		WHERE ft.fbid = $1 AND (
-			ft.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($2)))
-			OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $2)
-			)
-		GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
-		ORDER BY sticky DESC,last_post DESC
+	my $threads = $dbh->prepare(q{
+SELECT ft.ftid,u.username,ft.subject,ft.posts, ft.sticky
+	,(SELECT count(*) FROM forum_posts WHERE ftid = ft.ftid
+		AND COALESCE(time > ftv.time,TRUE)) AS unread
+	,ft.ctime::DATE as posting_date
+	,date_trunc('seconds',ft.mtime::timestamp) as last_post
+FROM forum_threads ft
+	JOIN users u USING(uid)
+	LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $2)
+		ftv ON ftv.ftid = ft.ftid
+WHERE ft.posts > 0 AND ft.fbid = $1 AND (
+		ft.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($2)))
+		OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $2)
+	)
+GROUP BY ft.ftid, ft.subject,ft.sticky,u.username,ft.ctime,ft.mtime,ft.posts,ftv.time
+ORDER BY sticky DESC,last_post DESC
 	});
 	$threads->execute($board->{fbid},$c->stash->{UID});
 	my @threads;
