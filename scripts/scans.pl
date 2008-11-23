@@ -103,6 +103,17 @@ sub parse_planet {
 	$addplanetscan->execute(@values);
 }
 
+sub parse_incoming {
+	my ($scan,$file) = @_;
+
+	while($file =~ m{class="left">Fleet:\s(.*?)</td><td\sclass="right">
+			Mission:\s(\w+)</td></tr>(.*?)Total\sShips:\s(\d+)}sxg){
+		my $id = addfleet($1,$2,$3,$scan->{planet},undef
+			,$scan->{tick},undef,undef,$4);
+		$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
+	}
+}
+
 my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
 	(id,tick,planet,light_fac,medium_fac,heavy_fac,amps,distorters
 		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,seccents
@@ -113,6 +124,7 @@ my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
 
 my %parsers = (
 	Planet => \&parse_planet,
+	Incoming => \&parse_incoming,
 );
 
 
@@ -213,11 +225,6 @@ while (my $scan = $newscans->fetchrow_hashref){
 		} elsif($type eq 'Unit' || $type eq 'Advanced Unit'){
 			my $id = addfleet($type,'Full fleet',$file,$planet,undef,$tick,undef,undef,undef);
 			$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
-		} elsif($type eq 'Incoming'){
-			while($file =~ m{class="left">Fleet: (.*?)</td><td class="left">Mission: (\w+)</td></tr>(.*?)Total Ships: (\d+)}sg){
-				my $id = addfleet($1,$2,$3,$planet,undef,$tick,undef,undef,$4);
-				$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
-			}
 		} elsif($type eq 'Landing'){
 		} else {
 			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
