@@ -221,9 +221,9 @@ sub resources : Local {
 		,((resources/planets*scoremem)/300 + (hidden/planets*scoremem)/100)::bigint AS scoregain2
 		,(score + (resources/planets*scoremem)/300
 			+ (hidden/planets*scoremem)/100)::bigint AS nscore2
-		,((s.size::int8*(1400-tick())*250)/100 + score + (resources/planets*scoremem)/300
+		,((s.size::int8*(1150-tick())*250)/100 + score + (resources/planets*scoremem)/300
 			+ (hidden/planets*scoremem)/100)::bigint AS nscore3
-		,(s.size::int8*(1400-tick())*250)/100 AS scoregain3
+		,(s.size::int8*(1150-tick())*250)/100 AS scoregain3
 		FROM (SELECT alliance_id AS id,sum(metal+crystal+eonium) AS resources
 				, sum(hidden) AS hidden, count(*) AS planets
 				FROM planets p join current_planet_scans c ON p.id = c.planet

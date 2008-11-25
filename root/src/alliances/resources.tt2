@@ -25,7 +25,7 @@
 		<td>[% a.hidplanet %]</td>
 		<td>[% a.nscore %] ([% a.scoregain %])</td>
 		<td>[% a.nscore2 %] ([% a.nscore2 - a.score %])</td>
-		<td>[% a.nscore2 %] ([% a.nscore3 - a.score %])</td>
+		<td>[% a.nscore3 %] ([% a.scoregain3 %])</td>
 	</tr>
 [% END %]
 </table>
