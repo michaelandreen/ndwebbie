@@ -237,7 +237,8 @@ sub edit : Local {
 		$order .= 'p.x,p.y,p.z';
 	}
 
-	my $targetquery = $dbh->prepare(qq{SELECT r.id,coords(x,y,z),comment,size,score,value,race,planet_status AS planetstatus,relationship,comment,r.planet, s.scans
+	my $targetquery = $dbh->prepare(qq{SELECT r.id,coords(x,y,z),comment,size
+		,score,value,race,planet_status,relationship,comment,r.planet, s.scans
 		FROM raid_targets r
 			JOIN current_planet_stats p ON p.id = r.planet
 			LEFT OUTER JOIN ( SELECT planet, array_accum(s::text) AS scans
