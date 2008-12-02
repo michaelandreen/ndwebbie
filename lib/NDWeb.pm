@@ -88,6 +88,7 @@ __PACKAGE__->deny_access_unless('/calls',[qw/calls_edit/]);
 __PACKAGE__->allow_access_if('/calls/index',[qw/calls_list/]);
 __PACKAGE__->allow_access_if('/calls/list',[qw/calls_list/]);
 __PACKAGE__->allow_access_if('/calls/edit',[qw/members/]);
+__PACKAGE__->allow_access_if('/calls/findCall',[qw/members/]);
 __PACKAGE__->deny_access_unless('/raids',[qw/raids_edit/]);
 __PACKAGE__->allow_access_if('/raids/index',[qw//]);
 __PACKAGE__->allow_access_if('/raids/view',[qw//]);
