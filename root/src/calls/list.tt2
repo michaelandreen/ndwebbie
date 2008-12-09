@@ -17,7 +17,7 @@
 			[% call.coords %] ([% call.defprio %])</a></td>
 		<td>[% call.landing_tick %]</td>
 		<td>[% call.race.unique.join('/') %]</td>
-		<td>[% call.amount.join('/') %]</td>
+		<td>[% call.amount.join(' / ') %]</td>
 		<td>[% call.shiptype.unique.join('/') | html %]</td>
 		<td>[% call.curreta %] ([% call.eta.unique.join('/') %])</td>
 		<td>[% call.alliance.unique.join('/') %]</td>
