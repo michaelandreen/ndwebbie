@@ -1,0 +1,6 @@
+
+<countries>
+[% FOR country IN tzcountries %]
+	<country>[% country | html %]</country>
+[% END %]
+</countries>

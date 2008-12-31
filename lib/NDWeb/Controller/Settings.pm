@@ -6,6 +6,8 @@ use parent 'Catalyst::Controller';
 
 use NDWeb::Include;
 
+use DateTime::TimeZone;
+
 =head1 NAME
 
 NDWeb::Controller::Settings - Catalyst Controller
@@ -37,10 +39,21 @@ sub index :Path :Args(0) {
 		}
 	}
 	$c->stash(stylesheets => \@stylesheets);
-	$c->stash(birthday => $dbh->selectrow_array(q{
-			SELECT birthday FROM users WHERE uid = $1
-			},undef,$c->user->id)
-	);
+
+	my ($birthday,$timezone) = $dbh->selectrow_array(q{
+SELECT birthday,timezone FROM users WHERE uid = $1
+		},undef,$c->user->id);
+	$c->stash(birthday => $birthday);
+
+	my @timezone = split m{/},$timezone,2;
+	$c->stash(timezone => \@timezone);
+
+	my @cat = DateTime::TimeZone->categories;
+	unshift @cat, 'GMT';
+	$c->stash(tzcategories => \@cat);
+
+	my @countries = DateTime::TimeZone->names_in_category($timezone[0]);
+	$c->stash(tzcountries => \@countries);
 }
 
 sub changeStylesheet : Local {
@@ -75,6 +88,22 @@ sub changeBirthday : Local {
 	$c->res->redirect($c->uri_for(''));
 }
 
+sub changeTimezone : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $timezone = $c->req->param('category');
+	$timezone .= '/' . $c->req->param('country') if $c->req->param('country');
+	my $query = $dbh->prepare(q{UPDATE users SET timezone = $2 WHERE uid = $1});
+	eval{
+		$dbh->selectrow_array(q{SELECT NOW() AT TIME ZONE $1},undef,$timezone);
+		$query->execute($c->user->id,$timezone );
+	};
+	if ($@){
+		$c->flash(error => $@);
+	}
+	$c->res->redirect($c->uri_for(''));
+}
 
 sub changePassword : Local {
 	my ( $self, $c ) = @_;

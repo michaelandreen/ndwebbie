@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 
+use DateTime::TimeZone;
+
 =head1 NAME
 
 NDWeb::Controller::JSRPC - Catalyst Controller
@@ -185,6 +187,13 @@ sub listTargets : Local {
 
 	$c->stash(template => 'jsrpc/update.tt2');
 	$c->forward('/listTargets');
+}
+
+sub tzcountries : Local {
+	my ($self, $c, $cat) = @_;
+
+	my @countries = DateTime::TimeZone->names_in_category($cat);
+	$c->stash(tzcountries => \@countries);
 }
 
 sub access_denied : Private {
