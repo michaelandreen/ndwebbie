@@ -82,25 +82,35 @@ sub index : Path : Args(0) {
 	$calls->execute($c->user->id);
 	$c->stash(calls => $calls->fetchall_arrayref({}) );
 
-	my $query = $dbh->prepare(q{SELECT f.id, coords(x,y,z), target, mission
-		, f.amount, tick, back
-FROM fleets f
-LEFT OUTER JOIN current_planet_stats p ON f.target = p.id
-WHERE NOT ingal AND f.uid = ? AND f.sender = ? AND
-	(back >= ? OR (tick >= tick() -  24 AND name = 'Main'))
-GROUP BY f.id, x,y,z, mission, tick,back,f.amount,f.target
-ORDER BY x,y,z,mission,tick
+	my $query = $dbh->prepare(q{
+(
+	SELECT DISTINCT ON (mission,name) fid,mission,name,tick, NULL AS eta
+		,amount, NULL AS coords, planet AS target, NULL AS back
+	FROM fleets f
+		JOIN full_fleets USING (fid)
+	WHERE uid = $1 AND planet = $2 AND tick >= tick() -  24
+		AND name = 'Main' AND mission = 'Full fleet'
+	ORDER BY mission,name,tick DESC
+) UNION (
+	SELECT fid,mission,name,landing_tick AS tick, eta, amount
+		, coords(x,y,z), target, back
+	FROM fleets f
+		JOIN launch_confirmations USING (fid)
+	LEFT OUTER JOIN current_planet_stats t ON target = t.id
+	WHERE uid = $1 AND f.planet = $2 AND back >= tick()
+		AND landing_tick - eta - 12 < tick()
+)
 		});
 
 	my $ships = $dbh->prepare(q{SELECT ship,amount FROM fleet_ships
-		WHERe id = ? ORDER BY num
+		WHERE fid = ? ORDER BY num
 		});
 
-	$query->execute($c->user->id,$c->user->planet,$c->stash->{TICK});
+	$query->execute($c->user->id,$c->user->planet);
 	my @fleets;
 	while (my $fleet = $query->fetchrow_hashref){
 		my @ships;
-		$ships->execute($fleet->{id});
+		$ships->execute($fleet->{fid});
 		while (my $ship = $ships->fetchrow_hashref){
 			push @ships,$ship;
 		}
@@ -185,16 +195,19 @@ sub postfleetupdate : Local {
 		$dbh->begin_work;
 		eval{
 			my $insert = $dbh->prepare(q{INSERT INTO fleets
-				(uid,sender,name,mission,tick,amount)
-				VALUES (?,?,'Main','Full fleet',tick(),?) RETURNING id});
-			my ($id) = $dbh->selectrow_array($insert,undef,$c->user->id
+				(planet,name,mission,tick,amount)
+				VALUES (?,'Main','Full fleet',tick(),?) RETURNING fid});
+			my ($id) = $dbh->selectrow_array($insert,undef
 				,$c->user->planet,$amount);
 			$insert = $dbh->prepare(q{INSERT INTO fleet_ships
-				(id,ship,amount) VALUES (?,?,?)});
+				(fid,ship,amount) VALUES (?,?,?)});
 			for my $s (@ships){
 				unshift @{$s},$id;
 				$insert->execute(@{$s});
 			}
+			$insert = $dbh->prepare(q{INSERT INTO full_fleets
+				(fid,uid) VALUES (?,?)});
+			$insert->execute($id,$c->user->id);
 			$dbh->commit;
 		};
 		if ($@){
@@ -221,9 +234,9 @@ sub postfleetsupdates : Local {
 		});
 	$dbh->begin_work;
 	if ($c->req->param('cmd') eq 'Recall Fleets'){
-		my $updatefleets = $dbh->prepare(q{UPDATE fleets
-			SET back = tick() + (tick() - (tick - eta))
-			WHERE uid = ? AND id = ? AND back > tick()+eta
+		my $updatefleets = $dbh->prepare(q{UPDATE launch_confirmations
+			SET back = tick() + (tick() - (landing_tick - eta))
+			WHERE uid = ? AND fid = ? AND back > tick()+eta
 		});
 
 		for my $param ($c->req->param()){
@@ -233,8 +246,8 @@ sub postfleetsupdates : Local {
 			}
 		}
 	}elsif ($c->req->param('cmd') eq 'Change Fleets'){
-		my $updatefleets = $dbh->prepare(q{UPDATE fleets
-			SET back = ? WHERE uid = ? AND id = ?});
+		my $updatefleets = $dbh->prepare(q{UPDATE launch_confirmations
+			SET back = ? WHERE uid = ? AND fid = ?});
 
 		for my $param ($c->req->param()){
 			if ($param =~ /^change:(\d+)$/){
@@ -370,7 +383,7 @@ sub insertintel : Private {
 	unless ($tick =~ /^(\d+)$/){
 		$tick = $c->stash->{game}->{tick};
 	}
-	my $addintel = $dbh->prepare(q{INSERT INTO fleets 
+	my $addintel = $dbh->prepare(q{INSERT INTO intel
 		(name,mission,tick,target,sender,eta,amount,ingal,back,uid)
 		VALUES($1,$2,$3,planetid($4,$5,$6,$10),planetid($7,$8,$9,$10)
 			,$11,$12,$13,$14,$15)
@@ -399,6 +412,7 @@ sub insertintel : Private {
 sub launchConfirmation : Local {
 	my ( $self, $c ) = @_;
 
+	$c->stash(error => $c->flash->{error});
 	$c->stash(missions => $c->flash->{missions});
 }
 
@@ -430,11 +444,14 @@ sub postconfirmation : Local {
 			WHERE uid = ? AND target = ? AND wave = ?
 			});
 		my $addfleet = $dbh->prepare(q{INSERT INTO fleets
-			(uid,name,mission,sender,target,tick,eta,back,amount)
-			VALUES ($1,$2,$3,(SELECT planet FROM users WHERE uid = $1),$4,$5,$6,$7,$8)
-			RETURNING id
+			(name,mission,planet,tick,amount)
+			VALUES ($2,$3,(SELECT planet FROM users WHERE uid = $1),tick(),$4)
+			RETURNING fid
 			});
-		my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount)
+		my $addconfirmation = $dbh->prepare(q{INSERT INTO launch_confirmations
+			(fid,uid,target,landing_tick,eta,back) VALUES ($1,$2,$3,$4,$5,$6)
+			});
+		my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (fid,ship,amount)
 			VALUES (?,?,?)
 			});
 		my $log = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
@@ -455,17 +472,14 @@ sub postconfirmation : Local {
 			my $name = $1;
 			my $tick = $c->stash->{TICK}+$9;
 			$tick += $8 if defined $8;
+			$tick = $13 if defined $13;
 			my $eta = $9;
+			$eta += $14 if defined $14;
 			my $mission = $10;
 			my $x = $5;
 			my $y = $6;
 			my $z = $7;
 			my $back = $tick + $eta - 1;
-			if ($13){
-				$tick = $13;
-			}elsif ($14){
-				$back += $14;
-			}
 			$mission{tick} = $tick;
 			$mission{mission} = $mission;
 			$mission{target} = "$x:$y:$z";
@@ -495,8 +509,9 @@ sub postconfirmation : Local {
 				warn "No ships in: $ships";
 				next;
 			}
-			my $fleet = $dbh->selectrow_array($addfleet,undef,$c->user->id,$name,$mission
-				,$planet_id,$tick,$eta,$back,$amount);
+			my $fleet = $dbh->selectrow_array($addfleet,undef,$c->user->id,$name
+				,$mission,$amount);
+			$addconfirmation->execute($fleet,$c->user->id,$planet_id,$tick,$eta,$back);
 			$mission{fleet} = $fleet;
 			for my $ship (@ships){
 				$addships->execute($fleet,$ship->{ship},$ship->{amount});
@@ -527,7 +542,11 @@ sub postconfirmation : Local {
 	};
 	if ($@){
 		$dbh->rollback;
-		die $@;
+		if ($@ =~ m/insert or update on table "fleet_ships" violates foreign key constraint "fleet_ships_ship_fkey"\s+DETAIL:\s+Key \(ship\)=\(([^)]+)\)/){
+			$c->flash( error => "'$1' is NOT a valid ship");
+		}else{
+			$c->flash( error => $@);
+		}
 	}
 
 	$c->res->redirect($c->uri_for('launchConfirmation'));

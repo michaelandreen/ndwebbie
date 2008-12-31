@@ -68,15 +68,15 @@ sub list : Local {
 			,u.defense_points, u.attack_points, c.landing_tick
 			,dc.username AS dc, (c.landing_tick - tick()) AS curreta
 			,p2.race, i.amount, i.eta, i.shiptype, p2.alliance
-			,coords(p2.x,p2.y,p2.z),	COUNT(DISTINCT f.id) AS fleets
+			,coords(p2.x,p2.y,p2.z),	COUNT(DISTINCT f.fid) AS fleets
 			FROM calls c 
 				JOIN users u ON c.member = u.uid
 				JOIN current_planet_stats p ON u.planet = p.id
 				LEFT OUTER JOIN incomings i ON i.call = c.id
 				LEFT OUTER JOIN current_planet_stats p2 ON i.sender = p2.id
 				LEFT OUTER JOIN users dc ON c.dc = dc.uid
-				LEFT OUTER JOIN fleets f ON f.target = u.planet 
-					AND f.tick = c.landing_tick AND f.back = f.tick + f.eta - 1
+				LEFT OUTER JOIN launch_confirmations f ON f.target = u.planet
+					AND f.landing_tick = c.landing_tick AND f.back = f.landing_tick + f.eta - 1
 			WHERE $where
 			GROUP BY c.id, p.x,p.y,p.z,p.id, p.size, p.score, p.value, c.landing_tick
 				,u.defense_points,u.attack_points,dc.username
@@ -113,18 +113,38 @@ sub edit : Local {
 
 
 	my $outgoings = $dbh->prepare(q{ 
-		SELECT i.id,i.mission, i.name, i.tick,eta
-			, i.amount, coords(x,y,z) AS coords, t.id AS planet
-		FROM fleets i
-		LEFT OUTER JOIN (planets
-			NATURAL JOIN planet_stats) t ON i.target = t.id
-				AND t.tick = ( SELECT MAX(tick) FROM planet_stats)
-		WHERE  i.sender = $1 
-			AND (i.tick > $2 - 14 OR i.mission = 'Full fleet')
-		ORDER BY i.tick,x,y,z
+(
+	SELECT DISTINCT ON (mission,name) fid,mission,name,tick, NULL AS eta
+		,amount, NULL AS coords, planet, NULL AS back, NULL AS recalled
+	FROM fleets f
+	WHERE planet = $1 AND tick <= $2 AND (
+			mission = 'Full fleet'
+			OR fid IN (SELECT fid FROM fleet_scans)
+		) AND (
+			mission = 'Full fleet'
+			OR tick >= $2 - 12
+		)
+	ORDER BY mission,name,tick DESC
+) UNION (
+	SELECT fid,mission,name,landing_tick AS tick, eta, amount
+		, coords(x,y,z), t.id AS planet, back
+		, (back <> landing_tick + eta - 1) AS recalled
+	FROM fleets f
+		JOIN launch_confirmations USING (fid)
+	LEFT OUTER JOIN current_planet_stats t ON target = t.id
+	WHERE f.planet = $1 AND back >= $2 AND landing_tick - eta - 12 < $2
+) UNION (
+	SELECT DISTINCT ON (tick,x,y,z,mission,name,amount)
+		NULL as fid, i.mission, i.name, i.tick,eta
+		, i.amount, coords(x,y,z), t.id AS planet, back, NULL AS recalled
+	FROM intel i
+	LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+	WHERE uid = -1 AND i.sender = $1 AND i.tick > $2 - 14 AND i.tick < $2 + 14
+	ORDER BY i.tick,x,y,z,mission,name,amount,back
+)
 	});
 	my $ships = $dbh->prepare(q{SELECT ship,amount FROM fleet_ships
-		WHERE id = ? ORDER BY num
+		WHERE fid = ? ORDER BY num
 		});
 	$outgoings->execute($call->{planet},$call->{landing_tick});
 	my @fleets;
@@ -133,12 +153,13 @@ sub edit : Local {
 				$fleet->{back} == $call->{landing_tick}){
 			$fleet->{fleetcatch} = 1;
 		}
-		$ships->execute($fleet->{id});
-		if ($ships->rows != 0){
+		if ($fleet->{fid}){
+			$ships->execute($fleet->{fid});
 			my @ships;
 			while (my $ship = $ships->fetchrow_hashref){
 				push @ships,$ship;
 			}
+			push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
 			$fleet->{ships} = \@ships;
 		}
 		push @fleets, $fleet;
@@ -146,21 +167,20 @@ sub edit : Local {
 	$c->stash(fleets => \@fleets);
 
 	my $defenders = $dbh->prepare(q{ 
-		SELECT DISTINCT ON (i.tick,x,y,z,s.id,i.name,i.amount) i.id,i.mission, i.name, i.tick,eta
-			, i.amount, coords(x,y,z) AS coords, s.id AS planet
-		FROM fleets i
-		LEFT OUTER JOIN (planets
-			NATURAL JOIN planet_stats) s ON i.sender = s.id
-				AND s.tick = ( SELECT MAX(tick) FROM planet_stats)
-		WHERE i.target = ?
-			AND i.tick = ? AND i.mission = 'Defend'
-		ORDER BY i.tick,x,y,z
+SELECT DISTINCT ON (x,y,z,s.id,name,amount) fid,mission, name, eta
+	, amount, coords(x,y,z) AS coords, landing_tick AS tick, f.planet
+	,back, (back <> landing_tick + eta - 1) AS recalled
+FROM launch_confirmations lc
+	JOIN fleets f USING (fid)
+	LEFT OUTER JOIN current_planet_stats s ON f.planet = s.id
+WHERE target = ? AND landing_tick = ? AND mission = 'Defend'
+ORDER BY x,y,z
 	});
 
 	$defenders->execute($call->{planet},$call->{landing_tick});
 	my @defenders;
 	while (my $fleet = $defenders->fetchrow_hashref){
-		$ships->execute($fleet->{id});
+		$ships->execute($fleet->{fid});
 		if ($ships->rows != 0){
 			my @ships;
 			while (my $ship = $ships->fetchrow_hashref){
@@ -186,8 +206,8 @@ sub edit : Local {
 		$outgoings->execute($attacker->{planet},$call->{landing_tick});
 		my @missions;
 		while (my $mission = $outgoings->fetchrow_hashref){
-			$ships->execute($mission->{id});
-			if ($ships->rows != 0){
+			if ($mission->{fid}){
+				$ships->execute($mission->{fid});
 				my @ships;
 				while (my $ship = $ships->fetchrow_hashref){
 					push @ships,$ship;
@@ -212,12 +232,12 @@ sub defleeches : Local {
 	my $query = $dbh->prepare(q{SELECT username,defense_points,count(id) AS calls
 		, SUM(fleets) AS fleets, SUM(recalled) AS recalled
 		FROM (SELECT username,defense_points,c.id,count(f.target) AS fleets
-			, count(NULLIF(f.tick + f.eta -1 = f.back,TRUE)) AS recalled
+			, count(NULLIF(f.landing_tick + f.eta -1 = f.back,TRUE)) AS recalled
 			FROM users u JOIN calls c ON c.member = u.uid
-				LEFT OUTER JOIN fleets f ON u.planet = f.target
-					AND c.landing_tick = f.tick
-			WHERE (f.mission = 'Defend' AND f.uid > 0 AND f.back IS NOT NULL AND NOT ingal)
-				OR f.target IS NULL
+				LEFT OUTER JOIN (
+					SELECT * FROM launch_confirmations JOIN fleets USING (fid)
+				) f ON u.planet = f.target AND c.landing_tick = f.landing_tick
+			WHERE f.mission = 'Defend'
 			GROUP BY username,defense_points,c.id
 		) d
 		GROUP BY username,defense_points ORDER BY fleets DESC, defense_points

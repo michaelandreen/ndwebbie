@@ -188,8 +188,9 @@ sub end : ActionClass('RenderView') {
 	if ($c->user_exists){
 		my $fleetupdate = 0;
 		if ($c->check_user_roles(qw/member_menu/)){
-			$fleetupdate = $dbh->selectrow_array(q{SELECT tick FROM fleets WHERE sender = ?
-				AND mission = 'Full fleet' AND tick > tick() - 24
+			$fleetupdate = $dbh->selectrow_array(q{
+SELECT tick FROM fleets WHERE planet = ? AND tick > tick() - 24
+AND mission = 'Full fleet' AND name IN ('Main','Advanced Unit');
 				},undef,$c->user->planet);
 			$fleetupdate = 0 unless defined $fleetupdate;
 		}

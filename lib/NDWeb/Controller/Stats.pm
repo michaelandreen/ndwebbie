@@ -112,34 +112,41 @@ sub planet : Local {
 
 	if ($c->check_user_roles(qw/stats_missions/)){
 		my $query = $dbh->prepare(q{
-			SELECT DISTINCT ON (i.tick,x,y,z,t.id,i.name,i.amount) i.id,i.mission, i.name, i.tick, i.eta AS eta
-				, i.amount, coords(x,y,z) AS coords, t.id AS planet
-			FROM ((
-					SELECT * FROM fleets
-					WHERE sender = $1 AND tick > tick() - 14
-				) UNION (
-					SELECT * FROM fleets WHERE sender = $1 AND mission = 'Full fleet'
-					ORDER BY tick DESC LIMIT 5
-				)
-			) i
-			LEFT OUTER JOIN (planets
-				NATURAL JOIN planet_stats) t ON i.target = t.id
-					AND t.tick = ( SELECT MAX(tick) FROM planet_stats)
-			WHERE  i.uid = -1
-			ORDER BY i.tick,x,y,z,t.id,i.name,i.amount,i.eta
-			});
+(
+	SELECT DISTINCT ON (mission,name) fid,mission,name,tick, NULL AS eta
+		,amount, NULL AS coords, planet, NULL AS back
+	FROM fleets f
+	WHERE planet = $1 AND tick <= tick() AND (
+			mission = 'Full fleet'
+			OR fid IN (SELECT fid FROM fleet_scans)
+		) AND (
+			mission = 'Full fleet'
+			OR tick >= tick() - 12
+		)
+	ORDER BY mission,name,tick DESC
+) UNION (
+	SELECT DISTINCT ON (tick,x,y,z,mission,name,amount)
+		NULL as fid, i.mission, i.name, i.tick,eta
+		, i.amount, coords(x,y,z), t.id AS planet, back
+	FROM intel i
+	LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+	WHERE uid = -1 AND i.sender = $1 AND i.tick > tick() - 14 AND i.tick < tick() + 14
+	ORDER BY i.tick,x,y,z,mission,name,amount,back
+)
+		});
 		$query->execute($id);
 		my $ships = $dbh->prepare(q{SELECT ship,amount FROM fleet_ships
-			WHERE id = ? ORDER BY num
+			WHERE fid = ? ORDER BY num
 		});
 		my @missions;
 		while (my $mission = $query->fetchrow_hashref){
 			my @ships;
-			$ships->execute($mission->{id});
-			if ($ships->rows != 0){
+			if ($mission->{fid}){
+				$ships->execute($mission->{fid});
 				while (my $ship = $ships->fetchrow_hashref){
 					push @ships,$ship;
 				}
+				push @ships, {ship => 'No', amount => 'ships'} if @ships == 0;
 				$mission->{ships} = \@ships;
 			}
 			push @missions,$mission;
@@ -149,7 +156,7 @@ sub planet : Local {
 		$query = $dbh->prepare(q{
 			SELECT DISTINCT ON (i.tick,x,y,z,s.id,i.name,i.amount) i.id,i.mission, i.name, i.tick,eta
 						, i.amount, coords(x,y,z) AS coords, s.id AS planet
-			FROM fleets i
+			FROM intel i
 			LEFT OUTER JOIN (planets
 				NATURAL JOIN planet_stats) s ON i.sender = s.id
 					AND s.tick = ( SELECT MAX(tick) FROM planet_stats)

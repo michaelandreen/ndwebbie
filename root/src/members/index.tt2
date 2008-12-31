@@ -91,14 +91,14 @@
 	<tr><td></td><th>Target</th><th>Mission</th><th>Amount</th><th>Landing Tick</th><th>Back home</th><th>change?</th></tr>
 [% FOR f IN fleets %]
 	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-		<td><input type="button" onclick="$('#fleet[% f.id %]').toggle()" value="&dArr;" title="Show fleets"></td>
+		<td><input type="button" onclick="$('#fleet[% f.fid %]').toggle()" value="&dArr;" title="Show fleets"></td>
 		<td>[% IF f.target %]<a href="[% c.uri_for('/stats/planet',f.target) %]">[% f.coords %]</a>[% END %]</td>
 		<td>[% f.mission %]</td>
 		<td>[% f.amount %]</td><td>[% f.tick %]</td>
-		<td>[% IF f.back %]<input style="width:5em" type="text" name="back:[% f.id %]" value="[% f.back %]">[% END %]</td>
-		<td>[% IF f.back %]<input type="checkbox" name="change:[% f.id %]">[% END %]</td>
+		<td>[% IF f.back %]<input style="width:5em" type="text" name="back:[% f.fid %]" value="[% f.back %]">[% END %]</td>
+		<td>[% IF f.back %]<input type="checkbox" name="change:[% f.fid %]">[% END %]</td>
 	</tr>
-	<tr id="fleet[% f.id %]" class="hidden">
+	<tr id="fleet[% f.fid %]" class="hidden">
 		<td>
 		<td colspan="5"><table>
 	[% FOR s IN f.ships %]

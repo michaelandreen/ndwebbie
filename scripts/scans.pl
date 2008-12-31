@@ -73,8 +73,11 @@ my $newscans = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
 my $findplanet = $dbh->prepare(q{SELECT planetid(?,?,?,?)});
 my $findoldplanet = $dbh->prepare(q{SELECT id FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND tick <= $4 ORDER BY tick DESC LIMIT 1});
 my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
-my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,sender,target,tick,eta,back,amount,ingal,uid) VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
-my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (id,scan) VALUES(?,?)});
+my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,planet,amount) VALUES(?,?,?,?) RETURNING fid});
+my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (fid,id) VALUES(?,?)});
+my $addintel = $dbh->prepare(q{INSERT INTO intel (name,mission,sender,target,tick,eta,back,amount,ingal,uid)
+	VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
+my $intelscan = $dbh->prepare(q{INSERT INTO fleet_scans (intel,id) VALUES(?,?)});
 my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount) VALUES(?,?,?)});
 my $addplanetscan = $dbh->prepare(q{INSERT INTO planet_scans
 	(id,tick,planet,metal_roids,metal,crystal_roids,crystal,eonium_roids,eonium
@@ -108,10 +111,30 @@ sub parse_incoming {
 
 	while($file =~ m{class="left">Fleet:\s(.*?)</td><td\sclass="right">
 			Mission:\s(\w+)</td></tr>(.*?)Total\sShips:\s(\d+)}sxg){
-		my $id = addfleet($1,$2,$3,$scan->{planet},undef
-			,$scan->{tick},undef,undef,$4);
+		my $id = addfleet($1,$2,$3,$scan->{planet},$scan->{tick},$4);
 		$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 	}
+}
+
+sub parse_unit {
+	my ($scan,$file) = @_;
+
+	my $id = addfleet($scan->{type},'Full fleet',$file,$scan->{planet},$scan->{tick});
+	$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
+}
+
+sub parse_jumpgate {
+	my ($scan,$file) = @_;
+
+	while ($file =~ m{(\d+):(\d+):(\d+)\D+(Attack|Defend|Return)</td><td class="left">([^<]*)\D+(\d+)\D+(\d+)}g){
+		my ($sender) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3,$scan->{tick});
+		($sender) = $dbh->selectrow_array($findoldplanet,undef,$1,$2,$3,$scan->{tick})
+			if ((not defined $sender) && $4 eq 'Return');
+		my $id = addintel($5,$4,$sender,$scan->{planet},$scan->{tick}+$6,$6
+			,undef,$7, $scan->{x} == $1 && $scan->{y} == $2);
+		$intelscan->execute($id,$scan->{id});
+	}
+
 }
 
 my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
@@ -125,6 +148,9 @@ my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
 my %parsers = (
 	Planet => \&parse_planet,
 	Incoming => \&parse_incoming,
+	Unit => \&parse_unit,
+	'Advanced Unit' => \&parse_unit,
+	Jumpgate => \&parse_jumpgate,
 );
 
 
@@ -147,6 +173,9 @@ while (my $scan = $newscans->fetchrow_hashref){
 		my $z = $4;
 		my $tick = $5;
 		$scan->{tick} = $5;
+		$scan->{type} = $1;
+		$scan->{x} = $x;
+		$scan->{y} = $y;
 
 		if($dbh->selectrow_array(q{SELECT * FROM scans WHERE scan_id = ? AND tick = ? AND id <> ?},undef,$scan->{scan_id},$tick,$scan->{id})){
 			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
@@ -171,16 +200,6 @@ while (my $scan = $newscans->fetchrow_hashref){
 		}
 		if (exists $parsers{$type}){
 			$parsers{$type}->($scan,$file);
-		}elsif ($type eq 'Jumpgate'){
-		#print "$file\n";
-			while ($file =~ m{(\d+):(\d+):(\d+)\D+(Attack|Defend|Return)</td><td class="left">([^<]*)\D+(\d+)\D+(\d+)}g){
-				
-				my ($sender) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3,$tick) or die $dbh->errstr;
-				($sender) = $dbh->selectrow_array($findoldplanet,undef,$1,$2,$3,$tick) if ((not defined $sender) && $4 eq 'Return');
-				my $id = addfleet($5,$4,undef,$sender,$planet,$tick+$6,$6
-					,undef,$7, $x == $1 && $y == $2);
-				$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
-			}
 		}elsif ($type eq 'News'){
 			while( $file =~ m{top">((?:\w| )+)\D+(\d+)</td><td class="left" valign="top">(.+?)</td></tr>}g){
 				my $news = $1;
@@ -196,9 +215,9 @@ while (my $scan = $newscans->fetchrow_hashref){
 					my ($target) = $dbh->selectrow_array($findplanet,undef
 						,$2,$3,$4,$t) or die $dbh->errstr;
 					die "No target: $2:$3:$4" unless defined $target;
-					my $id = addfleet($1,$mission,undef,$planet,$target,$6
+					my $id = addintel($1,$mission,$planet,$target,$6
 						,$eta,$back,undef, ($x == $2 && $y == $3));
-					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
+					$intelscan->execute($id,$scan->{id});
 				}elsif($news eq 'Incoming' && $text =~ m/We have detected an open jumpgate from (.*?), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have roughly (\d+) ships/g){
 					my $eta = $5 - $t;
 					my $mission = '';
@@ -208,9 +227,9 @@ while (my $scan = $newscans->fetchrow_hashref){
 					my ($target) = $dbh->selectrow_array($findplanet,undef
 						,$2,$3,$4,$t) or die $dbh->errstr;
 					die "No target: $2:$3:$4" unless defined $target;
-					my $id = addfleet($1,$mission,undef,$target,$planet,$5
+					my $id = addintel($1,$mission,$target,$planet,$5
 						,$eta,$back,$6, ($x == $2 && $y == $3));
-					$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
+					$intelscan->execute($id,$scan->{id});
 				}
 			}
 		} elsif($type eq 'Development'){
@@ -222,9 +241,6 @@ while (my $scan = $newscans->fetchrow_hashref){
 			}
 			push @values,$total;
 			$adddevscan->execute(@values);
-		} elsif($type eq 'Unit' || $type eq 'Advanced Unit'){
-			my $id = addfleet($type,'Full fleet',$file,$planet,undef,$tick,undef,undef,undef);
-			$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 		} elsif($type eq 'Landing'){
 		} else {
 			print "Something wrong with scan $scan->{id} type $type at tick $tick http://game.planetarion.com/showscan.pl?scan_id=$scan->{scan_id}\n";
@@ -249,7 +265,26 @@ $dbh->commit;
 system 'killall','-USR1', 'irssi' if $parsedscans;
 
 sub addfleet {
-	my ($name,$mission,$ships,$sender,$target,$tick,$eta,$back,$amount,$ingal) = @_;
+	my ($name,$mission,$ships,$sender,$tick,$amount) = @_;
+
+	my @ships;
+	my $total = 0;
+	while(defined $ships && $ships =~ m{((?:[a-zA-Z]| )+)</td><td(?: class="right")?>(\d+)}sg){
+		$total += $2;
+		push @ships, [$1,$2];
+	}
+	$amount = $total if (!defined $amount);
+	my $id = $dbh->selectrow_array($addfleet,undef,$name,$mission,$sender
+		,$tick, $amount);
+	for my $s (@ships){
+		unshift @{$s},$id;
+		$addships->execute(@{$s}) or die $dbh->errstr;
+	}
+	return $id;
+}
+
+sub addintel {
+	my ($name,$mission,$sender,$target,$tick,$eta,$back,$amount,$ingal) = @_;
 
 	die "no sender" unless defined $sender;
 
@@ -261,18 +296,7 @@ sub addfleet {
 		$back = $tick + $eta if $eta;
 	}
 
-	my @ships;
-	my $total = 0;
-	while(defined $ships && $ships =~ m{((?:[a-zA-Z]| )+)</td><td(?: class="right")?>(\d+)}sg){
-		$total += $2;
-		push @ships, [$1,$2];
-	}
-	$amount = $total if (!defined $amount) && defined $ships;
-	my $id = $dbh->selectrow_array($addfleet,undef,$name,$mission,$sender
-		,$target,$tick, $eta, $back, $amount,$ingal) or die $dbh->errstr;
-	for my $s (@ships){
-		unshift @{$s},$id;
-		$addships->execute(@{$s}) or die $dbh->errstr;
-	}
+	my $id = $dbh->selectrow_array($addintel,undef,$name,$mission,$sender
+		,$target,$tick, $eta, $back, $amount,$ingal);
 	return $id;
-};
+}

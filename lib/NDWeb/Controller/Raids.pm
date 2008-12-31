@@ -137,23 +137,22 @@ sub view : Local {
 			#next if ($target->{score}/$planet->{score} < 0.4) && ($target->{value}/$planet->{value} < 0.4);
 		}
 
-		my $unitscans = $dbh->prepare(q{ 
-			SELECT DISTINCT ON (name) i.id,i.name, i.tick, i.amount 
-			FROM fleets i
-			WHERE  i.uid = -1
-				AND i.sender = ?
-				AND i.mission = 'Full fleet'
-			GROUP BY i.id,i.tick,i.name,i.amount
-			ORDER BY name,i.tick DESC
+		my $unitscans = $dbh->prepare(q{
+SELECT DISTINCT ON (name) fid, name, tick, amount
+FROM fleets
+WHERE planet = ?
+	AND mission = 'Full fleet'
+GROUP BY fid,tick,name,amount
+ORDER BY name,tick DESC
 		});
 		$unitscans->execute($target->{planet});
 		my $ships = $dbh->prepare(q{SELECT ship,amount FROM fleet_ships
-			WHERE id = ? ORDER BY num
+			WHERE fid = ? ORDER BY num
 		});
 		my @missions;
 		while (my $mission = $unitscans->fetchrow_hashref){
 			my @ships;
-			$ships->execute($mission->{id});
+			$ships->execute($mission->{fid});
 			while (my $ship = $ships->fetchrow_hashref){
 				push @ships,$ship;
 			}

@@ -1,7 +1,7 @@
 	<table>
-		<tr><th></th><th>Coords</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th></tr>
+		<tr><th></th><th>Coords</th><th>Name</th><th>Mission</th><th>Tick</th><th>ETA</th><th>Amount</th><th>Back</th></tr>
 	[% FOR m IN missions %]
-		<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]" onclick="$('#fleet[% m.id %]').toggle()">
+		<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]" onclick="$('#fleet[% m.fid %]').toggle()">
 			<td>
 		[% IF m.ships %]
 				<b>&dArr;</b>
@@ -16,12 +16,16 @@
 			<td>[% m.tick %]</td>
 			<td>[% m.eta %]</td>
 			<td>[% m.amount %]</td>
+			<td>[% m.back %]</td>
 			[% IF m.fleetcatch %]
 			<td class="Hostile">FLEETCATCH!!</td>
 			[% END %]
+			[% IF m.recalled %]
+			<td>Recalled</td>
+			[% END %]
 		</tr>
 		[% IF m.ships %]
-		<tr id="fleet[% m.id %]" class="hidden">
+		<tr id="fleet[% m.fid %]" class="hidden">
 			<td>
 			<td colspan="5"><table>
 			[% FOR s IN m.ships %]
