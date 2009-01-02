@@ -92,8 +92,7 @@ sub changeTimezone : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $timezone = $c->req->param('category');
-	$timezone .= '/' . $c->req->param('country') if $c->req->param('country');
+	my $timezone = $c->req->param('timezone');
 	my $query = $dbh->prepare(q{UPDATE users SET timezone = $2 WHERE uid = $1});
 	eval{
 		$dbh->selectrow_array(q{SELECT NOW() AT TIME ZONE $1},undef,$timezone);

@@ -23,7 +23,7 @@
 	</p>
 </fieldset>
 </form>
-<form action="[% c.uri_for('changeTimezone') %]" method="post"><fieldset> <legend>Timezone</legend>
+<fieldset> <legend>Timezone</legend>
 	<select name="category" id="tzcategory">
 [% FOR cat IN tzcategories %]
 		<option value="[% cat %]" [% IF cat == timezone.0 %]selected[% END %]>[% cat %]</option>
@@ -34,9 +34,11 @@
 		<option value="[% country %]" [% IF country == timezone.1 %]selected[% END %]>[% country %]</option>
 [% END %]
 	</select>
-	<br><input type="submit" value="Change">
+<form action="[% c.uri_for('changeTimezone') %]" method="post">
+	<p><input type="text" name="timezone" value="[% timezone.join("/") %]" id="timezone">
+	<input type="submit" value="Change"></p>
 	<p>Remember that GMT stays the same all year, so if you're in the UK you should pick Europe/London.</p>
-</fieldset></form>
+</form></fieldset>
 [%- site.stylesheets = ['ui/ui.datepicker.css'] %]
 <script type="text/javascript" src="/static/ui/ui.core.min.js"></script>
 <script type="text/javascript" src="/static/ui/ui.datepicker.min.js"></script>
@@ -50,12 +52,22 @@ $(document).ready(function(){
 		showOn: "both"
 	});
 	$("#tzcategory").change(function(){
-		$.get("/jsrpc/tzcountries/" + $(this).val(),function(xml){
+		if ($(this).val() == 'GMT'){
+			$("#timezone").val($(this).val());
 			$("#tzcountry").empty();
-			$("country",xml).each(function(i){
-				$("#tzcountry").append('<option value="'+$(this).text()+'">'+$(this).text()+'</option>');
+		}else{
+			$.get("/jsrpc/tzcountries/" + $(this).val(),function(xml){
+				$("#tzcountry").empty();
+				$("country",xml).each(function(i){
+					var opt = $('<option>');
+					$("#tzcountry").append(opt);
+					opt.attr('value',$(this).text()).text($(this).text());
+				});
 			});
-		});
+		}
+	});
+	$("#tzcountry").change(function(){
+		$("#timezone").val($("#tzcategory").val() + '/' + $(this).val());
 	});
 });
 </script>
