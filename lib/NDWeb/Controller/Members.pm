@@ -33,7 +33,8 @@ sub index : Path : Args(0) {
 	$c->stash(u => $dbh->selectrow_hashref(q{SELECT planet,defense_points
 			,attack_points,scan_points,humor_points
 			, (attack_points+defense_points+scan_points/20)::NUMERIC(5,1) as total_points
-			, sms,rank,hostmask FROM users WHERE uid = ?
+			, sms,rank,hostmask,call_if_needed,sms_note
+		FROM users WHERE uid = ?
 			},undef,$c->user->id)
 	);
 
@@ -82,42 +83,7 @@ sub index : Path : Args(0) {
 	$calls->execute($c->user->id);
 	$c->stash(calls => $calls->fetchall_arrayref({}) );
 
-	my $query = $dbh->prepare(q{
-(
-	SELECT DISTINCT ON (mission,name) fid,mission,name,tick, NULL AS eta
-		,amount, NULL AS coords, planet AS target, NULL AS back
-	FROM fleets f
-		JOIN full_fleets USING (fid)
-	WHERE uid = $1 AND planet = $2 AND tick >= tick() -  24
-		AND name = 'Main' AND mission = 'Full fleet'
-	ORDER BY mission,name,tick DESC
-) UNION (
-	SELECT fid,mission,name,landing_tick AS tick, eta, amount
-		, coords(x,y,z), target, back
-	FROM fleets f
-		JOIN launch_confirmations USING (fid)
-	LEFT OUTER JOIN current_planet_stats t ON target = t.id
-	WHERE uid = $1 AND f.planet = $2 AND back >= tick()
-		AND landing_tick - eta - 12 < tick()
-)
-		});
-
-	my $ships = $dbh->prepare(q{SELECT ship,amount FROM fleet_ships
-		WHERE fid = ? ORDER BY num
-		});
-
-	$query->execute($c->user->id,$c->user->planet);
-	my @fleets;
-	while (my $fleet = $query->fetchrow_hashref){
-		my @ships;
-		$ships->execute($fleet->{fid});
-		while (my $ship = $ships->fetchrow_hashref){
-			push @ships,$ship;
-		}
-		$fleet->{ships} = \@ships;
-		push @fleets,$fleet;
-	}
-	$c->stash(fleets => \@fleets);
+	$c->stash(fleets => member_fleets($dbh, $c->user->id,$c->user->planet));
 
 	my $announcements = $dbh->prepare(q{SELECT ft.ftid, u.username,ft.subject,
 		count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) AS unread,count(fp.fpid) AS posts,
@@ -149,8 +115,11 @@ sub postsmsupdate : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	$dbh->do(q{UPDATE users SET sms = ? WHERE uid = ?
-		},undef, html_escape $c->req->param('sms'), $c->user->id);
+	my $callme = $c->req->param('callme') || 0;
+	$dbh->do(q{
+UPDATE users SET sms = $1, call_if_needed =  $2, sms_note = $3 WHERE uid = $4
+		},undef, html_escape $c->req->param('sms'),$callme
+		,$c->req->param('smsnote'), $c->user->id);
 
 	$c->res->redirect($c->uri_for(''));
 }
@@ -550,6 +519,73 @@ sub postconfirmation : Local {
 	}
 
 	$c->res->redirect($c->uri_for('launchConfirmation'));
+}
+
+sub defenders : Local {
+	my ( $self, $c, $order ) = @_;
+	my $dbh = $c->model;
+
+	my $defenders = $dbh->prepare(q{
+SELECT uid,u.planet,username, to_char(NOW() AT TIME ZONE timezone,'HH24:MI') AS time
+	,sms_note, call_if_needed, race
+FROM users u
+	JOIN current_planet_stats p ON p.id = u.planet
+WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
+ORDER BY call_if_needed DESC, LOWER(username)
+		});
+	$defenders->execute;
+
+	my @members;
+	while (my $member = $defenders->fetchrow_hashref){
+
+		$member->{fleets} = member_fleets($dbh, $member->{uid}, $member->{planet});
+		push @members,$member;
+	}
+	$c->stash(members => \@members);
+}
+
+sub member_fleets {
+	my ( $dbh, $uid, $planet ) = @_;
+
+	my $query = $dbh->prepare(q{
+(
+	SELECT DISTINCT ON (mission,name) fid,name,tick, NULL AS eta
+		,amount, NULL AS coords, planet AS target, NULL AS back
+		,NULL AS recalled, mission
+	FROM fleets f
+	WHERE planet = $2 AND tick <= tick() AND tick >= tick() -  24
+		AND name IN ('Main','Advanced Unit') AND mission = 'Full fleet'
+	ORDER BY mission,name,tick DESC, fid DESC
+) UNION (
+	SELECT fid,name,landing_tick AS tick, eta, amount
+		, coords(x,y,z), target, back
+		, (back <> landing_tick + eta - 1) AS recalled
+		,CASE WHEN landing_tick <= tick() OR (back <> landing_tick + eta - 1)
+			THEN 'Returning' ELSE mission END AS mission
+	FROM fleets f
+		JOIN launch_confirmations USING (fid)
+	LEFT OUTER JOIN current_planet_stats t ON target = t.id
+	WHERE uid = $1 AND f.planet = $2 AND back > tick()
+		AND landing_tick - eta - 12 < tick()
+)
+		});
+
+	my $ships = $dbh->prepare(q{SELECT ship,amount FROM fleet_ships
+		WHERE fid = ? ORDER BY num
+		});
+
+	$query->execute($uid,$planet);
+	my @fleets;
+	while (my $fleet = $query->fetchrow_hashref){
+		my @ships;
+		$ships->execute($fleet->{fid});
+		while (my $ship = $ships->fetchrow_hashref){
+			push @ships,$ship;
+		}
+		$fleet->{ships} = \@ships;
+		push @fleets,$fleet;
+	}
+	return \@fleets;
 }
 
 =head1 AUTHOR

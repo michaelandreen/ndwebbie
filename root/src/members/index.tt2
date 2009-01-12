@@ -128,6 +128,12 @@
 <fieldset class="forum-post"> <legend>SMS</legend>
 	<p>Number:
 	<input type="text" name="sms" value="[% u.sms %]">
+	Info to DCs: <input type="text" name="smsnote" value="[% u.sms_note | html %]">
+	</p>
+	<p>
+	Wake me up if needed:
+	<input type="checkbox" name="callme" value="TRUE"
+	[% IF u.call_if_needed %]checked[% END %]>
 	<input type="submit" value="Submit">
 	</p>
 </fieldset>

@@ -1,0 +1,27 @@
+[% META title = 'Defenders' %]
+<table>
+	<tr>
+	<th></th>
+	<th>User</th>
+	<th>Race</th>
+	<th title="The current time for the member">Time</th>
+	<th>Note</th>
+	<th>Wakeup?</th>
+	</tr>
+[% FOR m IN members %]
+	<tr align="left" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td><input type="button" onclick="$('#member[% m.uid %]').toggle()" value="&dArr;" title="Show fleets"></td>
+		<td>[% m.username %]</td>
+		<td>[% m.race %]</td>
+		<td>[% m.time %]</td>
+		<td>[% m.sms_note | html %]</td>
+		<td>[% IF m.call_if_needed %]<b>YES</b>[%END%]</td>
+	</tr>
+	<tr id="member[% m.uid %]" class="hidden">
+		<td></td>
+		<td colspan="8">
+		[% PROCESS inc/missionlist.tt2 missions=m.fleets %]
+		</td>
+	</tr>
+[% END %]
+</table>
