@@ -63,6 +63,7 @@ $(document).ready(function(){
 					$("#tzcountry").append(opt);
 					opt.attr('value',$(this).text()).text($(this).text());
 				});
+				$("#tzcountry").change();
 			});
 		}
 	});
