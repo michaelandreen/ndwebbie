@@ -33,7 +33,7 @@ SELECT fcid,category,fb.fbid,fb.board
 	,date_trunc('seconds',max(ft.mtime)::timestamp ) AS last_post
 FROM forum_categories fc
 	JOIN forum_boards fb USING (fcid)
-	JOIN forum_threads ft USING (fbid)
+	LEFT OUTER JOIN forum_threads ft USING (fbid)
 	LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1)
 		ftv USING (ftid)
 WHERE fbid IN (SELECT fbid FROM forum_access
