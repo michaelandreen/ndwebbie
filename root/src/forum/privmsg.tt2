@@ -28,15 +28,15 @@ $(document).ready(function(){
 	});
 
 	$('#privmsg').submit(function(){
-		if(!$('#privmsg :checkbox[@name=uid][@checked]').val()){
+		if(!$('#privmsg :checkbox[name=uid][checked]').val()){
 			alert('You need to add a receiver.');
 			return false;
 		}
-		if($('#privmsg :input[@name=subject]').val() == ''){
+		if($('#privmsg :input[name=subject]').val() == ''){
 			alert('You need to write a subject');
 			return false;
 		}
-		if($('#privmsg :input[@name=message]').val() == ''){
+		if($('#privmsg :input[name=message]').val() == ''){
 			alert('You need to write a message');
 			return false;
 		}
