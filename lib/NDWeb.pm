@@ -49,7 +49,7 @@ __PACKAGE__->config( page_cache => {
 	disable_index => 1,
 });
 
-
+__PACKAGE__->config( default_model => 'Model');
 # Start the application
 __PACKAGE__->setup(qw/
 	-Debug
