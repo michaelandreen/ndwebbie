@@ -322,17 +322,17 @@ sub insertintel : Private {
 
 	$dbh->begin_work;
 	my $findscan = $dbh->prepare(q{SELECT scan_id FROM scans
-		WHERE scan_id = ? AND tick >= tick() - 168 AND groupscan = ?
+		WHERE scan_id = LOWER(?) AND tick >= tick() - 168 AND groupscan = ?
 		});
 	my $addscan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid,groupscan)
-		VALUES (?,tick(),?,?)
+		VALUES (LOWER(?),tick(),?,?)
 		});
 	my $addpoint = $dbh->prepare(q{UPDATE users SET scan_points = scan_points + 1
 		WHERE uid = ?
 		});
 	my @scans;
 	my $intel = $c->req->param('message');
-	while ($intel =~ m{http://[\w.]+/.+?scan(_id|_grp)?=(\d+)}g){
+	while ($intel =~ m{http://[\w.]+/.+?scan(_id|_grp)?=(\w+)}g){
 		my $groupscan = (defined $1 && $1 eq '_grp') || 0;
 		my %scan;
 		$scan{id} = $2;

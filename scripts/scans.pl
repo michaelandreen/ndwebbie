@@ -43,8 +43,8 @@ $dbh->do(q{SET CLIENT_ENCODING TO 'LATIN1';});
 my $scangroups = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
 	WHERE groupscan AND NOT parsed FOR UPDATE
 });
-my $oldscan = $dbh->prepare(q{SELECT scan_id FROM scans WHERE scan_id = ? AND tick >= tick() - 168});
-my $addScan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid) VALUES (?,?,?)});
+my $oldscan = $dbh->prepare(q{SELECT scan_id FROM scans WHERE scan_id = LOWER(?) AND tick >= tick() - 168});
+my $addScan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid) VALUES (LOWER(?),?,?)});
 my $parsedscan = $dbh->prepare(q{UPDATE scans SET tick = ?, type = ?, planet = ?, parsed = TRUE WHERE id = ?});
 my $addpoints = $dbh->prepare(q{UPDATE users SET scan_points = scan_points + ? WHERE uid = ? });
 my $delscan = $dbh->prepare(q{DELETE FROM scans WHERE id = ?});
@@ -56,7 +56,7 @@ while (my $group = $scangroups->fetchrow_hashref){
 	my $file = get("http://game.planetarion.com/showscan.pl?scan_grp=$group->{scan_id}");
 
 	my $points = 0;
-	while ($file =~ m/showscan.pl\?scan_id=(\d+)/g){
+	while ($file =~ m/showscan.pl\?scan_id=(\w+)/g){
 		unless ($dbh->selectrow_array($oldscan,undef,$1)){
 			$addScan->execute($1,$group->{tick},$group->{uid});
 			++$points;
