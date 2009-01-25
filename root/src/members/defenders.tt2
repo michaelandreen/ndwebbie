@@ -7,6 +7,7 @@
 	<th title="The current time for the member">Time</th>
 	<th>Note</th>
 	<th>Wakeup?</th>
+	<th>Timezone</th>
 	</tr>
 [% FOR m IN members %]
 	<tr align="left" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
@@ -16,6 +17,7 @@
 		<td>[% m.time %]</td>
 		<td>[% m.sms_note | html %]</td>
 		<td>[% IF m.call_if_needed %]<b>YES</b>[%END%]</td>
+		<td>[% m.timezone | html %]</td>
 	</tr>
 	<tr id="member[% m.uid %]" class="hidden">
 		<td></td>

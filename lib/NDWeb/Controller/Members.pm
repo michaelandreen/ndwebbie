@@ -527,7 +527,7 @@ sub defenders : Local {
 
 	my $defenders = $dbh->prepare(q{
 SELECT uid,u.planet,username, to_char(NOW() AT TIME ZONE timezone,'HH24:MI') AS time
-	,sms_note, call_if_needed, race
+	,sms_note, call_if_needed, race, timezone
 FROM users u
 	JOIN current_planet_stats p ON p.id = u.planet
 WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
