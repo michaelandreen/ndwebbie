@@ -21,7 +21,7 @@ package NDWeb::Include;
 use strict;
 use warnings;
 require Exporter;
-use BBCode::Parser;
+use Parse::BBCode;
 use CGI qw/:standard/;
 
 our @ISA = qw/Exporter/;
@@ -40,21 +40,35 @@ sub comma_value ($) {
 	return $v;
 }
 
+
+my $bbc = Parse::BBCode->new({
+		tags => {
+			Parse::BBCode::HTML->defaults,
+			'' => sub {
+				my $e = ($_[2]);
+				$e =~ s/\r?\n|\r/<br>\n/g;
+				$e
+			},
+			url   => 'url:<a href="%{link}A" rel="external">%s</a>',
+			quote => 'block:<div class="bbcode-quote">
+<div class="bbcode-quote-head"><b>%{html}a wrote:</b></div>
+<div class="bbcode-quote-body">%s</div></div>',
+			code => 'block:<div class="bbcode-quote"><pre class="bbcode-code">%{html}s</pre></div>',
+			img   => 'url:<a href="%{link}A" rel="external">%s</a>',
+			li  => 'block:<li>%{parse}s</li>',
+		},
+		close_open_tags   => 1,
+	});
+
 sub parseMarkup ($) {
 	my ($text) = @_;
 
-	#$text =~ s{\n}{\n<br/>}g;
-	#$text =~ s{\[B\](.*?)\[/B\]}{<b>$1</b>}gi;
-	#$text =~ s{\[I\](.*?)\[/I\]}{<i>$1</i>}gi;
-	#$text =~ s{\[url\](.*?)\[/url\]}{<a href="$1">$1</a>}gi;
-	#$text =~ s{\[PRE\](.*?)\[/PRE\]}{<pre>$1</pre>}sgi;
-	#$text =~ s{\[PRE\](.*?)\[/PRE\]}{<pre>$1</pre>}sgi;
-	#$1 =~ s{<br/>}{}g;
-
-	eval{
-		my $tree = BBCode::Parser->DEFAULT->parse($text);
-		$text = $tree->toHTML;
-	};
+	$text = $bbc->render($text);
+	if ($bbc->error){
+		my $tree = $bbc->get_tree;
+		$text = $tree->raw_text;
+		$text = $bbc->render($text);
+	}
 	$text =~ s/\x{3}\d\d?//g; #mirc color TODO: possibly match until \x{0F} and change to [color] block
 	$text =~ s/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]//g;
 	return $text;

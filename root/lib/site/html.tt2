@@ -19,7 +19,7 @@
 <!--
 $(document).ready(function(){
 	$('.hidden').hide();
-	$('a[rel="external"]').click(function() {
+	$('a[rel*="external"]').click(function() {
 		window.open( $(this).attr('href') );
 		return false;
 	});

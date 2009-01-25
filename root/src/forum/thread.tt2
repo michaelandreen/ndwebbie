@@ -14,7 +14,7 @@
 	[% END %]
 <fieldset class="forum-post">
 <legend class="forum-post-header"><b>[% post.username %]</b> : [% post.time %] </legend>
-	[% post.message %]
+<div class="forum-post-body">[% post.message %]</div>
 </fieldset>
 [% END %]
 
