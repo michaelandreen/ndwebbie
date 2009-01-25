@@ -13,14 +13,14 @@
 <p><a name="NewPosts">New posts below:</a></p>
 	[% END %]
 <fieldset class="forum-post">
-<legend class="unread:[% post.unread %]"><b>[% post.username %]</b> : [% post.time %]</legend>
+<legend class="forum-post-header"><b>[% post.username %]</b> : [% post.time %] </legend>
 	[% post.message %]
 </fieldset>
 [% END %]
 
 [% IF thread.post %]
-<form action="[% c.uri_for('addPost',thread.ftid) %]#NewPosts" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
-	<textarea rows="25" cols="60" name="message">[% previewMessage %]</textarea>
+<form action="[% c.uri_for('addPost',thread.ftid) %]#NewPosts" method="post"><fieldset class="forum-post"> <legend><a name="Reply">New Reply</a></legend>
+	<textarea rows="25" cols="60" name="message" id="replybox">[% previewMessage %]</textarea>
 	<br>
 	<input type="submit" name="cmd" value="Submit">
 	<input type="submit" name="cmd" value="Preview">
@@ -67,6 +67,7 @@
 	[% END %]
 		</select></td>
 		<td><select name="access" multiple size="5">
+			<option value=""></option>
 	[% FOR u IN access %]
 			<option value="[% u.uid %]">[% u.username %]</option>
 	[% END %]
@@ -75,4 +76,19 @@
 </table>
 <input type="submit" name="cmd" value="Change access">
 </fieldset></form>
+[% END %]
+
+[% IF thread.post %]
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".forum-post-header").append(
+		$("<a>").attr("href","#Reply").addClass("quotelink").text("Quote"));
+	$(".quotelink").click(function(){
+		var text = $(this).parents("legend").siblings().text();
+		var username = $(this).parents("legend").text().split(" ",1);
+		var oldtext = $("#replybox").val();
+		$("#replybox").val(oldtext + "\n[quote=" + username + "]" + text + "[/quote]\n");
+	});
+});
+</script>
 [% END %]
