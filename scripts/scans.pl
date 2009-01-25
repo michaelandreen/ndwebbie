@@ -73,7 +73,7 @@ my $newscans = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
 my $findplanet = $dbh->prepare(q{SELECT planetid(?,?,?,?)});
 my $findoldplanet = $dbh->prepare(q{SELECT id FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND tick <= $4 ORDER BY tick DESC LIMIT 1});
 my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
-my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,planet,amount) VALUES(?,?,?,?) RETURNING fid});
+my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,planet,tick,amount) VALUES(?,?,?,?,?) RETURNING fid});
 my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (fid,id) VALUES(?,?)});
 my $addintel = $dbh->prepare(q{INSERT INTO intel (name,mission,sender,target,tick,eta,back,amount,ingal,uid)
 	VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
