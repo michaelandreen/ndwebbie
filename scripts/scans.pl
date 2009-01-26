@@ -78,7 +78,7 @@ my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (fid,id) VALUES(?,?)});
 my $addintel = $dbh->prepare(q{INSERT INTO intel (name,mission,sender,target,tick,eta,back,amount,ingal,uid)
 	VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
 my $intelscan = $dbh->prepare(q{INSERT INTO fleet_scans (intel,id) VALUES(?,?)});
-my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (id,ship,amount) VALUES(?,?,?)});
+my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (fid,ship,amount) VALUES(?,?,?)});
 my $addplanetscan = $dbh->prepare(q{INSERT INTO planet_scans
 	(id,tick,planet,metal_roids,metal,crystal_roids,crystal,eonium_roids,eonium
 		,agents,guards,light,medium,heavy,hidden)
