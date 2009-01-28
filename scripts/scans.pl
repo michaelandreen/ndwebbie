@@ -55,15 +55,17 @@ while (my $group = $scangroups->fetchrow_hashref){
 	$dbh->begin_work;
 	my $file = get("http://game.planetarion.com/showscan.pl?scan_grp=$group->{scan_id}");
 
-	my $points = 0;
-	while ($file =~ m/showscan.pl\?scan_id=(\w+)/g){
-		unless ($dbh->selectrow_array($oldscan,undef,$1)){
-			$addScan->execute($1,$group->{tick},$group->{uid});
-			++$points;
+	if ($file){
+		my $points = 0;
+		while ($file =~ m/showscan.pl\?scan_id=(\w+)/g){
+			unless ($dbh->selectrow_array($oldscan,undef,$1)){
+				$addScan->execute($1,$group->{tick},$group->{uid});
+				++$points;
+			}
 		}
+		$addpoints->execute($points,$group->{uid});
+		$parsedscan->execute($group->{tick},'GROUP',undef,$group->{id});
 	}
-	$addpoints->execute($points,$group->{uid});
-	$parsedscan->execute($group->{tick},'GROUP',undef,$group->{id});
 	$dbh->commit;
 }
 
