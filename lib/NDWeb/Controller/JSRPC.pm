@@ -38,7 +38,8 @@ sub update : Local {
 
 	my $targets;;
 	if ($from){
-		my ($timestamp) = $dbh->selectrow_array("SELECT MAX(modified)::timestamp AS modified FROM raid_targets");
+		my ($timestamp) = $dbh->selectrow_array(q{SELECT MAX(modified)::timestamp AS modified
+			FROM raid_targets WHERE raid = $1},undef,$raid->{id});
 		$c->stash(timestamp => $timestamp);
 		$targets = $dbh->prepare(q{SELECT r.id,r.planet FROM raid_targets r
 			WHERE r.raid = ? AND modified > ?
