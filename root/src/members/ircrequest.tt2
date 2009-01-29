@@ -2,7 +2,7 @@
 [% IF reply %]
 <h3>[% reply %]</h3>
 [% END %]
-<form action="[% c.uri_for('postircrequest') %]" method="post"><fieldset> <legend>Launch confirmation</legend>
+<form action="[% c.uri_for('postircrequest') %]" method="post"><fieldset> <legend>IRC request</legend>
 	<p>Message to irc. To def channel you can report incs with a line from gal status.</p>
 	<select name="channel">
 [% FOR ch IN channels %]
