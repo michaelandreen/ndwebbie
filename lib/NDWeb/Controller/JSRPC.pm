@@ -175,7 +175,6 @@ sub joinable : Local {
 			WHERE target = ? AND wave = ?
 		});
 		$query->execute($joinable,$target,$wave);
-		$c->forward('/listTargets');
 	}
 
 	$c->stash(template => 'jsrpc/update.tt2');
