@@ -22,6 +22,7 @@
 [% FOR t IN targets %]
 <fieldset class="[% t.style %]"> <legend><a name="target[% t.id %]">Target: #[% t.id %]</a></legend>
 	<div class="leftinfo"><ul>
+		<li><a href="[% c.uri_for('targetcalc',t.id) %]" rel="external">Calc</a></li>
 		<li>Size: [% t.size %]</li>
 		<li class="[% t.scorebash %]">Score: [% t.score %]</li>
 		<li class="[% t.valuebash %]">Value: [% t.value %]</li>

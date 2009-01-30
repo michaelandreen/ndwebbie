@@ -93,6 +93,7 @@ __PACKAGE__->allow_access_if('/calls/findCall',[qw/members/]);
 __PACKAGE__->deny_access_unless('/raids',[qw/raids_edit/]);
 __PACKAGE__->allow_access_if('/raids/index',[qw//]);
 __PACKAGE__->allow_access_if('/raids/view',[qw//]);
+__PACKAGE__->allow_access_if('/raids/targetcalc',[qw//]);
 __PACKAGE__->allow_access_if('/raids/findRaid',[qw//]);
 __PACKAGE__->allow_access_if('/raids/log',[qw//]);
 __PACKAGE__->deny_access_unless('/intel',[qw/intel/]);

@@ -572,6 +572,71 @@ sub posttargetalliances : Local {
 	$c->res->redirect($c->uri_for('targetlist',join ',',$c->req->param('alliances')));
 }
 
+sub targetcalc : Local {
+	my ($self, $c, $target) = @_;
+	my $dbh = $c->model;
+
+	my $target = $dbh->selectrow_hashref(q{
+SELECT p.id,p.value,p.score,metal_roids, crystal_roids, eonium_roids, ds.total, race
+FROM raids r
+	JOIN raid_targets rt ON r.id = rt.raid
+	JOIN current_planet_stats p ON rt.planet = p.id
+	LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
+	LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
+WHERE rt.id = ? AND r.open AND not r.removed
+	AND r.id IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?)
+		},undef,$target,$c->user->id);
+
+	my $planet = $dbh->selectrow_hashref(q{
+SELECT score,value FROM current_planet_stats WHERE id = $1
+		},undef,$c->user->planet);
+
+	my %races = (Ter => 1, Cat => 2, Xan => 3, Zik => 4, Etd => 5);
+	my @query = (
+		"def_1_race=$races{$target->{race}}",
+		"def_structures=$target->{total}",
+		"def_metal_asteroids=$target->{metal_roids}",
+		"def_crystal_asteroids=$target->{crystal_roids}",
+		"def_eonium_asteroids=$target->{eonium_roids}",
+		#"def_planet_value_1=$target->{value}",
+		#"def_planet_score_1=$target->{score}",
+		"att_planet_value_1=$planet->{value}",
+		"att_planet_score_1=$planet->{score}",
+	);
+
+	my $fleets = $dbh->prepare(q{
+SELECT DISTINCT ON (name) name, tick, fid FROM fleets
+WHERE planet = $1 AND mission = 'Full fleet'
+ORDER BY name ASC, tick DESC
+		});
+	my $ships = $dbh->prepare(q{
+SELECT id, amount FROM fleet_ships fs JOIN ship_stats s ON s.name = fs.ship
+WHERE fid = $1
+		});
+
+	for ('def','att'){
+		my $planet = $c->user->planet;
+		$planet = $target->{id} if /^def/;
+		$fleets->execute($planet);
+		my $nrfleets = 0;
+		my $tick = 0;
+		while (my $fleet = $fleets->fetchrow_hashref){
+			$ships->execute($fleet->{fid});
+			next unless $tick < $fleet->{tick};
+			$tick = $fleet->{tick};
+			++$nrfleets;
+			while (my $ship = $ships->fetchrow_hashref){
+				push @query, "${_}_${nrfleets}_$ship->{id}=$ship->{amount}";
+			}
+		}
+		push @query, "${_}_fleets=$nrfleets";
+	}
+	my $query = join '&', @query;
+	#$c->res->body("http://game.planetarion.com/bcalc.pl?$query");
+	$c->res->redirect("http://game.planetarion.com/bcalc.pl?$query");
+}
+
+
 sub listAlliances : Private {
 	my ($self, $c) = @_;
 	my @alliances;
