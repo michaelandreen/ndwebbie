@@ -233,7 +233,7 @@ sub edit : Local {
 	}elsif ($order && $order eq 'race'){
 		$order .= ' ASC';
 	}else {
-		$order .= 'p.x,p.y,p.z';
+		$order = 'p.x,p.y,p.z';
 	}
 
 	my $targetquery = $dbh->prepare(qq{SELECT r.id,coords(x,y,z),comment,size
