@@ -117,8 +117,7 @@ sub planet : Local {
 		,amount, NULL AS coords, planet, NULL AS back
 	FROM fleets f
 	WHERE planet = $1 AND tick <= tick() AND (
-			mission = 'Full fleet'
-			OR fid IN (SELECT fid FROM fleet_scans)
+			fid IN (SELECT fid FROM fleet_scans)
 		) AND (
 			mission = 'Full fleet'
 			OR tick >= tick() - 12
