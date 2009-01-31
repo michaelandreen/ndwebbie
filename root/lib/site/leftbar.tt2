@@ -57,12 +57,6 @@
 	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/members/ircrequest">IRC request</a></li>
 </ul>
-<p>Covop menu</p>
-<ul class="linkbar">
-	<li><a href="/covop">Bank hacking</a></li>
-	<li><a href="/covop/distwhores">Distwhores</a></li>
-	<li><a href="/covop/easy">Easy targets</a></li>
-</ul>
 	[% ELSE %]
 		[% IF c.user.planet %]
 	<p><b>Update your fleet to see member menu</b></p>
@@ -80,6 +74,14 @@
 	</form>
 		[% END %]
 	[% END %]
+[% END %]
+[% IF c.check_user_roles("covop") %]
+<p>Covop menu</p>
+<ul class="linkbar">
+	<li><a href="/covop">Bank hacking</a></li>
+	<li><a href="/covop/distwhores">Distwhores</a></li>
+	<li><a href="/covop/easy">Easy targets</a></li>
+</ul>
 [% END %]
 [% IF user.attacker %]
 <p>Attack menu</p>
