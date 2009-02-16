@@ -15,7 +15,7 @@
 	<tr>
 		<th>Coords</th><th>Tick</th><th>Metal</th><th>Crystal</th><th>Eonium</th>
 		<th>Gov</th><th>Alert</th><th>Tick</th><th>Dists</th>
-		<th>Max (5 agents)</th><th>(15 agents)</th><th>Last covop (tick)</th>
+		<th>Max (5 agents)</th><th>(15 agents)</th><th>Max</th><th>Last covop (tick)</th>
 	</tr>
 
 [% debug(targets.size) %]
@@ -30,8 +30,9 @@
 	<td>[% t.minalert %] - [% t.maxalert %]</td>
 	<td[% PROCESS style tick=t.dstick%]>[% t.dstick %]</td>
 	<td>[% t.distorters %]</td>
-	<td>[% t.max_bank_hack %]</td>
+	<td>[% t.hack5 %]</td>
 	<td>[% t.hack15 %]</td>
+	<td>[% t.max_bank_hack %]</td>
 	<td>[% t.lastcovop %]</td>
 	<td><a href="[% c.uri_for('marktarget', t.id) %]">Did CovOp this tick</a></td>
 	</tr>

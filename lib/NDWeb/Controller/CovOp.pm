@@ -24,21 +24,21 @@ Catalyst Controller.
 sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
 	$c->stash( where => q{AND max_bank_hack > 60000
-		ORDER BY max_bank_hack DESC, minalert ASC});
+		ORDER BY max_bank_hack DESC, hack5 DESC, hack15 DESC, minalert,x,y,z});
 	$c->forward('list');
 }
 
 sub easy : Local {
 	my ( $self, $c ) = @_;
 	$c->stash( where =>  qq{AND minalert < 70
-		ORDER BY minalert ASC,max_bank_hack DESC});
+		ORDER BY minalert, max_bank_hack DESC, hack5 DESC, hack15 DESC,x,y,z});
 	$c->forward('list');
 }
 
 sub distwhores : Local {
 	my ( $self, $c ) = @_;
 	$c->stash( where =>  qq{AND distorters > 0
-		ORDER BY distorters DESC, minalert ASC});
+		ORDER BY distorters DESC, minalert, x,y,z});
 	$c->forward('list');
 }
 
@@ -57,11 +57,12 @@ sub list : Private {
 	my $dbh = $c->model;
 
 	my $query = $dbh->prepare(q{SELECT *
-		FROM (SELECT p.id,coords(x,y,z),size, metal,crystal,eonium
+		FROM (SELECT p.id,coords(x,y,z),x,y,z,size, metal,crystal,eonium
 			,distorters,guards
 			,covop_alert(seccents,ds.total,size,guards,gov,0) AS minalert
 			,covop_alert(seccents,ds.total,size,guards,gov,50) AS maxalert
-			,max_bank_hack(metal,crystal,eonium,p.value,c.value,5)
+			,max_bank_hack(500000,500000,500000,p.value,c.value,5)
+			,max_bank_hack(metal,crystal,eonium,p.value,c.value,5) AS hack5
 			,max_bank_hack(metal,crystal,eonium,p.value,c.value,15) AS hack15
 			, planet_status, relationship,gov,ps.tick AS pstick, ds.tick AS dstick
 			FROM current_planet_stats p
