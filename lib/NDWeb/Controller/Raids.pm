@@ -30,8 +30,11 @@ sub index :Path :Args(0) {
 	my $dbh = $c->model;
 
 	my $launched = 0;
-	my $query = $dbh->prepare(q{SELECT r.id,released_coords AS releasedcoords,tick,waves*COUNT(DISTINCT rt.id) AS waves,
-			COUNT(rc.uid) AS claims, COUNT(nullif(rc.launched,false)) AS launched,COUNT(NULLIF(rc.uid > 0,true)) AS blocked
+	my $query = $dbh->prepare(q{
+		SELECT r.id,released_coords AS releasedcoords,tick
+			,waves*COUNT(DISTINCT rt.id) AS waves,COUNT(rc.uid) AS claims
+			,COUNT(nullif(rc.launched,false)) AS launched
+			,COUNT(NULLIF(rc.uid > 0 OR rc.wave > r.waves,true)) AS blocked
 		FROM raids r JOIN raid_targets rt ON r.id = rt.raid
 			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target
 		WHERE open AND not removed AND r.id 
@@ -49,8 +52,11 @@ sub index :Path :Args(0) {
 	$c->stash(raids => \@raids);
 
 	if ($c->check_user_roles(qw/raids_info/)){
-		my $query = $dbh->prepare(q{SELECT r.id,open ,tick,waves*COUNT(DISTINCT rt.id) AS waves,
-			COUNT(rc.uid) AS claims, COUNT(nullif(rc.launched,false)) AS launched ,COUNT(NULLIF(uid > 0,true)) AS blocked
+		my $query = $dbh->prepare(q{
+		SELECT r.id,open ,tick
+			,waves*COUNT(DISTINCT rt.id) AS waves,COUNT(rc.uid) AS claims
+			,COUNT(nullif(rc.launched,false)) AS launched
+			,COUNT(NULLIF(uid > 0 OR rc.wave > r.waves,true)) AS blocked
 		FROM raids r JOIN raid_targets rt ON r.id = rt.raid
 			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target
 		WHERE not removed AND (not open 
@@ -68,8 +74,11 @@ sub index :Path :Args(0) {
 		$c->stash(closedraids => \@raids);
 
 
-		$query = $dbh->prepare(q{SELECT r.id,tick,waves*COUNT(DISTINCT rt.id) AS waves,
-			COUNT(rc.uid) AS claims, COUNT(nullif(rc.launched,false)) AS launched ,COUNT(NULLIF(uid > 0,true)) AS blocked
+		$query = $dbh->prepare(q{
+		SELECT r.id,tick,waves*COUNT(DISTINCT rt.id) AS waves
+			,COUNT(rc.uid) AS claims
+			,COUNT(nullif(rc.launched,false)) AS launched
+			,COUNT(NULLIF(uid > 0 OR rc.wave > r.waves,true)) AS blocked
 		FROM raids r JOIN raid_targets rt ON r.id = rt.raid
 			LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target
 		WHERE removed
@@ -237,7 +246,8 @@ sub edit : Local {
 	}
 
 	my $targetquery = $dbh->prepare(qq{SELECT r.id,coords(x,y,z),comment,size
-		,score,value,race,planet_status,relationship,comment,r.planet, s.scans
+		,score,value,race,planet_status,relationship,r.planet, s.scans
+		,max(rc.wave) AS waves
 		FROM raid_targets r
 			JOIN current_planet_stats p ON p.id = r.planet
 			LEFT OUTER JOIN ( SELECT planet, array_accum(s::text) AS scans
@@ -248,7 +258,10 @@ sub edit : Local {
 					) s
 				GROUP BY planet
 			) s ON s.planet = r.planet
+			LEFT OUTER JOIN raid_claims rc ON r.id = rc.target
 		WHERE r.raid = ?
+		GROUP BY r.id,x,y,z,comment,size,score,value,race
+			,planet_status,relationship,comment,r.planet, s.scans
 		ORDER BY $order
 		});
 	my $claims =  $dbh->prepare(q{ SELECT username,launched FROM raid_claims
@@ -258,7 +271,8 @@ sub edit : Local {
 	my @targets;
 	while (my $target = $targetquery->fetchrow_hashref){
 		my @waves;
-		for my $i (1 .. $raid->{waves}){
+		$target->{waves} ||= $raid->{waves};
+		for my $i (1 .. $target->{waves}){
 			$claims->execute($target->{id},$i);
 			my $claimers;
 			if ($claims->rows != 0){
