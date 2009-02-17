@@ -262,6 +262,7 @@ sub edit : Local {
 		WHERE r.raid = ?
 		GROUP BY r.id,x,y,z,comment,size,score,value,race
 			,planet_status,relationship,comment,r.planet, s.scans
+			,sizerank,scorerank,xprank,valuerank
 		ORDER BY $order
 		});
 	my $claims =  $dbh->prepare(q{ SELECT username,launched FROM raid_claims
