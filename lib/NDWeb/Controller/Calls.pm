@@ -167,7 +167,7 @@ sub edit : Local {
 	$c->stash(fleets => \@fleets);
 
 	my $defenders = $dbh->prepare(q{ 
-SELECT DISTINCT ON (x,y,z,s.id,name,amount) fid,mission, name, eta
+SELECT DISTINCT ON (x,y,z,s.id,name,amount,back) fid,mission, name, eta
 	, amount, coords(x,y,z) AS coords, landing_tick AS tick, f.planet
 	,back, (back <> landing_tick + eta - 1) AS recalled
 FROM launch_confirmations lc
