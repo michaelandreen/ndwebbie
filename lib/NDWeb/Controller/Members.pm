@@ -535,10 +535,19 @@ ORDER BY call_if_needed DESC, LOWER(username)
 		});
 	$defenders->execute;
 
+	my $available = $dbh->prepare(q{
+SELECT ship,amount FROM available_ships WHERE planet = $1
+		});
+
 	my @members;
 	while (my $member = $defenders->fetchrow_hashref){
 
 		$member->{fleets} = member_fleets($dbh, $member->{uid}, $member->{planet});
+		$available->execute($member->{planet});
+		my $fleet = {fid => $member->{username}, mission => 'Available', name => 'At home'
+			, ships => $available->fetchall_arrayref({})
+		};
+		push @{$member->{fleets}}, $fleet;
 		push @members,$member;
 	}
 	$c->stash(members => \@members);
