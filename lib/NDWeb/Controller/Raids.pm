@@ -141,7 +141,7 @@ sub view : Local {
 			if ($planet->{x} == $target->{x}){
 				$target->{style} = 'incluster';
 			}
-			$target->{scorebash} = 'bash' if ($target->{score}/$planet->{score} < 0.4);
+			$target->{scorebash} = 'bash' if ($target->{score}/$planet->{score} < 0.6);
 			$target->{valuebash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
 			#next if ($target->{score}/$planet->{score} < 0.4) && ($target->{value}/$planet->{value} < 0.4);
 		}
