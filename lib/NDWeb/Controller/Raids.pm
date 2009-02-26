@@ -247,7 +247,7 @@ sub edit : Local {
 
 	my $targetquery = $dbh->prepare(qq{SELECT r.id,coords(x,y,z),comment,size
 		,score,value,race,planet_status,relationship,r.planet, s.scans
-		,max(rc.wave) AS waves
+		,COALESCE(max(rc.wave),0) AS waves
 		FROM raid_targets r
 			JOIN current_planet_stats p ON p.id = r.planet
 			LEFT OUTER JOIN ( SELECT planet, array_accum(s::text) AS scans
@@ -272,7 +272,9 @@ sub edit : Local {
 	my @targets;
 	while (my $target = $targetquery->fetchrow_hashref){
 		my @waves;
-		$target->{waves} ||= $raid->{waves};
+		if ($target->{waves} < $raid->{waves}){
+			$target->{waves} = $raid->{waves}
+		}
 		for my $i (1 .. $target->{waves}){
 			$claims->execute($target->{id},$i);
 			my $claimers;
