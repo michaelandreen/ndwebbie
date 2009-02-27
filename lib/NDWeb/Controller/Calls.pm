@@ -231,13 +231,14 @@ sub defleeches : Local {
 
 	my $query = $dbh->prepare(q{SELECT username,defense_points,count(id) AS calls
 		, SUM(fleets) AS fleets, SUM(recalled) AS recalled
+		,count(NULLIF(fleets,0)) AS defended_calls
 		FROM (SELECT username,defense_points,c.id,count(f.target) AS fleets
 			, count(NULLIF(f.landing_tick + f.eta -1 = f.back,TRUE)) AS recalled
 			FROM users u JOIN calls c ON c.member = u.uid
 				LEFT OUTER JOIN (
 					SELECT * FROM launch_confirmations JOIN fleets USING (fid)
+					WHERE mission = 'Defend'
 				) f ON u.planet = f.target AND c.landing_tick = f.landing_tick
-			WHERE f.mission = 'Defend'
 			GROUP BY username,defense_points,c.id
 		) d
 		GROUP BY username,defense_points ORDER BY fleets DESC, defense_points

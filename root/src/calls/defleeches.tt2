@@ -6,14 +6,16 @@
 	<th>Def Missions</th>
 	<th>Recalled missions</th>
 	<th>Calls</th>
+	<th>Defended calls</th>
 	</tr>
 [% FOR m IN members %]
-	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-	<td>[% m.username %]</td>
+	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td align="left">[% m.username %]</td>
 	<td>[% m.defense_points %]</td>
 	<td>[% m.fleets %]</td>
 	<td>[% m.recalled %]</td>
 	<td>[% m.calls %]</td>
+	<td>[% m.defended_calls %]</td>
 	</tr>
 [% END %]
 </table>
