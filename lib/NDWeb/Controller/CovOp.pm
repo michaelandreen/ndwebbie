@@ -23,18 +23,19 @@ Catalyst Controller.
 
 sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
-	$c->stash( where => q{hack5 > 60000
-		ORDER BY hack5 DESC, hack15 DESC, minalert
-			,lastcovop NULLS FIRST,pstick DESC, dstick DESC,x,y,z
+	$c->stash( where => q{hack5 > 60000 AND minalert < 60
+		ORDER BY hack5 DESC, hack13 DESC
+			,(CASE WHEN tick() - lastcovop < 6 THEN lastcovop ELSE NULL END) NULLS FIRST
+			,minalert, pstick DESC, dstick DESC,x,y,z
 		});
 	$c->forward('list');
 }
 
 sub easy : Local {
 	my ( $self, $c ) = @_;
-	$c->stash( where =>  q{minalert < 70
-		ORDER BY minalert, max_bank_hack DESC, hack5 DESC, hack15 DESC
-			,lastcovop NULLS FIRST,pstick DESC, dstick DESC,x,y,z
+	$c->stash( where =>  q{minalert < 60
+		ORDER BY minalert, hack5 DESC,lastcovop NULLS FIRST
+			,hack13 DESC,pstick DESC, dstick DESC,x,y,z
 		});
 	$c->forward('list');
 }
@@ -65,9 +66,9 @@ sub list : Private {
 	my $query = $dbh->prepare(q{
 	SELECT * FROM (
 		SELECT *
-			,max_bank_hack(500000,500000,500000,pvalue,cvalue,5)
+			,(2*pvalue::float/cvalue) :: Numeric(3,1) AS max_bank_hack
 			,max_bank_hack(metal,crystal,eonium,pvalue,cvalue,5) AS hack5
-			,max_bank_hack(metal,crystal,eonium,pvalue,cvalue,13) AS hack15
+			,max_bank_hack(metal,crystal,eonium,pvalue,cvalue,13) AS hack13
 		FROM (SELECT p.id,coords(x,y,z),x,y,z,size
 			,metal + metal_roids * (tick()-ps.tick) * 125 AS metal
 			,crystal + crystal_roids * (tick()-ps.tick) * 125 AS crystal
