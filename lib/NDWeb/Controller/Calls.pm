@@ -164,6 +164,16 @@ sub edit : Local {
 		}
 		push @fleets, $fleet;
 	}
+
+	my $available = $dbh->prepare(q{
+SELECT ship,amount from ships_home WHERE planet = $1 AND tick = $2
+		});
+	$available->execute($call->{planet}, $call->{landing_tick});
+	my $fleet = {fid => $call->{member}, mission => 'Available'
+		, name => 'At home', ships => $available->fetchall_arrayref({})
+	};
+	push @fleets, $fleet;
+
 	$c->stash(fleets => \@fleets);
 
 	my $defenders = $dbh->prepare(q{ 
