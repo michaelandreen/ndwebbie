@@ -216,14 +216,27 @@ sub resources : Local {
 		,r.resources,r.hidden,r.planets
 		,(resources/planets)::bigint AS resplanet
 		,(hidden/planets)::bigint AS hidplanet
-		,((resources / 300) + (hidden / 100))::bigint AS scoregain
 		,(score + (resources / 300) + (hidden / 100))::bigint AS nscore
-		,((resources/planets*scoremem)/300 + (hidden/planets*scoremem)/100)::bigint AS scoregain2
-		,(score + (resources/planets*scoremem)/300
-			+ (hidden/planets*scoremem)/100)::bigint AS nscore2
-		,((s.size::int8*(1150-tick())*250)/100 + score + (resources/planets*scoremem)/300
-			+ (hidden/planets*scoremem)/100)::bigint AS nscore3
-		,(s.size::int8*(1150-tick())*250)/100 AS scoregain3
+		,(SELECT sum(score)::bigint FROM (
+SELECT score + (metal+crystal+eonium)/300 + hidden/100 AS score
+FROM current_planet_stats p
+	JOIN current_planet_scans ps ON p.id = ps.planet
+WHERE alliance_id = r.id
+ORDER BY score DESC
+LIMIT 60) a
+		) AS nscore2
+		,(SELECT sum(score)::bigint FROM (
+SELECT score + (metal+crystal+eonium)/300 + hidden/100 + (endtick()-tick())*(
+		250*size + COALESCE(metal_ref + crystal_ref + eonium_ref,7)* 1000
+		+ CASE extraction WHEN 0 THEN 3000 WHEN 1 THEN 11500 ELSE COALESCE(extraction,3)*3000*3 END
+	)*(1.35+0.005*COALESCE(fincents,20))/100 AS score
+FROM current_planet_stats p
+	JOIN current_planet_scans ps ON p.id = ps.planet
+	LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
+WHERE alliance_id = r.id
+ORDER BY score DESC
+LIMIT 60) a
+		) AS nscore3
 		FROM (SELECT alliance_id AS id,sum(metal+crystal+eonium) AS resources
 				, sum(hidden) AS hidden, count(*) AS planets
 				FROM planets p join current_planet_scans c ON p.id = c.planet
@@ -240,6 +253,7 @@ sub resources : Local {
 		push @alliances,$alliance;
 	}
 	$c->stash(alliances => \@alliances);
+	$c->stash( comma => \&comma_value)
 }
 
 

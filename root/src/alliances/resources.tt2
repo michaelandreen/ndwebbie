@@ -9,7 +9,7 @@
 		<th><a href="[% c.uri_for('resources','resplanet') %]">Resources / Planet</a></th>
 		<th><a href="[% c.uri_for('resources','hidplanet') %]">Hidden Resources / Planet</a></th>
 		<th><a href="[% c.uri_for('resources','nscore') %]">Res score (gain)</a>[1]</th>
-		<th><a href="[% c.uri_for('resources','nscore2') %]">Avg res score (gain)</a>[2]</th>
+		<th><a href="[% c.uri_for('resources','nscore2') %]">Top res score (gain)</a>[2]</th>
 		<th><a href="[% c.uri_for('resources','nscore3') %]">Estimated score</a>[3]</th>
 	</tr>
 [% FOR a IN alliances %]
@@ -17,18 +17,18 @@
 		<td><a href="[% c.uri_for("edit",a.id) %]">[% a.name %]</a></td>
 		<td class="[% a.relationship %]">[% a.relationship %]</td>
 		<td>[% a.members %] ([% a.planets %])</td>
-		<td>[% a.score %]</td>
-		<td>[% a.size %]</td>
-		<td>[% a.resources %]</td>
-		<td>[% a.hidden %]</td>
-		<td>[% a.resplanet %]</td>
-		<td>[% a.hidplanet %]</td>
-		<td>[% a.nscore %] ([% a.scoregain %])</td>
-		<td>[% a.nscore2 %] ([% a.nscore2 - a.score %])</td>
-		<td>[% a.nscore3 %] ([% a.scoregain3 %])</td>
+		<td>[% comma(a.score) %]</td>
+		<td>[% comma(a.size) %]</td>
+		<td>[% comma(a.resources) %]</td>
+		<td>[% comma(a.hidden) %]</td>
+		<td>[% comma(a.resplanet) %]</td>
+		<td>[% comma(a.hidplanet) %]</td>
+		<td>[% comma(a.nscore) %] ([% a.nscore - a.score %])</td>
+		<td>[% comma(a.nscore2) %] ([% a.nscore2 - a.score %])</td>
+		<td>[% comma(a.nscore3) %] ([% a.nscore3 - a.score %])</td>
 	</tr>
 [% END %]
 </table>
 <p>[1] = New score if resources are spent (gain is just the extra value compared to unspent resources) + hidden production getting released</p>
-<p>[2] = Same as [1] but calculated with avg resources and max 60 members</p>
-<p>[3] = Same as [2] but also includes resources if roids are kept to end of round (gain is just from the roids)</p>
+<p>[2] = Score for the top60 members, after res being spent and production getting released.</p>
+<p>[3] = Same as [2] but also includes resources if roids are kept to end of round</p>
