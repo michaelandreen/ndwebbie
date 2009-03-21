@@ -30,7 +30,7 @@ sub alliance : Local {
 	my ( $self, $c, $ally ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT coords(x,y,z), size, score, value, COALESCE(nick,'') AS nick
+	my $query = $dbh->prepare(q{SELECT coords(x,y,z), size, score, value,race, COALESCE(nick,'') AS nick
 		FROM current_planet_stats
 		WHERE alliance_id = $1
 		ORDER BY x,y,z});
