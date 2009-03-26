@@ -49,7 +49,7 @@ sub index :Path : Args(0) {
 		while ($coords =~ m/(\d+:\d+:\d+)/g){
 			push @coords,$1;
 		}
-		my $planets = $dbh->prepare(q{SELECT id,coords(x,y,z), alliance
+		my $planets = $dbh->prepare(q{SELECT id,coords(x,y,z), alliance, nick
 			FROM current_planet_stats p
 			WHERE coords(x,y,z) = ANY($1)
 			ORDER BY alliance, p.x, p.y, p.z
