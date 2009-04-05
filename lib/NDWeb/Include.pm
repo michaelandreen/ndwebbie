@@ -56,6 +56,8 @@ my $bbc = Parse::BBCode->new({
 			code => 'block:<div class="bbcode-quote"><pre class="bbcode-code">%{html}s</pre></div>',
 			img   => 'url:<a href="%{link}A" rel="external">%s</a>',
 			li  => 'block:<li>%{parse}s</li>',
+			size  => '<span style="font-size: %{num}a%">%s</span>',
+
 		},
 		close_open_tags   => 1,
 	});
