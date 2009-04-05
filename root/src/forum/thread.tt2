@@ -20,7 +20,7 @@
 
 [% IF thread.post %]
 <form action="[% c.uri_for('addPost',thread.ftid) %]#NewPosts" method="post"><fieldset class="forum-post"> <legend><a name="Reply">New Reply</a></legend>
-	<textarea rows="25" cols="60" name="message" id="replybox">[% previewMessage %]</textarea>
+	<textarea class="bbcode" rows="25" cols="60" name="message" id="replybox">[% previewMessage %]</textarea>
 	<br>
 	<input type="submit" name="cmd" value="Submit">
 	<input type="submit" name="cmd" value="Preview">
@@ -79,6 +79,10 @@
 [% END %]
 
 [% IF thread.post %]
+[%- site.stylesheets = ['markitup/skins/simple/style.css','markitup/sets/bbcode/style.css' ] %]
+<script type="text/javascript" src="/static/markitup/jquery.markitup.pack.js"></script>
+<script type="text/javascript" src="/static/markitup/sets/bbcode/set.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function(){
 	$(".forum-post-header").append(
@@ -89,6 +93,8 @@ $(document).ready(function(){
 		var oldtext = $("#replybox").val();
 		$("#replybox").val(oldtext + "\n[quote=" + username + "]" + text + "[/quote]\n");
 	});
+	mySettings.markupSet.pop();
+    $('.bbcode').markItUp(mySettings);
 });
 </script>
 [% END %]
