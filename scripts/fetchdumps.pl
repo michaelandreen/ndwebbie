@@ -60,7 +60,6 @@ if ($updated){
 	$dbh->do(q{UPDATE misc SET value = ? WHERE id = 'TICK'}, undef, $updated);
 	system 'killall','-USR1', 'irssi';
 	local $dbh->{Warn} = 0;
-	$dbh->do(q{VACUUM ANALYZE});
 }
 
 
