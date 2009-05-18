@@ -48,7 +48,7 @@
 		<td></td>
 		<td>[% devscan.distorters %]</td>
 	</tr>
-	<tr><th colspan="3">Refinaries</th></tr>
+	<tr><th colspan="3">Refineries</th></tr>
 	<tr><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
 	<tr align="right"><td>[% devscan.metal_ref %]</td>
 		<td>[% devscan.crystal_ref %]</td>
