@@ -17,9 +17,11 @@
 </ul>
 </td>
 <td>
-	<textarea rows="8" cols="40" name="info">[% call.info %]</textarea>
+	<textarea rows="8" cols="40" name="info">[% call.info | html %]</textarea>
 </td>
 <td><ul>
+	<li>Calc: <input type="text" name="calc" value="[% call.calc | html %]">
+		<input type="checkbox" name="ccalc"></li>
 	<li>Change Notes? <input type="checkbox" name="cinfo"></li>
 	<li><input type="submit" name="cmd" value="Submit"></li>
 	<li><input type="submit" name="cmd" value="Take call"></li>

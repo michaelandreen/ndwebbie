@@ -292,6 +292,12 @@ sub postcallupdate : Local {
 				,undef,$c->req->param('info'),$call->{id});
 			$log->execute($c->user->id,$call->{ftid},"Updated info");
 		}
+		if ($c->req->param('ccalc')){
+			my $calc = $c->req->param('calc');
+			$dbh->do(q{UPDATE calls SET calc = ? WHERE id = ?}
+				,undef,$calc,$call->{id});
+			$log->execute($c->user->id,$call->{ftid},html_escape "Updated calc to: [URL] $calc [/URL]");
+		}
 	}elsif($c->req->param('cmd') =~ /^(Cover|Uncover|Ignore|Open|Take) call$/){
 		my $extra_vars = '';
 		if ($1 eq 'Cover'){
@@ -362,7 +368,7 @@ sub findCall : Private {
 	my $query = $dbh->prepare(q{
 		SELECT c.id, coords(p.x,p.y,p.z), c.landing_tick, c.info, covered
 			,open, dc.username AS dc, u.defense_points,c.member AS uid
-			,u.planet, u.username AS member, u.sms,c.ftid
+			,u.planet, u.username AS member, u.sms,c.ftid,calc
 		FROM calls c 
 		JOIN users u ON c.member = u.uid
 		LEFT OUTER JOIN users dc ON c.dc = dc.uid
