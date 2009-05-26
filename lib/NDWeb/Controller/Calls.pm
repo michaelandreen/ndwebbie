@@ -296,7 +296,7 @@ sub postcallupdate : Local {
 			my $calc = $c->req->param('calc');
 			$dbh->do(q{UPDATE calls SET calc = ? WHERE id = ?}
 				,undef,$calc,$call->{id});
-			$log->execute($c->user->id,$call->{ftid},html_escape "Updated calc to: [URL] $calc [/URL]");
+			$log->execute($c->user->id,$call->{ftid},html_escape('Updated calc to: [URL]'.$calc.'[/URL]'));
 		}
 	}elsif($c->req->param('cmd') =~ /^(Cover|Uncover|Ignore|Open|Take) call$/){
 		my $extra_vars = '';
