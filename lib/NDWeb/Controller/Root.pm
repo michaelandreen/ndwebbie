@@ -75,6 +75,41 @@ sub logout : Local {
 	$c->res->redirect($c->uri_for('index'));
 }
 
+my %clickatellstatus = (
+	"001", "Message unknown. The delivering network did not recognise the message type or content.",
+	"002", "Message queued. The message could not be delivered and has been queued for attempted redelivery.",
+	"003", "Delivered. Delivered to the network or gateway (delivered to the recipient).",
+	"004", "Received by recipient. Confirmation of receipt on the handset of the recipient.",
+	"005", "Error with message. There was an error with the message, probably caused by the content of the message itself.",
+	"006", "User cancelled message delivery. Client cancelled the message by setting the validity period, or the message was terminated by an internal mechanism.",
+	"007", "Error delivering message An error occurred delivering the message to the handset.",
+	"008", " OK. Message received by gateway.",
+	"009", "Routing error. The routing gateway or network has had an error routing the message.",
+	"010", "Message expired. Message has expired at the network due to the handset being off, or out of reach.",
+	"011", "Message queued for later delivery. Message has been queued at the Clickatell gateway for delivery at a later time (delayed delivery).",
+	"012", "Out of credit. The message cannot be delivered due to a lack of funds in your account. Please re-purchase credits."
+);
+
+
+sub smsconfirm : Local {
+	my ($self, $c) = @_;
+	my $dbh = $c->model;
+
+	my $sms = $dbh->prepare(q{
+UPDATE sms SET status = $2, cost = $3
+	,time = TIMESTAMP WITH TIME ZONE 'epoch' + $4 * INTERVAL '1 second'
+WHERE msgid = $1
+		});
+
+	$sms->execute($c->req->param('apiMsgId')
+		,$clickatellstatus{$c->req->param('status')}
+		,$c->req->param('charge')
+		,$c->req->param('timestamp'));
+
+	$c->stash(template => 'default.tt2');
+}
+
+
 sub begin : Private {
 	my ($self, $c) = @_;
 
