@@ -47,7 +47,7 @@ $dumps->execute($tick);
 if (@_ = $dumps->fetchrow){
 	$_ = $_[0];
 	$hour = (gmtime($_[1]))[2];
-	my $planetid = $dbh->prepare(qq{SELECT findplanetid(?,?,?)});
+	my $planetid = $dbh->prepare(q{SELECT find_planet_id($1,$2,$3)});
 	while (m/(\d+)\t(\d+)\t(\d+)\t\"(.*)\"\t\"(.*)\"\t(Ter|Cat|Zik|Xan|Etd)\t(\d+)\t(\d+)\t(\d+)\t(\d+)/g){
 		$planetid->execute($5,$4,$6);
 		my @id = $planetid->fetchrow;
