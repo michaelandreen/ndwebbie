@@ -9,6 +9,10 @@
 	<br>
 	<input type="submit" value="Change">
 </fieldset></form>
+<form action="[% c.uri_for('changeEmail') %]" method="post"><fieldset> <legend>Email</legend>
+	<input type="text" name="email" value="[% email | html %]">
+	<br><input type="submit" value="Change">
+</fieldset></form>
 <form action="[% c.uri_for('changeBirthday') %]" method="post"><fieldset> <legend>Birthday</legend>
 	YYYY-MM-DD:
 	<input type="text" name="birthday" value="[% birthday %]" id="birthday">

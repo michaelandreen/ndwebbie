@@ -2,11 +2,14 @@ package NDWeb::Controller::Settings;
 
 use strict;
 use warnings;
+use feature ":5.10";
 use parent 'Catalyst::Controller';
 
 use NDWeb::Include;
 
 use DateTime::TimeZone;
+use Mail::Sendmail;
+use Email::Valid;
 
 =head1 NAME
 
@@ -40,10 +43,11 @@ sub index :Path :Args(0) {
 	}
 	$c->stash(stylesheets => \@stylesheets);
 
-	my ($birthday,$timezone) = $dbh->selectrow_array(q{
-SELECT birthday,timezone FROM users WHERE uid = $1
+	my ($birthday,$timezone,$email) = $dbh->selectrow_array(q{
+SELECT birthday,timezone,email FROM users WHERE uid = $1
 		},undef,$c->user->id);
 	$c->stash(birthday => $birthday);
+	$c->stash(email =>  $c->flash->{email} // $email);
 
 	my @timezone = split m{/},$timezone,2;
 	$c->stash(timezone => \@timezone);
@@ -113,6 +117,82 @@ sub changePassword : Local {
 		});
 	$query->execute($c->req->param('pass'),$c->req->param('oldpass'),$c->user->id);
 
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub changeEmail : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $email = $c->req->param('email');
+
+	unless (Email::Valid->address($email)){
+		$c->flash(email => $email);
+		$c->flash(error => 'Invalid email address');
+		$c->res->redirect($c->uri_for(''));
+		return,
+	}
+
+	eval{
+		my $insert = $dbh->prepare(q{
+INSERT INTO email_change (uid,email) VALUES ($1,$2) RETURNING id;
+			});
+		$insert->execute($c->user->id,$email);
+
+		my ($id) = $insert->fetchrow_array;
+
+		my %mail = (
+			smtp => 'ruin.nu',
+			To      => $email,
+			From    => 'NewDawn Command <nd@ruin.nu>',
+			'Content-type' => 'text/plain; charset="UTF-8"',
+			Subject => 'Change email address',
+			Message => qq{
+You have requested to change email address on the NewDawn website.
+If that is not the case, then feel free to ignore this email. Otherwise
+use the following url to confirm the change:
+
+}.$c->uri_for('confirmEmail',$id)."\n",
+		);
+
+		if (sendmail %mail) {
+			$c->flash(error => 'Sent mail for confirmation.');
+		}else {
+			$c->flash(error => $Mail::Sendmail::error);
+		}
+	};
+	if($@){
+		if($@ =~ /duplicate key value violates unique constraint/){
+			$c->flash(email => $email);
+			$c->flash(error => 'Something went wrong, try to set the email again');
+		}else{
+			die $@;
+		}
+	}
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub confirmEmail : Local {
+	my ( $self, $c, $id ) = @_;
+	my $dbh = $c->model;
+
+	$dbh->begin_work;
+	my $query = $dbh->prepare(q{
+UPDATE email_change SET confirmed = TRUE
+WHERE uid = $1 AND id = $2 AND NOT confirmed
+RETURNING email
+		});
+	$query->execute($c->user->id,$id);
+	my ($email) = $query->fetchrow_array;
+
+	if ($email){
+		$dbh->do(q{UPDATE users SET email = $2 WHERE uid = $1}
+			,undef,$c->user->id,$email);
+		$c->flash(error => "Email updated.");
+	}else{
+		$c->flash(error => "$id is not a valid change id for your account, or already confirmed");
+	}
+	$dbh->commit;
 	$c->res->redirect($c->uri_for(''));
 }
 
