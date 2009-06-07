@@ -227,6 +227,10 @@ span.newposts {
 	color: red;
 }
 
+input.email {
+	width: 30em;
+}
+
 div.bbcode-quote,div.bbcode-code {
 	border: solid;
 	border-width: 1px;
