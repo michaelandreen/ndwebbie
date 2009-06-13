@@ -3,27 +3,51 @@ package NDWeb;
 use strict;
 use warnings;
 
-use Catalyst::Runtime '5.70';
+use Catalyst::Runtime 5.80;
 
 # Set flags and add plugins for the application
 #
 #         -Debug: activates the debug mode for very useful log messages
-#   ConfigLoader: will load the configuration from a YAML file in the
+#   ConfigLoader: will load the configuration from a Config::General file in the
 #                 application's home directory
-# Static::Simple: will serve static files from the application's root 
+# Static::Simple: will serve static files from the application's root
 #                 directory
 
 use parent qw/Catalyst/;
+use Catalyst qw/
+	-Debug
+	ConfigLoader
+	Static::Simple
+	Unicode
+
+	Authentication
+	Authentication::Store::NDWeb
+	Authentication::Credential::Password
+
+	Authorization::Roles
+	Authorization::ACL
+
+	Session::DynamicExpiry
+	Session
+	Session::Store::File
+	Session::State::Cookie
+
+	Compress::Gzip
+	Compress::Deflate
+
+	Cache
+	PageCache
+/;
 
 our $VERSION = '0.01';
 
-# Configure the application. 
+# Configure the application.
 #
 # Note that settings in ndweb.yml (or other external
 # configuration file that you set up manually) take precedence
 # over this when using ConfigLoader. Thus configuration
 # details given here can function as a default configuration,
-# with a external configuration file acting as an override for
+# with an external configuration file acting as an override for
 # local deployment.
 
 __PACKAGE__->config( name => 'NDWeb' );
@@ -51,31 +75,7 @@ __PACKAGE__->config( page_cache => {
 
 __PACKAGE__->config( default_model => 'Model');
 # Start the application
-__PACKAGE__->setup(qw/
-	-Debug
-	ConfigLoader
-	Static::Simple
-	Unicode
-
-	Authentication
-	Authentication::Store::NDWeb
-	Authentication::Credential::Password
-
-	Authorization::Roles
-	Authorization::ACL
-	
-	Session::DynamicExpiry
-	Session
-	Session::Store::File
-	Session::State::Cookie
-
-	Compress::Gzip
-	Compress::Deflate
-
-	Cache
-	PageCache
-	/);
-
+__PACKAGE__->setup();
 
 __PACKAGE__->deny_access_unless('/users',[qw/admin_users/]);
 __PACKAGE__->deny_access_unless('/alliances',[qw/alliances/]);
@@ -129,7 +129,7 @@ Catalyst developer
 
 =head1 LICENSE
 
-This library is free software, you can redistribute it and/or modify
+This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut

@@ -3,8 +3,7 @@ package NDWeb::Auth::User;
 use strict;
 use warnings;
 use Data::Dumper;
-use base qw/Catalyst::Authentication::User/;
-use base qw/Class::Accessor::Fast/;
+use base qw/Class::Accessor::Fast Catalyst::Authentication::User/;
 
 BEGIN {
 	__PACKAGE__->mk_accessors(qw//);

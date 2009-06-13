@@ -2,16 +2,12 @@ package Catalyst::Plugin::Authentication::Store::NDWeb;
 
 use strict;
 use warnings;
-use base qw/Class::Accessor::Fast/;
+use Moose;
 
 use NDWeb::Auth::User;
 
 our $VERSION= "0.104";
 
-
-BEGIN {
-	#__PACKAGE__->mk_accessors(qw/config/);
-}
 
 
 sub setup {
