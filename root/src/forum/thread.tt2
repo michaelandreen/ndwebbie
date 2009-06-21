@@ -79,10 +79,6 @@
 [% END %]
 
 [% IF thread.post %]
-[%- site.stylesheets = ['markitup/skins/simple/style.css','markitup/sets/bbcode/style.css' ] %]
-<script type="text/javascript" src="/static/markitup/jquery.markitup.pack.js"></script>
-<script type="text/javascript" src="/static/markitup/sets/bbcode/set.js"></script>
-
 <script type="text/javascript">
 $(document).ready(function(){
 	$(".forum-post-header").append(
@@ -93,8 +89,7 @@ $(document).ready(function(){
 		var oldtext = $("#replybox").val();
 		$("#replybox").val(oldtext + "\n[quote=" + username + "]" + text + "[/quote]\n");
 	});
-	mySettings.markupSet.pop();
-    $('.bbcode').markItUp(mySettings);
 });
 </script>
+[% INCLUDE inc/markitup.tt2 %]
 [% END %]

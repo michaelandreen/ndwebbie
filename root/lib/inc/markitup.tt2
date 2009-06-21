@@ -1,0 +1,10 @@
+[%- site.stylesheets = ['markitup/skins/simple/style.css','markitup/sets/bbcode/style.css' ] %]
+<script type="text/javascript" src="/static/markitup/jquery.markitup.pack.js"></script>
+<script type="text/javascript" src="/static/markitup/sets/bbcode/set.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	mySettings.markupSet.pop();
+    $('.bbcode').markItUp(mySettings);
+});
+</script>
