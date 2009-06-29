@@ -62,7 +62,6 @@ sub list : Local {
 		} . $order);
 	$query->execute;
 	$c->stash(alliances => $query->fetchall_arrayref({}) );
-	$c->stash(comma => \&comma_value);
 }
 
 sub edit : Local {
@@ -253,7 +252,6 @@ LIMIT 60) a
 		push @alliances,$alliance;
 	}
 	$c->stash(alliances => \@alliances);
-	$c->stash( comma => \&comma_value)
 }
 
 

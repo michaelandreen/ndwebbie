@@ -107,8 +107,6 @@ sub view : Local {
 	$c->forward('findRaid');
 	$raid = $c->stash->{raid};
 
-	$c->stash(comma => \&comma_value);
-
 	$c->stash(raid => $raid->{id});
 	my $planet;
 	if ($c->user->planet){
@@ -548,7 +546,6 @@ sub targetlist : Local {
 	my ($self, $c, $alliances, $order) = @_;
 	my $dbh = $c->model;
 
-	$c->stash(comma => \&comma_value);
 	$c->stash(allies => $alliances);
 	$alliances ||= '';
 	my @alliances = split /,/, $alliances;

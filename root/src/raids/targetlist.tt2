@@ -32,12 +32,12 @@
 		<td><a href="[% c.uri_for('/stats/planet',p.id) %]">[% p.coords %]</a></td>
 		<td>[% p.alliance %]</td>
 		<td>[% p.race %]</td>
-		<td>[% comma(p.score) %]</td>
-		<td>[% comma(p.value) %]</td>
-		<td>[% comma(p.xp) %]</td>
-		<td>[% comma(p.size) %]</td>
-		<td>[% comma(p.nfvalue) %]</td>
-		<td>[% comma(p.nfvalue2) %]</td>
+		<td>[% p.score | commify %]</td>
+		<td>[% p.value | commify %]</td>
+		<td>[% p.xp | commify %]</td>
+		<td>[% p.size | commify %]</td>
+		<td>[% p.nfvalue | commify %]</td>
+		<td>[% p.nfvalue2 | commify %]</td>
 		<td><input type="checkbox" name="target" value="[% p.id %]"></td>
 	[% IF x != p.x OR y != p.y %]
 		[% x = p.x; y = p.y; %]

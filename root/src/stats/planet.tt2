@@ -12,15 +12,15 @@
 	<tr><th>Type</th><th>Roids</th><th>Resources</th></tr>
 	<tr align="right"><td align="left">Metal</td>
 		<td>[% planetscan.metal_roids %]</td>
-		<td>[% comma(planetscan.metal) %]</td>
+		<td>[% planetscan.metal | commify %]</td>
 	</tr>
 	<tr align="right"><td align="left">Crystal</td>
 		<td>[% planetscan.crystal_roids %]</td>
-		<td>[% comma(planetscan.crystal) %]</td>
+		<td>[% planetscan.crystal | commify %]</td>
 	</tr>
 	<tr align="right"><td align="left">Eonium</td>
 		<td>[% planetscan.eonium_roids %]</td>
-		<td>[% comma(planetscan.eonium) %]</td>
+		<td>[% planetscan.eonium | commify %]</td>
 	</tr>
 	<tr><th>Agents</th><th><th>Guards</th></tr>
 	<tr align="right"><td>[% planetscan.agents %]</td>
@@ -31,7 +31,7 @@
 	<tr align="right"><td>[% planetscan.light %]</td>
 		<td>[% planetscan.medium %]</td><td>[% planetscan.heavy %]</td>
 	</tr>
-	<tr><th>Hidden:</th><td colspan="2" align="right">[% comma(planetscan.hidden) %]</td></tr>
+	<tr><th>Hidden:</th><td colspan="2" align="right">[% planetscan.hidden | commify %]</td></tr>
 </table>
 [% END %]
 [% IF devscan.tick %]

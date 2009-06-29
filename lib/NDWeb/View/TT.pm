@@ -3,11 +3,16 @@ package NDWeb::View::TT;
 use strict;
 use base 'Catalyst::View::TT';
 
+use NDWeb::Include;
+
 __PACKAGE__->config({
 	INCLUDE_PATH => [
 		NDWeb->path_to( 'root', 'src' ),
 		NDWeb->path_to( 'root', 'lib' )
 	],
+	FILTERS => {
+		commify => \&comma_value,
+	},
 	PRE_PROCESS  => 'config/main.tt2',
 	WRAPPER      => 'site/wrapper.tt2',
 	ERROR        => 'error.tt2',

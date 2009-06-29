@@ -41,13 +41,13 @@
 		<td align="center">[% p.ruler %] <b>OF</b> [% p.planet %]</td>
 		<td align="center">[% p.race %]</td>
 		[% p.sizeimg = (p.size_gain_day == 0 ? 'stay' : (p.size_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% p.size_gain_day %] Today | [% p.size_gain %] Tick">[% comma(p.size) %] <img src="/static/images/[% p.sizeimg %].png" alt="[% p.sizeimg %]"> </td>
+		<td title="[% p.size_gain_day %] Today | [% p.size_gain %] Tick">[% p.size | commify %] <img src="/static/images/[% p.sizeimg %].png" alt="[% p.sizeimg %]"> </td>
 		[% p.scoreimg = (p.score_gain_day == 0 ? 'stay' : (p.score_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(p.score_gain_day) %] Today | [% comma(p.score_gain) %] Tick">[% comma(p.score) %] <img src="/static/images/[% p.scoreimg %].png" alt="[% p.scoreimg %]"> </td>
+		<td title="[% p.score_gain_day | commify %] Today | [% p.score_gain | commify %] Tick">[% p.score | commify %] <img src="/static/images/[% p.scoreimg %].png" alt="[% p.scoreimg %]"> </td>
 		[% p.valueimg = (p.value_gain_day == 0 ? 'stay' : (p.value_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(p.value_gain_day) %] Today | [% comma(p.value_gain) %] Tick">[% comma(p.value) %] <img src="/static/images/[% p.valueimg %].png" alt="[% p.valueimg %]"> </td>
+		<td title="[% p.value_gain_day | commify %] Today | [% p.value_gain | commify %] Tick">[% p.value | commify %] <img src="/static/images/[% p.valueimg %].png" alt="[% p.valueimg %]"> </td>
 		[% p.xpimg = (p.xp_gain_day == 0 ? 'stay' : (p.xp_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(p.xp_gain_day) %] Today | [% comma(p.xp_gain) %] Tick">[% comma(p.xp) %] <img src="/static/images/[% p.xpimg %].png" alt="[% p.xpimg %]"> </td>
+		<td title="[% p.xp_gain_day | commify %] Today | [% p.xp_gain | commify %] Tick">[% p.xp | commify %] <img src="/static/images/[% p.xpimg %].png" alt="[% p.xpimg %]"> </td>
 	</tr>
 </table>
 [% END %]

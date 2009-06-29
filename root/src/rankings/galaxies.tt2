@@ -29,15 +29,15 @@
 		<td title="[% g.xprank_gain_day %] Today | [% g.xprank_gain %] Tick">[% g.xprank %] <img src="/static/images/[% g.xprankimg %].png" alt="[% g.xprankimg %]"> </td>
 		<td><a href="[% c.uri_for('/stats','galaxy',g.x,g.y) %]">[% g.x %]:[% g.y %]</a></td>
 		[% g.planetsimg = (g.planets_gain_day == 0 ? 'stay' : (g.planets_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% g.planets_gain_day %] Today | [% g.planets_gain %] Tick">[% comma(g.planets) %] <img src="/static/images/[% g.planetsimg %].png" alt="[% g.planetsimg %]"> </td>
+		<td title="[% g.planets_gain_day %] Today | [% g.planets_gain %] Tick">[% g.planets | commify %] <img src="/static/images/[% g.planetsimg %].png" alt="[% g.planetsimg %]"> </td>
 		[% g.sizeimg = (g.size_gain_day == 0 ? 'stay' : (g.size_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% g.size_gain_day %] Today | [% g.size_gain %] Tick">[% comma(g.size) %] <img src="/static/images/[% g.sizeimg %].png" alt="[% g.sizeimg %]"> </td>
+		<td title="[% g.size_gain_day %] Today | [% g.size_gain %] Tick">[% g.size | commify %] <img src="/static/images/[% g.sizeimg %].png" alt="[% g.sizeimg %]"> </td>
 		[% g.scoreimg = (g.score_gain_day == 0 ? 'stay' : (g.score_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(g.score_gain_day) %] Today | [% comma(g.score_gain) %] Tick">[% comma(g.score) %] <img src="/static/images/[% g.scoreimg %].png" alt="[% g.scoreimg %]"> </td>
+		<td title="[% g.score_gain_day | commify %] Today | [% g.score_gain | commify %] Tick">[% g.score | commify %] <img src="/static/images/[% g.scoreimg %].png" alt="[% g.scoreimg %]"> </td>
 		[% g.valueimg = (g.value_gain_day == 0 ? 'stay' : (g.value_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(g.value_gain_day) %] Today | [% comma(g.value_gain) %] Tick">[% comma(g.value) %] <img src="/static/images/[% g.valueimg %].png" alt="[% g.valueimg %]"> </td>
+		<td title="[% g.value_gain_day | commify %] Today | [% g.value_gain | commify %] Tick">[% g.value | commify %] <img src="/static/images/[% g.valueimg %].png" alt="[% g.valueimg %]"> </td>
 		[% g.xpimg = (g.xp_gain_day == 0 ? 'stay' : (g.xp_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(g.xp_gain_day) %] Today | [% comma(g.xp_gain) %] Tick">[% comma(g.xp) %] <img src="/static/images/[% g.xpimg %].png" alt="[% g.xpimg %]"> </td>
+		<td title="[% g.xp_gain_day | commify %] Today | [% g.xp_gain | commify %] Tick">[% g.xp | commify %] <img src="/static/images/[% g.xpimg %].png" alt="[% g.xpimg %]"> </td>
 	</tr>
 [% END %]
 </table>

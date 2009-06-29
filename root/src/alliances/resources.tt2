@@ -17,15 +17,15 @@
 		<td><a href="[% c.uri_for("edit",a.id) %]">[% a.name %]</a></td>
 		<td class="[% a.relationship %]">[% a.relationship %]</td>
 		<td>[% a.members %] ([% a.planets %])</td>
-		<td>[% comma(a.score) %]</td>
-		<td>[% comma(a.size) %]</td>
-		<td>[% comma(a.resources) %]</td>
-		<td>[% comma(a.hidden) %]</td>
-		<td>[% comma(a.resplanet) %]</td>
-		<td>[% comma(a.hidplanet) %]</td>
-		<td>[% comma(a.nscore) %] ([% a.nscore - a.score %])</td>
-		<td>[% comma(a.nscore2) %] ([% a.nscore2 - a.score %])</td>
-		<td>[% comma(a.nscore3) %] ([% a.nscore3 - a.score %])</td>
+		<td>[% a.score | commify %]</td>
+		<td>[% a.size | commify %]</td>
+		<td>[% a.resources | commify %]</td>
+		<td>[% a.hidden | commify %]</td>
+		<td>[% a.resplanet | commify %]</td>
+		<td>[% a.hidplanet | commify %]</td>
+		<td>[% a.nscore | commify %] ([% a.nscore - a.score %])</td>
+		<td>[% a.nscore2 | commify %] ([% a.nscore2 - a.score %])</td>
+		<td>[% a.nscore3 | commify %] ([% a.nscore3 - a.score %])</td>
 	</tr>
 [% END %]
 </table>

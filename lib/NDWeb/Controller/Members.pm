@@ -29,7 +29,6 @@ sub index : Path : Args(0) {
 
 	$c->stash(error => $c->flash->{error});
 
-	$c->stash(comma => \&comma_value);
 	$c->stash(u => $dbh->selectrow_hashref(q{SELECT planet,defense_points
 			,attack_points,scan_points,humor_points
 			, (attack_points+defense_points+scan_points/20)::NUMERIC(5,1) as total_points

@@ -33,7 +33,7 @@
 		<li>Race: [% t.race %]</li>
 		<li>Cap: [% t.cap * 100 | format('%.02f') %]</li>
 		[% FOR r IN t.roids %]
-			<li>Roids wave [% r.wave %]: [% r.roids %] ([% comma(r.xp) %] xp)</li>
+			<li>Roids wave [% r.wave %]: [% r.roids %] ([% r.xp | commify %] xp)</li>
 		[% END %]
 	</ul>
 	[% IF t.comment %]
@@ -45,15 +45,15 @@
 	<tr><th></th><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
 	<tr align="center">
 		<th>Roids</th>
-		<td>[% comma(t.metal_roids) %]</td>
-		<td>[% comma(t.crystal_roids) %]</td>
-		<td>[% comma(t.eonium_roids) %]</td>
+		<td>[% t.metal_roids | commify %]</td>
+		<td>[% t.crystal_roids | commify %]</td>
+		<td>[% t.eonium_roids | commify %]</td>
 	</tr>
 	<tr align="center">
 		<th>Resources</th>
-		<td>[% comma(t.metal) %]</td>
-		<td>[% comma(t.crystal) %]</td>
-		<td>[% comma(t.eonium) %]</td>
+		<td>[% t.metal | commify %]</td>
+		<td>[% t.crystal | commify %]</td>
+		<td>[% t.eonium | commify %]</td>
 	</tr>
 
 	</table>
@@ -102,7 +102,7 @@
 		<table>
 		[% FOR s IN m.ships %]
 		<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-			<td>[% s.ship %]</td><td>[% comma(s.amount) %]</td>
+			<td>[% s.ship %]</td><td>[% s.amount | commify %]</td>
 		</tr>
 		[% END %]
 		</table>

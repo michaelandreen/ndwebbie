@@ -23,18 +23,18 @@
 		<td align="left"><a href="[% c.uri_for('edit',a.id) %]">[% a.name %]</a></td>
 		<td>[% a.kmem %]</td>
 		<td>[% a.members %]</td>
-		<td>[% comma(a.score) %]</td>
-		<td>[% comma(a.kscore) %]</td>
-		<td>[% comma(a.scavg) %]</td>
-		<td>[% comma(a.kscavg) %]</td>
-		<td>[% comma(a.size) %]</td>
-		<td>[% comma(a.ksize) %]</td>
-		<td>[% comma(a.siavg) %]</td>
-		<td>[% comma(a.ksiavg) %]</td>
-		<td>[% comma(a.kxp) %]</td>
-		<td>[% comma(a.kxpavg) %]</td>
-		<td>[% comma(a.kvalue) %]</td>
-		<td>[% comma(a.kvalavg) %]</td>
+		<td>[% a.score | commify %]</td>
+		<td>[% a.kscore | commify %]</td>
+		<td>[% a.scavg | commify %]</td>
+		<td>[% a.kscavg | commify %]</td>
+		<td>[% a.size | commify %]</td>
+		<td>[% a.ksize | commify %]</td>
+		<td>[% a.siavg | commify %]</td>
+		<td>[% a.ksiavg | commify %]</td>
+		<td>[% a.kxp | commify %]</td>
+		<td>[% a.kxpavg | commify %]</td>
+		<td>[% a.kvalue | commify %]</td>
+		<td>[% a.kvalavg | commify %]</td>
 	</tr>
 [% END %]
 </table>

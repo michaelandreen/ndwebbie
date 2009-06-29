@@ -25,13 +25,13 @@
 		[% a.membersimg = (a.members_gain_day == 0 ? 'stay' : (a.members_gain_day > 0 ? 'up' : 'down')) %]
 		<td title="[% a.members_gain_day %] Today | [% a.members_gain %] Tick">[% a.members %] <img src="/static/images/[% a.membersimg %].png" alt="[% a.membersimg %]"> </td>
 		[% a.sizeimg = (a.size_gain_day == 0 ? 'stay' : (a.size_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(a.size_gain_day) %] Today | [% comma(a.size_gain) %] Tick">[% comma(a.size) %] <img src="/static/images/[% a.sizeimg %].png" alt="[% a.sizeimg %]"> </td>
+		<td title="[% a.size_gain_day | commify %] Today | [% a.size_gain | commify %] Tick">[% a.size | commify %] <img src="/static/images/[% a.sizeimg %].png" alt="[% a.sizeimg %]"> </td>
 		[% a.scoreimg = (a.score_gain_day == 0 ? 'stay' : (a.score_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(a.score_gain_day) %] Today | [% comma(a.score_gain) %] Tick">[% comma(a.score) %] <img src="/static/images/[% a.scoreimg %].png" alt="[% a.scoreimg %]"> </td>
+		<td title="[% a.score_gain_day | commify %] Today | [% a.score_gain | commify %] Tick">[% a.score | commify %] <img src="/static/images/[% a.scoreimg %].png" alt="[% a.scoreimg %]"> </td>
 		[% a.avgsizeimg = (a.avgsize_gain_day == 0 ? 'stay' : (a.avgsize_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(a.avgsize_gain_day) %] Today | [% comma(a.avgsize_gain) %] Tick">[% comma(a.avgsize) %] <img src="/static/images/[% a.avgsizeimg %].png" alt="[% a.avgsizeimg %]"> </td>
+		<td title="[% a.avgsize_gain_day | commify %] Today | [% a.avgsize_gain | commify %] Tick">[% a.avgsize | commify %] <img src="/static/images/[% a.avgsizeimg %].png" alt="[% a.avgsizeimg %]"> </td>
 		[% a.avgscoreimg = (a.avgscore_gain_day == 0 ? 'stay' : (a.avgscore_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% comma(a.avgscore_gain_day) %] Today | [% comma(a.avgscore_gain) %] Tick">[% comma(a.avgscore) %] <img src="/static/images/[% a.avgscoreimg %].png" alt="[% a.avgscoreimg %]"> </td>
+		<td title="[% a.avgscore_gain_day | commify %] Today | [% a.avgscore_gain | commify %] Tick">[% a.avgscore | commify %] <img src="/static/images/[% a.avgscoreimg %].png" alt="[% a.avgscoreimg %]"> </td>
 	</tr>
 [% END %]
 </table>

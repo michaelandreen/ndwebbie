@@ -33,8 +33,6 @@ sub galaxy : Local {
 	my ( $self, $c, $x, $y, $z ) = @_;
 	my $dbh = $c->model;
 
-	$c->stash( comma => \&comma_value);
-
 	my $query = $dbh->prepare(q{SELECT x,y,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,

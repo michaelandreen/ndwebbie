@@ -39,8 +39,6 @@ sub planets : Local {
 	$c->detach('/default') if $offset < 0;
 	$c->stash(offset => $offset);
 
-	$c->stash( comma => \&comma_value);
-
 	if (defined $order && $order =~ /^(scorerank|sizerank|valuerank|xprank|hit_us)$/){
 		$order = $1;
 	}else {
@@ -89,8 +87,6 @@ sub galaxies : Local {
 	$c->detach('/default') if $offset < 0;
 	$c->stash(offset => $offset);
 
-	$c->stash( comma => \&comma_value);
-
 	if (defined $order && $order =~ /^(scorerank|sizerank|valuerank|xprank|planets)$/){
 		$order = $1;
 	}else{
@@ -135,8 +131,6 @@ sub alliances : Local {
 	$offset = 0 unless $offset;
 	$c->detach('/default') if $offset < 0;
 	$c->stash(offset => $offset);
-
-	$c->stash( comma => \&comma_value);
 
 	if (defined $order && $order =~ /^(scorerank|sizerank|valuerank|xprank|avgsize|avgscore|members)$/){
 		$order = $1;
