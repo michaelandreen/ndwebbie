@@ -31,6 +31,7 @@
 		<li>Hidden value: [% t.hidden %]</li>
 		<li>Factory Usage: [% t.light %], [% t.medium %], [% t.heavy %]</li>
 		<li>Race: [% t.race %]</li>
+		<li>Cap: [% t.cap * 100 | format('%.02f') %]</li>
 		[% FOR r IN t.roids %]
 			<li>Roids wave [% r.wave %]: [% r.roids %] ([% comma(r.xp) %] xp)</li>
 		[% END %]

@@ -3,8 +3,10 @@ package NDWeb::Controller::Raids;
 use strict;
 use warnings;
 use parent 'Catalyst::Controller';
+use feature ':5.10';
 
 use POSIX qw/floor pow/;
+use List::Util qw/min/;
 use NDWeb::Include;
 use ND::Include;
 
@@ -141,10 +143,11 @@ sub view : Local {
 			if ($planet->{x} == $target->{x}){
 				$target->{style} = 'incluster';
 			}
+			$target->{cap} = min(0.25,0.25 * pow($target->{value}/$planet->{value} , 0.5));
 			$target->{scorebash} = 'bash' if ($target->{score}/$planet->{score} < 0.6);
 			$target->{valuebash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
-			#next if ($target->{score}/$planet->{score} < 0.4) && ($target->{value}/$planet->{value} < 0.4);
 		}
+		$target->{cap} //= 0.25;
 
 		my $unitscans = $dbh->prepare(q{
 SELECT DISTINCT ON (name) fid, name, tick, amount
@@ -175,8 +178,8 @@ ORDER BY name,tick DESC
 		my @claims;
 		my $size = $target->{size};
 		for (my $i = 1; $i <= $raid->{waves}; $i++){
-			my $roids = floor(0.25*$size);
-			$size -= $roids;
+			my $roids = floor($target->{cap}*$size);
+			$size -= floor(0.25*$size);
 			my $xp = 0;
 			if ($planet && $planet->{score}){
 				$xp = pa_xp($roids,$planet->{score},$planet->{value},$target->{score},$target->{value});
@@ -593,7 +596,7 @@ sub targetcalc : Local {
 	my ($self, $c, $target) = @_;
 	my $dbh = $c->model;
 
-	my $target = $dbh->selectrow_hashref(q{
+	$target = $dbh->selectrow_hashref(q{
 SELECT p.id,p.value,p.score,metal_roids, crystal_roids, eonium_roids, ds.total, race
 FROM raids r
 	JOIN raid_targets rt ON r.id = rt.raid
