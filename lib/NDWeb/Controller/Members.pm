@@ -235,21 +235,26 @@ sub ircrequest : Local {
 	my $dbh = $c->model;
 
 	$c->stash(reply => $c->flash->{reply});
-	$c->stash(channels => ['def','scan','members']);
+	$c->stash(channels => ['scan','members','def']);
 }
 
 sub postircrequest : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{INSERT INTO irc_requests
-		(uid,channel,message) VALUES($1,$2,$3)
+	if ($c->req->param('channel')){
+		my $query = $dbh->prepare(q{
+INSERT INTO irc_requests (uid,channel,message) VALUES($1,$2,$3)
 		});
-	$query->execute($c->user->id,$c->req->param('channel'),$c->req->param('message'));
-	system 'killall','-USR1', 'irssi';
+		$query->execute($c->user->id,$c->req->param('channel'),$c->req->param('message'));
+		system 'killall','-USR1', 'irssi';
 
-	$c->flash(reply => "Msg sent to: ".$c->req->param('channel'));
-	$c->res->redirect($c->uri_for('ircrequest'));
+		$c->flash(reply => "Msg sent to: ".$c->req->param('channel'));
+		$c->res->redirect($c->uri_for('ircrequest'));
+	}else{
+		$c->stash(ircmessage => $c->req->param('message'));
+		$c->go('ircrequest');
+	}
 }
 
 sub points : Local {

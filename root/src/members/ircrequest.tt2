@@ -4,11 +4,25 @@
 [% END %]
 <form action="[% c.uri_for('postircrequest') %]" method="post"><fieldset> <legend>IRC request</legend>
 	<p>Message to irc. To def channel you can report incs with a line from gal status.</p>
-	<input style="width: 90%" type="text" name="message" value="">
-	<br><select name="channel">
+	<input style="width: 90%" type="text" name="message" value="[% ircmessage %]">
+	<br><select name="channel" id="channel">
+	<option value="">Pick a channel</option>
 [% FOR ch IN channels %]
 	<option value="[% ch %]">[% ch | ucfirst %]</option>
 [% END %]
 	</select>
-	<input type="submit" value="Send">
+	<input type="submit" value="Send" id="ircsend">
 </fieldset></form>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#ircsend").attr("disabled","true");
+	$('#channel').change(function(){
+		var u = $('option:selected');
+		if (u.val() == '')
+			$("#ircsend").attr("disabled","true");
+		else
+			$("#ircsend").removeAttr("disabled");
+	});
+});
+</script>
