@@ -66,7 +66,7 @@ sub list : Private {
 	my $query = $dbh->prepare(q{
 	SELECT * FROM (
 		SELECT *
-			,(2*pvalue::float/cvalue) :: Numeric(3,1) AS max_bank_hack
+			,(2*pvalue::float/cvalue) :: Numeric(4,1) AS max_bank_hack
 			,max_bank_hack(metal,crystal,eonium,pvalue,cvalue,5) AS hack5
 			,max_bank_hack(metal,crystal,eonium,pvalue,cvalue,13) AS hack13
 		FROM (SELECT p.id,coords(x,y,z),x,y,z,size
