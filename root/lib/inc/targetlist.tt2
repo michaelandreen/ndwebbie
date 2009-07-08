@@ -3,8 +3,8 @@
 	<tr><th>Target</th><th>Tick</th></tr>
 	[% FOR target IN claimedtargets %]
 	<tr>
-		<td>[% IF target.released_coords %]<a href="[% c.uri_for('/stats/find',target.coords)%]">
-				[% target.coords%][% IF target.launched%]*[% END %]</a>
+		<td>[% IF target.released_coords %]<a href="[% c.uri_for('/stats/find',target.coords)%]"
+			title="Target [%target.id%]"> [% target.coords%][% IF target.launched%]*[% END %]</a>
 			[%ELSE%]Target [%target.id%][% END %]</td>
 		<td><a href="[% c.uri_for('/raids/view',target.raid)%]#target[% target.id %]">
 			[% target.landingtick %]</a></td>
