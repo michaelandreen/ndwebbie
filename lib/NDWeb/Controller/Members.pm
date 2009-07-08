@@ -204,7 +204,7 @@ sub postfleetsupdates : Local {
 	if ($c->req->param('cmd') eq 'Recall Fleets'){
 		my $updatefleets = $dbh->prepare(q{UPDATE launch_confirmations
 			SET back = tick() + (tick() - (landing_tick - eta))
-			WHERE uid = ? AND fid = ? AND back > tick()+eta
+			WHERE uid = ? AND fid = ? AND back >= tick()+eta
 		});
 
 		for my $param ($c->req->param()){
