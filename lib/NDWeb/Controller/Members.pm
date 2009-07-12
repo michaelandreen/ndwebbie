@@ -268,6 +268,44 @@ ORDER BY } . "$order $limit"
 	$c->stash(members => $query->fetchall_arrayref({}));
 }
 
+sub stats : Local {
+	my ( $self, $c, $order ) = @_;
+	my $dbh = $c->model;
+
+	if ($order ~~ /^(scre|value|xp|size|race)$/){
+		$order = "$1rank";
+	}else{
+		$order = 'scorerank';
+	}
+	$order .= ',race' if $order eq 'racerank';
+
+	my $limit = 'LIMIT 10';
+	$limit = '' if $c->check_user_roles(qw/members_points_nolimit/);
+
+	my ($races) = $dbh->selectrow_array(q{SELECT enum_range(null::race)::text[]});
+	$c->stash(races => $races);
+	my $query = $dbh->prepare(q{
+SELECT nick
+	,rank() OVER(ORDER BY score DESC) AS scorerank
+	,rank() OVER(ORDER BY value DESC) AS valuerank
+	,rank() OVER(ORDER BY xp DESC) AS xprank
+	,rank() OVER(ORDER BY size DESC) AS sizerank
+	,rank() OVER(PARTITION BY race ORDER BY score DESC) AS racerank
+	,race
+FROM current_planet_stats
+WHERE alliance = 'NewDawn'
+	AND race = ANY($1)
+ORDER BY } . "$order $limit");
+	my @race = $c->req->param('race');
+	my %race = map { $_ => 1 } @race;
+	$c->stash(race => \%race);
+	unless (@race){
+		@race = @$races;
+	}
+	$query->execute(\@race);
+	$c->stash(members => $query->fetchall_arrayref({}));
+}
+
 sub addintel : Local {
 	my ( $self, $c, $order ) = @_;
 

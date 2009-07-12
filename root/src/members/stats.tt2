@@ -1,0 +1,29 @@
+[% META title = 'Top members' %]
+<form method="get" action="">
+[% FOR r IN races %]
+[% r %]:<input type="checkbox" name="race" value="[% r %]"[% IF race.exists(r) %] checked[% END %]>
+[% END %]
+<input type="submit" value="Submit">
+</form>
+<table>
+	<tr>
+	<th>User</th>
+	<th><a href="[% c.uri_for('stats','score',c.req.params) %]">Score</a></th>
+	<th><a href="[% c.uri_for('stats','value',c.req.params) %]">Value</a></th>
+	<th><a href="[% c.uri_for('stats','xp',c.req.params) %]">XP</a></th>
+	<th><a href="[% c.uri_for('stats','size',c.req.params) %]">Size</a></th>
+	<th><a href="[% c.uri_for('stats','race',c.req.params) %]">Racerank</a></th>
+	<th>Race</th>
+	</tr>
+[% FOR m IN members %]
+	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td align="left">[% m.nick %]</td>
+	<td>[% m.scorerank %]</td>
+	<td>[% m.valuerank %]</td>
+	<td>[% m.xprank %]</td>
+	<td>[% m.sizerank %]</td>
+	<td>[% m.racerank %]</td>
+	<td>[% m.race %]</td>
+	</tr>
+[% END %]
+</table>
