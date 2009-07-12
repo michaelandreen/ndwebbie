@@ -33,23 +33,40 @@ sub galaxy : Local {
 	my ( $self, $c, $x, $y, $z ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT x,y,
-		size, size_gain, size_gain_day,
-		score,score_gain,score_gain_day,
-		value,value_gain,value_gain_day,
-		xp,xp_gain,xp_gain_day,
-		sizerank,sizerank_gain,sizerank_gain_day,
-		scorerank,scorerank_gain,scorerank_gain_day,
-		valuerank,valuerank_gain,valuerank_gain_day,
-		xprank,xprank_gain,xprank_gain_day,
-		planets,planets_gain,planets_gain_day
-		,ticks_roiding, ticks_roided
-	FROM galaxies g
-		JOIN (SELECT x,y,count(CASE WHEN size_gain > 0 THEN 1 ELSE NULL END) AS ticks_roiding
+	my $query = $dbh->prepare(q{
+SELECT x,y
+	,size, size_gain, size_gain_day
+	,score,score_gain,score_gain_day
+	,value,value_gain,value_gain_day
+	,xp,xp_gain,xp_gain_day
+	,sizerank,sizerank_gain,sizerank_gain_day
+	,scorerank,scorerank_gain,scorerank_gain_day
+	,valuerank,valuerank_gain,valuerank_gain_day
+	,xprank,xprank_gain,xprank_gain_day
+	,planets,planets_gain,planets_gain_day
+	,ticks_roiding, ticks_roided
+	,raid.tick AS last_raid, raid
+FROM galaxies g
+	JOIN (SELECT x,y,count(CASE WHEN size_gain > 0 THEN 1 ELSE NULL END) AS ticks_roiding
 			,count(CASE WHEN size_gain < 0 THEN 1 ELSE NULL END) AS ticks_roided
-			FROM galaxies GROUP BY x,y) ga USING (x,y)
-	WHERE tick = ( SELECT max(tick) AS max FROM galaxies)
-		AND x = $1 AND y = $2
+		FROM galaxies GROUP BY x,y) ga USING (x,y)
+	LEFT OUTER JOIN (
+		SELECT DISTINCT ON (x,y) x,y,raid, tick
+		FROM (
+			SELECT raid,p.tick,x,y,count(*), sum(size) AS size
+			FROM raids r
+				JOIN raid_targets rt ON r.id = rt.raid
+				JOIN planet_stats p ON p.id = rt.planet AND p.tick = r.tick-12
+			WHERE x = $1 and y = $2
+			GROUP BY raid,p.tick,x,y
+			) AS a
+			JOIN galaxies g USING (tick,x,y)
+		WHERE a.count::float / g.planets >= 0.5
+		ORDER BY x,y,tick
+	) AS raid USING (x,y)
+
+WHERE g.tick = ( SELECT max(tick) AS max FROM galaxies)
+	AND x = $1 AND y = $2;
 		});
 
 	$query->execute($x,$y);

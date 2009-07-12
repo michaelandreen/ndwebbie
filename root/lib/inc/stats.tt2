@@ -15,6 +15,7 @@
 	<th>XP</th>
 	<th>Roided</th>
 	<th>Roiding</th>
+	[% IF intel %]<th>Last raid (tick)</th>[% END %]
 	</tr>
 	<tr align="right" class="odd">
 		[% g.sizerankimg = (g.sizerank_gain_day == 0 ? 'stay' : (g.sizerank_gain_day < 0 ? 'up' : 'down')) %]
@@ -38,6 +39,7 @@
 		<td title="[% g.xp_gain_day | commify %] Today | [% g.xp_gain | commify %] Tick">[% g.xp | commify %] <img src="/static/images/[% g.xpimg %].png" alt="[% g.xpimg %]"> </td>
 		<td>[% g.ticks_roided %]</td>
 		<td>[% g.ticks_roiding %]</td>
+		[% IF intel %]<td>[% IF g.raid %][% g.raid %] ([% g.last_raid %])[% ELSE %]No raid[% END %]</td>[% END %]
 	</tr>
 </table>
 [% END %]
