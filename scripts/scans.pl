@@ -92,7 +92,7 @@ sub parse_planet {
 	my @values = ($scan->{id},$scan->{tick},$scan->{planet});
 	$file =~ s/(\d),(\d)/$1$2/g;
 
-	while($file =~ m/"center">(Metal|Crystal|Eonium)\D+(\d+)\D+([\d,]+)/g){
+	while($file =~ m{"center">(Metal|Crystal|Eonium)</td>\D+(\d+)\D+([\d,]+)}g){
 		push @values,$2,$3;
 	}
 	if($file =~ m{Security\ Guards .+? "center">(\d+)</td>
