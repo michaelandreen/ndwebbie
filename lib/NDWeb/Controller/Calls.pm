@@ -54,23 +54,20 @@ sub list : Local {
 
 	my $query = $dbh->prepare(qq{
 		SELECT id,coords(x,y,z),planet,landing_tick,dc,curreta,fleets
-			,(0.2*(attack_points/GREATEST(a.attack,1))
-				+ 0.4*(defense_points/GREATEST(a.defense,1))
-				+ 0.2*(c.size/a.size) + 0.05*(c.score/a.score)
-				+ 0.15*(c.value/a.value))::Numeric(3,2) AS defprio
+			,defprio
 			,array_accum(COALESCE(race::text,'')) AS race
 			,array_accum(COALESCE(amount,0)) AS amount
 			,array_accum(COALESCE(eta,0)) AS eta
 			,array_accum(COALESCE(shiptype,'')) AS shiptype
 			,array_accum(COALESCE(alliance,'?')) AS alliance
 			,array_accum(coords) AS attackers
-		FROM (SELECT c.id, p.x,p.y,p.z,p.id AS planet, p.size, p.value, p.score
+		FROM (SELECT c.id, p.x,p.y,p.z,p.id AS planet, defprio
 			,u.defense_points, u.attack_points, c.landing_tick
 			,dc.username AS dc, (c.landing_tick - tick()) AS curreta
 			,p2.race, i.amount, i.eta, i.shiptype, p2.alliance
-			,coords(p2.x,p2.y,p2.z),	COUNT(DISTINCT f.fid) AS fleets
-			FROM calls c 
-				JOIN users u ON c.member = u.uid
+			,coords(p2.x,p2.y,p2.z), COUNT(DISTINCT f.fid) AS fleets
+			FROM calls c
+				JOIN users_defprio u ON c.member = u.uid
 				JOIN current_planet_stats p ON u.planet = p.id
 				LEFT OUTER JOIN incomings i ON i.call = c.id
 				LEFT OUTER JOIN current_planet_stats p2 ON i.sender = p2.id
@@ -78,18 +75,12 @@ sub list : Local {
 				LEFT OUTER JOIN launch_confirmations f ON f.target = u.planet
 					AND f.landing_tick = c.landing_tick AND f.back = f.landing_tick + f.eta - 1
 			WHERE $where
-			GROUP BY c.id, p.x,p.y,p.z,p.id, p.size, p.score, p.value, c.landing_tick
+			GROUP BY c.id, p.x,p.y,p.z,p.id, defprio, c.landing_tick
 				,u.defense_points,u.attack_points,dc.username
 				,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z
 			) c
-			,(SELECT avg(attack_points) AS attack, avg(defense_points) AS defense
-				, avg(size) AS size, avg(score) AS score, avg(value) AS value
-				FROM users u JOIN current_planet_stats p ON p.id = u.planet
-				WHERE uid IN (SELECT uid FROM groupmembers  where gid = 2)
-			) a
 		GROUP BY id, x,y,z,planet,landing_tick, defense_points, attack_points
-			,dc,curreta,fleets, c.size, c.score, c.value
-			, a.attack, a.defense, a.size, a.score, a.value
+			,dc,curreta,fleets, defprio
 		ORDER BY $order
 		});
 	$query->execute;
