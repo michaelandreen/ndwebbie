@@ -76,6 +76,7 @@
 <fieldset class="forum-post"> <legend>Account details</legend>
 	<ul>
 	<li> ND rank (by score): [% u.rank %] </li>
+	<li> Defprio: [% u.defprio %] </li>
 	<li> Defense points: [% u.defense_points %] </li>
 	<li> Attack points: [% u.attack_points %] </li>
 	<li> Scan points: [% u.scan_points %] </li>

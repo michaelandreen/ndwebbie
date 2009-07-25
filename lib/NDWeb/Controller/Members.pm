@@ -2,6 +2,7 @@ package NDWeb::Controller::Members;
 
 use strict;
 use warnings;
+use feature ":5.10";
 use parent 'Catalyst::Controller';
 
 use NDWeb::Include;
@@ -32,8 +33,8 @@ sub index : Path : Args(0) {
 	$c->stash(u => $dbh->selectrow_hashref(q{SELECT planet,defense_points
 			,attack_points,scan_points,humor_points
 			, (attack_points+defense_points+scan_points/20)::NUMERIC(5,1) as total_points
-			, sms,rank,hostmask,call_if_needed,sms_note
-		FROM users WHERE uid = ?
+			, sms,rank,hostmask,call_if_needed,sms_note,defprio
+		FROM users_defprio WHERE uid = ?
 			},undef,$c->user->id)
 	);
 
@@ -261,7 +262,8 @@ sub points : Local {
 	my ( $self, $c, $order ) = @_;
 	my $dbh = $c->model;
 
-	if ($order && $order =~ /^((?:defense|attack|total|humor|scan|raid)_points)$/){
+	if ($order ~~ /^((?:defense|attack|total|humor|scan|raid)_points)$/
+			|| $order ~~ /^(defprio)$/){
 		$order = "$1 DESC";
 	}else{
 		$order = 'total_points DESC';
@@ -270,20 +272,18 @@ sub points : Local {
 	my $limit = 'LIMIT 10';
 	$limit = '' if $c->check_user_roles(qw/members_points_nolimit/);
 
-	my $query = $dbh->prepare(qq{SELECT username,defense_points,attack_points
-		,scan_points,humor_points
-		,(attack_points+defense_points+scan_points/20)::NUMERIC(4,0) as total_points
-		, count(NULLIF(rc.launched,FALSE)) AS raid_points
-		FROM users u LEFT OUTER JOIN raid_claims rc USING (uid)
-		WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
-		GROUP BY username,defense_points,attack_points,scan_points,humor_points,rank
-		ORDER BY $order $limit});
+	my $query = $dbh->prepare(q{
+SELECT username,defense_points,attack_points
+	,scan_points,humor_points,defprio
+	,(attack_points+defense_points+scan_points/20)::NUMERIC(4,0) as total_points
+	, count(NULLIF(rc.launched,FALSE)) AS raid_points
+FROM users_defprio u LEFT OUTER JOIN raid_claims rc USING (uid)
+WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
+GROUP BY username,defense_points,attack_points,scan_points,humor_points,defprio
+ORDER BY } . "$order $limit"
+	);
 	$query->execute;
-	my @members;
-	while (my $member = $query->fetchrow_hashref){
-		push @members,$member;
-	}
-	$c->stash(members => \@members);
+	$c->stash(members => $query->fetchall_arrayref({}));
 }
 
 sub addintel : Local {

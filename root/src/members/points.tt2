@@ -3,6 +3,7 @@
 	<tr>
 	<th>User</th>
 	<th><a href="[% c.uri_for('points','total_points') %]">Total</a></th>
+	<th><a href="[% c.uri_for('points','defprio') %]">Defprio</a></th>
 	<th><a href="[% c.uri_for('points','defense_points') %]">Defenses</a></th>
 	<th><a href="[% c.uri_for('points','attack_points') %]">Attacks</a></th>
 	<th><a href="[% c.uri_for('points','raid_points') %]">Raid</a></th>
@@ -13,6 +14,7 @@
 	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
 	<td align="left">[% m.username %]</td>
 	<td>[% m.total_points %]</td>
+	<td>[% m.defprio %]</td>
 	<td>[% m.defense_points %]</td>
 	<td>[% m.attack_points %]</td>
 	<td>[% m.raid_points %]</td>
