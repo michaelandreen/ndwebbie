@@ -1,0 +1,17 @@
+[% META title = 'Channels' %]
+<table>
+	<tr>
+	<th><a href="[% c.uri_for('channels','coords') %]">Coords</a></th>
+	<th>Nick</th>
+	<th><a href="[% c.uri_for('channels','channel') %]">Channel</a></th>
+	<th><a href="[% c.uri_for('channels','alliance') %]">Alliance</a></th>
+	</tr>
+[% FOR p IN planets %]
+	<tr align="left" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td><a href="[% c.uri_for('/stats/planet',p.id) %]">[% p.coords %]</a></td>
+	<td><a href="[% c.uri_for('planet',p.id) %]">[% p.nick %]</a></td>
+	<td>[% p.channel %]</td>
+	<td>[% p.alliance %]</td>
+	</tr>
+[% END %]
+</table>

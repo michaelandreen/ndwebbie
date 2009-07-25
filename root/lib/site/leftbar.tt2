@@ -116,6 +116,7 @@
 <p>Intel menu</p>
 <ul class="linkbar">
 	<li><a href="/intel">Intel</a></li>
+	<li><a href="/intel/channels">Channels</a></li>
 	<li><form action="/intel/find" method="post"><p>
 		<input class="coordsinput" type="text" name="coords" value="[% checkcoords %]">
 		<input class="coordsinput" type="submit" value="Check">

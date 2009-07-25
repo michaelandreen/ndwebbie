@@ -2,6 +2,7 @@ package NDWeb::Controller::Intel;
 
 use strict;
 use warnings;
+use feature ':5.10';
 use parent 'Catalyst::Controller';
 
 use NDWeb::Include;
@@ -95,6 +96,27 @@ sub planet : Local {
 	$query->execute($id,$ticks);
 	$c->stash(outgoing => $query->fetchall_arrayref({}) );
 
+}
+
+sub channels : Local {
+	my ( $self, $c, $order ) = @_;
+	my $dbh = $c->model;
+
+	if ($order ~~ /(alliance|channel)/){
+		$order = "lower($1) ASC";
+	}elsif ($order ~~ /(coords)/){
+		$order = "x,y,z";
+	}else{
+		$order = 'lower(channel)';
+	}
+
+	my $query = $dbh->prepare(q{
+SELECT id,coords(x,y,z),nick,channel,alliance FROM current_planet_stats
+WHERE channel <> '' and channel IS NOT NULL
+ORDER BY } . $order
+	);
+	$query->execute;
+	$c->stash(planets => $query->fetchall_arrayref({}) );
 }
 
 sub postplanetcomment : Local {
