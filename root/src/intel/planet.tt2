@@ -38,7 +38,7 @@
 		<tr><td>Alliance</td>
 			<td><select name="alliance">
 [% FOR a IN alliances %]
-				<option value="[% a.id %]" [% IF a.id == p.alliance_id %]selected[% END %]> [% a.name %]</option>
+				<option value="[% a.alliance %]" [% IF a.aid == p.aid %]selected[% END %]> [% a.alliance %]</option>
 [% END %]
 				</select></td>
 			<td><input type="checkbox" name="calliance"></td>

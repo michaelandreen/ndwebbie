@@ -52,7 +52,7 @@ sub distwhores : Local {
 sub marktarget : Local {
 	my ( $self, $c, $target ) = @_;
 	my $dbh = $c->model;
-	my $update = $dbh->prepare(q{INSERT INTO covop_attacks (uid,id,tick) VALUES(?,?,tick())});
+	my $update = $dbh->prepare(q{INSERT INTO covop_attacks (uid,pid,tick) VALUES(?,?,tick())});
 	eval{
 		$update->execute($c->user->id,$target);
 	};
@@ -65,11 +65,11 @@ sub list : Private {
 
 	my $query = $dbh->prepare(q{
 	SELECT * FROM (
-		SELECT *
+		SELECT *, pid AS id
 			,(2*pvalue::float/cvalue) :: Numeric(4,1) AS max_bank_hack
 			,max_bank_hack(metal,crystal,eonium,pvalue,cvalue,5) AS hack5
 			,max_bank_hack(metal,crystal,eonium,pvalue,cvalue,13) AS hack13
-		FROM (SELECT p.id,coords(x,y,z),x,y,z,size
+		FROM (SELECT pid,coords(x,y,z),x,y,z,size
 			,metal + metal_roids * (tick()-ps.tick) * 125 AS metal
 			,crystal + crystal_roids * (tick()-ps.tick) * 125 AS crystal
 			,eonium + eonium_roids * (tick()-ps.tick) * 125 AS eonium
@@ -79,12 +79,12 @@ sub list : Private {
 			, planet_status, relationship,gov,ps.tick AS pstick, ds.tick AS dstick
 			, p.value AS pvalue, c.value AS cvalue
 			FROM current_planet_stats p
-				LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-				LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
-				CROSS JOIN (SELECT value FROM current_planet_stats WHERE id = $1) c
+				LEFT OUTER JOIN current_planet_scans ps USING (pid)
+				LEFT OUTER JOIN current_development_scans ds USING (pid)
+				CROSS JOIN (SELECT value FROM current_planet_stats WHERE pid = $1) c
 			) AS foo
-			LEFT OUTER JOIN (SELECT id,max(tick) AS lastcovop FROM covop_attacks
-				GROUP BY id) co USING (id)
+			LEFT OUTER JOIN (SELECT pid,max(tick) AS lastcovop FROM covop_attacks
+				GROUP BY pid) co USING (pid)
 		WHERE (metal IS NOT NULL OR distorters IS NOT NULL)
 			AND (NOT planet_status IN ('Friendly','NAP'))
 			AND  (relationship IS NULL OR NOT relationship IN ('Friendly','NAP'))

@@ -91,10 +91,11 @@ sub updateUser : Local {
 				my $column = $1;
 				my $value = $c->req->param($column);
 				if ($column eq 'planet'){
+					$column = 'pid';
 					if ($value eq ''){
 						$value = undef;
 					}elsif($value =~ /^(\d+)\D+(\d+)\D+(\d+)$/){
-						($value) = $dbh->selectrow_array(q{SELECT id FROM
+						($value) = $dbh->selectrow_array(q{SELECT pid FROM
 							current_planet_stats WHERE x = ? and y = ? and z =?}
 							,undef,$1,$2,$3);
 					}
@@ -131,9 +132,10 @@ sub findUser : Private {
 	my $dbh = $c->model;
 
 	my $query = $dbh->prepare(q{
-		SELECT uid,username,hostmask,CASE WHEN u.planet IS NULL THEN '' ELSE coords(x,y,z) END AS planet,attack_points,defense_points,scan_points,humor_points,info, email, sms
-		FROM users u LEFT OUTER JOIN current_planet_stats p ON u.planet = p.id
-		WHERE uid = ?;
+SELECT uid,username,hostmask,attack_points,defense_points,scan_points,humor_points,info, email, sms
+	,COALESCE(coords(x,y,z),'') AS planet
+FROM users u LEFT OUTER JOIN current_planet_stats p USING (pid)
+WHERE uid = ?;
 		});
 	$user = $dbh->selectrow_hashref($query,undef,$user);
 

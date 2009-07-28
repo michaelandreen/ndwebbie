@@ -35,7 +35,7 @@ use ND::DB;
 our $dbh = ND::DB::DB();
 
 $dbh->begin_work;
-my $st = $dbh->prepare(q{SELECT uid FROM current_planet_stats p JOIN users u ON p.id = u.planet WHERE alliance_id = 1 ORDER BY score DESC});
+my $st = $dbh->prepare(q{SELECT uid FROM current_planet_stats p JOIN users u USING (pid) WHERE alliance = 'NewDawn' ORDER BY score DESC});
 my $update = $dbh->prepare(q{UPDATE users SET rank = ? WHERE uid = ?});
 $st->execute;
 my $rank = 1;

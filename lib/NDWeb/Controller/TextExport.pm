@@ -32,7 +32,7 @@ sub alliance : Local {
 
 	my $query = $dbh->prepare(q{SELECT coords(x,y,z), size, score, value,race, COALESCE(nick,'') AS nick
 		FROM current_planet_stats
-		WHERE alliance_id = $1
+		WHERE aid = $1
 		ORDER BY x,y,z});
 	$query->execute($ally);
 

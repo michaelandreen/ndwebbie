@@ -56,8 +56,8 @@ FROM galaxies g
 			SELECT raid,p.tick,x,y,count(*), sum(size) AS size
 			FROM raids r
 				JOIN raid_targets rt ON r.id = rt.raid
-				JOIN planet_stats p ON p.id = rt.planet AND p.tick = r.tick-12
-			WHERE x = $1 and y = $2
+				JOIN planet_stats p USING (pid)
+			WHERE x = $1 and y = $2 AND p.tick = r.tick-12
 			GROUP BY raid,p.tick,x,y
 			) AS a
 			JOIN galaxies g USING (tick,x,y)
@@ -91,8 +91,8 @@ WHERE g.tick = ( SELECT max(tick) AS max FROM galaxies)
 		};
 	}
 
-	$query = $dbh->prepare(qq{SELECT DISTINCT ON (x,y,z,p.id)
-		p.id,coords(x,y,z), ruler, p.planet,race,
+	$query = $dbh->prepare(qq{SELECT DISTINCT ON (x,y,z,pid)
+		pid AS id,coords(x,y,z), ruler, p.planet,race,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,
@@ -103,10 +103,10 @@ WHERE g.tick = ( SELECT max(tick) AS max FROM galaxies)
 		xprank,xprank_gain,xprank_gain_day
 		$extra_columns
 		FROM current_planet_stats_full p
-			LEFT OUTER JOIN planet_scans ps ON p.id = ps.planet
-			LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
+			LEFT OUTER JOIN planet_scans ps USING (pid)
+			LEFT OUTER JOIN current_development_scans ds USING (pid)
 		WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE)
-		ORDER BY x,y,z,p.id,ps.tick DESC, ps.id DESC, ds.tick DESC, ds.id DESC
+		ORDER BY x,y,z,pid,ps.tick DESC, ps.id DESC, ds.tick DESC, ds.id DESC
 		});
 
 	$query->execute($x,$y,$z);
@@ -117,8 +117,8 @@ sub planet : Local {
 	my ( $self, $c, $id ) = @_;
 	my $dbh = $c->model;
 
-	my $p = $dbh->selectrow_hashref(q{SELECT id,x,y,z FROM current_planet_stats
-		WHERE id = $1},undef,$id);
+	my $p = $dbh->selectrow_hashref(q{SELECT pid AS id,x,y,z FROM current_planet_stats
+		WHERE pid = $1},undef,$id);
 
 	$c->detach('/default') unless $p;
 
@@ -129,9 +129,9 @@ sub planet : Local {
 		my $query = $dbh->prepare(q{
 (
 	SELECT DISTINCT ON (mission,name) fid,mission,name,tick, NULL AS eta
-		,amount, NULL AS coords, planet, NULL AS back
+		,amount, NULL AS coords, pid AS planet, NULL AS back
 	FROM fleets f
-	WHERE planet = $1 AND tick <= tick() AND (
+	WHERE pid = $1 AND tick <= tick() AND (
 			fid IN (SELECT fid FROM fleet_scans)
 		) AND (
 			mission = 'Full fleet'
@@ -141,9 +141,9 @@ sub planet : Local {
 ) UNION (
 	SELECT DISTINCT ON (tick,x,y,z,mission,name,amount)
 		NULL as fid, i.mission, i.name, i.tick,eta
-		, i.amount, coords(x,y,z), t.id AS planet, back
+		, i.amount, coords(x,y,z), pid AS planet, back
 	FROM intel i
-	LEFT OUTER JOIN current_planet_stats t ON i.target = t.id
+	LEFT OUTER JOIN current_planet_stats t ON i.target = pid
 	WHERE uid = -1 AND i.sender = $1 AND i.tick > tick() - 14 AND i.tick < tick() + 14
 	ORDER BY i.tick,x,y,z,mission,name,amount,back
 )
@@ -168,16 +168,16 @@ sub planet : Local {
 		$c->stash(outgoings => \@missions);
 
 		$query = $dbh->prepare(q{
-			SELECT DISTINCT ON (i.tick,x,y,z,s.id,i.name,i.amount) i.id,i.mission, i.name, i.tick,eta
-						, i.amount, coords(x,y,z) AS coords, s.id AS planet
+			SELECT DISTINCT ON (i.tick,x,y,z,pid,i.name,i.amount) i.id,i.mission, i.name, i.tick,eta
+						, i.amount, coords(x,y,z) AS coords, pid AS planet
 			FROM intel i
 			LEFT OUTER JOIN (planets
-				NATURAL JOIN planet_stats) s ON i.sender = s.id
+				NATURAL JOIN planet_stats) s ON i.sender = pid
 					AND s.tick = ( SELECT MAX(tick) FROM planet_stats)
 			WHERE  i.uid = -1
 				AND i.target = ?
 				AND i.tick > tick() - 3
-			ORDER BY i.tick,x,y,z,s.id,i.name,i.amount,i.eta
+			ORDER BY i.tick,x,y,z,pid,i.name,i.amount,i.eta
 		});
 		$query->execute($id);
 		my @incomings;
@@ -197,7 +197,7 @@ sub planet : Local {
 
 	if ($c->check_user_roles(qw/stats_scans/)){
 		my $query = $dbh->prepare(q{SELECT type,scan_id, tick FROM scans
-			WHERE planet = ? AND tick > tick() - 168
+			WHERE pid = ? AND tick > tick() - 168
 			ORDER BY tick,type DESC
 		});
 		$query->execute($id);
@@ -206,18 +206,18 @@ sub planet : Local {
 
 	if ($c->check_user_roles(qw/stats_planetdata/)){
 		$c->stash(planetscan => $dbh->selectrow_hashref(q{SELECT *
-			FROM current_planet_scans WHERE planet = $1},undef,$id));
+			FROM current_planet_scans WHERE pid = $1},undef,$id));
 		$c->stash(devscan => $dbh->selectrow_hashref(q{SELECT *
-			FROM current_development_scans WHERE planet = $1},undef,$id));
+			FROM current_development_scans WHERE pid = $1},undef,$id));
 	}
 
-	my $query = $dbh->prepare(q{SELECT value,value_gain AS gain,tick FROM planet_stats 
-		WHERE id = ? AND tick > tick() - 24});
+	my $query = $dbh->prepare(q{SELECT value,value_gain AS gain,tick FROM planet_stats
+		WHERE pid = ? AND tick > tick() - 24});
 	$query->execute($id);
 	$c->stash(values => $query->fetchall_arrayref({}) );
 
 	$query = $dbh->prepare(q{SELECT x,y,z,tick FROM planet_stats
-		WHERE id = ? ORDER BY tick ASC});
+		WHERE pid = ? ORDER BY tick ASC});
 	$query->execute($id);
 	my @coords;
 	my $co = {x => 0, y => 0, z => 0};
@@ -245,7 +245,7 @@ sub find : Local {
 	}elsif (/(\d+)(?: |:)(\d+)/){
 		$c->res->redirect($c->uri_for('galaxy',$1,$2));
 	}elsif($c->check_user_roles(qw/stats_find_nick/)) {
-		my $query = $dbh->prepare(q{SELECT id,coords(x,y,z),nick
+		my $query = $dbh->prepare(q{SELECT pid AS id,coords(x,y,z),nick
 			FROM current_planet_stats p
 			WHERE nick ilike $1
 		});

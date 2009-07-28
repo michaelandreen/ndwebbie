@@ -54,7 +54,7 @@ sub planetranks : Local {
 	my $query = $dbh->prepare(q{SELECT tick,-scorerank AS score,-sizerank AS size
 		,-valuerank AS value,-xprank AS xp
 		FROM planets NATUral JOIN planet_stats
-		WHERE id = $1 ORDER BY tick ASC
+		WHERE pid = $1 ORDER BY tick ASC
 		});
 	$query->execute($planet);
 	$c->stash(query => $query);
@@ -69,7 +69,7 @@ sub planetstats : Local {
 	$c->stash->{settings}->{y_min_value} = '0';
 	my $query = $dbh->prepare(q{SELECT tick,score,size,value,xp*60 AS "xp*60"
 		FROM planets NATURAL JOIN planet_stats
-		WHERE id = $1 ORDER BY tick ASC
+		WHERE pid = $1 ORDER BY tick ASC
 		});
 	$query->execute($planet);
 	$c->stash(query => $query);
@@ -122,9 +122,9 @@ sub planetvsnd : Local {
 	my $query = $dbh->prepare(q{SELECT a.tick,a.score/LEAST(members,60) AS NDscore
 		,a.size/members as NDsize,memsize, memscore
 		FROM (SELECT tick,size AS memsize,score AS memscore
-			FROM planets p JOIN planet_stats ps USING (id) WHERE p.id = $1) p
+			FROM planets p JOIN planet_stats ps USING (pid) WHERE pid = $1) p
 		JOIN alliance_stats a ON a.tick = p.tick
-		WHERE a.id = 1 ORDER BY tick
+		WHERE aid = 1 ORDER BY tick
 		});
 	$query->execute($planet);
 	$c->stash(query => $query);
@@ -140,12 +140,14 @@ sub alliancevsintel : Local {
 	$c->stash->{settings}->{y2_label} = 'score';
 
 	my $query = $dbh->prepare(q{SELECT a.tick,a.score,a.size,memsize, memscore
-		FROM (SELECT tick,SUM(size) AS memsize,SUM(score) AS memscore
-			FROM planets p JOIN planet_stats ps USING (id)
-			WHERE p.alliance_id = $1 GROUP BY tick) p
-			JOIN alliance_stats a ON a.tick = p.tick
-		WHERE a.id = $1
-			AND a.tick > (SELECT max(tick) - 50 FROM alliance_stats)
+		FROM (SELECT tick,aid,SUM(size) AS memsize,SUM(score) AS memscore
+			FROM alliances a
+				JOIN planets p USING (alliance)
+				JOIN planet_stats ps USING (pid)
+			GROUP BY tick,aid ) p
+			JOIN alliance_stats a USING (aid,tick)
+		WHERE aid = $1
+			AND tick > (SELECT max(tick) - 50 FROM alliance_stats)
 		ORDER BY tick
 		});
 	$query->execute($alliance);
@@ -162,12 +164,14 @@ sub avgalliancevsintel : Local {
 
 	my $query = $dbh->prepare(q{SELECT a.tick,a.score/LEAST(members,60) AS score
 		,a.size/members AS size,memsize, memscore
-		FROM (SELECT tick,AVG(size) AS memsize,AVG(score) AS memscore
-			FROM planets p JOIN planet_stats ps USING (id) WHERE p.alliance_id = $1
-			GROUP BY tick) p
-		JOIN alliance_stats a ON a.tick = p.tick
-		WHERE a.id = $1
-			AND a.tick > (SELECT max(tick) - 50 FROM alliance_stats)
+		FROM (SELECT tick,aid,AVG(size) AS memsize,AVG(score) AS memscore
+			FROM alliances a
+				JOIN planets p USING (alliance)
+				JOIN planet_stats ps USING (pid)
+			GROUP BY tick,aid) p
+		JOIN alliance_stats a USING (aid,tick)
+		WHERE aid = $1
+			AND tick > (SELECT max(tick) - 50 FROM alliance_stats)
 		ORDER BY tick
 		});
 	$query->execute($alliance);

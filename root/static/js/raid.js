@@ -1,4 +1,4 @@
-modified = "0000-01-01";
+modified = "0001-01-01";
 
 function parseUpdate(xml){
 	if ($('timestamp',xml).text())

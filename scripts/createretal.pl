@@ -49,13 +49,13 @@ $dbh->do(q{INSERT INTO raid_access (raid,gid) VALUES(?,2)}
 my $addtarget = $dbh->prepare(q{INSERT INTO raid_targets(raid,planet,comment)
 	VALUES($1,$2,$3)});
 
-my $incs = $dbh->prepare(q{SELECT sender,array_accum(i.eta) AS eta,array_accum(amount) AS amount
-	,array_accum(shiptype) AS type,array_accum(fleet) AS name,array_accum(c.landing_tick) AS landing
+my $incs = $dbh->prepare(q{SELECT pid,array_agg(i.eta) AS eta,array_agg(amount) AS amount
+	,array_agg(shiptype) AS type,array_agg(fleet) AS name,array_agg(c.landing_tick) AS landing
 	FROM calls c
 		JOIN incomings i ON i.call = c.id
 	WHERe NOT c.covered AND c.landing_tick BETWEEN tick() AND tick() + 6
 		AND c.landing_tick + GREATEST(i.eta,7) > tick() + 10
-	GROUP BY sender
+	GROUP BY pid
 	});
 $incs->execute;
 
@@ -69,7 +69,7 @@ while (my $inc = $incs->fetchrow_hashref){
 		my $back = $landing + $eta;
 		$comment .= "$name: ETA=$eta Amount=$amount Type:'$type' Landing tick=$landing Estimated back:$back\n";
 	}
-	$addtarget->execute($raid,$inc->{sender},$comment);
+	$addtarget->execute($raid,$inc->{pid},$comment);
 }
 
 $dbh->commit;

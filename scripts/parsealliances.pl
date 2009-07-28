@@ -63,7 +63,7 @@ for my $i (3,4){
 		$alliance->[$i+2] = $rank;
     }
 }
-my $insert = $dbh->prepare(q{INSERT INTO alliance_stats (tick,id,members,
+my $insert = $dbh->prepare(q{INSERT INTO alliance_stats (tick,aid,members,
 	size,score,
 	sizerank,scorerank,
 	size_gain,score_gain,
@@ -73,7 +73,7 @@ my $insert = $dbh->prepare(q{INSERT INTO alliance_stats (tick,id,members,
 	members_gain,members_gain_day
 	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}) or die $dbh->errstr;
 
-my $findalliance = $dbh->prepare(q{SELECT tick,id,members,
+my $findalliance = $dbh->prepare(q{SELECT tick,aid,members,
 	size, score,
 	sizerank, scorerank,
 	size_gain, score_gain,
@@ -81,7 +81,7 @@ my $findalliance = $dbh->prepare(q{SELECT tick,id,members,
 	size_gain_day, score_gain_day,
 	sizerank_gain_day, scorerank_gain_day,
 	members_gain,members_gain_day
-FROM alliance_stats WHERE id = $1 AND tick < $2 ORDER BY tick DESC LIMIT 1}) or die $dbh->errstr;
+FROM alliance_stats WHERE aid = $1 AND tick < $2 ORDER BY tick DESC LIMIT 1}) or die $dbh->errstr;
 
 for my $alliance (@alliances) {
 

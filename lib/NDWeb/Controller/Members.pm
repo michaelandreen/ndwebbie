@@ -30,7 +30,7 @@ sub index : Path : Args(0) {
 
 	$c->stash(error => $c->flash->{error});
 
-	$c->stash(u => $dbh->selectrow_hashref(q{SELECT planet,defense_points
+	$c->stash(u => $dbh->selectrow_hashref(q{SELECT pid AS planet,defense_points
 			,attack_points,scan_points,humor_points
 			, (attack_points+defense_points+scan_points/20)::NUMERIC(5,1) as total_points
 			, sms,rank,hostmask,call_if_needed,sms_note,defprio
@@ -38,13 +38,13 @@ sub index : Path : Args(0) {
 			},undef,$c->user->id)
 	);
 
-	$c->stash(groups => $dbh->selectrow_array(q{SELECT array_accum(groupname)
+	$c->stash(groups => $dbh->selectrow_array(q{SELECT array_agg(groupname)
 		FROM groups g NATURAL JOIN groupmembers gm
 		WHERE uid = $1
 			},undef,$c->user->id)
 	);
 
-	$c->stash(p => $dbh->selectrow_hashref(q{SELECT id,x,y,z, ruler, planet,race,
+	$c->stash(p => $dbh->selectrow_hashref(q{SELECT pid AS id,x,y,z, ruler, planet,race,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,
@@ -54,32 +54,14 @@ sub index : Path : Args(0) {
 		valuerank,valuerank_gain,valuerank_gain_day,
 		xprank,xprank_gain,xprank_gain_day
 		from current_planet_stats_full p
-			WHERE id = ?
+			WHERE pid = ?
 			},undef,$c->user->planet)
 	);
 
 	my $calls = $dbh->prepare(q{
-		SELECT id,landing_tick,dc,curreta
-			,array_accum(race::text) AS race
-			,array_accum(amount) AS amount
-			,array_accum(eta) AS eta
-			,array_accum(shiptype) AS shiptype
-			,array_accum(coords) AS attackers
-		FROM (SELECT c.id, c.landing_tick
-			,dc.username AS dc, (c.landing_tick - tick()) AS curreta
-			,p2.race, i.amount, i.eta, i.shiptype, p2.alliance
-			,coords(p2.x,p2.y,p2.z)
-			FROM calls c
-				LEFT OUTER JOIN incomings i ON i.call = c.id
-				LEFT OUTER JOIN current_planet_stats p2 ON i.sender = p2.id
-				LEFT OUTER JOIN users dc ON c.dc = dc.uid
-			WHERE c.member = $1 AND c.landing_tick >= tick()
-			GROUP BY c.id, c.landing_tick, dc.username
-				,p2.race,i.amount,i.eta,i.shiptype,p2.alliance,p2.x,p2.y,p2.z
-			) c
-		GROUP BY id, landing_tick,dc,curreta
+SELECT * FROM defcalls
+WHERE uid = $1 AND landing_tick >= tick()
 		});
-
 	$calls->execute($c->user->id);
 	$c->stash(calls => $calls->fetchall_arrayref({}) );
 
@@ -164,7 +146,7 @@ sub postfleetupdate : Local {
 		$dbh->begin_work;
 		eval{
 			my $insert = $dbh->prepare(q{INSERT INTO fleets
-				(planet,name,mission,tick,amount)
+				(pid,name,mission,tick,amount)
 				VALUES (?,'Main','Full fleet',tick(),?) RETURNING fid});
 			my ($id) = $dbh->selectrow_array($insert,undef
 				,$c->user->planet,$amount);
@@ -400,12 +382,12 @@ sub postconfirmation : Local {
 			FROM  raid_claims c
 				JOIN raid_targets t ON c.target = t.id
 				JOIN raids r ON t.raid = r.id
-			WHERE c.uid = ? AND r.tick+c.wave-1 = ? AND t.planet = ?
+			WHERE c.uid = ? AND r.tick+c.wave-1 = ? AND t.pid = ?
 				AND r.open AND not r.removed
 			});
 		my $finddefensetarget = $dbh->prepare(q{SELECT c.id FROM calls c
 				JOIN users u ON c.member = u.uid
-			WHERE u.planet = $1 AND c.landing_tick = $2
+			WHERE u.pid = $1 AND c.landing_tick = $2
 		});
 		my $informDefChannel = $dbh->prepare(q{INSERT INTO defense_missions
 			(fleet,call) VALUES (?,?)
@@ -417,12 +399,12 @@ sub postconfirmation : Local {
 			WHERE uid = ? AND target = ? AND wave = ?
 			});
 		my $addfleet = $dbh->prepare(q{INSERT INTO fleets
-			(name,mission,planet,tick,amount)
-			VALUES ($2,$3,(SELECT planet FROM users WHERE uid = $1),tick(),$4)
+			(name,mission,pid,tick,amount)
+			VALUES ($2,$3,(SELECT pid FROM users WHERE uid = $1),tick(),$4)
 			RETURNING fid
 			});
 		my $addconfirmation = $dbh->prepare(q{INSERT INTO launch_confirmations
-			(fid,uid,target,landing_tick,eta,back) VALUES ($1,$2,$3,$4,$5,$6)
+			(fid,uid,pid,landing_tick,eta,back) VALUES ($1,$2,$3,$4,$5,$6)
 			});
 		my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (fid,ship,amount)
 			VALUES (?,?,?)
@@ -530,10 +512,10 @@ sub defenders : Local {
 	my $dbh = $c->model;
 
 	my $defenders = $dbh->prepare(q{
-SELECT uid,u.planet,username, to_char(NOW() AT TIME ZONE timezone,'HH24:MI') AS time
+SELECT uid,pid AS planet,username, to_char(NOW() AT TIME ZONE timezone,'HH24:MI') AS time
 	,sms_note, call_if_needed, race, timezone
 FROM users u
-	JOIN current_planet_stats p ON p.id = u.planet
+	JOIN current_planet_stats p USING (pid)
 WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
 ORDER BY call_if_needed DESC, LOWER(username)
 		});
@@ -563,22 +545,22 @@ sub member_fleets {
 	my $query = $dbh->prepare(q{
 (
 	SELECT DISTINCT ON (mission,name) fid,name,tick, NULL AS eta
-		,amount, NULL AS coords, planet AS target, NULL AS back
+		,amount, NULL AS coords, pid AS target, NULL AS back
 		,NULL AS recalled, mission
 	FROM fleets f
-	WHERE planet = $2 AND tick <= tick() AND tick >= tick() -  24
+	WHERE pid = $2 AND tick <= tick() AND tick >= tick() -  24
 		AND name IN ('Main','Advanced Unit') AND mission = 'Full fleet'
 	ORDER BY mission,name,tick DESC, fid DESC
 ) UNION (
 	SELECT fid,name,landing_tick AS tick, eta, amount
-		, coords(x,y,z), target, back
+		, coords(x,y,z), lc.pid AS target, back
 		, (back <> landing_tick + eta - 1) AS recalled
 		,CASE WHEN landing_tick <= tick() OR (back <> landing_tick + eta - 1)
 			THEN 'Returning' ELSE mission END AS mission
-	FROM fleets f
-		JOIN launch_confirmations USING (fid)
-	LEFT OUTER JOIN current_planet_stats t ON target = t.id
-	WHERE uid = $1 AND f.planet = $2 AND back > tick()
+	FROM  launch_confirmations lc
+		LEFT OUTER JOIN current_planet_stats t USING (pid)
+		JOIN fleets f USING (fid)
+	WHERE uid = $1 AND f.pid = $2 AND back > tick()
 		AND landing_tick - eta - 12 < tick()
 )
 		});

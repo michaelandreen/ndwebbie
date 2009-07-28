@@ -64,15 +64,15 @@ for my $i (8,7,5,6){
     }
 }
 
-my $findplanets = $dbh->prepare(q{SELECT tick,id, x, y, z, 
-	size, score, value, xp, 
-	sizerank, scorerank, valuerank, xprank, 
-	size_gain, score_gain, value_gain, xp_gain, 
-	sizerank_gain, scorerank_gain, valuerank_gain, xprank_gain, 
-	size_gain_day, score_gain_day, value_gain_day, xp_gain_day, 
+my $findplanets = $dbh->prepare(q{SELECT tick,pid, x, y, z,
+	size, score, value, xp,
+	sizerank, scorerank, valuerank, xprank,
+	size_gain, score_gain, value_gain, xp_gain,
+	sizerank_gain, scorerank_gain, valuerank_gain, xprank_gain,
+	size_gain_day, score_gain_day, value_gain_day, xp_gain_day,
 	sizerank_gain_day, scorerank_gain_day, valuerank_gain_day, xprank_gain_day
 FROM planet_stats WHERE tick = (SELECT MAX(tick) FROM planet_stats WHERE tick < $1)});
-my $insert = $dbh->prepare(q{INSERT INTO planet_stats(tick,id, x, y, z, 
+my $insert = $dbh->prepare(q{INSERT INTO planet_stats(tick,pid, x, y, z,
 	size, score, value,xp,
 	sizerank,scorerank,valuerank,xprank,
 	size_gain, score_gain, value_gain, xp_gain,
@@ -85,6 +85,8 @@ my %oldStats;
 while (my @planet = $findplanets->fetchrow){
 	$oldStats{$planet[1]} = \@planet;
 }
+my $intel = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
+		(SELECT ftid FROM planets WHERE pid = $2),$1,$3)});
 for my $planet (@planets) {
 	#print "$planet->[1]\n";
 	my $oldPlanet = $oldStats{$planet->[1]};
@@ -100,7 +102,7 @@ for my $planet (@planets) {
 			($planet->[3] != $oldPlanet->[3]) or 
 			($planet->[4] != $oldPlanet->[4])){
 			#print "Planet has moved from $oldPlanet[2]:$oldPlanet[3]:$oldPlanet[4] to $planet->[2]:$planet->[3]:$planet->[4]\n";
-			intel_log -3, $planet->[1],"Planet has moved from $oldPlanet->[2]:$oldPlanet->[3]:$oldPlanet->[4] to $planet->[2]:$planet->[3]:$planet->[4] tick $tick";
+			$intel->execute(-3, $planet->[1],"Planet has moved from $oldPlanet->[2]:$oldPlanet->[3]:$oldPlanet->[4] to $planet->[2]:$planet->[3]:$planet->[4] tick $tick");
 		}
 	}
 	#print "@{$oldPlanet}\n";

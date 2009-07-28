@@ -56,7 +56,7 @@ sub planets : Local {
 		$extra_columns = ",planet_status,hit_us, alliance,relationship,nick";
 	}
 
-	my $query = $dbh->prepare(qq{SELECT id,x,y,z,ruler,planet,race,
+	my $query = $dbh->prepare(qq{SELECT pid AS id,x,y,z,ruler,planet,race,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		value,value_gain,value_gain_day,
@@ -143,7 +143,7 @@ sub alliances : Local {
 	if ($order =~ /rank$/){
 		$browse = qq{WHERE $order > ? ORDER BY $order ASC LIMIT 100};
 	}
-	my $query = $dbh->prepare(qq{SELECT a.name,a.id,
+	my $query = $dbh->prepare(qq{SELECT alliance AS name,aid AS id,
 		size, size_gain, size_gain_day,
 		score,score_gain,score_gain_day,
 		avgsize,avgsize_gain,avgsize_gain_day,

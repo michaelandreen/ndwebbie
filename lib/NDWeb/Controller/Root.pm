@@ -131,7 +131,7 @@ sub listTargets : Private {
 FROM raid_claims c
 	JOIN raid_targets t ON c.target = t.id
 	JOIN raids r ON t.raid = r.id
-	JOIN current_planet_stats p ON t.planet = p.id
+	JOIN current_planet_stats p USING (pid)
 WHERE c.uid = $1 AND r.tick+c.wave > tick() AND r.open AND not r.removed
 ORDER BY r.tick+c.wave,x,y,z});
 	$query->execute($c->user->id) or die $dbh->errstr;
@@ -146,8 +146,8 @@ ORDER BY r.tick+c.wave,x,y,z});
 sub listAlliances : Private {
 	my ($self, $c) = @_;
 	my @alliances;
-	push @alliances,{id => -1, name => ''};
-	my $query = $c->model->prepare(q{SELECT id,name FROM alliances ORDER BY LOWER(name)});
+	push @alliances,{aid => '', alliance => ''};
+	my $query = $c->model->prepare(q{SELECT aid,alliance FROM alliances ORDER BY LOWER(alliance)});
 	$query->execute;
 	while (my $ally = $query->fetchrow_hashref){
 		push @alliances,$ally;
@@ -224,7 +224,7 @@ sub end : ActionClass('RenderView') {
 		my $fleetupdate = 0;
 		if ($c->check_user_roles(qw/member_menu/)){
 			$fleetupdate = $dbh->selectrow_array(q{
-SELECT tick FROM fleets WHERE planet = ? AND tick > tick() - 24
+SELECT tick FROM fleets WHERE pid = ? AND tick > tick() - 24
 AND mission = 'Full fleet' AND name IN ('Main','Advanced Unit');
 				},undef,$c->user->planet);
 			$fleetupdate = 0 unless defined $fleetupdate;

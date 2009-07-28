@@ -42,7 +42,7 @@ sub load {
 	}
 
 	($self->{planet},$self->{username},$self->{css}) = $dbh->selectrow_array(q{
-		SELECT planet,username,css FROM users WHERE uid = ?
+		SELECT pid,username,css FROM users WHERE uid = ?
 		},undef,$self->{id}) or die $dbh->errstr;
 
 	return $self;

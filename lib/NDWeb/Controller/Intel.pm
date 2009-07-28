@@ -35,10 +35,8 @@ sub index :Path : Args(0) {
 			o.alliance AS oalliance ,coords(o.x,o.y,o.z) AS ocoords, i.sender
 			,t.alliance AS talliance,coords(t.x,t.y,t.z) AS tcoords, i.target
 		},q{not ingal
-			AND ((( t.alliance_id != o.alliance_id OR t.alliance_id IS NULL OR o.alliance_id IS NULL) AND (i.mission = 'Defend' OR i.mission = 'AllyDef' ))
-			OR ( t.alliance_id = o.alliance_id AND i.mission = 'Attack'))
-			AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
-			AND NOT (i.back IS NOT NULL AND i.back = i.tick + 4)
+			AND ((COALESCE( t.alliance != o.alliance,TRUE) AND (i.mission = 'Defend' OR i.mission = 'AllyDef' ))
+				OR ( t.alliance = o.alliance AND i.mission = 'Attack'))
 			AND i.tick > (tick() - $1)
 		});
 	$query->execute($ticks);
@@ -50,7 +48,7 @@ sub index :Path : Args(0) {
 		while ($coords =~ m/(\d+:\d+:\d+)/g){
 			push @coords,$1;
 		}
-		my $planets = $dbh->prepare(q{SELECT id,coords(x,y,z), alliance, nick
+		my $planets = $dbh->prepare(q{SELECT pid AS id,coords(x,y,z), alliance, nick
 			FROM current_planet_stats p
 			WHERE coords(x,y,z) = ANY($1)
 			ORDER BY alliance, p.x, p.y, p.z
@@ -71,8 +69,8 @@ sub planet : Local {
 	my $ticks = $c->req->param('ticks') || 48;
 	$c->stash(showticks => $ticks);
 
-	my $query = $dbh->prepare(q{SELECT id,coords(x,y,z),alliance,nick,channel
-		FROM current_planet_stats WHERE channel ILIKE ?
+	my $query = $dbh->prepare(q{SELECT pid AS id,coords(x,y,z),alliance,nick,channel
+		FROM current_planet_stats WHERE channel = $1
 		ORDER BY alliance,x,y,z
 		});
 	$query->execute($p->{channel});
@@ -102,16 +100,16 @@ sub channels : Local {
 	my ( $self, $c, $order ) = @_;
 	my $dbh = $c->model;
 
-	if ($order ~~ /(alliance|channel)/){
+	if ($order ~~ /(alliance)/){
 		$order = "lower($1) ASC";
 	}elsif ($order ~~ /(coords)/){
 		$order = "x,y,z";
 	}else{
-		$order = 'lower(channel)';
+		$order = 'channel';
 	}
 
 	my $query = $dbh->prepare(q{
-SELECT id,coords(x,y,z),nick,channel,alliance FROM current_planet_stats
+SELECT pid AS id,coords(x,y,z),nick,channel,alliance FROM current_planet_stats
 WHERE channel <> '' and channel IS NOT NULL
 ORDER BY } . $order
 	);
@@ -142,33 +140,33 @@ sub postplanetupdate : Local {
 		});
 	if ($c->req->param('cnick')){
 		my $value = html_escape $c->req->param('nick');
-		$dbh->do(q{UPDATE planets SET nick = ? WHERE id =?}
+		$dbh->do(q{UPDATE planets SET nick = ? WHERE pid =?}
 			,undef,$value,$p->{id});
 		$log->execute($c->user->id,$p->{ftid},"Set nick to: $value");
 	}
 	if ($c->req->param('cchannel')){
 		my $value = html_escape $c->req->param('channel');
-		$dbh->do(q{UPDATE planets SET channel = ? WHERE id =?}
+		$dbh->do(q{UPDATE planets SET channel = ? WHERE pid =?}
 			,undef,$value,$p->{id});
 		$log->execute($c->user->id,$p->{ftid},"Set channel to: $value");
 	}
 	if ($c->req->param('cstatus')){
 		my $value = $c->req->param('status');
-		$dbh->do(q{UPDATE planets SET planet_status = ? WHERE id =?}
+		$dbh->do(q{UPDATE planets SET planet_status = ? WHERE pid =?}
 			,undef,$value,$p->{id});
 		$log->execute($c->user->id,$p->{ftid},"Set planet_status to: $value");
 	}
 	if ($c->req->param('cgov')){
 		my $value = $c->req->param('gov');
-		$dbh->do(q{UPDATE planets SET gov = ? WHERE id =?}
+		$dbh->do(q{UPDATE planets SET gov = ? WHERE pid =?}
 			,undef,$value,$p->{id});
 		$log->execute($c->user->id,$p->{ftid},"Set gov to: $value");
 	}
 	if ($c->req->param('calliance')){
 		my $value = $c->req->param('alliance');
-		$dbh->do(q{UPDATE planets SET alliance_id = NULLIF(?,-1) WHERE id =?}
+		$dbh->do(q{UPDATE planets SET alliance = NULLIF(?,'') WHERE pid = ?}
 			,undef,$value,$p->{id});
-		$log->execute($c->user->id,$p->{ftid},"Set alliance_id to: $value");
+		$log->execute($c->user->id,$p->{ftid},"Set alliance to: $value");
 	}
 	$dbh->commit;
 
@@ -188,7 +186,7 @@ sub find : Local {
 			,undef,$1,$2,$3,$4);
 		$c->res->redirect($c->uri_for('planet',$planet));
 	}else{
-		my $query = $dbh->prepare(q{SELECT id,coords(x,y,z),nick
+		my $query = $dbh->prepare(q{SELECT pid AS id,coords(x,y,z),nick
 			FROM current_planet_stats p
 			WHERE nick ilike $1
 		});
@@ -206,10 +204,10 @@ sub findPlanet : Private {
 	my ( $self, $c, $id ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT x,y,z,id, nick, alliance,alliance_id
+	my $query = $dbh->prepare(q{SELECT x,y,z,pid AS id, nick, alliance,aid
 		, planet_status,channel,ftid,gov
 		FROM current_planet_stats
-		WHERE id = $1
+		WHERE pid = $1
 		});
 	$query->execute($id);
 	$c->stash(p => $query->fetchrow_hashref);
@@ -320,7 +318,7 @@ sub naps : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT p.id,coords(x,y,z)
+	my $query = $dbh->prepare(q{SELECT pid AS id,coords(x,y,z)
 		,ruler, p.planet,race, size, score, value
 		, xp, sizerank, scorerank, valuerank, xprank, p.value - p.size*200 
 			- COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150
@@ -329,8 +327,8 @@ sub naps : Local {
 		,(metal+crystal+eonium)/100 AS resvalue, planet_status,hit_us
 		, alliance,relationship,nick
 		FROM current_planet_stats p
-			LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-			LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
+			LEFT OUTER JOIN current_planet_scans ps USING (pid)
+			LEFT OUTER JOIN current_development_scans ds USING (pid)
 		WHERE planet_status IN ('Friendly','NAP') order by x,y,z asc
 		});
 	$query->execute;

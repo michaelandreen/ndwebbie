@@ -45,7 +45,7 @@ my $scangroups = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
 });
 my $oldscan = $dbh->prepare(q{SELECT scan_id FROM scans WHERE scan_id = LOWER(?) AND tick >= tick() - 168});
 my $addScan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid) VALUES (LOWER(?),?,?)});
-my $parsedscan = $dbh->prepare(q{UPDATE scans SET tick = ?, type = ?, planet = ?, parsed = TRUE WHERE id = ?});
+my $parsedscan = $dbh->prepare(q{UPDATE scans SET tick = ?, type = ?, pid = ?, parsed = TRUE WHERE id = ?});
 my $addpoints = $dbh->prepare(q{UPDATE users SET scan_points = scan_points + ? WHERE uid = ? });
 my $delscan = $dbh->prepare(q{DELETE FROM scans WHERE id = ?});
 
@@ -73,23 +73,23 @@ my $newscans = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
 	WHERE NOT groupscan AND NOT parsed FOR UPDATE
 });
 my $findplanet = $dbh->prepare(q{SELECT planetid(?,?,?,?)});
-my $findoldplanet = $dbh->prepare(q{SELECT id FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND tick <= $4 ORDER BY tick DESC LIMIT 1});
+my $findoldplanet = $dbh->prepare(q{SELECT pid FROM planet_stats WHERE x = $1 AND y = $2 AND z = $3 AND tick <= $4 ORDER BY tick DESC LIMIT 1});
 my $findcoords = $dbh->prepare(q{SELECT * FROM planetcoords(?,?)});
-my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,planet,tick,amount) VALUES(?,?,?,?,?) RETURNING fid});
+my $addfleet = $dbh->prepare(q{INSERT INTO fleets (name,mission,pid,tick,amount) VALUES(?,?,?,?,?) RETURNING fid});
 my $fleetscan = $dbh->prepare(q{INSERT INTO fleet_scans (fid,id) VALUES(?,?)});
 my $addintel = $dbh->prepare(q{INSERT INTO intel (name,mission,sender,target,tick,eta,back,amount,ingal,uid)
 	VALUES(?,?,?,?,?,?,?,?,?,-1) RETURNING id});
 my $intelscan = $dbh->prepare(q{INSERT INTO intel_scans (intel,id) VALUES(?,?)});
 my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (fid,ship,amount) VALUES(?,?,?)});
 my $addplanetscan = $dbh->prepare(q{INSERT INTO planet_scans
-	(id,tick,planet,metal_roids,metal,crystal_roids,crystal,eonium_roids,eonium
+	(id,tick,pid,metal_roids,metal,crystal_roids,crystal,eonium_roids,eonium
 		,agents,guards,light,medium,heavy,hidden)
 	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
 
 sub parse_planet {
 	my ($scan,$file) = @_;
 
-	my @values = ($scan->{id},$scan->{tick},$scan->{planet});
+	my @values = ($scan->{id},$scan->{tick},$scan->{pid});
 	$file =~ s/(\d),(\d)/$1$2/g;
 
 	while($file =~ m{"center">(Metal|Crystal|Eonium)</td>\D+(\d+)\D+([\d,]+)}g){
@@ -113,7 +113,7 @@ sub parse_incoming {
 
 	while($file =~ m{class="left">Fleet:\s(.*?)</td><td\sclass="right">
 			Mission:\s(\w+)</td></tr>(.*?)Total\sShips:\s(\d+)}sxg){
-		my $id = addfleet($1,$2,$3,$scan->{planet},$scan->{tick},$4);
+		my $id = addfleet($1,$2,$3,$scan->{pid},$scan->{tick},$4);
 		$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 	}
 }
@@ -121,7 +121,7 @@ sub parse_incoming {
 sub parse_unit {
 	my ($scan,$file) = @_;
 
-	my $id = addfleet($scan->{type},'Full fleet',$file,$scan->{planet},$scan->{tick});
+	my $id = addfleet($scan->{type},'Full fleet',$file,$scan->{pid},$scan->{tick});
 	$fleetscan->execute($id,$scan->{id}) or die $dbh->errstr;
 }
 
@@ -132,7 +132,7 @@ sub parse_jumpgate {
 		my ($sender) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3,$scan->{tick});
 		($sender) = $dbh->selectrow_array($findoldplanet,undef,$1,$2,$3,$scan->{tick})
 			if ((not defined $sender) && $4 eq 'Return');
-		my $id = addintel($5,$4,$sender,$scan->{planet},$scan->{tick}+$6,$6
+		my $id = addintel($5,$4,$sender,$scan->{pid},$scan->{tick}+$6,$6
 			,undef,$7, $scan->{x} == $1 && $scan->{y} == $2);
 		$intelscan->execute($id,$scan->{id});
 	}
@@ -140,7 +140,7 @@ sub parse_jumpgate {
 }
 
 my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
-	(id,tick,planet,light_fac,medium_fac,heavy_fac,amps,distorters
+	(id,tick,pid,light_fac,medium_fac,heavy_fac,amps,distorters
 		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,seccents
 		,travel,infra,hulls,waves,extraction,covert,mining,total)
 	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
@@ -187,7 +187,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 			next;
 		}
 		my ($planet) = $dbh->selectrow_array($findplanet,undef,$x,$y,$z,$tick);
-		$scan->{planet} = $planet;
+		$scan->{pid} = $planet;
 		unless ($planet){
 			$dbh->pg_rollback_to('scans') or die "rollback didn't work";
 			if ( $x == 0 && $y == 0 && $z == 0 ){

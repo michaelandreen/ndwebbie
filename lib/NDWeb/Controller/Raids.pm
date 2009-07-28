@@ -110,12 +110,12 @@ sub view : Local {
 	$c->stash(raid => $raid->{id});
 	my $planet;
 	if ($c->user->planet){
-		my $query = $dbh->prepare("SELECT value, score,x,y FROM current_planet_stats WHERE id = ?");
+		my $query = $dbh->prepare(q{SELECT value, score,x,y FROM current_planet_stats WHERE pid = ?});
 		$planet = $dbh->selectrow_hashref($query,undef,$c->user->planet);
 	}
 	$c->stash(message => parseMarkup($raid->{message}));
 	$c->stash(landingtick => $raid->{tick});
-	my $targetquery = $dbh->prepare(q{SELECT r.id, r.planet, size, score, value
+	my $targetquery = $dbh->prepare(q{SELECT r.id, pid AS planet, size, score, value
 		, p.x,p.y,p.z, race
 		, p.value - p.size*200 -
 			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 -
@@ -128,9 +128,9 @@ sub view : Local {
 		,amps, distorters, light_fac, medium_fac, heavy_fac
 		,hulls, waves
 		FROM current_planet_stats p
-			JOIN raid_targets r ON p.id = r.planet
-			LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-			LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
+			JOIN raid_targets r USING (pid)
+			LEFT OUTER JOIN current_planet_scans ps USING (pid)
+			LEFT OUTER JOIN current_development_scans ds USING (pid)
 		WHERE r.raid = $1
 			AND NOT COALESCE(p.x = $2 AND p.y = $3,False)
 		ORDER BY size});
@@ -150,7 +150,7 @@ sub view : Local {
 		my $unitscans = $dbh->prepare(q{
 SELECT DISTINCT ON (name) fid, name, tick, amount
 FROM fleets
-WHERE planet = ?
+WHERE pid = ?
 	AND mission = 'Full fleet'
 GROUP BY fid,tick,name,amount
 ORDER BY name,tick DESC
@@ -247,22 +247,22 @@ sub edit : Local {
 	}
 
 	my $targetquery = $dbh->prepare(qq{SELECT r.id,coords(x,y,z),comment,size
-		,score,value,race,planet_status,relationship,r.planet, s.scans
+		,score,value,race,planet_status,relationship,pid AS planet, s.scans
 		,COALESCE(max(rc.wave),0) AS waves
 		FROM raid_targets r
-			JOIN current_planet_stats p ON p.id = r.planet
-			LEFT OUTER JOIN ( SELECT planet, array_accum(s::text) AS scans
-				FROM ( SELECT DISTINCT ON (planet,type) planet,scan_id,type, tick
+			JOIN current_planet_stats p USING (pid)
+			LEFT OUTER JOIN ( SELECT pid, array_agg(s::text) AS scans
+				FROM ( SELECT DISTINCT ON (pid,type) pid,scan_id,type, tick
 					FROM scans
 					WHERE tick > tick() - 24
-					ORDER BY planet,type ,tick DESC
+					ORDER BY pid,type ,tick DESC
 					) s
-				GROUP BY planet
-			) s ON s.planet = r.planet
+				GROUP BY pid
+			) s USING (pid)
 			LEFT OUTER JOIN raid_claims rc ON r.id = rc.target
 		WHERE r.raid = ?
 		GROUP BY r.id,x,y,z,comment,size,score,value,race
-			,planet_status,relationship,comment,r.planet, s.scans
+			,planet_status,relationship,comment,pid, s.scans
 			,sizerank,scorerank,xprank,valuerank
 		ORDER BY $order
 		});
@@ -344,8 +344,8 @@ sub postaddtargets : Local {
 	$sizelimit = -1 unless $sizelimit;
 
 	my $targets = $c->req->param('targets');
-	my $addtarget = $dbh->prepare(qq{INSERT INTO raid_targets(raid,planet) (
-		SELECT ?, id FROM current_planet_stats p
+	my $addtarget = $dbh->prepare(q{INSERT INTO raid_targets(raid,pid) (
+		SELECT ?, pid FROM current_planet_stats p
 		WHERE x = ? AND y = ? AND COALESCE(z = ?,TRUE)
 		AND p.size > ?
 		)});
@@ -367,13 +367,13 @@ sub postaddtargets : Local {
 			push @errors, $@;
 		}
 	}
-	if ($c->req->param('alliance') =~ /^(\d+)$/ && $1 != 1){
-		my $addtarget = $dbh->prepare(qq{INSERT INTO raid_targets(raid,planet) (
-			SELECT ?,id FROM current_planet_stats p WHERE alliance_id = ? AND p.size > ?)
+	if ($c->req->param('alliance') =~ /^(\d+)$/ && $1 ne 'NewDawn'){
+		my $addtarget = $dbh->prepare(q{INSERT INTO raid_targets(raid,pid) (
+			SELECT ?,pid FROM current_planet_stats p WHERE aid= ? AND p.size > ?)
 			});
 		eval {
 			$addtarget->execute($raid,$1,$sizelimit);
-			$c->forward('log',[$raid,"BC adding alliance $1 to raid"]);
+			$c->forward('log',[$raid,"BC adding alliance '$1' to raid"]);
 		};
 		if ($@ =~ /duplicate key value violates unique constraint "raid_targets_raid_key"/){
 			push @errors, "A planet from this alliance has already been added to the raid,"
@@ -524,11 +524,11 @@ sub postcreate : Local {
 		my @gals = $c->req->param('gal');
 		my @targets = $c->req->param('target');
 
-		my $addtarget = $dbh->prepare(q{INSERT INTO raid_targets(raid,planet) (
-			SELECT $1,id FROM current_planet_stats p WHERE (planet_status IN ('','Hostile')
+		my $addtarget = $dbh->prepare(q{INSERT INTO raid_targets(raid,pid) (
+			SELECT $1,pid FROM current_planet_stats p WHERE (planet_status IN ('','Hostile')
 				AND (relationship IS NULL OR relationship IN ('','Hostile')))
-				AND (id = ANY ($2) OR ( size > $4 AND (x,y) IN (
-					SELECT x,y FROM current_planet_stats WHERE id = ANY ($3)))
+				AND (pid = ANY ($2) OR ( size > $4 AND (x,y) IN (
+					SELECT x,y FROM current_planet_stats WHERE pid = ANY ($3)))
 				)
 			)
 		});
@@ -560,7 +560,7 @@ sub targetlist : Local {
 	$order = "p.$order" if $order =~ /rank$/;
 
 	my $query = $dbh->prepare(q{
-SELECT p.id, coords(p.x,p.y,p.z),p.x,p.y,p.alliance, p.score, p.value, p.size, p.xp,nfvalue, nfvalue - sum(pa.value) AS nfvalue2, p.race
+SELECT p.pid AS id, coords(p.x,p.y,p.z),p.x,p.y,p.alliance, p.score, p.value, p.size, p.xp,nfvalue, nfvalue - sum(pa.value) AS nfvalue2, p.race
 FROM current_planet_stats p
 	JOIN (SELECT g.x,g.y, sum(p.value) AS nfvalue
 		FROM galaxies g join current_planet_stats p on g.x = p.x AND g.y = p.y
@@ -568,13 +568,12 @@ FROM current_planet_stats p
 			AND (planet_status IN ('','Hostile')
 				AND (relationship IS NULL OR relationship IN ('','Hostile')))
 		GROUP BY g.x,g.y
-	) g ON p.x = g.x AND p.y = g.y
-	JOIN current_planet_stats pa ON pa.x = g.x AND pa.y = g.y
+	) g USING (x,y)
+	JOIN current_planet_stats pa USING (x,y,aid)
 WHERE p.x <> 200
-	AND p.alliance_id = ANY ($1)
-	AND pa.alliance_id = ANY ($1)
+	AND aid = ANY ($1)
 	AND p.relationship IN ('','Hostile')
-GROUP BY p.id, p.x,p.y,p.z,p.alliance, p.score, p.value, p.size, p.xp, nfvalue,p.race
+GROUP BY p.pid, p.x,p.y,p.z,p.alliance, p.score, p.value, p.size, p.xp, nfvalue,p.race
 	,p.scorerank,p.valuerank,p.sizerank,p.xprank
 ORDER BY
 		} . $order);
@@ -657,13 +656,13 @@ WHERE fid = $1
 sub listAlliances : Private {
 	my ($self, $c) = @_;
 	my @alliances;
-	my $query = $c->model->prepare(q{SELECT id,name FROM alliances
+	my $query = $c->model->prepare(q{SELECT aid AS id,alliance AS name FROM alliances
 		WHERE relationship IN ('','Hostile')
-			AND id IN (SELECT alliance_id FROM planets)
-		 ORDER BY LOWER(name)
+			AND alliance IN (SELECT alliance FROM planets)
+		 ORDER BY LOWER(alliance)
 		});
 	$query->execute;
-	push @alliances,{id => -1, name => ''};
+	push @alliances,{id => '', name => ''};
 	while (my $ally = $query->fetchrow_hashref){
 		push @alliances,$ally;
 	}

@@ -40,7 +40,7 @@ sub list : Local {
 		$order = "score DESC";
 	}
 	my $query = $dbh->prepare(q{
-		SELECT DISTINCT a.id,name,COALESCE(s.score,SUM(p.score)) AS score
+		SELECT aid AS id,alliance AS name,COALESCE(s.score,SUM(p.score)) AS score
 			,COALESCE(s.size,SUM(p.size)) AS size,s.members,count(p.score) AS kmem
 			,COALESCE(SUM(p.score),-1) AS kscore
 			,COALESCE(SUM(p.size),-1) AS ksize
@@ -54,9 +54,9 @@ sub list : Local {
 			,COALESCE(AVG(p.value)::int,-1) AS kvalavg
 		FROM alliances a
 			LEFT OUTER JOIN (SELECT * FROM alliance_stats
-				WHERE tick = (SELECT max(tick) FROM alliance_stats)) s ON s.id = a.id
-			LEFT OUTER JOIN current_planet_stats p ON p.alliance_id = a.id
-		GROUP BY a.id,a.name,s.score,s.size,s.members
+				WHERE tick = (SELECT max(tick) FROM alliance_stats)) s USING (aid)
+			LEFT OUTER JOIN current_planet_stats p USING (alliance,aid)
+		GROUP BY aid,alliance,s.score,s.size,s.members
 		HAVING s.score IS NOT NULL OR count(p.score) > 0
 		ORDER BY
 		} . $order);
@@ -68,7 +68,7 @@ sub edit : Local {
 	my ( $self, $c, $id, $order ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT id,name, relationship FROM alliances WHERE id = ?});
+	my $query = $dbh->prepare(q{SELECT aid AS id,alliance AS name, relationship FROM alliances WHERE aid = ?});
 	my $a = $dbh->selectrow_hashref($query,undef,$id);
 	$c->stash(a => $a);
 
@@ -83,13 +83,13 @@ sub edit : Local {
 	$order .= ' DESC' if $order eq 'hit_us';
 
 	my $members = $dbh->prepare(q{
-		SELECT id, coords(x,y,z), nick, ruler, planet, race, size, score, value, xp
+		SELECT pid AS id, coords(x,y,z), nick, ruler, planet, race, size, score, value, xp
 			,planet_status,hit_us, sizerank, scorerank, valuerank, xprank
 		FROM current_planet_stats p
-		WHERE p.alliance_id = ?
+		WHERE p.alliance = ?
 		ORDER BY
 		} . $order);
-	$members->execute($a->{id});
+	$members->execute($a->{name});
 	$c->stash(members => $members->fetchall_arrayref({}) );
 
 	my $ticks = $c->req->param('ticks') || 48;
@@ -98,14 +98,12 @@ sub edit : Local {
 	$query = $dbh->prepare(intelquery q{
 			o.alliance AS oalliance ,coords(o.x,o.y,o.z) AS ocoords, i.sender
 			,t.alliance AS talliance,coords(t.x,t.y,t.z) AS tcoords, i.target
-		},q{NOT ingal AND (o.alliance_id = $1 OR t.alliance_id = $1)
+		},q{NOT ingal AND (o.alliance = $1 OR t.alliance = $1)
 			AND (i.mission = 'Defend' OR i.mission = 'AllyDef')
-			AND ((( t.alliance_id != o.alliance_id OR t.alliance_id IS NULL OR o.alliance_id IS NULL)))
-			AND i.sender NOT IN (SELECT planet FROM users u NATURAL JOIN groupmembers gm WHERE gid = 8 AND planet IS NOT NULL)
-			AND NOT (i.back IS NOT NULL AND i.back = i.tick + 4)
+			AND COALESCE( t.alliance != o.alliance, TRUE)
 			AND i.tick > (tick() - $2)
 		});
-	$query->execute($a->{id}, $ticks);
+	$query->execute($a->{name}, $ticks);
 	$c->stash(intel => $query->fetchall_arrayref({}) );
 }
 
@@ -113,35 +111,38 @@ sub postallianceupdate : Local {
 	my ( $self, $c, $id, $order ) = @_;
 	my $dbh = $c->model;
 
+	my $query = $dbh->prepare(q{SELECT aid,alliance, relationship FROM alliances WHERE aid = ?});
+	my $a = $dbh->selectrow_hashref($query,undef,$id);
+
 	$dbh->begin_work;
 	my $log = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
 		(SELECT ftid FROM users WHERE uid = $1),$1,$2)
 		});
 	if ($c->req->param('crelationship')){
 		my $value = $c->req->param('relationship');
-		$dbh->do(q{UPDATE alliances SET relationship = ? WHERE id =?}
+		$dbh->do(q{UPDATE alliances SET relationship = ? WHERE aid =?}
 			,undef,$value,$id);
 		$log->execute($c->user->id
-			,"HC set alliance: $id relationship: $value");
+			,"HC set alliance: $a->{alliance} ($id) relationship: $value");
 	}
 	my $coords = $c->req->param('coords');
-	my $findplanet = $dbh->prepare(q{SELECT id FROM current_planet_stats
+	my $findplanet = $dbh->prepare(q{SELECT pid FROM current_planet_stats
 		WHERE x = ? AND y = ? AND z = ?});
 	my $addplanet = $dbh->prepare(q{
-		UPDATE planets SET alliance_id = $2, nick = coalesce($3,nick)
-		WHERE id = $1;
+		UPDATE planets SET alliance = $2, nick = coalesce($3,nick)
+		WHERE pid = $1;
 		});
 	my $text = '';
 	while ($coords =~ m/(\d+):(\d+):(\d+)(?:\s+nick=(\S+))?/g){
 		my ($planet) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3);
-		$addplanet->execute($planet,$id,$4);
+		$addplanet->execute($planet,$a->{alliance},$4);
 		my $nick = '';
 		$nick = "(nick $4)" if defined $4;
 		$text .= "($planet) $1:$2:$3 $nick\n";
 	}
 	if ($text){
 		$log->execute($c->user->id
-			,"HC added the following planets to alliance $id:\n $text");
+			,"HC added the following planets to alliance $a->{alliance} ($id):\n $text");
 	}
 	$dbh->commit;
 
@@ -152,20 +153,23 @@ sub postremoveallplanets : Local {
 	my ( $self, $c, $id, $order ) = @_;
 	my $dbh = $c->model;
 
+	my $query = $dbh->prepare(q{SELECT aid,alliance, relationship FROM alliances WHERE aid = ?});
+	my $a = $dbh->selectrow_hashref($query,undef,$id);
+
 	$dbh->begin_work;
 	my $log = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
 		(SELECT ftid FROM users WHERE uid = $1),$1,$2)
 		});
-	my ($coords) = $dbh->selectrow_array(q{SELECT CONCAT(coords(x,y,z) || ' ') 
-			FROM current_planet_stats where alliance_id = $1
-		},undef,$id);
+	my ($coords) = $dbh->selectrow_array(q{SELECT array_to_string(array_agg(coords(x,y,z)),' ')
+			FROM current_planet_stats where alliance = $1
+		},undef,$a->{alliance});
 	my $removeplanets = $dbh->prepare(q{
-		UPDATE planets SET alliance_id = NULL
-		WHERE alliance_id = $1;
+		UPDATE planets SET alliance = NULL
+		WHERE alliance = $1;
 	});
-	$removeplanets->execute($id);
+	$removeplanets->execute($a->{alliance});
 	$log->execute($c->user->id
-		,"HC cleaned alliance $id :\n\n$coords");
+		,"HC cleaned alliance $a->{alliance} (id) :\n\n$coords");
 	$dbh->commit;
 
 	$c->res->redirect($c->uri_for('edit',$id));
@@ -210,48 +214,17 @@ sub resources : Local {
 		$order = "resplanet DESC";
 	}
 
-	my $query = $dbh->prepare(qq{
-		SELECT a.id,a.name,a.relationship,s.members,s.score,s.size
-		,r.resources,r.hidden,r.planets
-		,(resources/planets)::bigint AS resplanet
-		,(hidden/planets)::bigint AS hidplanet
-		,(score + (resources / 300) + (hidden / 100))::bigint AS nscore
-		,(SELECT sum(score)::bigint FROM (
-SELECT score + (metal+crystal+eonium)/300 + hidden/100 AS score
-FROM current_planet_stats p
-	JOIN current_planet_scans ps ON p.id = ps.planet
-WHERE alliance_id = r.id
-ORDER BY score DESC
-LIMIT 60) a
-		) AS nscore2
-		,(SELECT sum(score)::bigint FROM (
-SELECT score + (metal+crystal+eonium)/300 + hidden/100 + (endtick()-tick())*(
-		250*size + COALESCE(metal_ref + crystal_ref + eonium_ref,7)* 1000
-		+ CASE extraction WHEN 0 THEN 3000 WHEN 1 THEN 11500 ELSE COALESCE(extraction,3)*3000*3 END
-	)*(1.35+0.005*COALESCE(fincents,20))/100 AS score
-FROM current_planet_stats p
-	JOIN current_planet_scans ps ON p.id = ps.planet
-	LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
-WHERE alliance_id = r.id
-ORDER BY score DESC
-LIMIT 60) a
-		) AS nscore3
-		FROM (SELECT alliance_id AS id,sum(metal+crystal+eonium) AS resources
-				, sum(hidden) AS hidden, count(*) AS planets
-				FROM planets p join current_planet_scans c ON p.id = c.planet
-				GROUP by alliance_id
-			) r
-			NATURAL JOIN alliances a
-			LEFT OUTER JOIN (SELECT *,LEAST(members,60) AS scoremem FROM alliance_stats
-				WHERE tick = (SELECT max(tick) FROM alliance_stats)) s ON a.id = s.id
-		ORDER BY $order
-		});
+	my $query = $dbh->prepare(q{
+SELECT aid AS id,alliance AS name,relationship,members,score,size
+	,resources,hidden,planets
+	,(resources/planets)::bigint AS resplanet
+	,(hidden/planets)::bigint AS hidplanet
+	, nscore, nscore2, nscore3
+FROM alliance_resources
+ORDER BY } . $order
+	);
 	$query->execute;
-	my @alliances;
-	while (my $alliance = $query->fetchrow_hashref){
-		push @alliances,$alliance;
-	}
-	$c->stash(alliances => \@alliances);
+	$c->stash(alliances => $query->fetchall_arrayref({}));
 }
 
 

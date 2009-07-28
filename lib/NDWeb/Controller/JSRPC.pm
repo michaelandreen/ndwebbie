@@ -41,12 +41,12 @@ sub update : Local {
 		my ($timestamp) = $dbh->selectrow_array(q{SELECT MAX(modified)::timestamp AS modified
 			FROM raid_targets WHERE raid = $1},undef,$raid->{id});
 		$c->stash(timestamp => $timestamp);
-		$targets = $dbh->prepare(q{SELECT r.id,r.planet FROM raid_targets r
+		$targets = $dbh->prepare(q{SELECT r.id,r.pid FROM raid_targets r
 			WHERE r.raid = ? AND modified > ?
 		});
 		$targets->execute($raid->{id},$from);
 	}elsif($target){
-		$targets = $dbh->prepare(q{SELECT r.id,r.planet FROM raid_targets r
+		$targets = $dbh->prepare(q{SELECT r.id,r.pid FROM raid_targets r
 			WHERE r.raid = $1 AND r.id = $2
 		});
 		$targets->execute($raid->{id},$target);
