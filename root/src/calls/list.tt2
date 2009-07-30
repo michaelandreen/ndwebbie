@@ -1,6 +1,6 @@
 [% META title = 'Defense calls' %]
 <table>
-	<tr><th>Call</th><th>DC</th><th>Def Fleets</th><th>Member (defprio)</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>ETA</th><th>Alliance</th><th>Attackers</th></tr>
+	<tr><th>Call</th><th>Status</th><th>DC</th><th>Def Fleets</th><th>Member (defprio)</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>ETA</th><th>Alliance</th><th>Attackers</th></tr>
 [% newday = game.tick %]
 [% FOR call IN calls %]
 	[% WHILE newday - 24 > call.landing_tick %]
@@ -8,7 +8,8 @@
 	<tr align="center"><td colspan="4">New day</td></tr>
 	[% END %]
 	<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-		<td class="[% UNLESS call.dc %]Hostile[%END%]"><a href="[% c.uri_for('edit',call.id) %]">[% call.id %]</a></td>
+		<td class="[% UNLESS call.dc %]Hostile[%END%]"><a href="[% c.uri_for('edit',call.call) %]">[% call.call %]</a></td>
+		<td>[% call.status %]</td>
 		<td>[% call.dc %]</td>
 		<td>[% call.fleets %]</td>
 		[% prio = call.defprio < minprio ? 'LowestPrio' :

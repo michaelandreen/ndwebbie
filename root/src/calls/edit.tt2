@@ -1,7 +1,7 @@
 [% META title = 'Edit call' %]
 
-<form action="[% c.uri_for('postcallupdate',call.id) %]" method="post">
-<fieldset> <legend>Call details, call# [% call.id %]</legend>
+<form action="[% c.uri_for('postcallupdate',call.call) %]" method="post">
+<fieldset> <legend>Call details, call# [% call.call %]</legend>
 <table>
 <tr>
 <td>
@@ -23,17 +23,18 @@
 	<li>Calc: <input type="text" name="calc" value="[% call.calc | html %]">
 		<input type="checkbox" name="ccalc"></li>
 	<li>Change Notes? <input type="checkbox" name="cinfo"></li>
+	<li>Status: <select name="status">[% FOR s IN statuses %]
+		<option value="[% s.status %]"[% IF s.status == call.status %] selected[% END %]>[% s.status %]</option>
+		[% END %]</select><input type="checkbox" name="cstatus"></li>
 	<li><input type="submit" name="cmd" value="Submit"></li>
 	<li><input type="submit" name="cmd" value="Take call"></li>
-	<li><input type="submit" name="cmd" value="[% cover %] call"></li>
-	<li><input type="submit" name="cmd" value="[% ignore %] call"></li>
 </ul></td>
 </tr>
 </table>
 </fieldset>
 </form>
 <fieldset><legend>Attackers:</legend>
-<form action="[% c.uri_for('postattackerupdate',call.id) %]" method="post">
+<form action="[% c.uri_for('postattackerupdate',call.call) %]" method="post">
 	<table>
 	<tr>
 	<th></th>
@@ -49,18 +50,18 @@
 	</tr>
 [% FOR a IN attackers %]
 	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-		<td><input type="button" onclick="$('#attacker[% a.id %]').toggle()" value="&dArr;" title="Show fleets"></td>
+		<td><input type="button" onclick="$('#attacker[% a.inc %]').toggle()" value="&dArr;" title="Show fleets"></td>
 		<td><a href="[% c.uri_for('/stats/planet',a.planet) %]">[% a.coords %]</a></td>
 		<td class="[% a.planet_status %]">[% a.planet_status %]</td>
 		<td class="[% a.relationship %]">[% a.alliance %] ([% a.relationship %])</td>
 		<td>[% a.race %]</td>
 		<td>[% a.eta %]</td>
 		<td>[% a.amount %]</td>
-		<td><input class="coord" type="text" name="shiptype:[% a.id %]" value="[% a.shiptype %]"></td>
+		<td><input class="coord" type="text" name="shiptype:[% a.inc %]" value="[% a.shiptype %]"></td>
 		<td>[% a.fleet %]</td>
-		<td><input type="checkbox" name="change:[% a.id %]"></td>
+		<td><input type="checkbox" name="change:[% a.inc %]"></td>
 	</tr>
-	<tr id="attacker[% a.id %]" class="hidden">
+	<tr id="attacker[% a.inc %]" class="hidden">
 	<td></td>
 	<td colspan="8">
 	[% PROCESS inc/missionlist.tt2 missions=a.missions %]
@@ -88,7 +89,7 @@
 </fieldset>
 [% END %]
 
-<form action="[% c.uri_for('postcallcomment', call.id) %]" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
+<form action="[% c.uri_for('postcallcomment', call.call) %]" method="post"><fieldset class="forum-post"> <legend>New Reply</legend>
 	<textarea rows="10" cols="60" name="message"></textarea>
 	<input type="submit" value="Submit">
 </fieldset></form>

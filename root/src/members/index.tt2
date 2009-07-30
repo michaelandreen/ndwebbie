@@ -53,10 +53,11 @@
 [% END %]
 [% IF calls %]
 <table>
-	<tr><th>Call</th><th>DC</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>Current eta</th><th>Inital eta</th><th>Attackers</th></tr>
+	<tr><th>Call</th><th>Status</th><th>DC</th><th>Landing tick</th><th>Races</th><th>Amount</th><th>Shiptypes</th><th>Current eta</th><th>Inital eta</th><th>Attackers</th></tr>
 	[% FOR call IN calls %]
 	<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-		<td class="[% UNLESS call.dc %]Hostile[%END%]"><a href="[% c.uri_for('/calls/edit',call.id) %]">[% call.id %]</a></td>
+		<td class="[% UNLESS call.dc %]Hostile[%END%]"><a href="[% c.uri_for('/calls/edit',call.call) %]">[% call.call %]</a></td>
+		<td>[% call.status %]</td>
 		<td>[% call.dc %]</td>
 		<td>[% call.landing_tick %]</td>
 		<td>[% call.race.unique.join('/') %]</td>

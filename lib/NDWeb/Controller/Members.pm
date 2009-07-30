@@ -61,6 +61,7 @@ sub index : Path : Args(0) {
 	my $calls = $dbh->prepare(q{
 SELECT * FROM defcalls
 WHERE uid = $1 AND landing_tick >= tick()
+ORDER BY landing_tick DESC
 		});
 	$calls->execute($c->user->id);
 	$c->stash(calls => $calls->fetchall_arrayref({}) );
@@ -423,8 +424,8 @@ sub postconfirmation : Local {
 			WHERE c.uid = ? AND r.tick+c.wave-1 = ? AND t.pid = ?
 				AND r.open AND not r.removed
 			});
-		my $finddefensetarget = $dbh->prepare(q{SELECT c.id FROM calls c
-				JOIN users u ON c.member = u.uid
+		my $finddefensetarget = $dbh->prepare(q{SELECT call FROM calls c
+				JOIN users u USING (uid)
 			WHERE u.pid = $1 AND c.landing_tick = $2
 		});
 		my $informDefChannel = $dbh->prepare(q{INSERT INTO defense_missions
@@ -524,7 +525,7 @@ sub postconfirmation : Local {
 				}
 			}elsif ($mission eq 'Defend'){
 				my $call = $findtarget->fetchrow_hashref;
-				$informDefChannel->execute($fleet,$call->{id});
+				$informDefChannel->execute($fleet,$call->{call});
 			}
 
 			$log->execute($c->user->id,"Pasted confirmation for $mission mission to $x:$y:$z, landing tick $tick");
