@@ -223,7 +223,12 @@ sub edit : Local {
 
 	$c->stash(errors => $c->flash->{errors});
 
-	my $groups = $dbh->prepare(q{SELECT g.gid,g.groupname,raid FROM groups g LEFT OUTER JOIN (SELECT gid,raid FROM raid_access WHERE raid = ?) AS ra ON g.gid = ra.gid WHERE g.attack});
+	my $groups = $dbh->prepare(q{
+SELECT g.gid,g.groupname,raid
+FROM groups g
+	LEFT OUTER JOIN (SELECT gid,raid FROM raid_access WHERE raid = ?) AS ra USING (gid)
+WHERE gid IN (SELECT gid FROM group_roles WHERE role = 'attack_menu')
+		});
 	$groups->execute($raid ? $raid->{id} : undef);
 
 	my @addgroups;
@@ -312,24 +317,19 @@ sub postraidupdate : Local {
 
 	$c->forward('log',[$raid, 'BC updated raid']);
 
-	my $groups = $dbh->prepare(q{SELECT gid,groupname FROM groups WHERE attack});
-	my $delgroup = $dbh->prepare(q{DELETE FROM raid_access WHERE raid = ? AND gid = ?});
-	my $addgroup = $dbh->prepare(q{INSERT INTO raid_access (raid,gid) VALUES(?,?)});
+	my $delgroups = $dbh->prepare(q{DELETE FROM raid_access WHERE raid = $1 AND gid = ANY($2)});
+	my $addgroups = $dbh->prepare(q{INSERT INTO raid_access (raid,gid) VALUES($1,unnest($2::text[]))});
 
-	$groups->execute();
-	while (my $group = $groups->fetchrow_hashref){
-		my $query;
-		next unless defined $c->req->param($group->{gid});
-		my $command = $c->req->param($group->{gid});
-		if ( $command eq 'remove'){
-			$query = $delgroup;
-		}elsif($command eq 'add'){
-			$query = $addgroup;
-		}
-		if ($query){
-			$query->execute($raid,$group->{gid});
-			$c->forward('log',[$raid, "BC '$command' access for $group->{gid} ($group->{groupname})"]);
-		}
+	if ($c->req->param('add_group')){
+		my @groups = $c->req->param('add_group');
+		warn "GROUPS!!!!: @groups";
+		$addgroups->execute($raid,\@groups);
+		$c->forward('log',[$raid, "BC added access to groups: @groups"]);
+	}
+	if ($c->req->param('remove_group')){
+		my @groups = $c->req->param('remove_group');
+		$delgroups->execute($raid,\@groups);
+		$c->forward('log',[$raid, "BC removed access for groups: @groups"]);
 	}
 	$dbh->commit;
 
@@ -535,7 +535,7 @@ sub postcreate : Local {
 		$addtarget->execute($raid,\@targets,\@gals,$c->req->param('sizelimit'));
 		$c->forward('log',[$raid,"BC added planets (@targets) and the gals for (@gals)"]);
 	}
-	$dbh->do(q{INSERT INTO raid_access (raid,gid) VALUES(?,2)}
+	$dbh->do(q{INSERT INTO raid_access (raid,gid) VALUES(?,'M')}
 		,undef,$raid);
 	$dbh->commit;
 

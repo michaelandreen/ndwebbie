@@ -237,7 +237,7 @@ sub members : Local {
 				JOIN raid_targets rt ON r.id = rt.raid) rt ON rt.pid = i.target
 			AND (rt.tick + 12) > i.tick AND rt.tick <= i.tick
 		LEFT OUTER JOIN raid_claims rc ON rt.id = rc.target AND rc.uid = u.uid AND i.tick = rt.tick + rc.wave - 1
-		WHERE gm.gid = 2
+		WHERE gm.gid = 'M'
 		GROUP BY u.uid,u.username,u.attack_points, u.defense_points,n.tick
 		ORDER BY }. " $order DESC" );
 	$query->execute;

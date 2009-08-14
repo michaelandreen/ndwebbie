@@ -472,7 +472,7 @@ sub findUsers : Private {
 
 	my $query = $dbh->prepare(q{SELECT uid,username FROM users
 		WHERE uid > 0 AND uid IN (SELECT uid FROM groupmembers)
-		ORDER BY LOWER(username)});
+		ORDER BY username});
 	$query->execute;
 
 	$c->stash(users => $query->fetchall_arrayref({}) );

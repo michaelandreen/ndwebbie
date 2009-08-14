@@ -31,7 +31,7 @@ sub load {
 
 	if (exists $authinfo->{id}){
 		$self->{id} = $dbh->selectrow_array(q{
-			SELECT uid FROM users WHERE lower(username) = lower(?)
+			SELECT uid FROM users WHERE username = ?
 		},undef,$authinfo->{id});
 	}elsif (exists $authinfo->{uid}){
 		$self->{id} = $authinfo->{uid};

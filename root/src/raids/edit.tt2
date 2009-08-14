@@ -17,7 +17,7 @@
 			<tr><th>Group</th><th>Remove</th></tr>
 			[% FOR g IN removegroups %]
 			<tr><td>[% g.groupname %]</td><td><input type="checkbox"
-				name="[% g.gid %]" value="remove"></td>
+				name="remove_group" value="[% g.gid %]"></td>
 			</tr>
 			[% END %]
 			</table>
@@ -28,7 +28,7 @@
 			<tr><th>Group</th><th>Add</th></tr>
 			[% FOR g IN addgroups %]
 			<tr><td>[% g.groupname %]</td><td><input type="checkbox"
-				name="[% g.gid %]" value="add"></td>
+				name="add_group" value="[% g.gid %]"></td>
 			</tr>
 			[% END %]
 			</table>

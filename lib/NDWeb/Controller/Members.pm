@@ -261,7 +261,7 @@ SELECT username,defense_points,attack_points
 	,(attack_points+defense_points+scan_points/20)::NUMERIC(4,0) as total_points
 	, count(NULLIF(rc.launched,FALSE)) AS raid_points
 FROM users_defprio u LEFT OUTER JOIN raid_claims rc USING (uid)
-WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
+WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 'M')
 GROUP BY username,defense_points,attack_points,scan_points,humor_points,defprio
 ORDER BY } . "$order $limit"
 	);
@@ -555,13 +555,13 @@ SELECT uid,pid AS planet,username, to_char(NOW() AT TIME ZONE timezone,'HH24:MI'
 	,sms_note, call_if_needed, race, timezone
 FROM users u
 	JOIN current_planet_stats p USING (pid)
-WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 2)
-ORDER BY call_if_needed DESC, LOWER(username)
+WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = 'M')
+ORDER BY call_if_needed DESC, username
 		});
 	$defenders->execute;
 
 	my $available = $dbh->prepare(q{
-SELECT ship,amount FROM available_ships WHERE planet = $1
+SELECT ship,amount FROM available_ships WHERE pid = $1
 		});
 
 	my @members;

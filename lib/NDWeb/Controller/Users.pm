@@ -28,11 +28,11 @@ sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(qq{SELECT u.uid,username,TRIM(',' FROM concat(g.groupname||',')) AS groups
-		FROM users u LEFT OUTER JOIN (groupmembers gm NATURAL JOIN groups g) ON gm.uid = u.uid
-		WHERE u.uid > 0
+	my $query = $dbh->prepare(qq{SELECT uid,username,array_to_string(array_agg(g.groupname),', ') AS groups
+		FROM users u LEFT OUTER JOIN (groupmembers gm NATURAL JOIN groups g) USING (uid)
+		WHERE uid > 0
 		GROUP BY u.uid,username
-		ORDER BY lower(username)});
+		ORDER BY username});
 	$query->execute;
 
 	my @users;
@@ -49,10 +49,12 @@ sub edit : Local {
 	$c->forward('findUser');
 	$user = $c->stash->{u};
 
-	my $groups = $dbh->prepare(q{SELECT g.gid,g.groupname,uid 
-		FROM groups g 
-		LEFT OUTER JOIN (SELECT gid,uid FROM groupmembers WHERE uid = ?)
-			AS gm ON g.gid = gm.gid
+	my $groups = $dbh->prepare(q{
+SELECT g.gid,g.groupname,uid
+FROM groups g
+	LEFT OUTER JOIN (SELECT gid,uid FROM groupmembers WHERE uid = ?)
+	AS gm USING(gid)
+WHERE gid <> ''
 		});
 	$groups->execute($user->{uid});
 
@@ -84,8 +86,8 @@ sub updateUser : Local {
 			(SELECT ftid FROM users WHERE uid = $1),$1,$2)
 			});
 
-		my $delgroup = $dbh->prepare(q{DELETE FROM groupmembers WHERE uid = ? AND gid = ?});
-		my $addgroup = $dbh->prepare(q{INSERT INTO groupmembers (uid,gid) VALUES(?,?)});
+		my $delgroups = $dbh->prepare(q{DELETE FROM groupmembers WHERE uid = $1 AND gid = ANY($2) });
+		my $addgroups = $dbh->prepare(q{INSERT INTO groupmembers (uid,gid) (SELECT $1,unnest($2::text[]))});
 		for my $param ($c->req->param()){
 			if ($param =~ /^c:(planet|\w+_points|hostmask|info|username|email|sms)$/){
 				my $column = $1;
@@ -103,19 +105,14 @@ sub updateUser : Local {
 				$dbh->do(qq{UPDATE users SET $column = ? WHERE uid = ? }
 					,undef,$value,$user->{uid});
 				$log->execute($c->user->id,"HC changed $column from $user->{$column} to $value for user: $user->{uid} ($user->{username})");
-			}elsif ($param =~ /^gr:(\d+)$/){
-				my $query;
-				if ($c->req->param($param) eq 'remove'){
-					$query = $delgroup;
-				}elsif($c->req->param($param) eq 'add'){
-					$query = $addgroup;
-				}
-				if ($query){
-					$query->execute($user->{uid},$1);
-					my ($action,$a2) = ('added','to');
-					($action,$a2) = ('removed','from') if $c->req->param($param) eq 'remove';
-					$log->execute($c->user->id,"HC $action user: $user->{uid} ($user->{username}) $a2 group: $1");
-				}
+			}elsif ($param eq 'add_group'){
+				my @groups = $c->req->param($param);
+				$addgroups->execute($user->{uid},\@groups);
+				$log->execute($c->user->id,"HC added user: $user->{uid} ($user->{username}) to groups: @groups");
+			}elsif ($param eq 'remove_group'){
+				my @groups = $c->req->param($param);
+				$delgroups->execute($user->{uid},\@groups);
+				$log->execute($c->user->id,"HC removed user: $user->{uid} ($user->{username}) from groups: @groups");
 			}
 		}
 		$dbh->commit;
@@ -151,7 +148,7 @@ sub mail : Local {
 	$c->stash(subject => $c->flash->{subject});
 	$c->stash(message => $c->flash->{message});
 
-	my $groups = $dbh->prepare(q{SELECT gid,groupname FROM groups WHERE gid > 0 ORDER BY gid});
+	my $groups = $dbh->prepare(q{SELECT gid,groupname FROM groups WHERE gid <> '' ORDER BY gid});
 	$groups->execute;
 	my @groups;
 	push @groups,{gid => -1, groupname => 'Pick a group'};
