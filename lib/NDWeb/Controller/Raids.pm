@@ -6,7 +6,6 @@ use parent 'Catalyst::Controller';
 use feature ':5.10';
 
 use POSIX qw/floor pow/;
-use List::Util qw/min/;
 use NDWeb::Include;
 use ND::Include;
 
