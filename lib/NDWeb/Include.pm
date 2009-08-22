@@ -27,7 +27,7 @@ use CGI qw/:standard/;
 our @ISA = qw/Exporter/;
 
 our @EXPORT = qw/parseMarkup
-	intelquery html_escape
+	html_escape
 	comma_value array_expand/;
 
 sub html_escape($) {
@@ -74,18 +74,6 @@ sub parseMarkup ($) {
 	$text =~ s/\x{3}\d\d?//g; #mirc color TODO: possibly match until \x{0F} and change to [color] block
 	$text =~ s/[^\x{9}\x{A}\x{D}\x{20}-\x{D7FF}\x{E000}-\x{FFFD}\x{10000}-\x{10FFFF}]//g;
 	return $text;
-}
-
-sub intelquery {
-	my ($columns,$where) = @_;
-	return qq{
-SELECT $columns, i.mission, i.tick AS landingtick,MIN(i.eta) AS eta, i.amount, i.ingal, u.username
-FROM (intel i NATURAL JOIN users u)
-	JOIN current_planet_stats t ON i.target = t.pid
-	JOIN current_planet_stats o ON i.sender = o.pid
-WHERE $where
-GROUP BY i.tick,i.mission,t.x,t.y,t.z,o.x,o.y,o.z,i.amount,i.ingal,u.username,t.alliance,o.alliance,t.nick,o.nick,i.sender,i.target
-ORDER BY i.tick DESC, i.mission};
 }
 
 sub array_expand ($) {

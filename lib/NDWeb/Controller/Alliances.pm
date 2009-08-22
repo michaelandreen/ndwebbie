@@ -4,8 +4,6 @@ use strict;
 use warnings;
 use parent 'Catalyst::Controller';
 
-use NDWeb::Include;
-
 =head1 NAME
 
 NDWeb::Controller::Alliances - Catalyst Controller
@@ -95,13 +93,15 @@ sub edit : Local {
 	my $ticks = $c->req->param('ticks') || 48;
 	$c->stash(showticks => $ticks);
 
-	$query = $dbh->prepare(intelquery q{
-			o.alliance AS oalliance ,coords(o.x,o.y,o.z) AS ocoords, i.sender
-			,t.alliance AS talliance,coords(t.x,t.y,t.z) AS tcoords, i.target
-		},q{NOT ingal AND (o.alliance = $1 OR t.alliance = $1)
-			AND (i.mission = 'Defend' OR i.mission = 'AllyDef')
-			AND COALESCE( t.alliance != o.alliance, TRUE)
-			AND i.tick > (tick() - $2)
+	$query = $dbh->prepare(q{
+SELECT salliance, scoords, sender, talliance, tcoords, target
+	,mission, tick AS landingtick, eta, amount, ingal, username
+FROM full_intel
+WHERE NOT ingal AND (salliance = $1 OR talliance = $1)
+	AND (mission = 'Defend' OR mission = 'AllyDef')
+	AND COALESCE( talliance <> salliance, TRUE)
+	AND tick > (tick() - $2)
+ORDER BY tick DESC, mission
 		});
 	$query->execute($a->{name}, $ticks);
 	$c->stash(intel => $query->fetchall_arrayref({}) );

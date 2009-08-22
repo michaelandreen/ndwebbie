@@ -69,8 +69,8 @@
 	</tr>
 [% FOR i IN incoming %]
 	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-	<td>[% i.oalliance %]</td>
-	<td><a href="[% c.uri_for('planet',i.sender) %]">[% i.ocoords %]</a></td>
+	<td>[% i.salliance %]</td>
+	<td><a href="[% c.uri_for('planet',i.sender) %]">[% i.scoords %]</a></td>
 	<td class="[% i.ingal ? 'ingal' : i.mission %]">[% i.mission %]</td>
 	<td align="center">[% i.landingtick %]</td>
 	<td align="center">[% i.eta %]</td>

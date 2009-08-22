@@ -31,13 +31,14 @@ sub index :Path : Args(0) {
 	my $ticks = $c->req->param('ticks') || 48;
 	$c->stash(showticks => $ticks);
 
-	my $query = $dbh->prepare(intelquery q{
-			o.alliance AS oalliance ,coords(o.x,o.y,o.z) AS ocoords, i.sender
-			,t.alliance AS talliance,coords(t.x,t.y,t.z) AS tcoords, i.target
-		},q{not ingal
-			AND ((COALESCE( t.alliance != o.alliance,TRUE) AND (i.mission = 'Defend' OR i.mission = 'AllyDef' ))
-				OR ( t.alliance = o.alliance AND i.mission = 'Attack'))
-			AND i.tick > (tick() - $1)
+	my $query = $dbh->prepare(q{
+SELECT salliance, scoords, sender, talliance, tcoords, target
+	,mission, tick AS landingtick, eta, amount, ingal, username
+FROM full_intel
+WHERE NOT ingal AND tick > (tick() - $1)
+	AND ((COALESCE( talliance <> salliance,TRUE) AND (mission = 'Defend' OR mission = 'AllyDef' ))
+		OR ( talliance = salliance AND mission = 'Attack'))
+ORDER BY tick DESC, mission
 		});
 	$query->execute($ticks);
 	$c->stash(intel => $query->fetchall_arrayref({}) );
@@ -82,15 +83,23 @@ sub planet : Local {
 	$c->stash(govs => ["","Feu", "Dic", "Dem","Uni"]);
 	$c->stash(planetstatus => ["","Friendly", "NAP", "Hostile"]);
 
-	$query = $dbh->prepare(intelquery q{i.sender
-			,o.alliance AS oalliance,coords(o.x,o.y,o.z) AS ocoords
-		},q{i.target = $1 AND i.tick > (tick() - $2)});
+	$query = $dbh->prepare(q{
+SELECT salliance, scoords, sender
+	,mission, tick AS landingtick, eta, amount, ingal, username
+FROM full_intel
+WHERE target = $1 AND tick > (tick() - $2)
+ORDER BY tick DESC, mission
+		});
 	$query->execute($id,$ticks);
 	$c->stash(incoming => $query->fetchall_arrayref({}) );
 
-	$query = $dbh->prepare(intelquery q{i.target
-			,t.alliance AS talliance,coords(t.x,t.y,t.z) AS tcoords
-		},q{i.sender = $1 AND i.tick > (tick() - $2)});
+	$query = $dbh->prepare(q{
+SELECT talliance, tcoords, target
+	,mission, tick AS landingtick, eta, amount, ingal, username
+FROM full_intel
+WHERE sender = $1 AND tick > (tick() - $2)
+ORDER BY tick DESC, mission
+		});
 	$query->execute($id,$ticks);
 	$c->stash(outgoing => $query->fetchall_arrayref({}) );
 
