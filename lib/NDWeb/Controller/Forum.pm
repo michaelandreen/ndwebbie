@@ -487,8 +487,8 @@ sub findThread : Private {
 		FROM forum_boards fb
 			NATURAL JOIN forum_threads ft
 			NATURAL JOIN forum_categories fc
-			LEFT OUTER JOIN (SELECT * FROM forum_access
-				WHERE gid IN (SELECT groups($2))
+			LEFT OUTER JOIN (SELECT fa.* FROM forum_access fa
+				JOIN (SELECT groups($2) AS gid) g USING (gid)
 			) fa USING (fbid)
 		WHERE ft.ftid = $1 AND (fa.post IS NOT NULL
 			OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $2))
