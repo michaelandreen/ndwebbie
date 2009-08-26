@@ -137,15 +137,26 @@ sub postowncoords : Local {
 	if ($c->user->planet){
 		$c->flash(error => 'You already have a planet set.'
 			.' Contact a HC if they need to be changed');
-	}elsif ($c->req->param('planet') =~ m/(\d+)\D+(\d+)\D+(\d+)/){
+	}elsif (my ($x,$y,$z) = $c->req->param('planet') =~ m/(\d+)\D+(\d+)\D+(\d+)/){
 		my $planet = $dbh->selectrow_array(q{SELECT planetid($1,$2,$3,TICK())
-			},undef,$1,$2,$3);
+			},undef,$x,$y,$z);
 
 		if ($planet){
-			$dbh->do(q{UPDATE users SET planet = ? WHERE uid = ?
-				},undef, $planet , $c->user->id);
+			eval {
+				$dbh->do(q{UPDATE users SET pid = ? WHERE uid = ?
+					},undef, $planet , $c->user->id);
+			};
+			given ($@){
+				when (''){}
+				when (/duplicate key value violates/){
+					$c->flash(error => "The coords $x:$y:$z are already in use. Talk to hc if these are really your coords.")
+				}
+				default {
+					$c->flash(error => $@)
+				}
+			}
 		}else{
-			$c->flash(error => "No planet at coords: $1:$2:$3");
+			$c->flash(error => "No planet at coords: $x:$y:$z");
 		}
 	}else{
 		$c->flash(error => $c->req->param('planet') . " are not valid coords.");
