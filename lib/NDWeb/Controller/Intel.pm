@@ -103,6 +103,17 @@ ORDER BY tick DESC, mission
 	$query->execute($id,$ticks);
 	$c->stash(outgoing => $query->fetchall_arrayref({}) );
 
+	$query = $dbh->prepare(q{
+SELECT tag, array_to_string(array_agg(username),', ') AS nicks, to_char(max(time),'YYYY-MM-DD HH24:MI') AS time
+FROM planet_tags pt
+	JOIN users u USING (uid)
+WHERE pt.pid = $1
+GROUP BY tag
+ORDER BY time DESC
+		});
+	$query->execute($id);
+	$c->stash(tags => $query->fetchall_arrayref({}) );
+
 }
 
 sub channels : Local {

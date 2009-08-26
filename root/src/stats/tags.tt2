@@ -1,0 +1,15 @@
+[% META title = 'Planet tags' %]
+<p> Picked tags: [% tags.join(', ') %]
+[% cloud %]
+
+<table class="stats">
+	<tr>
+		<th>Coords</th><th>Tags</th>
+	</tr>
+[% FOR p IN planets %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td><a href="[% c.uri_for('planet',p.pid) %]">[% p.coords %]</a></td>
+	<td>[% p.tags %]</td>
+	</tr>
+[% END %]
+</table>

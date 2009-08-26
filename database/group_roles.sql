@@ -40,6 +40,7 @@ INSERT INTO roles VALUES('intel_naps');
 INSERT INTO roles VALUES('textexport_alliance');
 INSERT INTO roles VALUES('stats_find_nick');
 INSERT INTO roles VALUES('members_defenders');
+INSERT INTO roles VALUES('stats_tags_all');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
@@ -55,13 +56,16 @@ INSERT INTO group_roles (gid,role) VALUES(6,'calls_list');
 INSERT INTO group_roles (gid,role) VALUES(6,'calls_edit');
 INSERT INTO group_roles (gid,role) VALUES(6,'calls_leeches');
 INSERT INTO group_roles (gid,role) VALUES(6,'members_defenders');
+INSERT INTO group_roles (gid,role) VALUES('D','stats_tags_all');
 
 INSERT INTO group_roles (gid,role) VALUES(4,'bc_menu');
 INSERT INTO group_roles (gid,role) VALUES(4,'raids_info');
 INSERT INTO group_roles (gid,role) VALUES(4,'raids_edit');
+INSERT INTO group_roles (gid,role) VALUES('B','stats_tags_all');
 
 INSERT INTO group_roles (gid,role) VALUES(5,'intel_menu');
 INSERT INTO group_roles (gid,role) VALUES(5,'intel');
+INSERT INTO group_roles (gid,role) VALUES('I','stats_tags_all');
 
 INSERT INTO group_roles (gid,role) VALUES(8,'no_fleet_update');
 
@@ -110,3 +114,7 @@ INSERT INTO group_roles (gid,role) VALUES(3,'intel_member');
 INSERT INTO group_roles (gid,role) VALUES(3,'intel_naps');
 INSERT INTO group_roles (gid,role) VALUES(3,'textexport_alliance');
 INSERT INTO group_roles (gid,role) VALUES(3,'members_defenders');
+
+INSERT INTO group_roles (gid,role) VALUES('R','stats_tags_all');
+
+INSERT INTO group_roles (gid,role) VALUES('s','stats_tags_all');

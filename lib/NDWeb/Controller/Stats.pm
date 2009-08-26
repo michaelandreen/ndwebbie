@@ -5,6 +5,7 @@ use warnings;
 use parent 'Catalyst::Controller';
 
 use NDWeb::Include;
+use HTML::TagCloud;
 
 =head1 NAME
 
@@ -259,6 +260,45 @@ sub find : Local {
 	}
 }
 
+sub tags : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my @tags = $c->req->param('tags');
+	$c->stash(tags => \@tags);
+	my $query = $dbh->prepare(q{
+SELECT tag, count(*)
+FROM planet_tags pt
+WHERE tag <> ALL($1)
+	AND ($3 OR uid = $2)
+GROUP BY tag
+		});
+	$query->execute(\@tags, $c->user->id, $c->check_user_roles('stats_tags_all') // 0);
+	my $cloud = HTML::TagCloud->new;
+	while (my $tag = $query->fetchrow_hashref){
+		my @t = @tags;
+		push @t, $tag->{tag};
+		my %param = (tags => \@t);
+		$cloud->add($tag->{tag}, $c->uri_for('tags',\%param), $tag->{count});
+	}
+	$c->stash(cloud => $cloud->html);
+	$c->stash(css => $cloud->css);
+
+	my $query = $dbh->prepare(q{
+WITH p AS (SELECT pid, coords(x,y,z) FROM current_planet_stats
+), t AS (SELECT pid,tag,bool_or(uid = $2) AS own,max(time) AS time
+	FROM planet_tags
+	WHERE ($3 OR uid = $2)
+	GROUP BY pid,tag
+	ORDER BY time DESC
+), tags AS (SELECT pid, array_agg(tag) AS tags
+	FROM t GROUP BY pid
+)
+SELECT p.*k,array_to_string(tags,', ') AS tags FROM p JOIN tags USING (pid) WHERE tags @> $1;
+		});
+	$query->execute(\@tags, $c->user->id, $c->check_user_roles('stats_tags_all') // 0);
+	$c->stash(planets => $query->fetchall_arrayref({}));
+}
 
 =head1 AUTHOR
 

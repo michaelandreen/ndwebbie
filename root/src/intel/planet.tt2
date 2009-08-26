@@ -48,6 +48,19 @@
 	</p>
 </form>
 
+[% IF tags.size > 0 %]
+<table class="stats">
+	<tr>
+	<th>Tag</th><th>Added by</th><th>Last added</th>
+	</tr>
+	[% FOR t IN tags %]
+	<tr>
+		<td>[% t.tag %]</td><td>[% t.nicks %]</td><td>[% t.time %]</td>
+	</tr>
+	[% END %]
+</table>
+[% END %]
+
 [% IF channelusers.size > 0 %]
 <table class="stats">
 	<tr>

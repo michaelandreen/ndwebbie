@@ -57,6 +57,7 @@
 	<li><a href="/members/addintel">Add intel/scans</a></li>
 	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/members/ircrequest">IRC request</a></li>
+	<li><a href="/stats/tags">Planet tags</a></li>
 </ul>
 	[% ELSE %]
 		[% IF c.user.planet %]
