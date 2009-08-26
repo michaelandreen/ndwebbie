@@ -1,4 +1,7 @@
 [% META title = 'Galaxy stats' %]
+[% FOR b IN browse %]
+<a href="[% c.uri_for('galaxy',b.x,b.y) %]">[% b.x %]:[% b.y %]</a>
+[% END %]
 [% IF g %]
 [% PROCESS inc/stats.tt2 %]
 <div class="leftinfo">

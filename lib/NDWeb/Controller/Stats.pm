@@ -112,6 +112,21 @@ WHERE g.tick = ( SELECT max(tick) AS max FROM galaxies)
 
 	$query->execute($x,$y,$z);
 	$c->stash(planets => $query->fetchall_arrayref({}) );
+
+	$query = $dbh->prepare(q{
+WITH p AS (
+	SELECT x,y FROM galaxies
+	WHERE tick = tick() AND (x <= $1 AND y < $2 OR x < $1)
+	ORDER BY x DESC, y DESC LIMIT 1
+), n AS (
+	SELECT x,y FROM galaxies
+	WHERE tick = tick() AND (x >= $1 AND y > $2 OR x > $1)
+	ORDER BY x ASC, y ASC LIMIT 1
+)
+TABLE p UNION TABLE n
+		});
+	$query->execute($x,$y);
+	$c->stash(browse => $query->fetchall_arrayref({}) );
 }
 
 sub planet : Local {
