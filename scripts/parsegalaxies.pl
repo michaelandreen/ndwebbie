@@ -35,8 +35,6 @@ use ND::DB;
 
 our $dbh = ND::DB::DB();
 
-$ND::DBH = $dbh;
-
 my $tick = $ARGV[0];
 my $hour;
 $dbh->begin_work;
