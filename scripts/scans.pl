@@ -264,7 +264,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 #$dbh->rollback;
 $dbh->commit;
 
-system 'killall','-USR1', 'irssi' if $parsedscans;
+system 'killall','-USR1', 'ndbot.pl' if $parsedscans;
 
 sub addfleet {
 	my ($name,$mission,$ships,$sender,$tick,$amount) = @_;

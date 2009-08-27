@@ -16,5 +16,5 @@ our $dbh = ND::DB::DB();
 
 my $update = $dbh->prepare("UPDATE misc SET value = value::int + 1 WHERE id = 'TICK'");
 $update->execute();
-system 'killall','-USR1', 'irssi';
+system 'killall','-USR1', 'ndbot.pl';
 $dbh->disconnect;
