@@ -4,10 +4,10 @@ SELECT u.*, (0.2 * (u.attack_points / GREATEST(a.attack, 1::numeric))
 		+ 0.2 * (p.size::numeric / a.size) + 0.05 * (p.score::numeric / a.score)
 		+ 0.15 * (p.value::numeric / a.value))::numeric(3,2) AS defprio
 FROM users u
-   JOIN current_planet_stats p ON u.planet = p.id
-   , (
+	LEFT JOIN current_planet_stats p USING (pid)
+	, (
 		SELECT avg(u.attack_points) AS attack, avg(u.defense_points) AS defense, avg(p.size) AS size, avg(p.score) AS score, avg(p.value) AS value
 		FROM users u
-			JOIN current_planet_stats p ON p.id = u.planet
-		WHERE u.uid IN ( SELECT groupmembers.uid FROM groupmembers WHERE groupmembers.gid = 2)
+			JOIN current_planet_stats p USING (pid)
+		WHERE u.uid IN ( SELECT groupmembers.uid FROM groupmembers WHERE groupmembers.gid = 'M')
 	) a;
