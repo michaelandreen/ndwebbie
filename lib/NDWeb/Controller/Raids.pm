@@ -592,18 +592,18 @@ sub targetcalc : Local {
 	my $dbh = $c->model;
 
 	$target = $dbh->selectrow_hashref(q{
-SELECT p.id,p.value,p.score,metal_roids, crystal_roids, eonium_roids, ds.total, race
+SELECT pid,p.value,p.score,metal_roids, crystal_roids, eonium_roids, ds.total, race
 FROM raids r
 	JOIN raid_targets rt ON r.id = rt.raid
-	JOIN current_planet_stats p ON rt.planet = p.id
-	LEFT OUTER JOIN current_planet_scans ps ON p.id = ps.planet
-	LEFT OUTER JOIN current_development_scans ds ON p.id = ds.planet
+	JOIN current_planet_stats p USING (pid)
+	LEFT OUTER JOIN current_planet_scans ps USING (pid)
+	LEFT OUTER JOIN current_development_scans ds USING (pid)
 WHERE rt.id = ? AND r.open AND not r.removed
 	AND r.id IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?)
 		},undef,$target,$c->user->id);
 
 	my $planet = $dbh->selectrow_hashref(q{
-SELECT score,value FROM current_planet_stats WHERE id = $1
+SELECT score,value FROM current_planet_stats WHERE pid = $1
 		},undef,$c->user->planet);
 
 	my %races = (Ter => 1, Cat => 2, Xan => 3, Zik => 4, Etd => 5);
@@ -621,7 +621,7 @@ SELECT score,value FROM current_planet_stats WHERE id = $1
 
 	my $fleets = $dbh->prepare(q{
 SELECT DISTINCT ON (name) name, tick, fid FROM fleets
-WHERE planet = $1 AND mission = 'Full fleet'
+WHERE pid = $1 AND mission = 'Full fleet'
 ORDER BY name ASC, tick DESC
 		});
 	my $ships = $dbh->prepare(q{
@@ -631,7 +631,7 @@ WHERE fid = $1
 
 	for ('def','att'){
 		my $planet = $c->user->planet;
-		$planet = $target->{id} if /^def/;
+		$planet = $target->{pid} if /^def/;
 		$fleets->execute($planet);
 		my $nrfleets = 0;
 		my $tick = 0;
