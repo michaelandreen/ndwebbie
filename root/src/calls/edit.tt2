@@ -9,7 +9,7 @@
 	<li>Current DC: [% call.dc %]</li>
 	<li>Member: [% call.member %] </li>
 	<li>SMS: [% call.sms %] </li>
-	<li>Coords: <a href="[% c.uri_for('/stats/planet', call.planet) %]">[% call.coords %]</a></li>
+	<li>Coords: <a href="[% c.uri_for('/stats/planet', call.pid) %]">[% call.coords %]</a></li>
 	<li>Landing at tick: <br>
 		<input type="text" name="tick" value="[% call.landing_tick %]">
 		<input type="checkbox" name="ctick"></li>
@@ -51,7 +51,7 @@
 [% FOR a IN attackers %]
 	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
 		<td><input type="button" onclick="$('#attacker[% a.inc %]').toggle()" value="&dArr;" title="Show fleets"></td>
-		<td><a href="[% c.uri_for('/stats/planet',a.planet) %]">[% a.coords %]</a></td>
+		<td><a href="[% c.uri_for('/stats/planet',a.pid) %]">[% a.coords %]</a></td>
 		<td class="[% a.planet_status %]">[% a.planet_status %]</td>
 		<td class="[% a.relationship %]">[% a.alliance %] ([% a.relationship %])</td>
 		<td>[% a.race %]</td>
