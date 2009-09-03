@@ -279,6 +279,7 @@ sub points : Local {
 	my ( $self, $c, $order ) = @_;
 	my $dbh = $c->model;
 
+	$order //= 'total_points';
 	if ($order ~~ /^((?:defense|attack|total|humor|scan|raid)_points)$/
 			|| $order ~~ /^(defprio)$/){
 		$order = "$1 DESC";
@@ -307,6 +308,7 @@ sub stats : Local {
 	my ( $self, $c, $order ) = @_;
 	my $dbh = $c->model;
 
+	$order //= 'score';
 	if ($order ~~ /^(scre|value|xp|size|race)$/){
 		$order = "$1rank";
 	}else{
