@@ -366,6 +366,11 @@ sub postintelmessage : Local {
 		}
 	}
 
+	my ($coords,$tick) = $c->model->selectrow_array(q{
+SELECT coords(x,y,z), tick() FROM current_planet_stats WHERE pid = $1
+		}, undef, $c->user->planet);
+
+	$c->req->param(message => "[i]Posted by $coords at tick $tick [/i]\n\n" . $c->req->param('message'));
 	$c->forward('/forum/insertThread',[12]);
 	$c->forward('/forum/insertPost',[$c->stash->{thread}]);
 	$c->flash(intelmessage => 1);
