@@ -130,7 +130,7 @@ sub findUser : Private {
 
 	my $query = $dbh->prepare(q{
 SELECT uid,username,hostmask,attack_points,defense_points,scan_points,humor_points,info, email, sms
-	,COALESCE(coords(x,y,z),'') AS planet
+	,COALESCE(coords(x,y,z),'') AS planet, pid
 FROM users u LEFT OUTER JOIN current_planet_stats p USING (pid)
 WHERE uid = ?;
 		});
