@@ -156,7 +156,7 @@ FROM fleets f
 		FROM launch_confirmations
 		WHERE pid = $1 AND landing_tick = $2
 	) lc USING (fid)
-WHERE mission = 'Defend'
+WHERE mission IN ('Defend', 'Fake Defend')
 ORDER BY x,y,z
 	});
 
