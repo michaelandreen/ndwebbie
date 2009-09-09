@@ -184,7 +184,7 @@ sub planet : Local {
 		$c->stash(outgoings => \@missions);
 
 		$query = $dbh->prepare(q{
-			SELECT DISTINCT ON (i.tick,x,y,z,pid,i.name,i.amount) i.id,i.mission, i.name, i.tick,eta
+			SELECT DISTINCT ON (i.tick,x,y,z,pid,i.name,i.mission,i.amount) i.id,i.mission, i.name, i.tick,eta
 						, i.amount, coords(x,y,z) AS coords, pid AS planet
 			FROM intel i
 			LEFT OUTER JOIN (planets
@@ -193,7 +193,7 @@ sub planet : Local {
 			WHERE  i.uid = -1
 				AND i.target = ?
 				AND i.tick > tick() - 3
-			ORDER BY i.tick,x,y,z,pid,i.name,i.amount,i.eta
+			ORDER BY i.tick,x,y,z,pid,i.name,i.mission,i.amount,i.eta
 		});
 		$query->execute($id);
 		my @incomings;
