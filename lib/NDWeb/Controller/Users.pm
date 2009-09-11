@@ -28,18 +28,15 @@ sub index :Path :Args(0) {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(qq{SELECT uid,username,array_to_string(array_agg(g.groupname),', ') AS groups
-		FROM users u LEFT OUTER JOIN (groupmembers gm NATURAL JOIN groups g) USING (uid)
-		WHERE uid > 0
-		GROUP BY u.uid,username
-		ORDER BY username});
+	my $query = $dbh->prepare(q{
+SELECT uid,username,pnick,array_to_string(array_agg(g.groupname),', ') AS groups
+FROM users u LEFT OUTER JOIN (groupmembers gm NATURAL JOIN groups g) USING (uid)
+WHERE uid > 0
+GROUP BY u.uid,username,pnick
+ORDER BY username
+		});
 	$query->execute;
-
-	my @users;
-	while (my $user = $query->fetchrow_hashref){
-		push @users, $user;
-	}
-	$c->stash(users => \@users);
+	$c->stash(users => $query->fetchall_arrayref({}));
 }
 
 sub edit : Local {

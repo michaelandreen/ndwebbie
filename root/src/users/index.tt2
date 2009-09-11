@@ -1,9 +1,10 @@
 [% META title = 'User listing' %]
 <table>
-	<tr><th>User</th><th>Groups</th></tr>
+	<tr><th>User</th><th>P-nick</th><th>Groups</th></tr>
 [% FOR u IN users %]
 	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
 		<td><a href="[% c.uri_for('edit',u.uid) %]">[% u.username | html %]</a></td>
+		<td>[% u.pnick %]</td>
 		<td>[% u.groups %]</td>
 	</tr>
 [% END %]
