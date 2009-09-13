@@ -265,7 +265,7 @@ sub postircrequest : Local {
 INSERT INTO irc_requests (uid,channel,message) VALUES($1,$2,$3)
 		});
 		$query->execute($c->user->id,$c->req->param('channel'),$c->req->param('message'));
-		system 'killall','-USR1', 'ndbot.pl';
+		$c->signal_bots;
 
 		$c->flash(reply => "Msg sent to: ".$c->req->param('channel'));
 		$c->res->redirect($c->uri_for('ircrequest'));
@@ -574,6 +574,7 @@ sub postconfirmation : Local {
 		}
 		$dbh->commit;
 		$c->flash(missions => \@missions);
+		$c->signal_bots;
 	};
 	if ($@){
 		$dbh->rollback;

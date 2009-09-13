@@ -41,6 +41,10 @@ use Catalyst qw/
 
 our $VERSION = '0.01';
 
+sub signal_bots {
+	system 'killall','-USR1', 'ndbot.pl';
+}
+
 # Configure the application.
 #
 # Note that settings in ndweb.yml (or other external
