@@ -99,6 +99,7 @@
 		<td>[% f.amount %]</td><td>[% f.tick %]</td>
 		<td>[% IF f.back %]<input style="width:5em" type="text" name="back:[% f.fid %]" value="[% f.back %]">[% END %]</td>
 		<td>[% IF f.back %]<input type="checkbox" name="change:[% f.fid %]">[% END %]</td>
+		<td><a href="[% c.uri_for('/raids/fleetcalc',f.fid) %]" rel="external">Calc</a></td>
 	</tr>
 	<tr id="fleet[% f.fid %]" class="hidden">
 		<td>

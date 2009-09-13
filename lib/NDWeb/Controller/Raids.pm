@@ -591,55 +591,98 @@ sub targetcalc : Local {
 	my ($self, $c, $target) = @_;
 	my $dbh = $c->model;
 
-	$target = $dbh->selectrow_hashref(q{
-SELECT pid,p.value,p.score,metal_roids, crystal_roids, eonium_roids, ds.total, race
+	$c->stash(target => $dbh->selectrow_hashref(q{
+SELECT pid,metal_roids, crystal_roids, eonium_roids, ds.total
 FROM raids r
 	JOIN raid_targets rt ON r.id = rt.raid
-	JOIN current_planet_stats p USING (pid)
 	LEFT OUTER JOIN current_planet_scans ps USING (pid)
 	LEFT OUTER JOIN current_development_scans ds USING (pid)
 WHERE rt.id = ? AND r.open AND not r.removed
 	AND r.id IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?)
-		},undef,$target,$c->user->id);
-
-	my $planet = $dbh->selectrow_hashref(q{
-SELECT score,value FROM current_planet_stats WHERE pid = $1
-		},undef,$c->user->planet);
-
-	my %races = (Ter => 1, Cat => 2, Xan => 3, Zik => 4, Etd => 5);
-	my @query = (
-		"def_1_race=$races{$target->{race}}",
-		"def_structures=$target->{total}",
-		"def_metal_asteroids=$target->{metal_roids}",
-		"def_crystal_asteroids=$target->{crystal_roids}",
-		"def_eonium_asteroids=$target->{eonium_roids}",
-		#"def_planet_value_1=$target->{value}",
-		#"def_planet_score_1=$target->{score}",
-		"att_planet_value_1=$planet->{value}",
-		"att_planet_score_1=$planet->{score}",
-	);
+		},undef,$target,$c->user->id));
 
 	my $fleets = $dbh->prepare(q{
-SELECT DISTINCT ON (name) name, tick, fid FROM fleets
+SELECT DISTINCT ON (name) name, tick, fid, race
+	,COALESCE($2,score) AS score, COALESCE($2, value) AS value
+FROM fleets LEFT OUTER JOIN current_planet_stats p USING (pid)
 WHERE pid = $1 AND mission = 'Full fleet'
 ORDER BY name ASC, tick DESC
 		});
+
+	for ('def','att'){
+		if (/^def/){
+			$fleets->execute($c->stash->{target}->{pid}, 0);
+		}else{
+			$fleets->execute($c->user->planet,undef);
+		}
+		$c->stash($_ => $fleets->fetchall_arrayref({}));
+	}
+
+	$c->forward('calcredir');
+}
+
+sub fleetcalc : Local {
+	my ($self, $c, $fid) = @_;
+	my $dbh = $c->model;
+
+	$c->stash(target => $dbh->selectrow_hashref(q{
+SELECT pid,metal_roids, crystal_roids, eonium_roids, ds.total
+FROM launch_confirmations lc
+	LEFT OUTER JOIN current_planet_scans ps USING (pid)
+	LEFT OUTER JOIN current_development_scans ds USING (pid)
+WHERE uid = $1 AND fid = $2
+			},undef,$c->user->id,$fid));
+
+	my $fleets = $dbh->prepare(q{
+SELECT DISTINCT ON (name) name, tick, fid, race
+	,score AS score, value AS value
+FROM fleets LEFT OUTER JOIN current_planet_stats p USING (pid)
+WHERE pid = $1 AND mission = 'Full fleet'
+ORDER BY name ASC, tick DESC
+		});
+
+	$fleets->execute($c->stash->{target}->{pid});
+	$c->stash(def => $fleets->fetchall_arrayref({}));
+
+	$fleets = $dbh->prepare(q{
+SELECT tick, fid, race ,score , value
+FROM fleets f LEFT OUTER JOIN current_planet_stats p USING (pid)
+WHERE fid = $1 AND pid = $2
+		});
+	$fleets->execute($fid, $c->user->planet);
+	$c->stash(att => $fleets->fetchall_arrayref({}));
+
+	$c->forward('calcredir');
+}
+
+sub calcredir : Private {
+	my ($self, $c) = @_;
+	my $dbh = $c->model;
+
+	my @query = (
+		"def_structures=".($c->stash->{target}->{total} // 0),
+		"def_metal_asteroids=".($c->stash->{target}->{metal_roids} // 0),
+		"def_crystal_asteroids=".($c->stash->{target}->{crystal_roids} // 0),
+		"def_eonium_asteroids=".($c->stash->{target}->{eonium_roids} // 0),
+	);
+
 	my $ships = $dbh->prepare(q{
 SELECT id, amount FROM fleet_ships fs JOIN ship_stats s ON s.name = fs.ship
 WHERE fid = $1
 		});
 
+	my %races = (Ter => 1, Cat => 2, Xan => 3, Zik => 4, Etd => 5);
 	for ('def','att'){
-		my $planet = $c->user->planet;
-		$planet = $target->{pid} if /^def/;
-		$fleets->execute($planet);
 		my $nrfleets = 0;
 		my $tick = 0;
-		while (my $fleet = $fleets->fetchrow_hashref){
+		for my $fleet (@{$c->stash->{$_}}){
 			$ships->execute($fleet->{fid});
 			next unless $tick < $fleet->{tick};
 			$tick = $fleet->{tick};
 			++$nrfleets;
+			push @query, "${_}_planet_value_${nrfleets}=$fleet->{value}";
+			push @query, "${_}_planet_score_${nrfleets}=$fleet->{score}";
+			push @query, "${_}_${nrfleets}_race=$races{$fleet->{race}}";
 			while (my $ship = $ships->fetchrow_hashref){
 				push @query, "${_}_${nrfleets}_$ship->{id}=$ship->{amount}";
 			}
@@ -647,7 +690,6 @@ WHERE fid = $1
 		push @query, "${_}_fleets=$nrfleets";
 	}
 	my $query = join '&', @query;
-	#$c->res->body("http://game.planetarion.com/bcalc.pl?$query");
 	$c->res->redirect("http://game.planetarion.com/bcalc.pl?$query");
 }
 
