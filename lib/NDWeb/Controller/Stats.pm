@@ -299,7 +299,7 @@ GROUP BY tag
 	$c->stash(cloud => $cloud->html);
 	$c->stash(css => $cloud->css);
 
-	my $query = $dbh->prepare(q{
+	$query = $dbh->prepare(q{
 WITH p AS (SELECT pid, coords(x,y,z) FROM current_planet_stats
 ), t AS (SELECT pid,tag,bool_or(uid = $2) AS own,max(time) AS time
 	FROM planet_tags
