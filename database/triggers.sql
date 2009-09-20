@@ -83,31 +83,3 @@ BEGIN
 	RETURN NEW;
 END;
 $_X$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION updated_target() RETURNS trigger
-    AS $_X$
-DECLARE
-	target INTEGER;
-BEGIN
-	IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
-		target := NEW.target;
-	ELSIF TG_OP = 'DELETE' THEN
-		target := OLD.target;
-	END IF;
-	UPDATE raid_targets SET modified = NOW() WHERE id = target;
-	RETURN NEW;
-END;
-$_X$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION unclaim_target() RETURNS trigger
-    AS $_X$
-BEGIN
-	IF OLD.launched THEN
-		UPDATE users
-		SET attack_points = attack_points - 1
-		WHERE uid = OLD.uid;
-	END IF;
-	RETURN NEW;
-END;
-$_X$ LANGUAGE plpgsql;
-

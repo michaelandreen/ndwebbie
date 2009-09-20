@@ -2,10 +2,13 @@
 [% FOR m IN missions %]
 [% IF m.warning %]<h4 style="color: red">[% m.warning %]</h4>[% END %]
 <p>Adding the following fleet: [% m.fleet %]
-<br>Target: [% m.target %]
+<br>Name: [% m.name %]
+<br>Target: [% m.target.join(":") %]
 <br>Mission: [% m.mission %]
 <br>Landing tick: [% m.tick %]
+<br>ETA: [% m.eta %]
 <br>Back: [% m.back %]
+<br>Amount: [% m.amount %]
 </p>
 <table>
 	[% FOR s IN m.ships %]
