@@ -117,6 +117,8 @@ sub changePassword : Local {
 		});
 	$query->execute($c->req->param('pass'),$c->req->param('oldpass'),$c->user->id);
 
+	$c->flash(error => "Old password was invalid") unless $query->rows;
+
 	$c->res->redirect($c->uri_for(''));
 }
 
