@@ -193,7 +193,7 @@ sub hostile : Local {
 FROM calls c 
 	JOIN incomings i USING (call)
 	JOIN current_planet_stats s USING (pid)
-WHERE c.landing_tick - i.eta > $1 and c.landing_tick - i.eta < $2
+WHERE c.landing_tick BETWEEN $1 + i.eta AND $2 + i.eta
 GROUP BY s.aid,s.alliance
 ORDER BY hostile_count DESC
 		});
