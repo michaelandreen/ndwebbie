@@ -294,6 +294,20 @@ sub markThreadAsRead : Private {
 	}
 }
 
+sub markThreadAsUnread : Local {
+	my ( $self, $c, $thread ) = @_;
+	my $dbh = $c->model;
+
+	my ($fbid) = $dbh->selectrow_array(q{
+SELECT fbid FROM forum_threads WHERE ftid = $1
+		},undef, $thread);
+
+	$dbh->do(q{
+DELETE FROM forum_thread_visits WHERE uid = $1 AND ftid = $2
+		}, undef, $c->user->id, $thread);
+	$c->res->redirect($c->uri_for('board',$fbid));
+}
+
 sub moveThreads : Local {
 	my ( $self, $c, $board ) = @_;
 	my $dbh = $c->model;

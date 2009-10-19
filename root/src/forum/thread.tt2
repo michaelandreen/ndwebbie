@@ -5,6 +5,10 @@
 <a href="[% c.uri_for('setSticky',thread.ftid, (thread.sticky ? 0 : 1)) %]">Make this thread [% thread.sticky ? 'unsticky' : 'sticky' %]</a>
 [% END %]
 
+[% IF c.user.id %]
+<a href="[% c.uri_for('markThreadAsUnread',thread.ftid) %]">Mark thread as unread</a>
+[% END %]
+
 [% createNewPostHr = 1 %]
 [% FOR post IN posts %]
 	[% IF createNewPostHr AND post.unread%]
@@ -16,6 +20,10 @@
 <legend class="forum-post-header"><b>[% post.username %]</b> : [% post.time %] </legend>
 <div class="forum-post-body">[% post.message %]</div>
 </fieldset>
+[% END %]
+
+[% IF c.user.id %]
+<a href="[% c.uri_for('markThreadAsUnread',thread.ftid) %]">Mark thread as unread</a>
 [% END %]
 
 [% IF thread.post %]
