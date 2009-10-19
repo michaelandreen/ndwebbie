@@ -232,7 +232,7 @@ sub findPosts :Private {
 	my $dbh = $c->model;
 
 	my $posts = $dbh->prepare(q{
-		SELECT u.uid,u.username,date_trunc('seconds',fp.time::timestamp) AS time
+		SELECT fpid,u.uid,u.username,date_trunc('seconds',fp.time::timestamp) AS time
 			,fp.message,COALESCE(fp.time > ftv.time,TRUE) AS unread
 		FROM forum_threads ft
 			JOIN forum_posts fp USING (ftid)
@@ -305,6 +305,22 @@ SELECT fbid FROM forum_threads WHERE ftid = $1
 	$dbh->do(q{
 DELETE FROM forum_thread_visits WHERE uid = $1 AND ftid = $2
 		}, undef, $c->user->id, $thread);
+	$c->res->redirect($c->uri_for('board',$fbid));
+}
+
+sub markPostAsUnread : Local {
+	my ( $self, $c, $post ) = @_;
+	my $dbh = $c->model;
+
+	my ($fbid) = $dbh->selectrow_array(q{
+SELECT fbid FROM forum_threads JOIN forum_posts USING (ftid) WHERE fpid = $1
+		},undef, $post);
+
+	$dbh->do(q{
+UPDATE forum_thread_visits ftv SET time = (fp.time - interval '1 second')
+FROM forum_posts fp
+WHERE ftv.uid = $1 AND fp.fpid = $2 AND fp.ftid = ftv.ftid
+		}, undef, $c->user->id, $post);
 	$c->res->redirect($c->uri_for('board',$fbid));
 }
 

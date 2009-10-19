@@ -17,7 +17,8 @@
 <p><a name="NewPosts">New posts below:</a></p>
 	[% END %]
 <fieldset class="forum-post">
-<legend class="forum-post-header"><b>[% post.username %]</b> : [% post.time %] </legend>
+<legend class="forum-post-header"><b>[% post.username %]</b> : [% post.time %]
+	<a href="[% c.uri_for('markPostAsUnread',post.fpid) %]">Unread from here</a></legend>
 <div class="forum-post-body">[% post.message %]</div>
 </fieldset>
 [% END %]
@@ -89,6 +90,8 @@
 [% IF thread.post %]
 <script type="text/javascript">
 $(document).ready(function(){
+	$(".forum-post-header").append(
+		$("<span>").text(" | "));
 	$(".forum-post-header").append(
 		$("<a>").attr("href","#Reply").addClass("quotelink").text("Quote"));
 	$(".quotelink").click(function(){
