@@ -38,7 +38,7 @@ $dbh->do("SET CLIENT_ENCODING TO 'LATIN1';");
 
 my %classes = (Fighter => 'Fi', Corvette => 'Co', Frigate => 'Fr', Destroyer => 'De', Cruiser => 'Cr', Battleship => 'Bs');
 
-my $file = get("http://game.planetarion.com/manual.php?page=stats");
+my $file = get("http://game.planetarion.com/manual.pl?page=stats");
 $dbh->begin_work;
 my $st = $dbh->prepare(q{INSERT INTO ship_stats (name,"class",t1,t2,t3,"type",init,guns,armor,damage,eres,metal,crystal,eonium,race) VALUES(?,?,NULLIF(?,'-'),NULLIF(?,'-'),NULLIF(?,'-'),?,?,?,?,?,?,?,?,?,?)});
 while ($file =~ /((?:\w| )+)<\/td><td>(\w+)<\/td><td>(\w+|-)<\/td><td>(\w+|-)<\/td><td>(\w+|-)<\/td><td>(\w+)\D+(\d+)\D+(\d+)\D+(\d+)\D+?(\d+|-)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+\d+\D+\d+.+?(\w+)<\/td>/g){
