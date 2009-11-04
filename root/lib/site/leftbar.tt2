@@ -100,6 +100,7 @@
 <ul class="linkbar">
 	<li><a href="/raids/create">Create raid</a></li>
 	<li><a href="/raids/targetlist">Find targets</a></li>
+	<li><a href="/raids/retal">Find retals</a></li>
 </ul>
 [% END %]
 [% IF c.check_user_roles("dc_menu") %]

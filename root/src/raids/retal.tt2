@@ -1,0 +1,41 @@
+<form action="[% c.uri_for('postcreateretal') %]" method="post">
+<table class="stats">
+	<tr>
+		<th>Coords</th>
+		<th>Alliance</th>
+		<th>Race</th>
+		<th>Size</th>
+		<th>Score</th>
+		<th>Value</th>
+		<th>Fleets out</th>
+		<th>Add to raid</th>
+	</tr>
+[% FOR p IN planets %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd ' %]">
+		<td><a href="[% c.uri_for('/stats/planet',p.pid) %]">[% p.coords %]</a></td>
+		<td>[% p.alliance %]</td>
+		<td>[% p.race %]</td>
+		<td>[% p.size | commify %]</td>
+		<td>[% p.score | commify %]</td>
+		<td>[% p.value | commify %]</td>
+		<td>[% FOR eta IN p.eta %]
+			[%
+				name = p.name.shift;
+				amount = p.amount.shift;
+				type = p.type.shift;
+				tick = p.landing.shift;
+				back = tick + eta;
+			%]
+			<p>[% name %]: eta=[% eta %] amount=[% amount | commify %] type=[% type | html %]
+				landing=[% tick %] back=[%back%]</p>
+		[% END %]</td>
+		<td><input type="checkbox" name="target" value="[% p.pid %]"></td>
+	</tr>
+[% END %]
+</table>
+<p>Landing tick: <input type="text" name="tick" value="[% TICK + 10 %]"></p>
+<p>Number of waves: <input type="text" name="waves" value="3"></p>
+<p>Raid message here</p>
+<p><textarea rows="15" cols="40" name="message">Retal Raid</textarea></p>
+<p><input type="submit" value="Create raid"></p>
+</form>

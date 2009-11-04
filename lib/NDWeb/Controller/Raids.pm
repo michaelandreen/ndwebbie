@@ -693,6 +693,67 @@ WHERE fid = $1
 	$c->res->redirect("http://game.planetarion.com/bcalc.pl?$query");
 }
 
+sub retal : Local {
+	my ($self, $c) = @_;
+	my $dbh = $c->model;
+
+	my $incs = $dbh->prepare(q{
+SELECT coords(x,y,z),pid,race,size,score,value,alliance
+	,array_agg(i.eta) AS eta,array_agg(amount) AS amount
+	,array_agg(shiptype) AS type,array_agg(fleet) AS name
+	,array_agg(c.landing_tick) AS landing
+FROM calls c
+	JOIN incomings i USING (call)
+	JOIN current_planet_stats p USING (pid)
+WHERE c.status <> 'Covered' AND c.landing_tick BETWEEN tick() AND tick() + 6
+	AND c.landing_tick + GREATEST(i.eta,7) > tick() + 10
+GROUP BY pid,race,x,y,z,size,score,value,alliance
+ORDER BY size DESC
+		});
+	$incs->execute;
+	$c->stash(planets => $incs->fetchall_arrayref({}));
+
+}
+
+sub postcreateretal : Local {
+	my ($self, $c) = @_;
+	my $dbh = $c->model;
+
+	$dbh->begin_work;
+	my $query = $dbh->prepare(q{INSERT INTO raids (tick,waves,message) VALUES(?,?,?) RETURNING (id)});
+	$query->execute($c->req->param('tick'),$c->req->param('waves')
+		,html_escape $c->req->param('message'));
+	my $raid = $query->fetchrow_array;
+	$c->forward('log',[$raid,"Created retal raid landing at tick: ".$c->req->param('tick')]);
+
+	if ($c->req->param('target')) {
+		my @targets = $c->req->param('target');
+
+		my $addtarget = $dbh->prepare(q{
+INSERT INTO raid_targets(raid,pid,comment) (
+	SELECT $1,pid,array_to_string(array_agg(
+			fleet || ': eta=' || eta || ', amount=' || amount || ', type=' || shiptype
+				|| ' landing=' || landing_tick || 'back=' || landing_tick + eta
+		),'\n')
+	FROM calls c
+		JOIN incomings i USING (call)
+		JOIN current_planet_stats p USING (pid)
+	WHERE c.status <> 'Covered' AND c.landing_tick BETWEEN tick() AND tick() + 6
+		AND c.landing_tick + GREATEST(i.eta,7) > tick() + 10
+		AND pid = ANY ($2)
+	GROUP BY pid
+	)
+		});
+		$addtarget->execute($raid,\@targets);
+		$c->forward('log',[$raid,"BC added planets (@targets) to retal_raid"]);
+	}
+	$dbh->do(q{INSERT INTO raid_access (raid,gid) VALUES(?,'M')}
+		,undef,$raid);
+	$dbh->commit;
+
+	$c->res->redirect($c->uri_for('edit',$raid));
+}
+
 
 sub listAlliances : Private {
 	my ($self, $c) = @_;
