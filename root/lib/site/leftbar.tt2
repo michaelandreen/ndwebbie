@@ -49,33 +49,14 @@
 	</li>
 </ul>
 [% IF c.check_user_roles("member_menu") %]
-	[% IF user.attacker %]
 <p>Member menu</p>
 <ul class="linkbar">
 	<li><a href="/members/points">Top points</a></li>
 	<li><a href="/members/stats">Top ranks</a></li>
 	<li><a href="/members/addintel">Add intel/scans</a></li>
-	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/members/ircrequest">IRC request</a></li>
 	<li><a href="/stats/tags">Planet tags</a></li>
 </ul>
-	[% ELSE %]
-		[% IF c.user.planet %]
-	<p><b>Update your fleet to see member menu</b></p>
-<form action="[% c.uri_for('/members/postfleetupdate') %]" method="post">
-	<p>Paste your total fleet from ships section on overview here:</p>
-	<textarea rows="5" cols="15" name="fleet"></textarea>
-	<br><input type="submit" value="Submit">
-</form>
-		[% ELSE %]
-	<form action="/members/postowncoords" method="post">
-		<p>We need your planet's coordinates: 
-		<input type="text" name="planet" value="">
-		<input type="submit" value="Submit">
-		</p>
-	</form>
-		[% END %]
-	[% END %]
 [% END %]
 [% IF c.check_user_roles("covop") %]
 <p>Covop menu</p>
@@ -86,14 +67,31 @@
 </ul>
 [% END %]
 [% IF user.attacker %]
-<p>Attack menu</p>
+<p>Fleet menu</p>
 <ul class="linkbar">
+	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
 	<li><a href="/raids">Web raids</a></li>
 </ul>
 <p><input type="button" value="Update target list"
 		onclick = "listTargets()">
 </p>
 <div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
+[% ELSIF c.check_user_roles("member_menu") %]
+	[% IF c.user.planet %]
+	<p><b>Update your fleet to see raids and launch confirmation</b></p>
+<form action="[% c.uri_for('/members/postfleetupdate') %]" method="post">
+	<p>Paste your total fleet from ships section on overview here:</p>
+	<textarea rows="5" cols="15" name="fleet"></textarea>
+	<br><input type="submit" value="Submit">
+</form>
+	[% ELSE %]
+	<form action="/members/postowncoords" method="post">
+		<p>We need your planet's coordinates:
+		<input type="text" name="planet" value="">
+		<input type="submit" value="Submit">
+		</p>
+	</form>
+	[% END %]
 [% END %]
 [% IF c.check_user_roles("bc_menu") %]
 <p>BC menu</p>
