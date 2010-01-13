@@ -40,26 +40,34 @@ my $dbh = ND::DB::DB();
 my @text = <>;
 my $text = join '',@text;
 
-my $email = Email::Simple->new(Email::StripMIME::strip_mime($text));;
+$text =~ /ndreport\+(.+?)\@ruin\.nu/;
 
-my $subject = encoder(decode_qp($email->header('Subject')))->utf8;
-my $body = 'FROM:'.encoder(decode_qp($email->header('From')))->utf8 . "\n\n" . encoder($email->body)->utf8;
+my $user = $1;
 
+my $email = Email::Simple->new(Email::StripMIME::strip_mime($text));
 
-$dbh->begin_work;
+my $body =  encoder($email->body)->utf8;
 
-my $new_thread = $dbh->prepare(q{INSERT INTO forum_threads (fbid,subject,uid) VALUES(25,$1,-4)});
+my $c = $dbh->prepare(q{
+SELECT coords(x,y,z) FROM current_planet_stats WHERE pid = (SELECT pid FROM users WHERE username = $1)
+});
 
-if ($new_thread->execute(escapeHTML($subject))){
-	my $id = $dbh->last_insert_id(undef,undef,undef,undef,"forum_threads_ftid_seq");
-	my $insert = $dbh->prepare(q{INSERT INTO forum_posts (ftid,message,uid) VALUES($1,$2,-4)});
-	if ($insert->execute($id,escapeHTML($body))){
-		$dbh->commit;
-	}else{
-		print $dbh->errstr;
-	}
-}else{
-	print $dbh->errstr;
+my $a = $dbh->prepare(q{
+SELECT race, $1 - tick() FROM current_planet_stats WHERE x = $2 AND y = $3 AND z = $4
+});
+
+my $report = $dbh->prepare(q{INSERT INTO irc_requests (channel,uid,message) VALUES('def',$1,$2)});
+
+while($body =~ /jumpgate from (.+?), located at (\d+):(\d+):(\d+).+?our system in tick (\d+) and appears to have (\d+)/sg){
+	my ($fleet, $x,$y,$z,$tick, $amount) = ($1,$2,$3,$4,$5,$6);
+
+	my ($coords) = $dbh->selectrow_array($c, undef, $user);
+
+	my ($race,$eta) = $dbh->selectrow_array($a,undef, $tick,$x,$y,$z);
+
+	$report->execute(-5,"$user has incs: $coords $x:$y:$z $fleet $race $amount Attack $eta");
 }
 
 $dbh->disconnect;
+
+system 'killall','-USR1', 'ndbot.pl';
