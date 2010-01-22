@@ -59,14 +59,6 @@
 	<li><a href="/stats/tags">Planet tags</a></li>
 </ul>
 [% END %]
-[% IF c.check_user_roles("covop") %]
-<p>Covop menu</p>
-<ul class="linkbar">
-	<li><a href="/covop">Bank hacking</a></li>
-	<li><a href="/covop/distwhores">Distwhores</a></li>
-	<li><a href="/covop/easy">Easy targets</a></li>
-</ul>
-[% END %]
 [% IF user.attacker %]
 <p>Fleet menu</p>
 <ul class="linkbar">
@@ -94,12 +86,12 @@
 	</form>
 	[% END %]
 [% END %]
-[% IF c.check_user_roles("bc_menu") %]
-<p>BC menu</p>
+[% IF c.check_user_roles("covop") %]
+<p>Covop menu</p>
 <ul class="linkbar">
-	<li><a href="/raids/create">Create raid</a></li>
-	<li><a href="/raids/targetlist">Find targets</a></li>
-	<li><a href="/raids/retal">Find retals</a></li>
+	<li><a href="/covop">Bank hacking</a></li>
+	<li><a href="/covop/distwhores">Distwhores</a></li>
+	<li><a href="/covop/easy">Easy targets</a></li>
 </ul>
 [% END %]
 [% IF c.check_user_roles("dc_menu") %]
@@ -112,6 +104,14 @@
 	<li><a href="/calls/list/uncovered">Not covered calls</a></li>
 	<li><a href="/calls/list/covered">Covered calls</a></li>
 	<li><a href="/calls/list/all">All calls</a></li>
+</ul>
+[% END %]
+[% IF c.check_user_roles("bc_menu") %]
+<p>BC menu</p>
+<ul class="linkbar">
+	<li><a href="/raids/create">Create raid</a></li>
+	<li><a href="/raids/targetlist">Find targets</a></li>
+	<li><a href="/raids/retal">Find retals</a></li>
 </ul>
 [% END %]
 [% IF c.check_user_roles("intel_menu") %]
