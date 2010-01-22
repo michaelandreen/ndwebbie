@@ -445,6 +445,75 @@ sub insertintel : Private {
 	$c->flash(scans => \@scans);
 }
 
+sub addincs : Local {
+	my ( $self, $c ) = @_;
+	$c->stash(incs => $c->flash->{incs});
+
+}
+
+sub postincs : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my @incs;
+
+	my $user = $dbh->prepare(q{
+SELECT uid FROM users u
+WHERE pid = planetid($1,$2,$3,tick())
+	AND uid IN (SELECT uid FROM groupmembers WHERE gid = 'M')
+		});
+	my $call = $dbh->prepare(q{
+SELECT call
+FROM calls WHERE uid = $1 AND landing_tick = tick() + $2
+		});
+	my $fleet = $dbh->prepare(q{
+SELECT pid
+FROM incomings i
+WHERE pid = planetid($1,$2,$3,tick()) AND amount = $4 and fleet = $5 AND call = $6
+		});
+	my $irc = $dbh->prepare(q{
+INSERT INTO irc_requests (uid,channel,message) VALUES($1,'def',$2)
+		});
+
+	my $msg = $c->req->param('message');
+	while ($msg =~ /(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\s+([^:]*\S+)\s+(?:Ter|Cat|Xan|Zik|Etd)\s+([\d,]+)\s+Attack\s+(\d+)/gc
+			|| $msg =~ /(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((?:Ter|Cat|Xan|Zik|Etd)\)\s+([^,]*\S+)\s+([\d,]+)\s+(\d+)\s+\(\d+\)/gc){
+
+		my $inc = {message => $&};
+		my $amount = $8;
+		{
+			$amount =~ s/,//g;
+		}
+		try {
+			my $uid = $dbh->selectrow_array($user,undef,$1,$2,$3);
+			die '<i>No user with these coords</i>' unless $uid;
+
+			my $call = $dbh->selectrow_array($call,undef,$uid,$9);
+			if ($call){
+				my $pid = $dbh->selectrow_hashref($fleet,undef,$4,$5,$6,$amount,$7,$call);
+				die '<i>Duplicate</i>' if $pid;
+
+			}
+
+			$irc->execute($c->user->id, $inc->{message});
+			$inc->{status} = '<b>Added</b>';
+
+		} catch {
+			when (m(^(<i>.*</i>) at )){
+				$inc->{status} = $1;
+			}
+			default {
+				$inc->{status} = $_;
+			}
+		};
+		push @incs, $inc;
+	}
+
+	$c->signal_bots if @incs;
+	$c->flash(incs => \@incs);
+	$c->res->redirect($c->uri_for('addincs'));
+}
+
 sub launchConfirmation : Local {
 	my ( $self, $c ) = @_;
 

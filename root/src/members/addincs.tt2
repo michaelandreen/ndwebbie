@@ -1,0 +1,20 @@
+[% META title = 'Add new incs' %]
+[% IF incs.size %]
+<div class="leftinfo">
+<h3>Added the following incs:</h3>
+	[% FOR i IN incs %]
+<p>[% i.status %]: [% i.message %]</p>
+	[% END %]
+</div>
+[% END %]
+
+<form action="[% c.uri_for('postincs') %]" method="post"><fieldset> <legend>Intel/scans</legend>
+	<p>
+		Paste incs from overview or ingame defense page here, for use when
+		<a href="/wiki/Members:MailReport">MailReport</a> doesn't work.
+		New incs will be forwarded to irc where they will be reported.
+	</p>
+	<textarea rows="20" cols="50" name="message"></textarea>
+	<p><input type="submit" name="cmd" value="Submit"></p>
+</fieldset></form>
+

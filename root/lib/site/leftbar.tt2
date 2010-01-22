@@ -54,6 +54,7 @@
 	<li><a href="/members/points">Top points</a></li>
 	<li><a href="/members/stats">Top ranks</a></li>
 	<li><a href="/members/addintel">Add intel/scans</a></li>
+	<li><a href="/members/addincs">Report incs</a></li>
 	<li><a href="/members/ircrequest">IRC request</a></li>
 	<li><a href="/stats/tags">Planet tags</a></li>
 </ul>
