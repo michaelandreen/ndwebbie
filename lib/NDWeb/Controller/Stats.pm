@@ -62,7 +62,7 @@ FROM galaxies g
 			GROUP BY raid,p.tick,x,y
 			) AS a
 			JOIN galaxies g USING (tick,x,y)
-		WHERE a.count::float / g.planets >= 0.5
+		WHERE a.count::float / NULLIF(g.planets,0) >= 0.5
 		ORDER BY x,y,tick
 	) AS raid USING (x,y)
 
