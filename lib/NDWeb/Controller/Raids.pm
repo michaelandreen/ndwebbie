@@ -734,7 +734,7 @@ INSERT INTO raid_targets(raid,pid,comment) (
 	SELECT $1,pid,array_to_string(array_agg(
 			fleet || ': eta=' || eta || ', amount=' || amount || ', type=' || shiptype
 				|| ' landing=' || landing_tick || 'back=' || landing_tick + eta
-		),'\n')
+		),E'\n')
 	FROM calls c
 		JOIN incomings i USING (call)
 		JOIN current_planet_stats p USING (pid)
