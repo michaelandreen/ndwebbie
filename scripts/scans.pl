@@ -128,6 +128,7 @@ sub parse_unit {
 sub parse_jumpgate {
 	my ($scan,$file) = @_;
 
+	$file =~ s/,//g;
 	while ($file =~ m{(\d+):(\d+):(\d+)\D+(Attack|Defend|Return)</td><td class="left">([^<]*)\D+(\d+)\D+(\d+)}g){
 		my ($sender) = $dbh->selectrow_array($findplanet,undef,$1,$2,$3,$scan->{tick});
 		($sender) = $dbh->selectrow_array($findoldplanet,undef,$1,$2,$3,$scan->{tick})
@@ -271,6 +272,7 @@ sub addfleet {
 
 	my @ships;
 	my $total = 0;
+	$ships =~ s/,//g;
 	while(defined $ships && $ships =~ m{((?:[a-zA-Z]| )+)</td><td(?: class="right")?>(\d+)}sg){
 		$total += $2;
 		push @ships, [$1,$2];
