@@ -85,6 +85,7 @@ while (my @planet = $findplanets->fetchrow){
 }
 my $intel = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
 		(SELECT ftid FROM planets WHERE pid = $2),$1,$3)});
+$dbh->do(q{DELETE FROM planet_stats WHERE tick = $1},undef,$tick);
 for my $planet (@planets) {
 	#print "$planet->[1]\n";
 	my $oldPlanet = $oldStats{$planet->[1]};

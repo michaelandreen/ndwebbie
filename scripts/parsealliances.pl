@@ -81,6 +81,8 @@ my $findalliance = $dbh->prepare(q{SELECT tick,aid,members,
 	members_gain,members_gain_day
 FROM alliance_stats WHERE aid = $1 AND tick < $2 ORDER BY tick DESC LIMIT 1}) or die $dbh->errstr;
 
+$dbh->do(q{DELETE FROM alliance_stats WHERE tick = $1},undef,$tick);
+
 for my $alliance (@alliances) {
 
 	$findalliance->execute($alliance->[1],$tick) or die $dbh->errstr;

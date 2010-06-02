@@ -77,6 +77,7 @@ my $insert = $dbh->prepare(q{INSERT INTO galaxies(tick, x, y,
 	sizerank_gain_day, scorerank_gain_day, valuerank_gain_day, xprank_gain_day,
 	planets,planets_gain,planets_gain_day
 	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
+$dbh->do(q{DELETE FROM galaxies WHERE tick = $1},undef,$tick);
 my $countplanets = $dbh->prepare(q{SELECT count(*) from planet_stats where x = $1 and y = $2 and tick = $3});
 for my $galaxy (@galaxies) {
 
