@@ -218,20 +218,10 @@ sub defleeches : Local {
 	my ( $self, $c, $type ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT username,defense_points,count(call) AS calls
-		, SUM(fleets) AS fleets, SUM(recalled) AS recalled
-		,count(NULLIF(fleets,0)) AS defended_calls
-		FROM (SELECT username,defense_points,call,count(f.back) AS fleets
-			, count(NULLIF(f.landing_tick + f.eta -1 = f.back,TRUE)) AS recalled
-			FROM users u JOIN calls c USING (uid)
-				LEFT OUTER JOIN (
-					SELECT lc.pid,landing_tick,eta,back
-					FROM launch_confirmations lc JOIN fleets f USING (fid)
-					WHERE mission = 'Defend'
-				) f USING (pid,landing_tick)
-			GROUP BY username,defense_points,call
-		) d
-		GROUP BY username,defense_points ORDER BY fleets DESC, defense_points
+	my $query = $dbh->prepare(q{
+SELECT username, defense_points, calls, fleets, recalled, defended_calls, value, sent_value
+FROM def_leeches
+ORDER BY value DESC NULLS LAST, defense_points
 		});
 	$query->execute;
 

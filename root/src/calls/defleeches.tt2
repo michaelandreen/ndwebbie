@@ -7,6 +7,8 @@
 	<th>Recalled missions</th>
 	<th>Calls</th>
 	<th>Defended calls</th>
+	<th title="Compared to own value at the time">Value received</th>
+	<th title="Compared to own value at the time">Value sent</th>
 	</tr>
 [% FOR m IN members %]
 	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
@@ -16,6 +18,8 @@
 	<td>[% m.recalled %]</td>
 	<td>[% m.calls %]</td>
 	<td>[% m.defended_calls %]</td>
+	<td>[% m.value %]</td>
+	<td>[% m.sent_value %]</td>
 	</tr>
 [% END %]
 </table>
