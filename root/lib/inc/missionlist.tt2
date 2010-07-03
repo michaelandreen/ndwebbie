@@ -17,6 +17,9 @@
 			<td>[% m.eta %]</td>
 			<td>[% m.amount %]</td>
 			<td>[% m.back %]</td>
+			[% IF m.value_ratio %]
+			<td>[% m.value_ratio %]%</td>
+			[% END %]
 			[% IF m.fleetcatch %]
 			<td class="Hostile">FLEETCATCH!!</td>
 			[% END %]

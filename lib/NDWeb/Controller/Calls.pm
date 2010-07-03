@@ -146,16 +146,31 @@ SELECT ship,amount from ships_home WHERE pid = $1 AND tick = $2
 	$c->stash(fleets => \@fleets);
 
 	my $defenders = $dbh->prepare(q{
+WITH lc AS (
+	SELECT fid,uid,back,eta,landing_tick
+	FROM launch_confirmations
+	WHERE pid = $1 AND landing_tick = $2
+), lcp AS (
+	SELECT DISTINCT ON (fid) fid,tick,value
+	FROM lc
+		JOIN users u USING (uid)
+		JOIN planet_stats USING (pid)
+	WHERE tick <= landing_tick - eta
+	ORDER BY fid,tick DESC
+), lcv AS (
+	SELECT fid,(sum(amount*(metal+crystal+eonium)) / value)::int  AS value_ratio
+	FROM lcp
+		JOIN fleet_ships fs USING (fid)
+		JOIN ship_stats s ON s.name = fs.ship
+	GROUP BY fid, value
+)
 SELECT DISTINCT ON (x,y,z,pid,name,amount,back) fid,mission, name, eta
 	, amount, coords(x,y,z) AS coords, landing_tick AS tick, pid AS planet
-	,back, (back <> landing_tick + eta - 1) AS recalled
+	,back, (back <> landing_tick + eta - 1) AS recalled, value_ratio
 FROM fleets f
 	LEFT OUTER JOIN current_planet_stats s USING (pid)
-	JOIN (
-		SELECT fid,back,eta,landing_tick
-		FROM launch_confirmations
-		WHERE pid = $1 AND landing_tick = $2
-	) lc USING (fid)
+	JOIN lc USING (fid)
+	JOIN lcv USING (fid)
 WHERE mission IN ('Defend', 'Fake Defend')
 ORDER BY x,y,z
 	});
