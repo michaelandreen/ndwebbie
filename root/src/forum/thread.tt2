@@ -18,7 +18,10 @@
 	[% END %]
 <fieldset class="forum-post">
 <legend class="forum-post-header"><b>[% post.username %]</b> : [% post.time %]
-	<a href="[% c.uri_for('markPostAsUnread',post.fpid) %]">Unread from here</a></legend>
+	[% IF c.user.id %]
+	<a href="[% c.uri_for('markPostAsUnread',post.fpid) %]">Unread from here</a>
+	[% END %]
+</legend>
 <div class="forum-post-body">[% post.message %]</div>
 </fieldset>
 [% END %]
