@@ -74,8 +74,9 @@
 	<p><b>Update your fleet to see raids and launch confirmation</b></p>
 <form action="[% c.uri_for('/members/postfleetupdate') %]" method="post">
 	<p>Paste your total fleet from ships section on overview here:</p>
-	<textarea rows="5" cols="15" name="fleet"></textarea>
+	<p><textarea rows="5" cols="15" name="fleet"></textarea>
 	<br><input type="submit" value="Submit">
+	</p>
 </form>
 	[% ELSE %]
 	<form action="/members/postowncoords" method="post">
