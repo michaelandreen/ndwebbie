@@ -1,7 +1,6 @@
 package NDWeb;
-
-use strict;
-use warnings;
+use Moose;
+use namespace::autoclean;
 
 use Catalyst::Runtime 5.80;
 
@@ -39,7 +38,10 @@ use Catalyst qw/
 	PageCache
 /;
 
+extends 'Catalyst';
+
 our $VERSION = '0.01';
+$VERSION = eval $VERSION;
 
 sub signal_bots {
 	system 'killall','-USR1', 'ndbot.pl';
@@ -47,14 +49,18 @@ sub signal_bots {
 
 # Configure the application.
 #
-# Note that settings in ndweb.yml (or other external
+# Note that settings in ndweb.conf (or other external
 # configuration file that you set up manually) take precedence
 # over this when using ConfigLoader. Thus configuration
 # details given here can function as a default configuration,
 # with an external configuration file acting as an override for
 # local deployment.
 
-__PACKAGE__->config( name => 'NDWeb' );
+__PACKAGE__->config(
+	name => 'NDWeb',
+	# Disable deprecated behavior needed by old applications
+	disable_component_resolution_regex_fallback => 1,
+);
 __PACKAGE__->config->{'Plugin::Authentication'}{'use_session'} = 1;
 __PACKAGE__->config(session => {
 	storage => "/tmp/ndweb-$>/session",
@@ -62,7 +68,7 @@ __PACKAGE__->config(session => {
 	expires => 300,
 	verify_address => 1,
 });
-__PACKAGE__->config( cache => {
+__PACKAGE__->config( "Plugin::Cache" => {
 	backend => {
 		class => "Cache::FileCache",
 		cache_root => "/tmp/ndweb-$>",

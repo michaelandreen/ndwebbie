@@ -3,6 +3,7 @@ package Catalyst::Plugin::Authentication::Store::NDWeb;
 use strict;
 use warnings;
 use Moose;
+use MRO::Compat;
 
 use NDWeb::Auth::User;
 
@@ -13,22 +14,13 @@ our $VERSION= "0.104";
 sub setup {
 	my $c = shift;
 
-    $c->default_auth_store(
-        Catalyst::Plugin::Authentication::Store::NDWeb->new(
-        )
-    );
+	$c->default_auth_store(
+		Catalyst::Plugin::Authentication::Store::NDWeb->new(
+		)
+	);
 
-    $c->NEXT::setup(@_);
+	$c->next::method(@_);
 
-}
-
-sub new {
-	my ( $class ) = @_;
-
-	my $self = {
-	};
-
-	bless $self, $class;
 }
 
 sub from_session {
@@ -58,7 +50,7 @@ sub user_supports {
 	NDWeb::User->supports( @_ );
 }
 
-__PACKAGE__;
+__PACKAGE__->meta->make_immutable;
 
 __END__
 
