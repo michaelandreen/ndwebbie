@@ -161,7 +161,7 @@ WITH lc AS (
 	SELECT fid,(sum(amount*(metal+crystal+eonium)) / value)::int  AS value_ratio
 	FROM lcp
 		JOIN fleet_ships fs USING (fid)
-		JOIN ship_stats s ON s.name = fs.ship
+		JOIN ship_stats s USING (ship)
 	GROUP BY fid, value
 )
 SELECT DISTINCT ON (x,y,z,pid,name,amount,back) fid,mission, name, eta

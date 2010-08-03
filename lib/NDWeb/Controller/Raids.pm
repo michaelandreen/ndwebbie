@@ -667,7 +667,7 @@ sub calcredir : Private {
 	);
 
 	my $ships = $dbh->prepare(q{
-SELECT id, amount FROM fleet_ships fs JOIN ship_stats s ON s.name = fs.ship
+SELECT id, amount FROM fleet_ships fs JOIN ship_stats s USING (ship)
 WHERE fid = $1
 		});
 
