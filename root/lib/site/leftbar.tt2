@@ -71,10 +71,10 @@
 <div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
 [% ELSIF c.check_user_roles("member_menu") %]
 	[% IF c.user.planet %]
-	<p><b>Update your fleet to see raids and launch confirmation</b></p>
-<form action="[% c.uri_for('/members/postfleetupdate') %]" method="post">
-	<p>Paste your total fleet from ships section on overview here:</p>
-	<p><textarea rows="5" cols="15" name="fleet"></textarea>
+	<p><b>Update your fleets to see raids and launch confirmation</b></p>
+<form action="[% c.uri_for('/members/postconfirmation') %]" method="post">
+	<p>Paste your fleets from fleets page here:</p>
+	<p><textarea rows="5" cols="15" name="mission"></textarea>
 	<br><input type="submit" value="Submit">
 	</p>
 </form>

@@ -3,12 +3,14 @@
 [% IF m.warning %]<h4 style="color: red">[% m.warning %]</h4>[% END %]
 <p>Adding the following fleet: [% m.fleet %]
 <br>Name: [% m.name %]
-<br>Target: [% m.target.join(":") %]
+<br>Num: [% m.num %]
+<br>Target: [% m.target %]
 <br>Mission: [% m.mission %]
 <br>Landing tick: [% m.tick %]
 <br>ETA: [% m.eta %]
 <br>Back: [% m.back %]
 <br>Amount: [% m.amount %]
+<br>LT: [% m.lt %]
 </p>
 <table>
 	[% FOR s IN m.ships %]
@@ -20,17 +22,37 @@
 
 [% IF missions.size == 0 %]
 <h3 style="color: red">COULD NOT PARSE YOUR MISSIONS, MAKE SURE YOU'VE READ THE INSTRUCTIONS AND PASTED WHAT WE ASK FOR</h3>
+<h4 style="color: red">If you are using Internet Explorer you have to switch to Opera, Firefox or Chrome</h4>
 [% END %]
 <form action="[% c.uri_for('postconfirmation') %]" method="post"><fieldset> <legend>Launch confirmation</legend>
-	<p>Paste all (ctrl+a should be ok, but try with just single mission if you get an error, save the ctrl+a output and contact harv) information from <b>missions page</b> here (NOT from news page, and not overview, nor gal status). It's ok to paste when prelaunched, as long as you're sure you won't change your plans.</p>
-	<p>A valid launch confirmation looks like this, but can also be after the fleet has launched and has ETA/Return ETA shown as last line:</p>
+	<p>Paste all (ctrl+a should be ok, but try with just the fleet information if you get an error, save the ctrl+a output and contact harv) information from <b>fleets page</b> here (NOT from news page, and not overview, nor gal status).</p>
+	<p>A valid launch confirmation looks like this:</p>
 	<pre>
-Some fleet name	X:Y:Z	A:B:C (2+8)
-9hrs 28mins	Defend
-Ship	Class	Target	Type	Count
-Viper	Corvette	Frigate	Emp 	50
+Ships Cla T1 T2 T3 Base (i) Alpha (i) Beta (i) Gamma (i) TOTAL
+Beetle CO FI CO -- 0 10,000 0 0 10,000
+Viper CO DE FR -- 0 10,000 0 0 10,000
+Locust FR CR BS -- 0 0 0 10,000 10,000
+Roach CR FR DE -- 0 0 2,000 0 1,000
+Scarab CR CR DE FR 0 0 1,000 0 1,000
+Tarantula CR BS CR -- 0 0 1,000 0 1,000
+Mantis BS CO FI -- 1,000 0 0 0 1,000
+Mosquito CO RO RO RO 0 1,000 0 0 1,000
+Hornet CR RO RO RO 0 0 3,000 0 1,000
+Termite BS ST ST ST 1,000 0 0 0 1,000
 
-Launching in tick 117, arrival in tick 124, Return ETA: Instant
+Total Ships in Fleet 2,000 21,000 4,000 10,000
+
+
+Mission:  Attack Defend
+Target:  1:3:1 1:3:2
+Launch Tick:  5734 5745
+ETA: Galaxy: 5, Universe: 8 10
+Arrival: 5743
+Return ETA: Instant
+ Cancel Order 9 (+11)
+Arrival: 5753
+Return ETA: Instant
+ Cancel Order
 	</pre>
 	<textarea rows="25" cols="80" name="mission"></textarea>
 	<br>

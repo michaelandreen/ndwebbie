@@ -152,15 +152,6 @@ CrBs: <input type="checkbox" name="class" value="z"[% IF attackgroups.grep('z').
 	</p>
 </fieldset>
 </form>
-[% IF c.user.planet %]
-<form action="[% c.uri_for('postfleetupdate') %]" method="post">
-<fieldset class="forum-post"> <legend>Fleet</legend>
-	<p>Paste your total fleet from ships section on overview here (do it daily to see the menus):</p>
-	<textarea rows="15" cols="50" name="fleet"></textarea>
-	<br><input type="submit" value="Submit">
-</fieldset>
-</form>
-[% END %]
 </div>
 [% IF c.user.planet %]
 <img class="graph" src="[% c.uri_for('/graphs/planetstats',c.user.planet,STICK) %]" alt="stats for your planet" height="300" width="500">

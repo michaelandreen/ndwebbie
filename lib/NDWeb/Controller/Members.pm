@@ -166,52 +166,6 @@ sub postowncoords : Local {
 	$c->res->redirect($c->uri_for(''));
 }
 
-sub postfleetupdate : Local {
-	my ( $self, $c ) = @_;
-	my $dbh = $c->model;
-
-	my $fleet = $c->req->param('fleet');
-	$fleet =~ s/,//g;
-	my $amount = 0;
-	my @ships;
-	while ($fleet =~ m/((?:[A-Z][a-z]+ )*[A-Z][a-z]+)\s+(\d+)/g){
-		$amount += $2;
-		push @ships, [$1,$2];
-	}
-	if ($amount){
-		$dbh->begin_work;
-		eval{
-			my $insert = $dbh->prepare(q{INSERT INTO fleets
-				(pid,name,mission,tick,amount)
-				VALUES (?,'Main','Full fleet',tick(),?) RETURNING fid});
-			my ($id) = $dbh->selectrow_array($insert,undef
-				,$c->user->planet,$amount);
-			$insert = $dbh->prepare(q{INSERT INTO fleet_ships
-				(fid,ship,amount) VALUES (?,?,?)});
-			for my $s (@ships){
-				unshift @{$s},$id;
-				$insert->execute(@{$s});
-			}
-			$insert = $dbh->prepare(q{INSERT INTO full_fleets
-				(fid,uid) VALUES (?,?)});
-			$insert->execute($id,$c->user->id);
-			$dbh->commit;
-		};
-		if ($@){
-			if ($@ =~ m/insert or update on table "fleet_ships" violates foreign key constraint "fleet_ships_ship_fkey"\s+DETAIL:\s+Key \(ship\)=\(([^)]+)\)/){
-				$c->flash( error => "'$1' is NOT a valid ship");
-			}else{
-				$c->flash( error => $@);
-			}
-			$dbh->rollback;
-		}
-	}else{
-		$c->flash( error => 'Fleet does not contain any ships');
-	}
-
-	$c->res->redirect($c->uri_for(''));
-}
-
 sub postfleetsupdates : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
@@ -526,7 +480,7 @@ sub postconfirmation : Local {
 	my $dbh = $c->model;
 
 	try {
-		my $findplanet = $dbh->prepare("SELECT planetid(?,?,?,?)");
+		my $findplanet = $dbh->prepare(q{SELECT planetid(?,?,?,tick())});
 		my $addfleet = $dbh->prepare(q{INSERT INTO fleets
 			(name,mission,pid,tick,amount)
 			VALUES ($2,$3,(SELECT pid FROM users WHERE uid = $1),tick(),$4)
@@ -536,7 +490,7 @@ sub postconfirmation : Local {
 UPDATE launch_confirmations SET back = $2 WHERE fid = $1
 			});
 		my $addconfirmation = $dbh->prepare(q{INSERT INTO launch_confirmations
-			(fid,uid,pid,landing_tick,eta,back) VALUES ($1,$2,$3,$4,$5,$6)
+			(fid,uid,pid,landing_tick,eta,back,num) VALUES ($1,$2,$3,$4,$5,$6,$7)
 			});
 		my $addships = $dbh->prepare(q{INSERT INTO fleet_ships (fid,ship,amount)
 			VALUES (?,?,?)
@@ -544,44 +498,69 @@ UPDATE launch_confirmations SET back = $2 WHERE fid = $1
 		my $log = $dbh->prepare(q{INSERT INTO forum_posts (ftid,uid,message) VALUES(
 			(SELECT ftid FROM users WHERE uid = $1),$1,$2)
 			});
+		my $return = $dbh->prepare(q{
+UPDATE launch_confirmations SET back = tick()
+WHERE uid = $1 AND num = $2 AND back > tick()
+			});
+		my $fullfleet = $dbh->prepare(q{INSERT INTO full_fleets
+					(fid,uid) VALUES (?,?)});
 		$dbh->begin_work;
 		my @missions = parseconfirmations($c->req->param('mission'), $c->stash->{TICK});
 		for my $m (@missions){
 			if ($m->{mission} eq 'Return'){
 				$c->forward("addReturnFleet", [$m]);
-				$updatefleet->execute($m->{fid},$m->{back}) if $m->{fid};
-				next;
+				if($m->{fid}){
+					$updatefleet->execute($m->{fid},$m->{back});
+					next;
+				}else{
+					$m->{pid} = $c->user->planet;
+				}
+			}elsif ($m->{target} =~ /^(\d+):(\d+):(\d+)$/) {
+				$m->{pid} = $dbh->selectrow_array($findplanet,undef,$1,$2,$3);
+				unless ($m->{pid}){
+					$m->{warning} = "No planet at $m->{target}, try again next tick.";
+					next;
+				}
 			}
-			$m->{pid} = $dbh->selectrow_array($findplanet,undef,@{$m->{target}},$c->stash->{TICK});
-			unless ($m->{pid}){
-				$m->{warning} = "No planet at @{$m->{target}}, try again next tick.";
+
+			#Recall fleets with same slot number
+			$return->execute($c->user->id,$m->{num});
+
+			unless ($m->{mission}){
+				$m->{warning} = "Not on a mission, but matching fleets recalled";
 				next;
 			}
 
 			$c->forward("findDuplicateFleet", [$m]);
 			if ($m->{match}){
-				$m->{warning} = "Already confirmed this fleet, changing back to to match this paste";
-				$updatefleet->execute($m->{fid},$m->{back});
+				$m->{warning} = "Already confirmed this fleet, updating changed information";
+				$updatefleet->execute($m->{fid},$m->{back}) if $m->{pid};
 				next;
 			}
 
+
 			$m->{fleet} = $dbh->selectrow_array($addfleet,undef,$c->user->id,$m->{name}
 				,$m->{mission},$m->{amount});
+
+			if ($m->{mission} eq 'Full fleet'){
+				$fullfleet->execute($m->{fleet},$c->user->id);
+			}else{
+				$addconfirmation->execute($m->{fleet},$c->user->id,$m->{pid},$m->{tick},$m->{eta},$m->{back},$m->{num});
+			}
+
 			if ($m->{mission} eq 'Attack'){
 				$c->forward("addAttackFleet", [$m]);
 			}elsif ($m->{mission} eq 'Defend'){
 				$c->forward("addDefendFleet", [$m]);
 			}
 
-			$addconfirmation->execute($m->{fleet},$c->user->id,$m->{pid},$m->{tick},$m->{eta},$m->{back});
-
 			for my $ship (@{$m->{ships}}){
 				$addships->execute($m->{fleet},$ship->{ship},$ship->{amount});
 			}
-			$log->execute($c->user->id,"Pasted confirmation for $m->{mission} mission to @{$m->{target}}, landing tick $m->{tick}");
+			$log->execute($c->user->id,"Pasted confirmation for $m->{mission} mission to $m->{target}, landing tick $m->{tick}");
 		}
-		$dbh->commit;
 		$c->flash(missions => \@missions);
+		$dbh->commit;
 		$c->signal_bots;
 	} catch {
 		$dbh->rollback;
@@ -599,43 +578,62 @@ sub parseconfirmations {
 	my ( $missions, $tick ) = @_;
 	return unless $missions;
 	my @missions;
-	while ($missions =~ m/\s*([^\n]+?)\s+(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)
-			\s+\((?:(\d+)\+)?(\d+)\).*?(?:\d+hrs\s+)?\d+mins?\s+
-			(Attack|Defend|Return|Fake\ Attack|Fake\ Defend)
-			(.*?)
-			(?:Launching\ in\ tick\ (\d+),\ arrival\ in\ tick\ (\d+)
-				|ETA:\ \d+,\ Return\ ETA:\ (\d+)
-				|Return\ ETA:\ (\d+)
-				)/sgx){
-		my $tick = $tick;
-		$tick += $9;
-		$tick += $8 if defined $8;
-		$tick = $13 if defined $13;
-		my $eta = $9;
-		$eta += $14 if defined $14;
-		my %mission = (
-			name => $1,
-			mission => $10,
+	$missions =~ s/,//g;
+	if ($missions =~ m/
+		Ships \s?\t Cla \s?\t T1 \s?\t T2 \s?\t T3 \s?\t Base\ \(i\) \s (?<name>.+?)\ \(i\) \s?\t (?<name>.+?)\ \(i\) \s?\t (?<name>.+?)\ \(i\) \s?\t TOTAL \W+
+		(?<ships>.+?)
+		\QTotal Ships in Fleet\E \s?\t (\d+) \s?\t (?<amount>\d+) \s?\t (?<amount>\d+) \s?\t (?<amount>\d+) \W+
+		Mission: \t (?<mission>\w*) \t (?<mission>\w*) \t (?<mission>\w*) \W+
+		Target: \t (?<target>\d+:\d+:\d+)? \t (?<target>\d+:\d+:\d+)? \t (?<target>\d+:\d+:\d+)? \W+
+		\QLaunch Tick:\E \t (?<lt>\d*) \t (?<lt>\d*) \t (?<lt>\d*) \W+
+		ETA: \t (?<eta>[^\t]*) \t (?<eta>[^\t]*) \t (?<eta>[^\t]*)
+		/sx){
+		my %match = %-;
+		for my $i (0..2){
+			my %mission = (
+				name => $match{name}->[$i],
+				mission => $match{mission}->[$i],
+				target => $match{target}->[$i],
+				amount => $match{amount}->[$i],
+				lt => $match{lt}->[$i],
+				num => $i,
+				ships => []
+			);
+			given($match{eta}->[$i]){
+				when(/(\d+) (\s+ \(\+\d+\))? \W+
+						Arrival:\ (\d+) \W+
+						\QReturn ETA: \E(Instant|\d+)/sx){
+					$mission{tick} = $3;
+					$mission{eta} = $1 + $4;
+					$mission{back} = $3 + $mission{eta} - 1;
+				}
+				when(/(\d+) \W+
+					Arrival:\ (\d+)/sx){
+					$mission{tick} = $2;
+					$mission{eta} = $1;
+					$mission{back} = $2;
+				}
+			}
+			push @missions,\%mission;
+		}
+		push @missions,{
+			name => 'Main',
+			num => 3,
+			mission => 'Full fleet',
 			tick => $tick,
-			eta => $eta,
-			back => $10 eq 'Return' ? $tick : $tick + $eta - 1,
-			target => [$5,$6,$7],
-			from => [$2,$3,$4],
-		);
-		my $ships = $11;
-		my @ships;
-		$mission{amount} = 0;
-		while ($ships =~ m/((?:\w+ )*\w+)\s+\w+\s+(?:(?:\w+|-)\s+){3}(?:Steal|Normal|Emp|Normal\s+Cloaked|Pod|Structure Killer)\s+(\d+)/g){
-			$mission{amount} += $2;
-			push @ships,{ship => $1, amount => $2};
+			amount => 0,
+			ships => []
+		};
+		while ($match{ships}->[0] =~ m/((?:\w+ )*\w+)\s+(FI|CO|FR|DE|CR|BS)[^\d]+([\d\s]+)/g){
+			my $ship = $1;
+			my @amounts = split /\D+/, $3;
+			my $amount = shift @amounts;
+			die "Ships don't sum up properly" if $amounts[3] != $amount + $amounts[0] + $amounts[1] + $amounts[2];
+			for my $i (0..3){
+				push @{$missions[$i]->{ships}},{ship => $ship, amount => $amounts[$i]} if $amounts[$i] > 0;
+			}
+			$missions[3]->{amount} += $amounts[3];
 		}
-		$mission{ships} = \@ships;
-
-		if ($mission{amount} == 0){
-			warn "No ships in: $ships";
-			next;
-		}
-		push @missions,\%mission;
 	}
 	return @missions;
 }
@@ -646,11 +644,11 @@ sub findDuplicateFleet : Private {
 
 	my $findfleet = $dbh->prepare(q{
 SELECT fid FROM fleets f
-	JOIN launch_confirmations lc USING (fid)
-WHERE uid = $1 AND name = $2 AND mission = $3 AND amount = $4
-	AND lc.pid = $5 AND landing_tick = $6
+	LEFT JOIN launch_confirmations lc USING (fid)
+WHERE f.pid = (SELECT pid FROM users WHERE uid = $1) AND mission = $3 AND amount = $4 AND
+	COALESCE(uid = $1 AND num = $2 AND lc.pid = $5 AND landing_tick = $6, TRUE)
 		});
-	my $fid = $dbh->selectrow_array($findfleet,undef,$c->user->id,$m->{name}
+	my $fid = $dbh->selectrow_array($findfleet,undef,$c->user->id,$m->{num}
 		,$m->{mission},$m->{amount}, $m->{pid}, $m->{tick});
 	$c->forward("matchShips", [$m,$fid]);
 	$m->{fid} = $fid if $m->{match};
@@ -699,7 +697,7 @@ INSERT INTO defense_missions (fleet,call) VALUES (?,?)
 	if ($call->{call}){
 		$informDefChannel->execute($m->{fleet},$call->{call});
 	}else{
-		$m->{warning} = "No call for @{$m->{target}} landing tick $m->{tick}";
+		$m->{warning} = "No call for $m->{target} landing tick $m->{tick}";
 	}
 }
 
@@ -710,17 +708,17 @@ sub addReturnFleet : Private {
 	my $findfleet = $dbh->prepare(q{
 SELECT fid FROM fleets f
 	JOIN launch_confirmations lc USING (fid)
-WHERE uid = $1 AND name = $2  AND amount = $3
+WHERE uid = $1 AND num = $2  AND amount = $3
 	AND back >= $4
 		});
-	my $fid = $dbh->selectrow_array($findfleet,undef,$c->user->id,$m->{name}
+	my $fid = $dbh->selectrow_array($findfleet,undef,$c->user->id,$m->{num}
 		,$m->{amount}, $m->{tick});
 	$c->forward("matchShips", [$m,$fid]);
 	if ($m->{match}){
 		$m->{fid} = $fid;
 		$m->{warning} = "Return fleet, changed back tick to match the return eta.";
 	} else {
-		$m->{warning} = "Couldn't find a fleet matching this returning fleet. Recall manually.";
+		$m->{warning} = "Couldn't find a fleet matching this returning fleet, so adding a new fleet that is returning";
 	}
 }
 
