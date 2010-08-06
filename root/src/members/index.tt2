@@ -119,17 +119,6 @@
 	</p>
 </form>
 </fieldset>
-<fieldset class="forum-post"> <legend>Attack classes</legend>
-<form action="[% c.uri_for('postattackgroups') %]" method="post">
-<p>Pick the classes you use for your attack fleets:</p>
-<p>
-FiCo: <input type="checkbox" name="class" value="x"[% IF attackgroups.grep('x').size > 0 %] checked[%END%]>
-FrDe: <input type="checkbox" name="class" value="y"[% IF attackgroups.grep('y').size > 0 %] checked[%END%]>
-CrBs: <input type="checkbox" name="class" value="z"[% IF attackgroups.grep('z').size > 0 %] checked[%END%]>
-<input type="submit" name="cmd" value="Submit">
-</p>
-</form>
-</fieldset>
 <form action="[% c.uri_for('posthostupdate') %]" method="post">
 <fieldset class="forum-post"> <legend>Hostname</legend>
 	<p>Hostname:
