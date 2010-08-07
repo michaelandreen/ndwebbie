@@ -27,7 +27,6 @@ use DBD::Pg qw(:pg_types);
 use CGI qw/:standard/;
 
 use Email::Simple;
-use Email::StripMIME;
 use Encode::Encoder qw(encoder);
 use MIME::QuotedPrint;
 
@@ -44,9 +43,9 @@ $text =~ /ndreport\+(.+?)\@ruin\.nu/;
 
 my $user = $1;
 
-my $email = Email::Simple->new(Email::StripMIME::strip_mime($text));
+my $email = Email::Simple->new($text);
 
-my $body =  encoder($email->body)->utf8;
+my $body =  encoder($email->body,'ISO-8859-15')->utf8;
 
 my $c = $dbh->prepare(q{
 SELECT coords(x,y,z) FROM current_planet_stats WHERE pid = (SELECT pid FROM users WHERE username = $1)
@@ -63,9 +62,11 @@ while($body =~ /jumpgate from (.+?), located at (\d+):(\d+):(\d+).+?our system i
 
 	my ($coords) = $dbh->selectrow_array($c, undef, $user);
 
+	$coords //= '(no coords entered)';
+
 	my ($race,$eta) = $dbh->selectrow_array($a,undef, $tick,$x,$y,$z);
 
-	$report->execute(-5,"$user has incs: $coords $x:$y:$z $fleet $race $amount Attack $eta");
+	$report->execute(-5,"$user has incs: $coords $x:$y:$z $fleet $race $amount $eta");
 }
 
 $dbh->disconnect;
