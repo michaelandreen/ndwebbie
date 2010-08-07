@@ -407,7 +407,7 @@ INSERT INTO irc_requests (uid,channel,message) VALUES($1,'def',$2)
 		});
 
 	my $msg = $c->req->param('message');
-	while ($msg =~ /(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\s+([^:]*\S+)\s+(?:Ter|Cat|Xan|Zik|Etd)\s+([\d,]+)\s+Attack\s+(\d+)/gc
+	while ($msg =~ /expand\s+(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\s+([^:]*\S+)\s+(?:Ter|Cat|Xan|Zik|Etd)\s+([\d,]+)\s+(\d+)/gc
 			|| $msg =~ /(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((?:Ter|Cat|Xan|Zik|Etd)\)\s+([^,]*\S+)\s+([\d,]+)\s+(\d+)\s+\(\d+\)/gc){
 
 		my $inc = {message => $&};
