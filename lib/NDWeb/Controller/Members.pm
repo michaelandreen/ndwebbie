@@ -561,30 +561,38 @@ sub parseconfirmations {
 		(?<ships>.+?)
 		\QTotal Ships in Fleet\E \s?\t (\d+) \s?\t (?<amount>\d+) \s?\t (?<amount>\d+) \s?\t (?<amount>\d+) \W+
 		Mission: \t (?<mission>\w*) \t (?<mission>\w*) \t (?<mission>\w*) \W+
-		Target: \t (?<target>\d+:\d+:\d+)? \t (?<target>\d+:\d+:\d+)? \t (?<target>\d+:\d+:\d+)? \W+
-		\QLaunch Tick:\E \t (?<lt>\d*) \t (?<lt>\d*) \t (?<lt>\d*) \W+
-		ETA: \t (?<eta>[^\t]*) \t (?<eta>[^\t]*) \t (?<eta>[^\t]*)
+		Target: \t (?<targets>((\d+:\d+:\d+)?\t)*) \W+
+		\QLaunch Tick:\E \t (?<lts>(\d*\t)*) \W+
+		ETA: \t? (?<etas>([^\t]+\t?)*)
 		/sx){
 		my %match = %-;
+		my @etas = split /\t/, $+{etas};
+		my @targets = split /\t/, $+{targets};
+		my @lts = split /\t/, $+{lts};
 		for my $i (0..2){
 			my %mission = (
 				name => $match{name}->[$i],
 				mission => $match{mission}->[$i],
-				target => $match{target}->[$i],
 				amount => $match{amount}->[$i],
-				lt => $match{lt}->[$i],
 				num => $i,
 				ships => []
 			);
-			given($match{eta}->[$i]){
-				when(/(\d+) (\s+ \(\+\d+\))? \W+
+			if	($mission{amount} == 0){
+				push @missions,\%mission;
+				next;
+			}
+
+			$mission{target} = shift @targets;
+			$mission{lt} = shift @lts;
+			given(shift @etas){
+				when(/^(\d+) (\s+ \(\+\d+\))? \W+
 						Arrival:\ (\d+) \W+
 						\QReturn ETA: \E(Instant|\d+)/sx){
 					$mission{tick} = $3;
 					$mission{eta} = $1 + $4;
 					$mission{back} = $3 + $mission{eta} - 1;
 				}
-				when(/(\d+) \W+
+				when(/^(\d+) \W+
 					Arrival:\ (\d+)/sx){
 					$mission{tick} = $2;
 					$mission{eta} = $1;
