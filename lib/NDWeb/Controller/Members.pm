@@ -554,54 +554,79 @@ WHERE uid = $1 AND num = $2 AND back > tick()
 sub parseconfirmations {
 	my ( $missions, $tick ) = @_;
 	return unless $missions;
-	my @missions;
-	$missions =~ s/,//g;
+	my @slots;
+	$missions =~ s/\s?,\s?//g;
+	$missions =~ s/\s*([:+])\s*/$1/g;
+	$missions =~ s/\(\s/(/g;
+	$missions =~ s/\s\)/)/g;
+	my $returnetare = qr/(\d+) \s+
+		Arrival:(\d+)/sx;
+	my $missionetare = qr/(\d+) (\s+ \(\+\d+\))? \s+
+		Arrival:(\d+) \s+
+		\QReturn ETA:\E\s*(?:(?<eta>Instant) \s+ Cancel \s+ Order
+			| (?<eta>\d+) \s+ Ticks \s+ Recall \s+ Fleet)/sx;
+	my $etare = qr/(Galaxy:\d+Universe:\d+(?:Alliance:\d+)?
+		|$missionetare
+		|$returnetare)\s*/x;
+	my $missre = qr/((?:Fake\ )?\w+)\s*/x;
 	if ($missions =~ m/
-		Ships \s?\t Cla \s?\t T1 \s?\t T2 \s?\t T3 \s?\t Base\ \(i\) \s (?<name>.+?)\ \(i\) \s?\t (?<name>.+?)\ \(i\) \s?\t (?<name>.+?)\ \(i\) \s?\t TOTAL \W+
+		Ships \s+ Cla \s+ T\s?1 \s+ T\s?2 \s+ T\s?3 \s+ Base \s+ \(i\) \s (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ TOTAL \s+
 		(?<ships>.+?)
-		\QTotal Ships in Fleet\E \s?\t (\d+) \s?\t (?<amount>\d+) \s?\t (?<amount>\d+) \s?\t (?<amount>\d+) \W+
-		Mission: \t (?<mission>\w*) \t (?<mission>\w*) \t (?<mission>\w*) \W+
-		Target: \t (?<targets>((\d+:\d+:\d+)?\t)*) \W+
-		\QLaunch Tick:\E \t (?<lts>(\d*\t)*) \W+
-		ETA: \t? (?<etas>([^\t]+\t?)*)
+		\QTotal Ships in Fleet\E \s+ (\d+) \s+ (?<amount>\d+) \s+ (?<amount>\d+) \s+ (?<amount>\d+) \s+
+		Mission: \s* (?<missions>(?:$missre)*)  \s*
+		Target: \s* (?<targets>((\d+:\d+:\d+)?\s)*) \s*
+		\QLaunch Tick:\E \s* (?<lts>(\d+\s+)*) \s*
+		ETA: \s* (?<etas>(?:$etare)*)
 		/sx){
 		my %match = %-;
-		my @etas = split /\t/, $+{etas};
-		my @targets = split /\t/, $+{targets};
-		my @lts = split /\t/, $+{lts};
+		my @targets = split /\s+/, $+{targets};
+		my @lts = split /\s+/, $+{lts};
+		my @etas;
+		my $_ = $+{etas};
+		while(/$etare/sxg){
+			push @etas, $1;
+		}
+		my @missions ;
+		$_ = $+{missions};
+		while(/$missre/sxg){
+			push @missions, $1;
+		}
 		for my $i (0..2){
 			my %mission = (
 				name => $match{name}->[$i],
-				mission => $match{mission}->[$i],
+				mission => '' ,
 				amount => $match{amount}->[$i],
 				num => $i,
 				ships => []
 			);
-			if	($mission{amount} == 0){
-				push @missions,\%mission;
+			if ($mission{amount} == 0){
+				push @slots,\%mission;
 				next;
 			}
 
-			$mission{target} = shift @targets;
-			$mission{lt} = shift @lts;
 			given(shift @etas){
-				when(/^(\d+) (\s+ \(\+\d+\))? \W+
-						Arrival:\ (\d+) \W+
-						\QReturn ETA: \E(Instant|\d+)/sx){
+				$mission{name} .= " $_";
+				when(/$missionetare/sx){
 					$mission{tick} = $3;
-					$mission{eta} = $1 + $4;
+					$mission{eta} = $1 + $+{eta};
 					$mission{back} = $3 + $mission{eta} - 1;
+					$mission{target} = shift @targets;
+					$mission{lt} = shift @lts;
+					$mission{mission} = shift @missions;
 				}
-				when(/^(\d+) \W+
-					Arrival:\ (\d+)/sx){
+				when(/$returnetare/sx){
 					$mission{tick} = $2;
 					$mission{eta} = $1;
 					$mission{back} = $2;
+					$mission{target} = shift @targets;
+					$mission{lt} = shift @lts;
+					$mission{mission} = shift @missions;
+					die 'Did you forget some at the end?' if $mission{mission} ne 'Return';
 				}
 			}
-			push @missions,\%mission;
+			push @slots,\%mission;
 		}
-		push @missions,{
+		push @slots,{
 			name => 'Main',
 			num => 3,
 			mission => 'Full fleet',
@@ -609,18 +634,18 @@ sub parseconfirmations {
 			amount => 0,
 			ships => []
 		};
-		while ($match{ships}->[0] =~ m/((?:\w+ )*\w+)\s+(FI|CO|FR|DE|CR|BS)[^\d]+([\d\s]+)/g){
+		while ($match{ships}->[0] =~ m/(\w+)\s+(FI|CO|FR|DE|CR|BS)[^\d]+((?:\d+\s*){5})/g){
 			my $ship = $1;
 			my @amounts = split /\D+/, $3;
-			my $amount = shift @amounts;
-			die "Ships don't sum up properly" if $amounts[3] != $amount + $amounts[0] + $amounts[1] + $amounts[2];
+			my $base = shift @amounts;
+			die "Ships don't sum up properly" if $amounts[3] != $base + $amounts[0] + $amounts[1] + $amounts[2];
 			for my $i (0..3){
-				push @{$missions[$i]->{ships}},{ship => $ship, amount => $amounts[$i]} if $amounts[$i] > 0;
+				push @{$slots[$i]->{ships}},{ship => $ship, amount => $amounts[$i]} if $amounts[$i] > 0;
 			}
-			$missions[3]->{amount} += $amounts[3];
+			$slots[3]->{amount} += $amounts[3];
 		}
 	}
-	return @missions;
+	return @slots;
 }
 
 sub findDuplicateFleet : Private {
