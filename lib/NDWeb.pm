@@ -47,6 +47,8 @@ sub signal_bots {
 	system 'killall','-USR1', 'ndbot.pl';
 }
 
+#$SIG{__WARN__} = sub { NDWeb->log->warn(@_); };
+
 # Configure the application.
 #
 # Note that settings in ndweb.conf (or other external
