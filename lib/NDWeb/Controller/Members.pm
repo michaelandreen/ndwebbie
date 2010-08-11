@@ -605,7 +605,6 @@ sub parseconfirmations {
 			}
 
 			given(shift @etas){
-				$mission{name} .= " $_";
 				when(/$missionetare/sx){
 					$mission{tick} = $3;
 					$mission{eta} = $1 + $+{eta};
