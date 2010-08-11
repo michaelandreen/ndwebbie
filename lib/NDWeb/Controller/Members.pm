@@ -656,7 +656,7 @@ sub findDuplicateFleet : Private {
 SELECT fid FROM fleets f
 	LEFT JOIN launch_confirmations lc USING (fid)
 WHERE f.pid = (SELECT pid FROM users WHERE uid = $1)
-	AND mission = $3 AND amount = $4 AND tick > $6 - 6
+	AND mission = $3 AND amount = $4 AND (mission <> 'Full fleet' OR tick > $6 - 6)
 	AND COALESCE(uid = $1 AND num = $2 AND lc.pid = $5 AND landing_tick = $6, TRUE)
 		});
 	my $fid = $dbh->selectrow_array($findfleet,undef,$c->user->id,$m->{num}
