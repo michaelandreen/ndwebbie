@@ -83,6 +83,12 @@ ORDER BY landing_tick DESC
 		});
 	$announcements->execute($c->user->id);
 	$c->stash(announcements => $announcements->fetchall_arrayref({}) );
+
+	my ($attackgroups) = $dbh->selectrow_array(q{
+SELECT array_agg(gid) FROM groupmembers WHERE gid IN ('x','y','z') AND uid = $1
+		}, undef, $c->user->id);
+	$c->stash(attackgroups => $attackgroups);
+
 }
 
 sub posthostupdate : Local {
@@ -91,6 +97,23 @@ sub posthostupdate : Local {
 
 	$dbh->do(q{UPDATE users SET hostmask = ? WHERE uid = ?
 		},undef, html_escape $c->req->param('hostname'), $c->user->id);
+
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub postattackgroups : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my @groups = $c->req->param('class');
+	$dbh->do(q{DELETE FROM groupmembers WHERE gid IN ('x','y','z') AND gid <> ALL($1) AND uid = $2
+		},undef, \@groups, $c->user->id);
+
+	$dbh->do(q{INSERT INTO groupmembers (uid,gid) (
+		SELECT $2, gid FROM unnest($1::text[]) AS gid WHERE gid IN ('x','y','z')
+	EXCEPT
+		SELECT uid,gid FROM groupmembers WHERE uid = $2
+		)},undef, \@groups, $c->user->id);
 
 	$c->res->redirect($c->uri_for(''));
 }
