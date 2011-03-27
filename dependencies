@@ -1,0 +1,38 @@
+- Task::Catalyst - Pulls in Moose and lots of other dependencies
+- DBD::Pg
+- Catalyst::Plugin::PageCache
+- Catalyst::Plugin::Cache
+- Catalyst::Plugin::Compress::Zlib
+- Catalyst::Plugin::Session::DynamicExpiry
+- Catalyst::Plugin::Unicode
+- Parse::BBCode
+- Catalyst::Model::Adaptor
+- parent (if perl < 5.10.1)
+- Text::MediawikiFormat
+- Geo::IP
+- Mail::Sendmail
+- HTML::TagCloud
+- Template::Plugin::DBI
+- Template::Plugin::GD
+- GD::Graph
+- Email::Simple
+- Email::StripMIME
+
+
+Bot deps:
+- MooseX::Declare
+- AI::MegaHAL
+- POE::Component::IRC
+
+
+
+------- Pulled by other things
+DateTime::TimeZone
+Email::Valid
+CGI
+LWP::Simple
+Encode::Encoder
+MIME::QuotedPrint
+Encode
+HTTP::Request::Common
+
