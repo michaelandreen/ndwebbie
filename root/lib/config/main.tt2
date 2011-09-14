@@ -16,7 +16,7 @@
      copyright => '2008 harv',
    };
 
-   USE DBI ( dbh = dbh);
+   # USE DBI ( dbh = dbh);
 
    # load up any other configuration items 
    PROCESS config/url.tt2;
