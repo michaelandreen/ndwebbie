@@ -656,7 +656,7 @@ sub parseconfirmations {
 			amount => 0,
 			ships => []
 		};
-		while ($match{ships}->[0] =~ m/(\w+)\s+(FI|CO|FR|DE|CR|BS)[^\d]+((?:\d+\s*){5})/g){
+		while ($match{ships}->[0] =~ m/(\w[ \w]+?)\s+(FI|CO|FR|DE|CR|BS)[^\d]+((?:\d+\s*){5})/g){
 			my $ship = $1;
 			my @amounts = split /\D+/, $3;
 			my $base = shift @amounts;
