@@ -22,6 +22,7 @@
 use strict;
 use warnings;
 no warnings 'exiting';
+use local::lib;
 use CGI;
 use DBI;
 use DBD::Pg qw(:pg_types);
@@ -210,7 +211,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 				my $text = $3;
 				my ($x,$y,$z) = $dbh->selectrow_array($findcoords,undef,$planet,$t);
 				die "No coords for: $planet tick $t" unless defined $x;
-				if($news eq 'Launch' && $text =~ m/The (.*?) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to (Attack|Defend). Arrival tick: (\d+)/g){
+				if($news eq 'Launch' && $text =~ m{The (.*?) fleet has been launched, heading for <a class="coords" href="galaxy.pl\?x=\d+&amp;y=\d+">(\d+):(\d+):(\d+)</a>, on a mission to (Attack|Defend). Arrival tick: (\d+)}g){
 					my $eta = $6 - $t;
 					my $mission = $5;
 					my $back = $6 + $eta;
@@ -221,7 +222,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 					my $id = addintel($1,$mission,$planet,$target,$6
 						,$eta,$back,undef, ($x == $2 && $y == $3));
 					$intelscan->execute($id,$scan->{id});
-				}elsif($news eq 'Incoming' && $text =~ m/We have detected an open jumpgate from (.*?), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have (\d+) visible ships/g){
+				}elsif($news eq 'Incoming' && $text =~ m{We have detected an open jumpgate from (.*?), located at <a class="coords" href="galaxy.pl\?x=\d+&amp;y=\d+">(\d+):(\d+):(\d+)</a>. The fleet will approach our system in tick (\d+) and appears to have (\d+) visible ships}g){
 					my $eta = $5 - $t;
 					my $mission = '';
 					my $back = $5 + $eta;
