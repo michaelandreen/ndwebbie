@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use feature ':5.10';
 
+use local::lib;
+
 use Encode;
 
 use LWP::UserAgent;

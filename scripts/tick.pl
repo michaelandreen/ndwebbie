@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use local::lib;
 use DBI;
 use DBD::Pg qw(:pg_types);
 

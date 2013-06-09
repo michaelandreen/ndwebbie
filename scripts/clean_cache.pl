@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+use local::lib;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 

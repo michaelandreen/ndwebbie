@@ -22,6 +22,7 @@ q{
 
 use strict;
 use warnings;
+use local::lib;
 use DBI;
 use DBD::Pg qw(:pg_types);
 use CGI qw/:standard/;
@@ -48,7 +49,8 @@ my $email = Email::Simple->new($text);
 my $body =  encoder($email->body,'ISO-8859-15')->utf8;
 
 my $c = $dbh->prepare(q{
-SELECT coords(x,y,z) FROM current_planet_stats WHERE pid = (SELECT pid FROM users WHERE username = $1)
+SELECT coords(x,y,z) FROM current_planet_stats WHERE pid = (SELECT pid FROM users WHERE username = $1
+	AND uid IN (SELECT uid FROM groupmembers WHERE gid = 'M'))
 });
 
 my $a = $dbh->prepare(q{
