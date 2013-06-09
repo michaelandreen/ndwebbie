@@ -380,13 +380,13 @@ sub insertintel : Private {
 	});
 	my @intel;
 	while ($intel =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)
-		\*?\s+(.+)(?:Ter|Cat|Xan|Zik|Etd)?
-		\s+(\d+)\s+(Attack|Defend)\s+(\d+)/gx){
+		\*?\s+(A|D)\s+(.+?)\s+(?:(?:Ter|Cat|Xan|Zik|Etd)\s+)?(\d+)\s+(\d+)/gx){
 		my $ingal = ($1 == $4 && $2 == $5) || 0;
 		my $lt = $tick + $10;
 		my $back = ($ingal ? $lt + 4 : undef);
+		my $mission = $7 eq 'A' ? 'Attack' : 'Defend';
 		eval {
-			$addintel->execute($7,$9,$lt,$1,$2,$3,$4,$5,$6,$tick,$10,$8
+			$addintel->execute($8,$mission,$lt,$1,$2,$3,$4,$5,$6,$tick,$10,$9
 				,$ingal,$back, $c->user->id);
 			push @intel,"Added $&";
 		};
@@ -430,11 +430,12 @@ INSERT INTO irc_requests (uid,channel,message) VALUES($1,'def',$2)
 		});
 
 	my $msg = $c->req->param('message');
-	while ($msg =~ /expand\s+(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\s+([^:]*\S+)\s+(?:Ter|Cat|Xan|Zik|Etd)\s+([\d,]+)\s+(\d+)/gc
-			|| $msg =~ /(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((?:Ter|Cat|Xan|Zik|Etd)\)\s+([^,]*\S+)\s+([\d,]+)\s+(\d+)\s+\(\d+\)/gc){
+	while ($msg =~ m/(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\*?\s+A\s+(.+?)\s+(Ter|Cat|Xan|Zik|Etd)\s+(\d+)\s+(\d+)/gc
+			||$msg =~ /expand\s+(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\s+([^:]*\S+)\s+(Ter|Cat|Xan|Zik|Etd)\s+([\d,]+)\s+(\d+)/gc
+			|| $msg =~ /(\d+):(\d+):(\d+)\s+(\d+):(\d+):(\d+)\s+\((Ter|Cat|Xan|Zik|Etd)\)\s+([^,]*\S+)\s+([\d,]+)\s+(\d+)\s+\(\d+\)/gc){
 
 		my $inc = {message => $&};
-		my $amount = $8;
+		my $amount = $9;
 		{
 			$amount =~ s/,//g;
 		}
@@ -442,14 +443,15 @@ INSERT INTO irc_requests (uid,channel,message) VALUES($1,'def',$2)
 			my $uid = $dbh->selectrow_array($user,undef,$1,$2,$3);
 			die '<i>No user with these coords</i>' unless $uid;
 
-			my $call = $dbh->selectrow_array($call,undef,$uid,$9);
+			my $call = $dbh->selectrow_array($call,undef,$uid,$10);
 			if ($call){
 				my $pid = $dbh->selectrow_hashref($fleet,undef,$4,$5,$6,$amount,$7,$call);
 				die '<i>Duplicate</i>' if $pid;
 
 			}
 
-			$irc->execute($c->user->id, $inc->{message});
+			my $message = "$1:$2:$3 $4:$5:$6 $7 $8 $amount $10";
+			$irc->execute($c->user->id, $message);
 			$inc->{status} = '<b>Added</b>';
 
 		} catch {
