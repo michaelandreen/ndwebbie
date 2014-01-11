@@ -25,8 +25,6 @@ use warnings;
 use DBI;
 use DBD::Pg qw(:pg_types);
 
-use LWP::Simple;
-
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 

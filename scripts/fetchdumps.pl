@@ -26,7 +26,8 @@ use local::lib;
 use DBI;
 use DBD::Pg qw(:pg_types);
 
-use LWP::Simple;
+use LWP::Simple qw/head get $ua/;
+$ua->agent("Stupid user agent check is stupid");
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
