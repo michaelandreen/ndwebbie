@@ -145,9 +145,9 @@ sub parse_jumpgate {
 
 my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
 	(id,tick,pid,light_fac,medium_fac,heavy_fac,amps,distorters
-		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,seccents
+		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,milcents,seccents,structdefs
 		,travel,infra,hulls,waves,extraction,covert,mining,total)
-	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	});
 
 
@@ -243,7 +243,7 @@ while (my $scan = $newscans->fetchrow_hashref){
 			my $total = 0;
 			while($file =~ m{((?:[a-zA-Z]| )+)</t[dh]><td(?: class="right")?>(\d+)}sg){
 				push @values,$2;
-				$total += $2 if $#values <= 13;
+				$total += $2 if $#values <= 15;
 			}
 			push @values,$total;
 			$adddevscan->execute(@values);
