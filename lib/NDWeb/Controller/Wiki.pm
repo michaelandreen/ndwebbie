@@ -29,16 +29,22 @@ sub auto : Priate {
 	$c->stash(wikiformat => \&wikiformat);
 }
 
-sub index :Path :Args(0) {
-	my ( $self, $c ) = @_;
+sub index :Path :Args(1) {
+	my ( $self, $c, $page ) = @_;
 
-	push @{$c->req->captures}, ('Info','Main');
-	$c->forward('page');
+	$c->forward('page',$page);
 	$c->stash(template => 'wiki/page.tt2');
 }
 
-sub page : LocalRegex(^(?:([A-Z]\w*)(?::|%3A))?([A-Z]\w*)$) {
+sub main :Path :Args(0) {
 	my ( $self, $c ) = @_;
+
+	$c->forward('page', ['Info:Main']);
+	$c->stash(template => 'wiki/page.tt2');
+}
+
+sub page : Private {
+	my ( $self, $c, $p ) = @_;
 	my $dbh = $c->model;
 
 	$c->forward('findPage');
@@ -47,8 +53,8 @@ sub page : LocalRegex(^(?:([A-Z]\w*)(?::|%3A))?([A-Z]\w*)$) {
 	$c->forward('loadText');
 
 	unless ($c->stash->{page}->{wpid}){
-		$c->stash->{page}->{namespace} = $c->req->captures->[0];
-		$c->stash->{page}->{name} = $c->req->captures->[1];
+		$c->stash->{page}->{namespace} = $c->stash->{namespace};
+		$c->stash->{page}->{name} = $c->stash->{name};
 		$c->stash->{page}->{fullname} = ($c->stash->{page}->{namespace} ? $c->stash->{page}->{namespace}.':' : '')
 			. $c->stash->{page}->{name};
 		$c->stash->{page}->{post} = $dbh->selectrow_array(q{SELECT post
@@ -59,8 +65,8 @@ sub page : LocalRegex(^(?:([A-Z]\w*)(?::|%3A))?([A-Z]\w*)$) {
 	$c->stash(title => $c->stash->{page}->{fullname});
 }
 
-sub edit : LocalRegex(^edit/(?:([A-Z]\w*)(?::|%3A))?([A-Z]\w*)$) {
-	my ( $self, $c ) = @_;
+sub edit :Local :Args(1) {
+	my ( $self, $c, @p ) = @_;
 	my $dbh = $c->model;
 
 	$c->forward('findPage');
@@ -72,12 +78,12 @@ sub edit : LocalRegex(^edit/(?:([A-Z]\w*)(?::|%3A))?([A-Z]\w*)$) {
 	unless ($c->stash->{page}->{wpid}){
 		$c->acl_access_denied('test',$c->action,'No edit access for this page')
 			unless @{$c->stash->{namespaces}};
-		$c->stash->{page}->{namespace} = $c->req->captures->[0];
-		$c->stash->{page}->{name} = $c->req->captures->[1];
+		$c->stash->{page}->{namespace} = $c->stash->{namespace};
+		$c->stash->{page}->{name} = $c->stash->{name};
 	}
 }
 
-sub history : LocalRegex(^history/(?:([A-Z]\w*)(?::|%3A))?([A-Z]\w*)$) {
+sub history :Local :Args(1) {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
@@ -195,12 +201,16 @@ sub findPage : Private {
 
 	my @arguments = ($c->stash->{UID});
 	my $where;
-	if ($p){
+	if ($p =~ /^\d+$/){
 		$where =  q{AND wpid = $2};
 		push @arguments, $p;
-	}else{
+	} elsif ($p =~ /^(?:([A-Z]\w*):)?([A-Z]\w*)$/){
 		$where = q{AND (namespace = COALESCE($2,'') AND name = $3)};
-		push @arguments, @{$c->req->captures};
+		push @arguments, $1, $2;
+		$c->stash(namespace => $1);
+		$c->stash(name => $2);
+	} else {
+		$c->detach('/default');
 	}
 
 	my $query = q{SELECT wpid,namespace,name,wprev

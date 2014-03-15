@@ -1,10 +1,10 @@
 - Task::Catalyst - Pulls in Moose and lots of other dependencies
 - DBD::Pg
 - Catalyst::Plugin::PageCache
-- Catalyst::Plugin::Cache
 - Catalyst::Plugin::Compress::Zlib
 - Catalyst::Plugin::Session::DynamicExpiry
-- Catalyst::Plugin::Unicode
+- Catalyst::Plugin::Session::State::Cookie
+- Catalyst::Plugin::Session::Store::File
 - Catalyst::Plugin::Authorization::ACL
 - Parse::BBCode
 - Catalyst::Model::Adaptor
@@ -27,6 +27,7 @@ Bot deps:
 
 
 ------- Pulled by other things
+- Catalyst::Plugin::Cache
 DateTime::TimeZone
 Email::Valid
 CGI

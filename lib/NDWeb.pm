@@ -13,11 +13,12 @@ use Catalyst::Runtime 5.80;
 #                 directory
 
 use parent qw/Catalyst/;
+
 use Catalyst qw/
 	-Debug
 	ConfigLoader
 	Static::Simple
-	Unicode
+	Unicode::Encoding
 
 	Authentication
 	Authentication::Store::NDWeb
@@ -30,9 +31,6 @@ use Catalyst qw/
 	Session
 	Session::Store::File
 	Session::State::Cookie
-
-	Compress::Gzip
-	Compress::Deflate
 
 	Cache
 	PageCache
@@ -86,6 +84,7 @@ __PACKAGE__->config( page_cache => {
 });
 
 __PACKAGE__->config( default_model => 'Model');
+__PACKAGE__->config( encoding => 'UTF-8');
 # Start the application
 __PACKAGE__->setup();
 

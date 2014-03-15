@@ -33,7 +33,7 @@ NDWeb::Controller::Root - Root Controller for NDWeb
 sub index : Local Path Args(0) {
 	my ( $self, $c ) = @_;
 
-	$c->visit('/wiki/index');
+	$c->visit('/wiki/main');
 }
 
 sub default : Path {
