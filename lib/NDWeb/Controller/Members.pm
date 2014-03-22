@@ -517,7 +517,7 @@ WHERE uid = $1 AND num = $2 AND back > tick()
 				}else{
 					$m->{pid} = $c->user->planet;
 				}
-			}elsif ($m->{target} =~ /^(\d+):(\d+):(\d+)$/) {
+			}elsif ($m->{target} ~~ /^(\d+):(\d+):(\d+)$/) {
 				$m->{pid} = $dbh->selectrow_array($findplanet,undef,$1,$2,$3);
 				unless ($m->{pid}){
 					$m->{warning} = "No planet at $m->{target}, try again next tick.";
@@ -585,9 +585,9 @@ sub parseconfirmations {
 	$missions =~ s/\(\s/(/g;
 	$missions =~ s/\s\)/)/g;
 	my $returnetare = qr/(\d+) \s+
-		Arrival:(\d+)/sx;
-	my $missionetare = qr/(\d+) (\s+ \(\+\d+\))? \s+
-		Arrival:(\d+) \s+
+		Arrival:\s*(\d+)/sx;
+	my $missionetare = qr/(\d+) (\s* \+ \s* \d+)? \s+
+		Arrival:\s*(\d+) \s+
 		\QReturn ETA:\E\s*(?:(?<eta>Instant) \s+ Cancel \s+ Order
 			| (?<eta>\d+) \s+ Ticks \s+ Recall \s+ Fleet)/sx;
 	my $etare = qr/(Galaxy:\d+Universe:\d+(?:Alliance:\d+)?
