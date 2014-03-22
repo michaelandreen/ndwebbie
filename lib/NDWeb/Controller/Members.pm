@@ -586,7 +586,7 @@ sub parseconfirmations {
 	$missions =~ s/\s\)/)/g;
 	my $returnetare = qr/(\d+) \s+
 		Arrival:\s*(\d+)/sx;
-	my $missionetare = qr/(\d+) (\s* \+ \s* \d+)? \s+
+	my $missionetare = qr/\s* (\d+ \+ \s*)? (\d+) \s+
 		Arrival:\s*(\d+) \s+
 		\QReturn ETA:\E\s*(?:(?<eta>Instant) \s+ Cancel \s+ Order
 			| (?<eta>\d+) \s+ Ticks \s+ Recall \s+ Fleet)/sx;
@@ -632,7 +632,7 @@ sub parseconfirmations {
 			given(shift @etas){
 				when(/$missionetare/sx){
 					$mission{tick} = $3;
-					$mission{eta} = $1 + $+{eta};
+					$mission{eta} = $2 + $+{eta};
 					$mission{back} = $3 + $mission{eta} - 1;
 					$mission{target} = shift @targets;
 					$mission{lt} = shift @lts;
