@@ -198,14 +198,6 @@ sub planet : Local {
 		$query->execute($id);
 		my @incomings;
 		while (my $mission = $query->fetchrow_hashref){
-			my @ships;
-			$ships->execute($mission->{id});
-			if ($ships->rows != 0){
-				while (my $ship = $ships->fetchrow_hashref){
-					push @ships,$ship;
-				}
-				$mission->{ships} = \@ships;
-			}
 			push @incomings,$mission;
 		}
 		$c->stash(incomings => \@incomings);
