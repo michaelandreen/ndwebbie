@@ -1,13 +1,3 @@
-CREATE TABLE roles (
-	role VARCHAR(32) UNIQUE NOT NULL
-);
-
-CREATE TABLE group_roles (
-	gid INTEGER REFERENCES groups(gid),
-	role VARCHAR(32) REFERENCES roles(role),
-	PRIMARY KEY(gid,role)
-);
-
 INSERT INTO roles VALUES('member_menu');
 INSERT INTO roles VALUES('hc_menu');
 INSERT INTO roles VALUES('bc_menu');

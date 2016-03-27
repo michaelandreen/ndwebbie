@@ -1,12 +1,3 @@
-INSERT INTO forum_categories (fcid,category) VALUES(-1000, 'Private');
-INSERT INTO forum_boards (fcid,fbid,board) VALUES(-1000, -1999, 'Private');
-
-CREATE TABLE forum_priv_access (
-	uid INTEGER REFERENCES users(uid),
-	ftid INTEGER REFERENCES forum_threads(ftid),
-	PRIMARY KEY(uid,ftid)
-);
-
 CREATE OR REPLACE FUNCTION unread_posts(IN uid int, OUT unread int, OUT "new" int) AS
 $SQL$
 SELECT count(*)::int AS unread

@@ -1,5 +1,4 @@
-DROP VIEW IF EXISTS full_intel;
-CREATE VIEW full_intel AS
+CREATE OR REPLACE VIEW full_intel AS
 SELECT s.alliance AS salliance ,coords(s.x,s.y,s.z) AS scoords, i.sender, s.nick AS snick
 	,t.alliance AS talliance,coords(t.x,t.y,t.z) AS tcoords, i.target, t.nick AS tnick
 	,i.mission, i.tick, MIN(i.eta) AS eta, i.amount, i.ingal

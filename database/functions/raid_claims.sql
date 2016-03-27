@@ -1,9 +1,3 @@
-DROP TRIGGER IF EXISTS update_target ON raid_claims;
-DROP TRIGGER IF EXISTS unclaim_target ON raid_claims;
-
-DROP FUNCTION IF EXISTS updated_target();
-DROP FUNCTION IF EXISTS unclaim_target();
-
 CREATE OR REPLACE FUNCTION updated_claim() RETURNS trigger
     AS $_X$
 DECLARE
@@ -38,9 +32,4 @@ BEGIN
 	RETURN NEW;
 END;
 $_X$ LANGUAGE plpgsql;
-
-
-CREATE TRIGGER updated_claim
-  AFTER INSERT OR DELETE OR UPDATE ON raid_claims
-  FOR EACH ROW EXECUTE PROCEDURE updated_claim();
 
