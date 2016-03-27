@@ -38,7 +38,7 @@
 		<td>[% p.x %] </td>
 		<td><a href="[% c.uri_for('/stats','galaxy',p.x,p.y) %]">[% p.y %]</a></td>
 		<td><a href="[% c.uri_for('/stats','planet',p.id) %]">[% p.z %]</a></td>
-		<td align="center">[% p.ruler %] <b>OF</b> [% p.planet %]</td>
+		<td align="center">[% p.ruler | html %] <b>OF</b> [% p.planet | html %]</td>
 		<td align="center">[% p.race %]</td>
 		[% p.sizeimg = (p.size_gain_day == 0 ? 'stay' : (p.size_gain_day > 0 ? 'up' : 'down')) %]
 		<td title="[% p.size_gain_day %] Today | [% p.size_gain %] Tick">[% p.size | commify %] <img src="/static/images/[% p.sizeimg %].png" alt="[% p.sizeimg %]"> </td>

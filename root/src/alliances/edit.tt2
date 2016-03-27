@@ -48,7 +48,7 @@
 		<td><a href="[% c.uri_for('/stats/planet',m.id) %]">[% m.coords %]</a></td>
 		<td class="[% m.planet_status %]"><a href="[% c.uri_for('/intel/planet',m.id) %]">[% m.nick %]([% m.planet_status %])</a></td>
 		<td>[% m.hit_us %]</td>
-		<td>[% m.ruler %] <b>OF</b> [% m.planet %]</td>
+		<td>[% m.ruler | html %] <b>OF</b> [% m.planet | html %]</td>
 		<td>[% m.race %]</td>
 		<td>[% m.size %] ([% m.sizerank %])</td>
 		<td>[% m.score %] ([% m.scorerank %])</td>

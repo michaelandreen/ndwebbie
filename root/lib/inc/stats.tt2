@@ -65,8 +65,8 @@
 		<td title="[% p.xprank_gain_day %] Today | [% p.xprank_gain %] Tick">[% p.xprank %] <img src="/static/images/[% p.xprankimg %].png" alt="[% p.xprankimg %]"> </td>
 
 		<td><a href="[% c.uri_for('/stats','planet',p.id) %]">[% p.coords %]</a></td>
-		<td align="center">[% p.ruler %] <b>OF</b> [% p.planet %]</td>
-		<td align="center">[% p.race %]</td>
+		<td align="center">[% p.ruler | html %] <b>OF</b> [% p.planet %]</td>
+		<td align="center">[% p.race | html %]</td>
 		[% p.sizeimg = (p.size_gain_day == 0 ? 'stay' : (p.size_gain_day > 0 ? 'up' : 'down')) %]
 		<td title="[% p.size_gain_day %] Today | [% p.size_gain %] Tick">[% p.size | commify %] <img src="/static/images/[% p.sizeimg %].png" alt="[% p.sizeimg %]"> </td>
 		[% p.scoreimg = (p.score_gain_day == 0 ? 'stay' : (p.score_gain_day > 0 ? 'up' : 'down')) %]

@@ -6,7 +6,7 @@
 [% FOR p IN planets %]
 	<tr align="center"  class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
 		<td><a href="[% c.uri_for('/stats/planet',p.id) %]">[% p.coords %]</a></td>
-		<td>[% p.ruler %] <b>OF</b> [% p.planet %]</td>
+		<td>[% p.ruler | html %] <b>OF</b> [% p.planet | html %]</td>
 		<td>[% p.race %]</td>
 		<td>[% p.size %] ([% p.sizerank %])</td>
 		<td>[% p.score %] ([% p.scorerank %])</td>
