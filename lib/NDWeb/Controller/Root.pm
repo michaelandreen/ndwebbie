@@ -95,6 +95,8 @@ sub smsconfirm : Local {
 	my ($self, $c) = @_;
 	my $dbh = $c->model;
 
+	$c->stash(template => 'default.tt2');
+
 	return unless $c->req->param('apiMsgId');
 
 	my $sms = $dbh->prepare(q{
@@ -108,7 +110,6 @@ WHERE msgid = $1
 		,$c->req->param('charge')
 		,$c->req->param('timestamp'));
 
-	$c->stash(template => 'default.tt2');
 }
 
 
