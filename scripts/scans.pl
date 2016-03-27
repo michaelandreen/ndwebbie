@@ -207,26 +207,26 @@ while (my $scan = $newscans->fetchrow_hashref){
 		if (exists $parsers{$type}){
 			$parsers{$type}->($scan,$file);
 		}elsif ($type eq 'News'){
-			while( $file =~ m{top">((?:\w| )+)\D+(\d+)</td><td class="left" valign="top">(.+?)</td></tr>}g){
+			while( $file =~ m{top;">((?:\w| )+)\D+(\d+)</td><td class="left" style="vertical-align: top;">(.+?)</td></tr>}g){
 				my $news = $1;
 				my $t = $2;
 				my $text = $3;
 				my ($x,$y,$z) = $dbh->selectrow_array($findcoords,undef,$planet,$t);
 				die "No coords for: $planet tick $t" unless defined $x;
-				if($news eq 'Launch' && $text =~ m{The (.*?) fleet has been launched, heading for <a class="coords" href="galaxy.pl\?x=\d+&amp;y=\d+">(\d+):(\d+):(\d+)</a>, on a mission to (Attack|Defend). Arrival tick: (\d+)}g){
+				if(($news eq 'Defend' || $news eq 'Attack' || $news eq 'Launch') && $text =~ m{The (.*?) fleet has been launched, heading for <a class="coords" href="galaxy.pl\?x=\d+&amp;y=\d+">(\d+):(\d+):(\d+)</a>, on a mission to (Attack|Defend). Arrival tick: (\d+)}g){
 					my $eta = $6 - $t;
 					my $mission = $5;
 					my $back = $6 + $eta;
 					$mission = 'AllyDef' if $eta == 6 && $x != $2;
 					my ($target) = $dbh->selectrow_array($findplanet,undef
 						,$2,$3,$4,$t) or die $dbh->errstr;
-					die "No target: $2:$3:$4" unless defined $target;
+					next unless defined $target;
 					my $id = addintel($1,$mission,$planet,$target,$6
 						,$eta,$back,undef, ($x == $2 && $y == $3));
 					$intelscan->execute($id,$scan->{id});
-				}elsif($news eq 'Incoming' && $text =~ m{We have detected an open jumpgate from (.*?), located at <a class="coords" href="galaxy.pl\?x=\d+&amp;y=\d+">(\d+):(\d+):(\d+)</a>. The fleet will approach our system in tick (\d+) and appears to have (\d+) visible ships}g){
+				}elsif($news eq 'Hostile' && $text =~ m{We have detected an open jumpgate from (.*?), located at <a class="coords" href="galaxy.pl\?x=\d+&amp;y=\d+">(\d+):(\d+):(\d+)</a>. The fleet will approach our system in tick (\d+) and appears to have (\d+) visible ships}g){
 					my $eta = $5 - $t;
-					my $mission = '';
+					my $mission = 'Attack';
 					my $back = $5 + $eta;
 					$mission = 'Defend' if $eta <= 6;
 					$mission = 'AllyDef' if $eta == 6 && $x != $2;
