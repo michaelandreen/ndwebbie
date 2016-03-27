@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use feature ':5.10';
 
+no if $] >= 5.018, warnings => "experimental::smartmatch";
+
 use local::lib;
 
 use Encode;
