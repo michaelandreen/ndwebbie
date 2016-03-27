@@ -95,6 +95,8 @@ sub smsconfirm : Local {
 	my ($self, $c) = @_;
 	my $dbh = $c->model;
 
+	return unless $c->req->param('apiMsgId');
+
 	my $sms = $dbh->prepare(q{
 UPDATE sms SET status = $2, cost = $3
 	,time = TIMESTAMP WITH TIME ZONE 'epoch' + $4 * INTERVAL '1 second'
