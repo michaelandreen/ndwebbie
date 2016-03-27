@@ -46,7 +46,7 @@ sub login : Local {
 	my ($self, $c) = @_;
 
 	if ($c->login){
-		my $gi = Geo::IP->new(GEOIP_STANDARD);
+		my $gi = Geo::IP->new("/usr/share/GeoIP/GeoIP.dat");
 		my $country = $gi->country_code_by_addr($c->req->address) || '??';
 
 		my $remember = 0;
