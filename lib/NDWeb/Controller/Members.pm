@@ -593,7 +593,7 @@ sub parseconfirmations {
 	my $etare = qr/(Galaxy:\d+Universe:\d+(?:Alliance:\d+)?
 		|$missionetare
 		|$returnetare)\s*/x;
-	my $missre = qr/((?:Fake\ )?\w+)\s*/x;
+	my $missre = qr/((?:Alliance\ Standby)|(?:(?:Fake\ )?\w+))\s*/x;
 	if ($missions =~ m/
 		Ships \s+ Cla \s+ T\s?1 \s+ T\s?2 \s+ T\s?3 \s+ Base \s+ \(i\) \s (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ TOTAL \s+
 		(?<ships>.+?)
@@ -629,6 +629,12 @@ sub parseconfirmations {
 				next;
 			}
 
+			if ($missions[0] eq 'Alliance Standby'){
+				shift @missions;
+				push @slots,\%mission;
+				next;
+			}
+
 			given(shift @etas){
 				when(/$missionetare/sx){
 					$mission{tick} = $3;
@@ -645,7 +651,7 @@ sub parseconfirmations {
 					$mission{target} = shift @targets;
 					$mission{lt} = shift @lts;
 					$mission{mission} = shift @missions;
-					die 'Did you forget some at the end?' if $mission{mission} ne 'Return';
+					die "Did you forget some at the end? '$mission{mission}'" if $mission{mission} ne 'Return';
 				}
 			}
 			push @slots,\%mission;
