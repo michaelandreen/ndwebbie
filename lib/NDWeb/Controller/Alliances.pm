@@ -189,12 +189,8 @@ sub hostile : Local {
 	}
 
 	my $query = $dbh->prepare(q{
-		SELECT s.aid AS id,s.alliance AS name,count(*) AS hostile_count
-FROM calls c 
-	JOIN incomings i USING (call)
-	JOIN current_planet_stats s USING (pid)
-WHERE c.landing_tick BETWEEN $1 + i.eta AND $2 + i.eta
-GROUP BY s.aid,s.alliance
+SELECT aid, alliance, hostile_count, targeted, targeted_raids
+FROM hostile_alliances($1,$2)
 ORDER BY hostile_count DESC
 		});
 	$query->execute($begintick,$endtick);

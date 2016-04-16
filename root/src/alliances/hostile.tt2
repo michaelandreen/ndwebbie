@@ -13,11 +13,15 @@
 	<tr>
 		<th>Alliance</th>
 		<th>Hostile Counts</th>
+		<th>Targeted by us</th>
+		<th>Raid targets</th>
 	</tr>
 [% FOR a IN alliances %]
 	<tr class="[% loop.count % 2 ? 'even' : 'odd' %]">
-		<td><a href="[% c.uri_for('edit',a.id) %]">[% a.name %]</a></td>
+		<td><a href="[% c.uri_for('edit',a.aid) %]">[% a.alliance %]</a></td>
 		<td>[% a.hostile_count %]</td>
+		<td>[% a.targeted %]</td>
+		<td>[% a.targeted_raids %]</td>
 	</tr>
 [% END %]
 </table>
