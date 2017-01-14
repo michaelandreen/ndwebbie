@@ -102,10 +102,20 @@ sub from_session {
 sub check_password {
 	my ( $self, $password ) = @_;
 	my $query = $self->{c}->model->prepare(q{
-		SELECT uid FROM users WHERE uid = ? AND password = md5(?)
+		SELECT uid FROM users WHERE uid = $1 AND password = crypt($2,password)
 	});
 	$query->execute($self->id,$password);
-	if ($query->rows == 1){
+
+	if ($query->rows == 0) {
+		$query = $self->{c}->model->prepare(q{
+			UPDATE users SET password = $2
+			WHERE uid = $1 AND password = md5($2)
+			RETURNING uid
+		});
+		$query->execute($self->id,$password);
+	}
+
+	if ($query->rows == 1) {
 		return $self;
 	}
 	return;

@@ -112,12 +112,16 @@ sub changePassword : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{UPDATE users SET password = MD5($1)
-		WHERE password = MD5($2) AND uid = $3
+	if (length $c->req->param('pass') < 4) {
+		$c->flash(error => "Your password need to be at least 4 characters");
+	} else {
+		my $query = $dbh->prepare(q{UPDATE users SET password = $1
+			WHERE password = crypt($2,password) AND uid = $3
 		});
-	$query->execute($c->req->param('pass'),$c->req->param('oldpass'),$c->user->id);
+		$query->execute($c->req->param('pass'),$c->req->param('oldpass'),$c->user->id);
 
-	$c->flash(error => "Old password was invalid") unless $query->rows;
+		$c->flash(error => "Old password was invalid") unless $query->rows;
+	}
 
 	$c->res->redirect($c->uri_for(''));
 }
