@@ -67,7 +67,7 @@ eval{
 			when(/^ID: (\S+)/){
 				$update->execute($msg->{id},$1,'Sent');
 			}
-			when(/^ERR: (?:302|128|114|113|105),(.*)/){
+			when(/^ERR: (?:301|302|128|114|113|105),(.*)/){
 				$update->execute($msg->{id},undef,$1);
 			}
 			default {
