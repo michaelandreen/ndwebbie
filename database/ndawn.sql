@@ -1001,7 +1001,7 @@ CREATE TABLE users (
     uid integer NOT NULL,
     username citext NOT NULL,
     pid integer,
-    password text NOT NULL,
+    password text,
     attack_points numeric(3,0) DEFAULT 0 NOT NULL,
     defense_points numeric(4,1) DEFAULT 0 NOT NULL,
     scan_points numeric(5,0) DEFAULT 0 NOT NULL,

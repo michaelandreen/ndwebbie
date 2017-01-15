@@ -1,8 +1,13 @@
 CREATE OR REPLACE FUNCTION user_password() RETURNS trigger
     AS $_X$
 DECLARE
+	old_password TEXT;
 BEGIN
-	IF COALESCE(NEW.password <> OLD.password,TRUE) AND
+	IF TG_OP = 'UPDATE'
+	THEN
+		old_password := OLD.password;
+	END IF;
+	IF COALESCE(NEW.password <> old_password,TRUE) AND
 		NOT NEW.password SIMILAR TO '$2a$\d+$[a-zA-Z0-9./]+'
 	THEN
 		NEW.password := crypt(NEW.password,gen_salt('bf',10));
