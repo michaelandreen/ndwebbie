@@ -188,6 +188,51 @@ sub postmail : Local {
 	$c->res->redirect($c->uri_for('mail'));
 }
 
+sub sms : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	$c->stash(ok => $c->flash->{ok});
+	$c->stash(error => $c->flash->{error});
+
+	my $query = $dbh->prepare(q{
+SELECT uid,username FROM users
+WHERE uid > 0 AND sms SIMILAR TO '\+\d+'
+	AND uid IN (SELECT uid FROM groupmembers WHERE gid = 'M')
+ORDER BY username
+		});
+	$query->execute;
+
+	$c->stash(users => $query->fetchall_arrayref({}) );
+
+	my $query = $dbh->prepare(q{
+SELECT u.username AS sender, COALESCE(r.username,'unknown?') AS receiver, number,
+	message, status, cost, to_char(time, 'YYYY-MM-DD HH24:MI:SS') AS time
+FROM users u
+	JOIN sms s USING (uid)
+	LEFT JOIN users r ON r.sms = '+' || s.number
+WHERE time > now() - '2 weeks'::interval
+ORDER BY time desc
+		});
+	$query->execute;
+	$c->stash(sms => $query->fetchall_arrayref({}));
+}
+
+sub postsms : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	$c->req->parameters->{uid} = [$c->req->parameters->{uid}]
+		unless ref $c->req->parameters->{uid} eq 'ARRAY';
+
+	my $query = $dbh->prepare(q{INSERT INTO sms (uid,message,number)
+		(SELECT $1,$2, trim(leading '+' FROM sms) FROM users u WHERE uid = ANY ($3) AND sms SIMILAR TO '\+\d+' )});
+
+	$query->execute($c->user->id,$c->req->param('message'),$c->req->parameters->{uid});
+
+	$c->res->redirect($c->uri_for('sms'));
+}
+
 =head1 AUTHOR
 
 Micahel Andreen (harv@ruin.nu)

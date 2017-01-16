@@ -31,6 +31,7 @@ INSERT INTO roles VALUES('textexport_alliance');
 INSERT INTO roles VALUES('stats_find_nick');
 INSERT INTO roles VALUES('members_defenders');
 INSERT INTO roles VALUES('stats_tags_all');
+INSERT INTO roles VALUES('users_sms');
 
 INSERT INTO group_roles (gid,role) VALUES(2,'member_menu');
 INSERT INTO group_roles (gid,role) VALUES(2,'attack_menu');
@@ -47,6 +48,7 @@ INSERT INTO group_roles (gid,role) VALUES(6,'calls_edit');
 INSERT INTO group_roles (gid,role) VALUES(6,'calls_leeches');
 INSERT INTO group_roles (gid,role) VALUES(6,'members_defenders');
 INSERT INTO group_roles (gid,role) VALUES('D','stats_tags_all');
+INSERT INTO group_roles (gid,role) VALUES('D','users_sms');
 
 INSERT INTO group_roles (gid,role) VALUES(4,'bc_menu');
 INSERT INTO group_roles (gid,role) VALUES(4,'raids_info');
@@ -83,6 +85,7 @@ INSERT INTO group_roles (gid,role) VALUES(1,'intel_member');
 INSERT INTO group_roles (gid,role) VALUES(1,'intel_naps');
 INSERT INTO group_roles (gid,role) VALUES(1,'textexport_alliance');
 INSERT INTO group_roles (gid,role) VALUES(1,'members_defenders');
+INSERT INTO group_roles (gid,role) VALUES('T','users_sms');
 
 INSERT INTO group_roles (gid,role) VALUES(3,'dc_menu');
 INSERT INTO group_roles (gid,role) VALUES(3,'bc_menu');
@@ -104,6 +107,9 @@ INSERT INTO group_roles (gid,role) VALUES(3,'intel_member');
 INSERT INTO group_roles (gid,role) VALUES(3,'intel_naps');
 INSERT INTO group_roles (gid,role) VALUES(3,'textexport_alliance');
 INSERT INTO group_roles (gid,role) VALUES(3,'members_defenders');
+INSERT INTO group_roles (gid,role) VALUES('H','users_sms');
+
+INSERT INTO group_roles (gid,role) VALUES('O','users_sms');
 
 INSERT INTO group_roles (gid,role) VALUES('R','stats_tags_all');
 

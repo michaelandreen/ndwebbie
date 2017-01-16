@@ -88,6 +88,7 @@ __PACKAGE__->config( encoding => 'UTF-8');
 __PACKAGE__->setup();
 
 __PACKAGE__->deny_access_unless('/users',[qw/admin_users/]);
+__PACKAGE__->deny_access_unless('/users/sms',[qw/users_sms/]);
 __PACKAGE__->deny_access_unless('/alliances',[qw/alliances/]);
 __PACKAGE__->deny_access_unless('/alliances/resources',[qw/alliances_resources/]);
 __PACKAGE__->deny_access_unless('/graphs/alliancevsintel',[qw/graphs_intel/]);

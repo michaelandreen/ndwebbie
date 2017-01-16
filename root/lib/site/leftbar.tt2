@@ -98,6 +98,7 @@
 [% IF c.check_user_roles("dc_menu") %]
 <p>DC menu</p>
 <ul class="linkbar">
+	<li><a href="/users/sms">Send SMS</a></li>
 	<li><a href="/members/defenders">Available defenders</a></li>
 	<li><a href="/calls/defleeches">Def Leeches</a></li>
 	<li><a href="/calls/list">Active calls</a></li>

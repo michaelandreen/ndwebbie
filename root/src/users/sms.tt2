@@ -1,0 +1,53 @@
+[% META title = 'SMS' %]
+
+<form action="postsms" method="post" id="sms"><fieldset class="forum-post">
+<legend>New SMS</legend>
+	<p><span id="recadd">Receiver(s): </span><select name="uid" multiple size="5">
+[% FOR u IN users %]
+		<option value="[% u.uid %]" [% IF uid == u.uid %]selected[% END %]>[% u.username %]</option>
+[% END %]
+		</select></p>
+	<div id="receivers"></div>
+	<p>Message <input type="text" name="message" size="50" value=""></p>
+	<br>
+	<input type="submit" name="cmd" value="Submit">
+</fieldset>
+</form>
+
+<table>
+	<tr><th>Sender</th><th>Receiver</th><th>Message</th><th>Cost</th><th>Status</th><th>Time</th></tr>
+[% FOR s IN sms %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td>[% s.sender | html %]</td>
+		<td>+[% s.number %] ([% s.receiver | html %])</td>
+		<td>[% s.message | html %]</td>
+		<td>[% s.cost %]</td>
+		<td>[% s.status | html %]</td>
+		<td>[% s.time %]</td>
+	</tr>
+[% END %]
+</table>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$('select').attr({name:'u', size: 1, multiple: null}).after($('<input type="button" id="add" value="Add">'));
+	$('#recadd').text('Users: ');
+	$('#receivers').append('Receiver(s):');
+
+	$('#add').click(function(){
+		var u = $('option:selected');
+		$('#receivers').append($('<p>'+u.text()+': <input type="checkbox" name="uid" checked value='+u.val()+'><\/p>'));
+	});
+
+	$('#sms').submit(function(){
+		if(!$('#sms :checkbox[name=uid][checked]').val()){
+			alert('You need to add a receiver.');
+			return false;
+		}
+		if($('#sms :input[name=message]').val() == ''){
+			alert('You need to write a message');
+			return false;
+		}
+	});
+});
+</script>
