@@ -18,5 +18,6 @@ $_X$ LANGUAGE plpgsql;
 
 /*
 alter table users alter COLUMN password drop not null ;
-CREATE TRIGGER user_password BEFORE UPDATE OR INSERT ON users FOR EACH ROW EXECUTE PROCEDURE user_password()
+DROP TRIGGER user_password ON users;
+CREATE TRIGGER user_password BEFORE INSERT OR UPDATE OF password ON users FOR EACH ROW EXECUTE PROCEDURE user_password();
 */
