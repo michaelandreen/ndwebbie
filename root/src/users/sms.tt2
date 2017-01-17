@@ -2,6 +2,7 @@
 
 <form action="postsms" method="post" id="sms"><fieldset class="forum-post">
 <legend>New SMS</legend>
+	<p>Available credits: [% credits %]</p>
 	<p><span id="recadd">Receiver(s): </span><select name="uid" multiple size="5">
 [% FOR u IN users %]
 		<option value="[% u.uid %]" [% IF uid == u.uid %]selected[% END %]>[% u.username %]</option>

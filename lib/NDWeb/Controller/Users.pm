@@ -216,6 +216,8 @@ ORDER BY time desc
 		});
 	$query->execute;
 	$c->stash(sms => $query->fetchall_arrayref({}));
+
+	$c->stash(credits => $dbh->selectrow_array(q{SELECT credits FROM clickatell}));
 }
 
 sub postsms : Local {
