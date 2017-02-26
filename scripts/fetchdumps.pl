@@ -55,10 +55,8 @@ for my $type ("planet","alliance","galaxy"){
 }
 
 if ($updated){
-	`perl $FindBin::Bin/parsealliances.pl $updated`;
-	`perl $FindBin::Bin/parseplanets.pl $updated`;
-	`perl $FindBin::Bin/parsegalaxies.pl $updated`;
-	`perl $FindBin::Bin/ndrank.pl`;
+	system("$FindBin::Bin/parsetick.sh", $updated);
+	system("$FindBin::Bin/ndrank.pl");
 	$dbh->do(q{UPDATE misc SET value = ? WHERE id = 'TICK'}, undef, $updated);
 	system 'killall','-USR1', 'ndbot.pl';
 	local $dbh->{Warn} = 0;

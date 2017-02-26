@@ -773,6 +773,8 @@ CREATE TABLE planets (
 )
 WITH (fillfactor='50');
 
+ALTER TABLE planets ADD COLUMN id text UNIQUE NOT NULL;
+
 
 ALTER TABLE planets OWNER TO ndawn;
 
