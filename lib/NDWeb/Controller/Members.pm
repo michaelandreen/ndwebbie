@@ -353,7 +353,7 @@ sub insertintel : Private {
 		});
 	my @scans;
 	my $intel = $c->req->param('message');
-	while ($intel =~ m{http://[\w.]+/.+?scan(_id|_grp)?=(\w+)}g){
+	while ($intel =~ m{https?://[\w.]+/.+?scan(_id|_grp)?=(\w+)}g){
 		my $groupscan = (defined $1 && $1 eq '_grp') || 0;
 		my %scan;
 		$scan{id} = $2;
