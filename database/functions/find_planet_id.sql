@@ -12,7 +12,7 @@ BEGIN
 			UPDATE planets SET race = _race, planet = _planet, ruler = _ruler WHERE pid = p.pid;
 			UPDATE forum_threads SET subject = escape_html(_ruler) || ' OF ' || escape_html(_planet)
 				WHERE ftid = p.ftid;
-			INSERT INTO forum_posts (ftid, uid, message) VALUES(p.ftid, -2, 'Planet changed data from ('
+			INSERT INTO forum_posts (ftid, uid, message) VALUES(p.ftid, -3, 'Planet changed data from ('
 				|| escape_html(p.ruler) || ', ' || escape_html(p.planet) || ', ' || p.race || ') to ('
 				|| escape_html(_ruler) || ', ' || escape_html(_planet) || ', ' || _race || ').');
 		END IF;
