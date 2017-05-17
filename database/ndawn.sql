@@ -3063,14 +3063,6 @@ ALTER TABLE ONLY planets
 
 
 --
--- Name: planets_ruler_key; Type: CONSTRAINT; Schema: public; Owner: ndawn
---
-
-ALTER TABLE ONLY planets
-    ADD CONSTRAINT planets_ruler_key UNIQUE (ruler, planet);
-
-
---
 -- Name: raid_access_pkey; Type: CONSTRAINT; Schema: public; Owner: ndawn
 --
 
