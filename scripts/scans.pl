@@ -146,8 +146,8 @@ sub parse_jumpgate {
 my $adddevscan = $dbh->prepare(q{INSERT INTO development_scans
 	(id,tick,pid,light_fac,medium_fac,heavy_fac,amps,distorters
 		,metal_ref,crystal_ref,eonium_ref,reslabs,fincents,milcents,seccents,structdefs
-		,travel,infra,hulls,waves,extraction,covert,mining,total)
-	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		,travel,infra,hulls,waves,extraction,covert,mining,population,total)
+	VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 	});
 
 
