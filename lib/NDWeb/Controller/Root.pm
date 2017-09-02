@@ -243,10 +243,7 @@ AND mission = 'Full fleet' AND name IN ('Main','Advanced Unit');
 			newposts => $newposts,
 			unreadposts => $unread
 		});
-		$c->stash->{user}->{attacker} = $c->check_user_roles(qw/attack_menu/)
-			&& (!$c->check_user_roles(qw/member_menu/)
-				|| ($c->user->planet && (($c->stash->{TICK} - $fleetupdate < 24)
-					|| $c->check_user_roles(qw/no_fleet_update/)))),
+		$c->stash->{user}->{attacker} = $c->check_user_roles(qw/attack_menu/);
 		$c->forward('listTargets');
 	}
 	my $birthdays = $dbh->prepare(q{SELECT username

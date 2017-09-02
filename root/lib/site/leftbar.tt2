@@ -69,23 +69,6 @@
 		onclick = "listTargets()">
 </p>
 <div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
-[% ELSIF c.check_user_roles("member_menu") %]
-	[% IF c.user.planet %]
-	<p><b>Update your fleets to see raids and launch confirmation</b></p>
-<form action="[% c.uri_for('/members/postconfirmation') %]" method="post">
-	<p>Paste your fleets from fleets page here:</p>
-	<p><textarea rows="5" cols="15" name="mission"></textarea>
-	<br><input type="submit" value="Submit">
-	</p>
-</form>
-	[% ELSE %]
-	<form action="/members/postowncoords" method="post">
-		<p>We need your planet's coordinates:
-		<input type="text" name="planet" value="">
-		<input type="submit" value="Submit">
-		</p>
-	</form>
-	[% END %]
 [% END %]
 [% IF c.check_user_roles("covop") %]
 <p>Covop menu</p>
