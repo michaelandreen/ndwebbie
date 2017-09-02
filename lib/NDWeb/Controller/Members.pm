@@ -607,7 +607,7 @@ sub parseconfirmations {
 		my @targets = split /\s+/, $+{targets};
 		my @lts = split /\s+/, $+{lts};
 		my @etas;
-		my $_ = $+{etas};
+		local $_ = $+{etas};
 		while(/$etare/sxg){
 			push @etas, $1;
 		}
