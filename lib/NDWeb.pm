@@ -89,6 +89,7 @@ __PACKAGE__->setup();
 
 __PACKAGE__->deny_access_unless('/users',[qw/admin_users/]);
 __PACKAGE__->allow_access_if('/users/sms',[qw/users_sms/]);
+__PACKAGE__->allow_access_if('/users/postsms',[qw/users_sms/]);
 __PACKAGE__->deny_access_unless('/alliances',[qw/alliances/]);
 __PACKAGE__->deny_access_unless('/alliances/resources',[qw/alliances_resources/]);
 __PACKAGE__->deny_access_unless('/graphs/alliancevsintel',[qw/graphs_intel/]);
