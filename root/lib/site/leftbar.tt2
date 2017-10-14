@@ -59,7 +59,7 @@
 	<li><a href="/stats/tags">Planet tags</a></li>
 </ul>
 [% END %]
-[% IF user.attacker %]
+[% IF user.attacker AND c.user.planet %]
 <p>Fleet menu</p>
 <ul class="linkbar">
 	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
@@ -69,6 +69,13 @@
 		onclick = "listTargets()">
 </p>
 <div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
+[% ELSE %]
+	<form action="/members/postowncoords" method="post">
+		<p>We need your planet's coordinates:
+		<input type="text" name="planet" value="">
+		<input type="submit" value="Submit">
+		</p>
+	</form>
 [% END %]
 [% IF c.check_user_roles("covop") %]
 <p>Covop menu</p>
