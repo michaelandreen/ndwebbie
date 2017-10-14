@@ -69,7 +69,7 @@
 		onclick = "listTargets()">
 </p>
 <div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
-[% ELSE %]
+[% ELSIF user.attacker %]
 	<form action="/members/postowncoords" method="post">
 		<p>We need your planet's coordinates:
 		<input type="text" name="planet" value="">
