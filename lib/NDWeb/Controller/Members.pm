@@ -595,7 +595,7 @@ sub parseconfirmations {
 		|$returnetare)\s*/x;
 	my $missre = qr/((?:Alliance\ Standby)|(?:(?:Fake\ )?\w+))\s*/x;
 	if ($missions =~ m/
-		Ships \s+ Cla \s+ T\s?1 \s+ T\s?2 \s+ T\s?3 \s+ Base \s+ \(i\) \s (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ TOTAL \s+
+		Ships \s+ Cla \s+ T\s?1 \s+ T\s?2 \s+ T\s?3 \s+ ETA \s+ Base \s+ \(i\) \s (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ (?<name>.+?) \s+ \(i\) \s+ TOTAL \s+
 		(?<ships>.+?)
 		\QTotal Ships in Fleet\E \s+ (\d+) \s+ (?<amount>\d+) \s+ (?<amount>\d+) \s+ (?<amount>\d+) \s+
 		Mission: \s* (?<missions>(?:$missre)*)  \s*
@@ -664,7 +664,7 @@ sub parseconfirmations {
 			amount => 0,
 			ships => []
 		};
-		while ($match{ships}->[0] =~ m/(\w[ \w]+?)\s+(FI|CO|FR|DE|CR|BS)[^\d]+((?:\d+\s*){5})/g){
+		while ($match{ships}->[0] =~ m/(\w[ \w]+?)\s+(FI|CO|FR|DE|CR|BS|--)[^\d]+\d+\s+((?:\d+\s*){5})/g){
 			my $ship = $1;
 			my @amounts = split /\D+/, $3;
 			my $base = shift @amounts;
