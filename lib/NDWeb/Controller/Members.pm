@@ -163,7 +163,7 @@ sub postowncoords : Local {
 		$c->flash(error => $c->req->param('planet') . " are not valid coords.");
 	}
 
-	$c->res->redirect($c->uri_for(''));
+	$c->res->redirect($c->uri_for('/'.$c->session->{referrer}));
 }
 
 sub postfleetsupdates : Local {
