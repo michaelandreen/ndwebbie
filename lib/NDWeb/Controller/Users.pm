@@ -169,7 +169,7 @@ sub postmail : Local {
 	}
 
 	my %mail = (
-		smtp => 'ruin.nu',
+		smtp => 'localhost',
 		BCC      => (join ',',@emails),
 		From    => 'NewDawn Command <nd@ruin.nu>',
 		'Content-type' => 'text/plain; charset="UTF-8"',

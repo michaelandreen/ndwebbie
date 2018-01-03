@@ -148,7 +148,7 @@ INSERT INTO email_change (uid,email) VALUES ($1,$2) RETURNING id;
 		my ($id) = $insert->fetchrow_array;
 
 		my %mail = (
-			smtp => 'ruin.nu',
+			smtp => 'localhost',
 			To      => $email,
 			From    => 'NewDawn Command <nd@ruin.nu>',
 			'Content-type' => 'text/plain; charset="UTF-8"',
