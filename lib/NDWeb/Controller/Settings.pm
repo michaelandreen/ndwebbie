@@ -132,6 +132,16 @@ sub changeEmail : Local {
 
 	my $email = $c->req->param('email');
 
+	if ($email =~ /^s?$/) {
+		my $update = $dbh->prepare(q{
+UPDATE users SET email = NULL WHERE uid = $1;
+			});
+		$update->execute($c->user->id);
+		$c->flash(error => 'email cleared');
+		$c->res->redirect($c->uri_for(''));
+		return,
+	}
+
 	unless (Email::Valid->address($email)){
 		$c->flash(email => $email);
 		$c->flash(error => 'Invalid email address');
