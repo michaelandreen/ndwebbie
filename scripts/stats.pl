@@ -46,6 +46,8 @@ while ($file =~ /class="(\w+)"><td>((?:\w| )+)<\/td><td>(\w+)<\/td><td>(\w+|-)<\
 	my $dmg = $10;
 	$dmg = 0 if $dmg eq '-';
 	my $class = $classes{$3};
+	my $type = $6;
+	$type = 'Emp' if $type eq 'EMP';
 	$st->execute($2,$class,$4,$5,'-',$6,$7,$8,$9,$dmg,$11,$12,$13,$14,$1) or die $dbh->errstr;
 	print "$2,$class,$4,$5,'-',$6,$7,$dmg,$9,$10,$11,$12,$13,$14,$1\n";
 }
