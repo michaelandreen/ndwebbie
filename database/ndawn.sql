@@ -3469,6 +3469,8 @@ CREATE TRIGGER update_forum_thread_posts AFTER INSERT OR DELETE OR UPDATE ON for
 
 CREATE TRIGGER update_planet AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCEDURE update_user_planet();
 
+CREATE TRIGGER update_user_planet_check BEFORE UPDATE ON users FOR EACH ROW WHEN (NEW.pid IS NOT NULL AND OLD.pid IS NULL) EXECUTE PROCEDURE update_user_planet_check();
+
 
 --
 -- Name: update_wiki_page; Type: TRIGGER; Schema: public; Owner: ndawn

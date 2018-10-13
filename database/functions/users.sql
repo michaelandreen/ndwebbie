@@ -26,3 +26,13 @@ BEGIN
 	RETURN NEW;
 END;
 $_X$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_user_planet_check() RETURNS trigger AS $_X$
+BEGIN
+	IF OLD.pid IS NULL AND NEW.pid IS NOT NULL AND isshuffletick() THEN
+		NEW.pid = NULL;
+	END IF;
+
+	RETURN NEW;
+END;
+$_X$ LANGUAGE plpgsql;
