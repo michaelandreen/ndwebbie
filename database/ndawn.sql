@@ -1462,9 +1462,9 @@ CREATE TABLE email_change (
     id text DEFAULT md5(((now() + (random() * '100 years'::interval)))::text) NOT NULL,
     uid integer NOT NULL,
     email text NOT NULL,
-    confirmed boolean DEFAULT false NOT NULL
+    confirmed boolean DEFAULT false NOT NULL,
+    time timestamptz DEFAULT now()
 );
-
 
 ALTER TABLE email_change OWNER TO ndawn;
 
