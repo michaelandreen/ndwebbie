@@ -43,11 +43,12 @@ sub index :Path :Args(0) {
 	}
 	$c->stash(stylesheets => \@stylesheets);
 
-	my ($birthday,$timezone,$email) = $dbh->selectrow_array(q{
-SELECT birthday,timezone,email FROM users WHERE uid = $1
+	my ($birthday,$timezone,$email,$discord_id) = $dbh->selectrow_array(q{
+SELECT birthday,timezone,email,discord_id FROM users WHERE uid = $1
 		},undef,$c->user->id);
 	$c->stash(birthday => $birthday);
 	$c->stash(email =>  $c->flash->{email} // $email);
+	$c->stash(discord_id =>  $c->flash->{discord_id} // $discord_id);
 
 	my @timezone = split m{/},$timezone,2;
 	$c->stash(timezone => \@timezone);
@@ -181,6 +182,39 @@ use the following url to confirm the change:
 		if($@ =~ /duplicate key value violates unique constraint/){
 			$c->flash(email => $email);
 			$c->flash(error => 'Something went wrong, try to set the email again');
+		}else{
+			die $@;
+		}
+	}
+	$c->res->redirect($c->uri_for(''));
+}
+
+sub changeDiscordId : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $discord_id = $c->req->param('discord_id');
+
+	if ($discord_id =~ /^\s*$/) {
+		my $update = $dbh->prepare(q{
+UPDATE users SET discord_id = NULL WHERE uid = $1;
+			});
+		$update->execute($c->user->id);
+		$c->flash(error => 'discord id cleared');
+		$c->res->redirect($c->uri_for(''));
+		return,
+	}
+
+	eval{
+		my $update = $dbh->prepare(q{
+UPDATE users SET discord_id = $2 WHERE uid = $1;
+			});
+		$update->execute($c->user->id,$discord_id);
+	};
+	if($@){
+		if($@ =~ /duplicate key value violates unique constraint/){
+			$c->flash(discord_id => $discord_id);
+			$c->flash(error => 'Someone else is using this discord id, duplicate account?');
 		}else{
 			die $@;
 		}

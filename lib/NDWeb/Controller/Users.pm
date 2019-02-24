@@ -29,7 +29,7 @@ sub index :Path :Args(0) {
 	my $dbh = $c->model;
 
 	my $query = $dbh->prepare(q{
-SELECT uid,username,pnick,array_to_string(array_agg(g.groupname),', ') AS groups
+SELECT uid,username,discord_id,pnick,array_to_string(array_agg(g.groupname),', ') AS groups
 FROM users u LEFT OUTER JOIN (groupmembers gm NATURAL JOIN groups g) USING (uid)
 WHERE uid > 0
 GROUP BY u.uid,username,pnick

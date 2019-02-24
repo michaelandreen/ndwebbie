@@ -9,6 +9,10 @@
 	<br>
 	<input type="submit" value="Change">
 </fieldset></form>
+<form action="[% c.uri_for('changeDiscordId') %]" method="post"><fieldset> <legend>Discord ID</legend>
+	<input type="text" name="discord_id" value="[% discord_id | html %]" class="discord_id">
+	<br><input type="submit" value="Change">
+</fieldset></form>
 <form action="[% c.uri_for('changeEmail') %]" method="post"><fieldset> <legend>Email</legend>
 	<input type="text" name="email" value="[% email | html %]" class="email">
 	<br><input type="submit" value="Change">
