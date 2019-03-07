@@ -66,6 +66,7 @@ __PACKAGE__->config(session => {
 	directory_umask => 077,
 	expires => 300,
 	verify_address => 1,
+	cookie_secure => 2,
 });
 __PACKAGE__->config( "Plugin::Cache" => {
 	backend => {
