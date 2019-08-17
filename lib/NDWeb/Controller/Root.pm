@@ -220,6 +220,10 @@ sub end : ActionClass('RenderView') {
 			$c->stash->{template} = 'access_denied.tt2';
 			$c->res->status(403);
 			$c->clear_errors;
+		}elsif ($c->error->[0] =~ m/No logged in user, and none supplied as argument/){
+			$c->stash->{template} = 'access_denied.tt2';
+			$c->res->status(403);
+			$c->clear_errors;
 		}
 	}
 

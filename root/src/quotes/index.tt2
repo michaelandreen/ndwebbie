@@ -1,0 +1,19 @@
+[% META title = 'Quotes' %]
+<form action="[% c.uri_for('') %]" method="post"><fieldset> <legend>Search term</legend>
+	<input type="text" name="search" value="[% search | html %]" class="search">
+	<input type="submit" value="Search">
+</fieldset></form>
+
+<table>
+	<tr>
+		<th>Id</th><th>Quote</th>
+	</tr>
+
+[% debug(quotes.size) %]
+[% FOR q IN quotes %]
+	<tr align="center" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+	<td align="right">[% q.qid %]</td>
+	<td align="left">[% q.quote | html %]</td>
+	</tr>
+[% END %]
+</table>
