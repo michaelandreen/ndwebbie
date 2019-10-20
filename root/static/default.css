@@ -1,256 +1,287 @@
-body,html {
-	color: black;
-	background-color: #D9D9D9;
-	font-family: sans-serif;
-}
-#body {
-	padding-left: 15em;
-	/*padding-right: 12em;*/
+body,
+html {
+  color: black;
+  background-color: #d9d9d9;
+  font-family: sans-serif;
+  margin: 0;
 }
 #header {
-	padding-left: 15em;
-	/*padding-right: 12em;*/
+  padding-left: 15em;
+  /*padding-right: 12em;*/
 }
-#leftbar,#rightbar{
-	padding: 0;
-	margin: 0;
-	position: absolute;
-	width: 14em;
-	top: 1em;
+
+#body {
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
 }
-#leftbar{
-	left: 1em;
+
+@media (min-width: 768px) {
+  #body {
+    width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
-#rightbar{
-	right: 1em;
+
+@media (min-width: 1199px) {
+  #body {
+    width: 990px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+#leftbar {
+  background: var(--mdc-theme-secondary);
+  height: 100%;
+  z-index: 5000;
+}
+
+#leftbar .mdc-drawer__content {
+  padding: 10px;
+}
+
+#rightbar {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  width: 14em;
+  top: 1em;
+}
+#rightbar {
+  right: 1em;
 }
 
 legend {
-	color: black;
-	background: white;
-	border-style: solid;
-	border-width: 1px;
-	padding: 1px;
+  color: black;
+  background: white;
+  border-style: solid;
+  border-width: 1px;
+  padding: 1px;
 }
 table.boards td {
-	/*border-style: solid;
+  /*border-style: solid;
 	border-width: 1px;*/
-	padding: 2px;
-	border-collapse: separate;
-	border-spacing: 15pt;
-	font-size: larger;
+  padding: 2px;
+  border-collapse: separate;
+  border-spacing: 15pt;
+  font-size: larger;
 }
 table.boards td.sticky {
-	font-weight: bold;
+  font-weight: bold;
 }
-table.boards{
-	border-collapse: separate;
-	border-spacing: 5px;
+table.boards {
+  border-collapse: separate;
+  border-spacing: 5px;
 }
 table.boards th {
-	font-size: larger;
+  font-size: larger;
 }
 
-table.boards a, table.stats a {
-	text-decoration: none;
-	width: 100%;
-	display: block;
+table.boards a,
+table.stats a {
+  text-decoration: none;
+  width: 100%;
+  display: block;
 }
 fieldset.forum-post {
-	width: 40em;
-	padding: 5px;
+  width: 40em;
+  padding: 5px;
 }
 fieldset.forum-post legend b {
-	font-size: larger;
+  font-size: larger;
 }
-div.leftinfo{
-	float: left;
-	padding-right: 2em;
+div.leftinfo {
+  float: left;
+  padding-right: 2em;
 }
 
 fieldset {
-	display: block;
-	clear: left;
+  display: block;
+  clear: left;
 }
-p.claimlinks{
-	clear: both;
+p.claimlinks {
+  clear: both;
 }
 
 ul.linkbar {
-	list-style-type: none;
-	width: 13.5em;
-	padding: 0;
-	margin: 0;
+  list-style-type: none;
+  width: 13.5em;
+  padding: 0;
+  margin: 0;
 }
 ul.linkbar li {
-	background: white;
-	color: black;
-	margin: 0.5em 0;
-	padding: 0.3em;
-	/*border-right: 1em solid black;*/
+  margin: 0.5em 0;
+  padding: 0.3em;
+  /*border-right: 1em solid black;*/
 }
 ul.linkbar a {
-	text-decoration: none;
-	width: 100%;
-	display: block;
+  text-decoration: none;
+  width: 100%;
+  display: block;
 }
 ul.linkbar input {
-	width: 12em;
+  width: 12em;
 }
 ul.linkbar input.coordsinput {
-	width: 5em;
+  width: 5em;
 }
 input.small {
-	width: 1.7em;
+  width: 1.7em;
 }
 tr.odd {
-	background: white;
-	color: black;
+  background: white;
+  color: black;
 }
 tr.total {
-	background: black;
-	color: red;
+  background: black;
+  color: red;
 }
 
-td.ingal{
-	background: blue;
-	color: black;
+td.ingal {
+  background: blue;
+  color: black;
 }
-td.Defend{
-	background: green;
-	color: black;
+td.Defend {
+  background: green;
+  color: black;
 }
-td.AllyDef{
-	background: #00FF00;
-	color: black;
+td.AllyDef {
+  background: #00ff00;
+  color: black;
 }
-td.Attack{
-	background: red;
-	color: black;
-}
-
-input.unclaim{
-	background: green;
-}
-input.join{
-	background: #00AAAA;
-}
-input.taken{
-	background: #AA0000;
+td.Attack {
+  background: red;
+  color: black;
 }
 
-input.blocked{
-	background: black;
-	color: gray;
+input.unclaim {
+  background: green;
+}
+input.join {
+  background: #00aaaa;
+}
+input.taken {
+  background: #aa0000;
 }
 
-td.Friendly{
-	background: green;
-	color: black;
-}
-td.Friendly a{
-	color: yellow;
-	background: green;
-}
-td.Hostile{
-	background: red;
-	color: black;
-}
-td.NAP{
-	background: blue;
-	color: white;
-}
-td.NAP a{
-	color: yellow;
-	background: blue;
+input.blocked {
+  background: black;
+  color: gray;
 }
 
-td.old{
-	background: red;
-	color: black;
+td.Friendly {
+  background: green;
+  color: black;
 }
-td.semiold{
-	background: yellow;
-	color: black;
+td.Friendly a {
+  color: yellow;
+  background: green;
 }
-td.new{
-	background: green;
-	color: black;
+td.Hostile {
+  background: red;
+  color: black;
 }
-table.old{
-	border: outset 1pt;
-	border-collapse: separate;
-	border-color: red;
+td.NAP {
+  background: blue;
+  color: white;
+}
+td.NAP a {
+  color: yellow;
+  background: blue;
 }
 
-table.closedPlanet{
-	border: outset 2pt;
-	border-collapse: separate;
-	border-color: red;
+td.old {
+  background: red;
+  color: black;
 }
-li.bash{
-	color: #FF9933;
+td.semiold {
+  background: yellow;
+  color: black;
+}
+td.new {
+  background: green;
+  color: black;
+}
+table.old {
+  border: outset 1pt;
+  border-collapse: separate;
+  border-color: red;
+}
+
+table.closedPlanet {
+  border: outset 2pt;
+  border-collapse: separate;
+  border-color: red;
+}
+li.bash {
+  color: #ff9933;
 }
 div.clear {
-	clear: both;
-	height: 0;
-	margin: 0;
-	padding: 0;
-	line-height: 0.0;
-	font-size: 1px;
+  clear: both;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 1px;
 }
 
-table.stats tr td{
-	padding-left: 0.5em;
+table.stats tr td {
+  padding-left: 0.5em;
 }
 
-td.LowestPrio{
-	background: red;
-	color: black;
+td.LowestPrio {
+  background: red;
+  color: black;
 }
-td.MediumPrio{
-	background: yellow;
-	color: black;
+td.MediumPrio {
+  background: yellow;
+  color: black;
 }
-td.MediumPrio a{
-	background: yellow;
-	color: black;
+td.MediumPrio a {
+  background: yellow;
+  color: black;
 }
-td.HighestPrio{
-	background: green;
-	color: black;
+td.HighestPrio {
+  background: green;
+  color: black;
 }
-span.newposts,span.unreadposts {
-	font-weight: bold;
+span.newposts,
+span.unreadposts {
+  font-weight: bold;
 }
 span.newposts {
-	color: red;
+  color: red;
 }
 
 input.email {
-	width: 30em;
+  width: 30em;
 }
 
-div.bbcode-quote,div.bbcode-code {
-	border: solid;
-	border-width: 1px;
-	MARGIN: 5px 15px 15px 15px; PADDING: 8px;
-	line-height: 1.4;
+div.bbcode-quote,
+div.bbcode-code {
+  border: solid;
+  border-width: 1px;
+  margin: 5px 15px 15px 15px;
+  padding: 8px;
+  line-height: 1.4;
 }
-div.bbcode-quote-head,div.bbcode-code-head {
-	font-weight: bold;
+div.bbcode-quote-head,
+div.bbcode-code-head {
+  font-weight: bold;
 }
 
 fieldset.incluster {
-	border: solid;
-	border-width: 2px;
-	border-color: red;
+  border: solid;
+  border-width: 2px;
+  border-color: red;
 }
 
 div#error {
-	font-weight: bold;
-	font-size: larger;
-	color: red;
-	border-style: solid;
-	border-width: 1px;
+  font-weight: bold;
+  font-size: larger;
+  color: red;
+  border-style: solid;
+  border-width: 1px;
 }

@@ -1,13 +1,26 @@
-<div id="leftbar">[% PROCESS site/leftbar.tt2 %]</div>
-<div id="header">[%# PROCESS site/header.tt2 %]</div>
+<div id="leftbar" class="mdc-drawer mdc-drawer--modal" data-mdc-auto-init="MDCDrawer">
+	<div class="mdc-drawer__content">
+		<button class="mdc-icon-button material-icons menu-nav-close">close</button>
+		[% PROCESS site/leftbar.tt2 %]
+	</div>	
+</div>
+<div id="header">[%# PROCESS header.tt2 %]</div>
 
-<div id="body">
-[% IF error %]
-	<div id="error">
-	[% error %]
-	</div>
-[% END %]
-[% content %]
+<header class="mdc-top-app-bar app-bar mdc-top-app-bar--fixed mdc-top-app-bar--dense" id="app-bar" data-mdc-auto-init="MDCTopAppBar">
+  <div class="mdc-top-app-bar__row">
+    <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+      <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button menu-nav-open">menu</button>
+      <span class="mdc-top-app-bar__title">[% template.title or site.title %]</span>
+    </section>
+  </div>
+</header>
+
+<div id="body" class="mdc-top-app-bar--fixed-adjust">
+  [% IF error %]
+  <div id="error">
+    [% error %]
+  </div>
+  [% END %] [% content %]
 </div>
 
 <div id="footer">[%# PROCESS site/footer.tt2 %]</div>

@@ -1,42 +1,65 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<head>
-	<title>[% site.title %]: [% title or template.title %]</title>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="/static/default.css">
-	<link rel="stylesheet" type="text/css" href="/static/css/[% user.css or "black" %].css">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	
-	<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
-	
-	<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-	
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-[%- FOR s IN site.stylesheets %]
-	<link rel="stylesheet" type="text/css" href="/static/[% s %]">
-[%- END %]
-[%- IF css %]
-<style type="text/css">
-[% css %]
-</style>
-[%- END %]
-	<link rel="icon" type="image/ico" href="/static/favicon.ico">
-	<script type="text/javascript" src="/static/js/raid.js"></script>
-	<script type="text/javascript" src="/static/js/jquery-1.4.2.min.js"></script>
-</head>
- <body>
-[% content %]
+  <head>
+    <title>[% site.title %]: [% title or template.title %]</title>
 
-<script type="text/javascript">
-<!--
-$(document).ready(function(){
-	$('.hidden').hide();
-	$('a[rel*="external"]').click(function() {
-		window.open( $(this).attr('href') );
-		return false;
-	});
-});
--->
-</script>
-</body>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link
+      href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+      rel="stylesheet"
+    />
+
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+
+	
+
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="/static/default.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/[% user.css or
+    "black" %].css"> [%- FOR s IN site.stylesheets %]
+    <link rel="stylesheet" type="text/css" href="/static/[% s %]" />
+    [%- END %] [%- IF css %]
+    <style type="text/css">
+      [% css %]
+    </style>
+    [%- END %]
+    <link rel="icon" type="image/ico" href="/static/favicon.ico" />
+    <script type="text/javascript" src="/static/js/raid.js"></script>
+    <!--
+    <script
+      type="text/javascript"
+      src="/static/js/jquery-1.4.2.min.js"
+    ></script>
+	-->
+  </head>
+  <body>
+  <div class="mdc-drawer-scrim"></div>
+    [% content %]
+
+    <script type="text/javascript">
+      <!--
+      $(document).ready(function(){
+      	$('.hidden').hide();
+      	$('a[rel*="external"]').click(function() {
+      		window.open( $(this).attr('href') );
+      		return false;
+      	});
+      });
+      -->
+    </script>
+	
+
+	<script type="text/javascript">
+	window.mdc.autoInit();
+	</script>
+
+	<script src="/static/js/md.js"></script>
+  </body>
 </html>
