@@ -1,6 +1,6 @@
 <div id="leftbar" class="mdc-drawer mdc-drawer--modal" data-mdc-auto-init="MDCDrawer">
 	<div class="mdc-drawer__content">
-		<button class="mdc-icon-button material-icons menu-nav-close">close</button>
+		<button class="mdc-icon-button material-icons menu-nav-toggle">close</button>
 		[% PROCESS site/leftbar.tt2 %]
 	</div>	
 </div>
@@ -9,7 +9,7 @@
 <header class="mdc-top-app-bar app-bar mdc-top-app-bar--fixed mdc-top-app-bar--dense" id="app-bar" data-mdc-auto-init="MDCTopAppBar">
   <div class="mdc-top-app-bar__row">
     <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-      <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button menu-nav-open">menu</button>
+      <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button menu-nav-toggle">menu</button>
       <span class="mdc-top-app-bar__title">[% template.title or site.title %]</span>
     </section>
   </div>
