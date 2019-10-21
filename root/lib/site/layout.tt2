@@ -1,13 +1,13 @@
 <div id="header">[%# PROCESS header.tt2 %]</div>
 
-  <header class="mdc-top-app-bar app-bar" id="app-bar" data-mdc-auto-init="MDCTopAppBar">
-    <div class="mdc-top-app-bar__row">
-      <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
-        <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button menu-nav-toggle">menu</button>
-        <span class="mdc-top-app-bar__title">[% template.title or site.title %]</span>
-      </section>
-    </div>
-  </header>
+	<header class="mdc-top-app-bar app-bar" id="app-bar" data-mdc-auto-init="MDCTopAppBar">
+		<div class="mdc-top-app-bar__row">
+			<section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+				<button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button menu-nav-toggle">menu</button>
+				<span class="mdc-top-app-bar__title">[% template.title or site.title %]</span>
+			</section>
+		</div>
+	</header>
 
 
 <aside id="leftbar" class="mdc-drawer blue mdc-drawer--dismissible mdc-top-app-bar--fixed-adjust" data-mdc-auto-init="MDCDrawer">
@@ -20,19 +20,20 @@
 
 <div class="mdc-drawer-app-content">
 
-  
+	
 
 
-  <main class="main-content" id="main-content">
-    <div id="body" class="mdc-top-app-bar--fixed-adjust">
-      [% IF error %]
-      <div id="error">
-        [% error %]
-      </div>
-      [% END %] [% content %]
-    </div>
-    </main>
+	<main class="main-content" id="main-content">
+		<div id="body" class="mdc-top-app-bar--fixed-adjust">
+			[% IF error %]
+			<div id="error">
+				[% error %]
+			</div>
+			[% END %] [% content %]
+		</div>
+		</main>
 
-  <div id="footer">[%# PROCESS site/footer.tt2 %]</div>
+	<div id="footer">[%# PROCESS site/footer.tt2 %]</div>
 
-  </div>
+	</div>
+</div>
