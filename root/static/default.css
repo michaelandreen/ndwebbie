@@ -4,10 +4,29 @@ html {
   background-color: #d9d9d9;
   font-family: sans-serif;
   margin: 0;
+  flex: auto;
 }
 #header {
   padding-left: 15em;
   /*padding-right: 12em;*/
+}
+
+.mdc-drawer-app-content {
+  flex: auto;
+  overflow: auto;
+  position: relative;
+}
+
+.main-content {
+  overflow: hidden;
+}
+
+.app-bar {
+  position: absolute;
+}
+
+.mdc-top-app-bar {
+  z-index: 7;
 }
 
 #body {
@@ -33,9 +52,9 @@ html {
 }
 
 #leftbar {
-  background: var(--mdc-theme-secondary);
+  background: #d8d8d8;
   height: 100%;
-  z-index: 5000;
+  z-index: 5;
 }
 
 #leftbar .mdc-drawer__content {

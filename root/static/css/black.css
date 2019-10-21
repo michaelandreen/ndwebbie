@@ -1,9 +1,8 @@
 body,
-html,
-table {
+html {
   font-family: sans-serif;
   color: #b2b2b2;
-  background-color: black;
+  background-color: #2d2d2d;
 }
 
 a {
@@ -36,7 +35,7 @@ legend {
 }
 
 ul.linkbar li {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.1);
   color: black;
   margin: 0.5em 0;
   padding: 0.3em;

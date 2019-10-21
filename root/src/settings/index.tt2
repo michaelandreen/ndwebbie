@@ -48,8 +48,13 @@
 	<p>Remember that GMT stays the same all year, so if you're in the UK you should pick Europe/London.</p>
 </form></fieldset>
 [%- site.stylesheets = ['ui/ui.datepicker.css'] %]
-<script type="text/javascript" src="/static/ui/ui.core.min.js"></script>
-<script type="text/javascript" src="/static/ui/ui.datepicker.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<!--<script type="text/javascript" src="/static/ui/ui.datepicker.min.js"></script>-->
+ <link
+      href="https://code.jquery.com/ui/1.11.4/themes/blitzer/jquery-ui.css"
+      rel="stylesheet"
+    />
+
 
 <script type="text/javascript">
 $(document).ready(function(){
