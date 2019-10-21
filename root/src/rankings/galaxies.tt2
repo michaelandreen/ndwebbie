@@ -1,46 +1,126 @@
 [% META title = 'Galaxy Rankings' %]
-<p>[% IF offset > 0 %]<a href="[% c.uri_for('galaxies', order, offset - 100) %]">Previous 100</a>[% END %]
-	[% IF galaxies.size == 100 %]<a href="[% c.uri_for('galaxies', order, offset + 100) %]">Next 100</a>[% END %]
+<p>
+  [% IF offset > 0 %]<a href="[% c.uri_for('galaxies', order, offset - 100) %]"
+    >Previous 100</a
+  >[% END %] [% IF galaxies.size == 100 %]<a
+    href="[% c.uri_for('galaxies', order, offset + 100) %]"
+    >Next 100</a
+  >[% END %]
 </p>
-<table class="stats">
-	<tr align="center"><th colspan="4">Rank</th>
-	</tr>
-	<tr>
-	<th><a href="[% c.uri_for('galaxies', 'sizerank', offset) %]">Size</a></th>
-	<th><a href="[% c.uri_for('galaxies', 'scorerank', offset) %]">Score</a></th>
-	<th><a href="[% c.uri_for('galaxies', 'valuerank', offset) %]">Value</a></th>
-	<th><a href="[% c.uri_for('galaxies', 'xprank', offset) %]">XP</a></th>
-	<th>Coords</th>
-	<th><a href="[% c.uri_for('galaxies', 'planets', offset) %]">Planets</a></th>
-	<th><a href="[% c.uri_for('galaxies', 'sizerank', offset) %]">Size</a></th>
-	<th><a href="[% c.uri_for('galaxies', 'scorerank', offset) %]">Score</a></th>
-	<th><a href="[% c.uri_for('galaxies', 'valuerank', offset) %]">Value</a></th>
-	<th><a href="[% c.uri_for('galaxies', 'xprank', offset) %]">XP</a></th>
-	</tr>
-	[% FOR g IN galaxies %]
-	<tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-		[% g.sizerankimg = (g.sizerank_gain_day == 0 ? 'stay' : (g.sizerank_gain_day < 0 ? 'up' : 'down')) %]
-		<td title="[% g.sizerank_gain_day %] Today | [% g.sizerank_gain %] Tick">[% g.sizerank %] <img src="/static/images/[% g.sizerankimg %].png" alt="[% g.sizerankimg %]"> </td>
-		[% g.scorerankimg = (g.scorerank_gain_day == 0 ? 'stay' : (g.scorerank_gain_day < 0 ? 'up' : 'down')) %]
-		<td title="[% g.scorerank_gain_day %] Today | [% g.scorerank_gain %] Tick">[% g.scorerank %] <img src="/static/images/[% g.scorerankimg %].png" alt="[% g.scorerankimg %]"> </td>
-		[% g.valuerankimg = (g.valuerank_gain_day == 0 ? 'stay' : (g.valuerank_gain_day < 0 ? 'up' : 'down')) %]
-		<td title="[% g.valuerank_gain_day %] Today | [% g.valuerank_gain %] Tick">[% g.valuerank %] <img src="/static/images/[% g.valuerankimg %].png" alt="[% g.valuerankimg %]"> </td>
-		[% g.xprankimg = (g.xprank_gain_day == 0 ? 'stay' : (g.xprank_gain_day < 0 ? 'up' : 'down')) %]
-		<td title="[% g.xprank_gain_day %] Today | [% g.xprank_gain %] Tick">[% g.xprank %] <img src="/static/images/[% g.xprankimg %].png" alt="[% g.xprankimg %]"> </td>
-		<td><a href="[% c.uri_for('/stats','galaxy',g.x,g.y) %]">[% g.x %]:[% g.y %]</a></td>
-		[% g.planetsimg = (g.planets_gain_day == 0 ? 'stay' : (g.planets_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% g.planets_gain_day %] Today | [% g.planets_gain %] Tick">[% g.planets | commify %] <img src="/static/images/[% g.planetsimg %].png" alt="[% g.planetsimg %]"> </td>
-		[% g.sizeimg = (g.size_gain_day == 0 ? 'stay' : (g.size_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% g.size_gain_day %] Today | [% g.size_gain %] Tick">[% g.size | commify %] <img src="/static/images/[% g.sizeimg %].png" alt="[% g.sizeimg %]"> </td>
-		[% g.scoreimg = (g.score_gain_day == 0 ? 'stay' : (g.score_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% g.score_gain_day | commify %] Today | [% g.score_gain | commify %] Tick">[% g.score | commify %] <img src="/static/images/[% g.scoreimg %].png" alt="[% g.scoreimg %]"> </td>
-		[% g.valueimg = (g.value_gain_day == 0 ? 'stay' : (g.value_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% g.value_gain_day | commify %] Today | [% g.value_gain | commify %] Tick">[% g.value | commify %] <img src="/static/images/[% g.valueimg %].png" alt="[% g.valueimg %]"> </td>
-		[% g.xpimg = (g.xp_gain_day == 0 ? 'stay' : (g.xp_gain_day > 0 ? 'up' : 'down')) %]
-		<td title="[% g.xp_gain_day | commify %] Today | [% g.xp_gain | commify %] Tick">[% g.xp | commify %] <img src="/static/images/[% g.xpimg %].png" alt="[% g.xpimg %]"> </td>
-	</tr>
-[% END %]
+<table class="stats striped">
+  <tr align="center">
+    <th colspan="4">Rank</th>
+  </tr>
+  <tr>
+    <th><a href="[% c.uri_for('galaxies', 'sizerank', offset) %]">Size</a></th>
+    <th>
+      <a href="[% c.uri_for('galaxies', 'scorerank', offset) %]">Score</a>
+    </th>
+    <th>
+      <a href="[% c.uri_for('galaxies', 'valuerank', offset) %]">Value</a>
+    </th>
+    <th><a href="[% c.uri_for('galaxies', 'xprank', offset) %]">XP</a></th>
+    <th>Coords</th>
+    <th>
+      <a href="[% c.uri_for('galaxies', 'planets', offset) %]">Planets</a>
+    </th>
+    <th><a href="[% c.uri_for('galaxies', 'sizerank', offset) %]">Size</a></th>
+    <th>
+      <a href="[% c.uri_for('galaxies', 'scorerank', offset) %]">Score</a>
+    </th>
+    <th>
+      <a href="[% c.uri_for('galaxies', 'valuerank', offset) %]">Value</a>
+    </th>
+    <th><a href="[% c.uri_for('galaxies', 'xprank', offset) %]">XP</a></th>
+  </tr>
+  [% FOR g IN galaxies %]
+  <tr align="right" class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+    [% g.sizerankimg = (g.sizerank_gain_day == 0 ? 'stay' : (g.sizerank_gain_day
+    < 0 ? 'up' : 'down')) %]
+    <td title="[% g.sizerank_gain_day %] Today | [% g.sizerank_gain %] Tick">
+      [% g.sizerank %]
+      <img
+        src="/static/images/[% g.sizerankimg %].png"
+        alt="[% g.sizerankimg %]"
+      />
+    </td>
+    [% g.scorerankimg = (g.scorerank_gain_day == 0 ? 'stay' :
+    (g.scorerank_gain_day < 0 ? 'up' : 'down')) %]
+    <td title="[% g.scorerank_gain_day %] Today | [% g.scorerank_gain %] Tick">
+      [% g.scorerank %]
+      <img
+        src="/static/images/[% g.scorerankimg %].png"
+        alt="[% g.scorerankimg %]"
+      />
+    </td>
+    [% g.valuerankimg = (g.valuerank_gain_day == 0 ? 'stay' :
+    (g.valuerank_gain_day < 0 ? 'up' : 'down')) %]
+    <td title="[% g.valuerank_gain_day %] Today | [% g.valuerank_gain %] Tick">
+      [% g.valuerank %]
+      <img
+        src="/static/images/[% g.valuerankimg %].png"
+        alt="[% g.valuerankimg %]"
+      />
+    </td>
+    [% g.xprankimg = (g.xprank_gain_day == 0 ? 'stay' : (g.xprank_gain_day < 0 ?
+    'up' : 'down')) %]
+    <td title="[% g.xprank_gain_day %] Today | [% g.xprank_gain %] Tick">
+      [% g.xprank %]
+      <img src="/static/images/[% g.xprankimg %].png" alt="[% g.xprankimg %]" />
+    </td>
+    <td>
+      <a href="[% c.uri_for('/stats','galaxy',g.x,g.y) %]"
+        >[% g.x %]:[% g.y %]</a
+      >
+    </td>
+    [% g.planetsimg = (g.planets_gain_day == 0 ? 'stay' : (g.planets_gain_day >
+    0 ? 'up' : 'down')) %]
+    <td title="[% g.planets_gain_day %] Today | [% g.planets_gain %] Tick">
+      [% g.planets | commify %]
+      <img
+        src="/static/images/[% g.planetsimg %].png"
+        alt="[% g.planetsimg %]"
+      />
+    </td>
+    [% g.sizeimg = (g.size_gain_day == 0 ? 'stay' : (g.size_gain_day > 0 ? 'up'
+    : 'down')) %]
+    <td title="[% g.size_gain_day %] Today | [% g.size_gain %] Tick">
+      [% g.size | commify %]
+      <img src="/static/images/[% g.sizeimg %].png" alt="[% g.sizeimg %]" />
+    </td>
+    [% g.scoreimg = (g.score_gain_day == 0 ? 'stay' : (g.score_gain_day > 0 ?
+    'up' : 'down')) %]
+    <td
+      title="[% g.score_gain_day | commify %] Today | [% g.score_gain | commify %] Tick"
+    >
+      [% g.score | commify %]
+      <img src="/static/images/[% g.scoreimg %].png" alt="[% g.scoreimg %]" />
+    </td>
+    [% g.valueimg = (g.value_gain_day == 0 ? 'stay' : (g.value_gain_day > 0 ?
+    'up' : 'down')) %]
+    <td
+      title="[% g.value_gain_day | commify %] Today | [% g.value_gain | commify %] Tick"
+    >
+      [% g.value | commify %]
+      <img src="/static/images/[% g.valueimg %].png" alt="[% g.valueimg %]" />
+    </td>
+    [% g.xpimg = (g.xp_gain_day == 0 ? 'stay' : (g.xp_gain_day > 0 ? 'up' :
+    'down')) %]
+    <td
+      title="[% g.xp_gain_day | commify %] Today | [% g.xp_gain | commify %] Tick"
+    >
+      [% g.xp | commify %]
+      <img src="/static/images/[% g.xpimg %].png" alt="[% g.xpimg %]" />
+    </td>
+  </tr>
+  [% END %]
 </table>
-<p>[% IF offset > 0 %]<a href="[% c.uri_for('galaxies', order, offset - 100) %]">Previous 100</a>[% END %]
-	[% IF galaxies.size == 100 %]<a href="[% c.uri_for('galaxies', order, offset + 100) %]">Next 100</a>[% END %]
+
+<p>
+  [% IF offset > 0 %]<a href="[% c.uri_for('galaxies', order, offset - 100) %]"
+    >Previous 100</a
+  >[% END %] [% IF galaxies.size == 100 %]<a
+    href="[% c.uri_for('galaxies', order, offset + 100) %]"
+    >Next 100</a
+  >[% END %]
 </p>

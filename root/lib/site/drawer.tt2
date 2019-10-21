@@ -40,7 +40,7 @@
   [% END %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'forum' ? 'active' : null %]">
         <a class="collapsible-header"
           >Forum<i class="material-icons">arrow_drop_down</i></a
         >
@@ -55,7 +55,7 @@
   </li>
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'rankings' ? 'active' : null %]">
         <a class="collapsible-header"
           >Rankings<i class="material-icons">arrow_drop_down</i></a
         >
@@ -85,7 +85,7 @@
   [% IF c.check_user_roles("member_menu") %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'members' ? 'active' : null %]">
         <a class="collapsible-header"
           >Newdawn<i class="material-icons">arrow_drop_down</i></a
         >
