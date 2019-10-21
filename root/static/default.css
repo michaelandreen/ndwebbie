@@ -26,6 +26,7 @@ html {
 }
 
 .mdc-top-app-bar {
+  background: #45296d;
   z-index: 7;
 }
 
@@ -52,7 +53,7 @@ html {
 }
 
 #leftbar {
-  background: #d8d8d8;
+  background: #070010;
   height: 100%;
   z-index: 5;
 }

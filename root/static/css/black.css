@@ -35,7 +35,7 @@ legend {
 }
 
 ul.linkbar li {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   color: black;
   margin: 0.5em 0;
   padding: 0.3em;
