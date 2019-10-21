@@ -105,7 +105,7 @@
   [% END %] [% IF user.attacker AND c.user.planet %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'members' ? 'active' : null %]">
         <a class="collapsible-header"
           >Fleets<i class="material-icons">arrow_drop_down</i></a
         >
@@ -123,7 +123,7 @@
   [% END %] [% IF c.check_user_roles("covop") %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'covop' ? 'active' : null %]">
         <a class="collapsible-header"
           >Covert Ops<i class="material-icons">arrow_drop_down</i></a
         >
@@ -140,7 +140,7 @@
   [% END %] [% IF c.check_user_roles("dc_menu") %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'members' ? 'active' : null %]">
         <a class="collapsible-header"
           >Defence<i class="material-icons">arrow_drop_down</i></a
         >
