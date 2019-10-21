@@ -17,10 +17,6 @@ html {
   position: relative;
 }
 
-.main-content {
-  overflow: hidden;
-}
-
 .app-bar {
   position: absolute;
 }
