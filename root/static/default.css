@@ -6,24 +6,25 @@ html {
   margin: 0;
   flex: auto;
 }
-#header {
-  padding-left: 15em;
-  /*padding-right: 12em;*/
+
+header,
+main,
+footer,
+nav {
+  padding-left: 300px;
 }
 
-.mdc-drawer-app-content {
-  flex: auto;
-  overflow: auto;
-  position: relative;
+@media only screen and (max-width: 992px) {
+  header,
+  main,
+  footer {
+    padding-left: 0;
+  }
 }
 
-.app-bar {
-  position: absolute;
-}
-
-.mdc-top-app-bar {
-  background: #45296d;
-  z-index: 7;
+.drawer-card {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 #body {

@@ -1,0 +1,201 @@
+<ul id="slide-out" class="sidenav sidenav-fixed">
+  [% IF user %]
+  <div class="card drawer-card z-depth-0">
+    <div class="card-image">
+      <img
+        style="object-fit: cover; height: 159px; width: 300px"
+        src="http://www.planetarion.com/templates/r32/images/planet_footer2.png"
+      />
+      <span class="card-title">[% c.user.username %]</span>
+    </div>
+
+    <div class="card-action">
+      <a href="/forum/privmsg"><i class="material-icons left">inbox</i></a>
+      <a href="/settings"><i class="material-icons left">settings</i></a>
+      <a href="/logout"><i class="material-icons right">logout</i></a>
+    </div>
+  </div>
+  [% ELSE %]
+  <li class="no-padding">
+    <div class="card drawer-card z-depth-0 p2">
+      <div class="card-content">
+        <form action="[% sslurl(c.uri_for('/login')) %]" method="post">
+          <input type="text" name="user" placeholder="Username" value="" />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value=""
+          />
+
+          <label>
+            <input type="checkbox" name="remember" />
+            <span>Remember</span>
+          </label>
+          <input type="submit" class="btn right" value="Login" />
+        </form>
+      </div>
+    </div>
+  </li>
+  [% END %]
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >Forum<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="/forum">Forum</a></li>
+            <li><a href="/forum/search">Forum search</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >Rankings<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="/rankings/planets">Planet Rankings</a></li>
+            <li><a href="/rankings/alliances">Alliance Rankings</a></li>
+            <li><a href="/rankings/galaxies">Galaxy Rankings</a></li>
+            <li>
+              <form action="/stats/find" method="post">
+                <p>
+                  <input
+                    class="coordsinput"
+                    type="text"
+                    name="coords"
+                    value="[% checkcoords %]"
+                  />
+                  <input class="coordsinput" type="submit" value="Check" />
+                </p>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  [% IF c.check_user_roles("member_menu") %]
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >Newdawn<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="/members/points">Top points</a></li>
+            <li><a href="/members/stats">Top ranks</a></li>
+            <li><a href="/members/addintel">Add intel/scans</a></li>
+            <li><a href="/members/addincs">Report incs</a></li>
+            <li><a href="/members/ircrequest">IRC request</a></li>
+            <li><a href="/stats/tags">Planet tags</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  [% END %] [% IF user.attacker AND c.user.planet %]
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >Fleets<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li>
+              <a href="/members/launchConfirmation">Launch confirmation</a>
+            </li>
+            <li><a href="/raids">Web raids</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  [% END %] [% IF c.check_user_roles("covop") %]
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >Covert Ops<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="/covop">Bank hacking</a></li>
+            <li><a href="/covop/distwhores">Distwhores</a></li>
+            <li><a href="/covop/easy">Easy targets</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  [% END %] [% IF c.check_user_roles("dc_menu") %]
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >Defence<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="/users/sms">Send SMS</a></li>
+            <li><a href="/members/defenders">Available defenders</a></li>
+            <li><a href="/calls/defleeches">Def Leeches</a></li>
+            <li><a href="/calls/list">Active calls</a></li>
+            <li><a href="/calls/list/recent">Recent calls</a></li>
+            <li><a href="/calls/list/uncovered">Not covered calls</a></li>
+            <li><a href="/calls/list/covered">Covered calls</a></li>
+            <li><a href="/calls/list/all">All calls</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  [% END %] [% IF c.check_user_roles("bc_menu") %]
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >Attack<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="/raids/create">Create raid</a></li>
+            <li><a href="/raids/targetlist">Find targets</a></li>
+            <li><a href="/raids/retal">Find retals</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  [% END %] [% IF c.check_user_roles("hc_menu") %]
+  <li class="no-padding">
+    <ul class="collapsible collapsible-accordion">
+      <li>
+        <a class="collapsible-header"
+          >HC Tools<i class="material-icons">arrow_drop_down</i></a
+        >
+        <div class="collapsible-body">
+          <ul>
+            <li><a href="/users">List users</a></li>
+            <li><a href="/alliances">Alliances</a></li>
+            <li><a href="/alliances/hostile">Hostile Alliances</a></li>
+            <li><a href="/intel/members">Member Intel</a></li>
+            <li><a href="/alliances/resources">Alliance resources</a></li>
+            <li><a href="/intel/naps">Planet Naps</a></li>
+            <li><a href="/users/mail">Mail</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </li>
+  [% END %]
+</ul>
