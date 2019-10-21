@@ -1,134 +1,160 @@
-
 <ul class="linkbar">
-	[% IF c.check_user_roles("member_menu") %]<li><a href="/members">Main page</a></li>[% END %]
-	<li><a href="/">Home</a></li>
-	<li>
-	<form action="/wiki/search" method="post">
-		<p>
-		<input type="text" name="search" value="">
-		<input type="submit" value="Wiki search">
-		</p>
-	</form>
-	</li>
-	<li><a href="/forum">Forum</a></li>
-	<li><a href="/forum/search">Forum search</a></li>
-[% IF user %]
-	<li><a href="/forum/allUnread">New posts [% IF user.unreadposts %](<span class="[% IF user.newposts %]newposts[% ELSE %]unreadposts[% END %]">[% user.unreadposts %]</span>)[% END %]</a></li>
-	<li><a href="/forum/privmsg">Priv msg</a></li>
-	<li><a href="/quotes">Quotes</a></li>
-	<li><a href="/settings">Settings</a></li>
-	<li><a href="/logout">Log out ([% c.user.username %])</a></li>
-[% ELSE %]
-	<li>
-	<form action="[% sslurl(c.uri_for('/login')) %]" method="post">
-		<p>
-		Username: <input type="text" name="user" value="">
-		Password: <input type="password" name="password" value="">
-		<input type="submit" value="Login">
-		Secure computer: <input style="width:1em" type="checkbox" name="remember">
-		</p>
-	</form>
-	</li>
-[% END %]
+  [% IF c.check_user_roles("member_menu") %]
+  <li><a href="/members">Main page</a></li>
+  [% END %]
+  <li><a href="/">Home</a></li>
+  <li>
+    <form action="/wiki/search" method="post">
+      <p>
+        <input type="text" name="search" value="" />
+        <input type="submit" value="Wiki search" />
+      </p>
+    </form>
+  </li>
+  <li><a href="/forum">Forum</a></li>
+  <li><a href="/forum/search">Forum search</a></li>
+  [% IF user %]
+  <li>
+    <a href="/forum/allUnread"
+      >New posts [% IF user.unreadposts %](<span
+        class="[% IF user.newposts %]newposts[% ELSE %]unreadposts[% END %]"
+        >[% user.unreadposts %]</span
+      >)[% END %]</a
+    >
+  </li>
+  <li><a href="/forum/privmsg">Priv msg</a></li>
+  <li><a href="/quotes">Quotes</a></li>
+  <li><a href="/settings">Settings</a></li>
+  <li><a href="/logout">Log out ([% c.user.username %])</a></li>
+  [% ELSE %]
+  <li>
+    <form action="[% sslurl(c.uri_for('/login')) %]" method="post">
+      <p>
+        Username: <input type="text" name="user" value="" /> Password:
+        <input type="password" name="password" value="" />
+        <input type="submit" value="Login" />
+        Secure computer:
+        <input style="width:1em" type="checkbox" name="remember" />
+      </p>
+    </form>
+  </li>
+  [% END %]
 </ul>
 [% IF birthdays.size > 0 %]
 <table>
-<tr><th colspan="2">Birthdays today</th></tr>
-[% FOR b IN birthdays %]
-	<tr><td>[% b.username %]</td><td>[% b.age %]</td></tr>
-[% END %]
+  <tr>
+    <th colspan="2">Birthdays today</th>
+  </tr>
+  [% FOR b IN birthdays %]
+  <tr>
+    <td>[% b.username %]</td>
+    <td>[% b.age %]</td>
+  </tr>
+  [% END %]
 </table>
+
 [% END %]
 <p>Tick: [% game.tick %]</p>
 <ul class="linkbar">
-	<li><a href="/rankings/planets">Planet Rankings</a></li>
-	<li><a href="/rankings/alliances">Alliance Rankings</a></li>
-	<li><a href="/rankings/galaxies">Galaxy Rankings</a></li>
-	<li><form action="/stats/find" method="post"><p>
-		<input class="coordsinput" type="text" name="coords" value="[% checkcoords %]">
-		<input class="coordsinput" type="submit" value="Check">
-		</p></form>
-	</li>
+  <li><a href="/rankings/planets">Planet Rankings</a></li>
+  <li><a href="/rankings/alliances">Alliance Rankings</a></li>
+  <li><a href="/rankings/galaxies">Galaxy Rankings</a></li>
+  <li>
+    <form action="/stats/find" method="post">
+      <p>
+        <input
+          class="coordsinput"
+          type="text"
+          name="coords"
+          value="[% checkcoords %]"
+        />
+        <input class="coordsinput" type="submit" value="Check" />
+      </p>
+    </form>
+  </li>
 </ul>
 [% IF c.check_user_roles("member_menu") %]
 <p>Member menu</p>
 <ul class="linkbar">
-	<li><a href="/members/points">Top points</a></li>
-	<li><a href="/members/stats">Top ranks</a></li>
-	<li><a href="/members/addintel">Add intel/scans</a></li>
-	<li><a href="/members/addincs">Report incs</a></li>
-	<li><a href="/members/ircrequest">IRC request</a></li>
-	<li><a href="/stats/tags">Planet tags</a></li>
+  <li><a href="/members/points">Top points</a></li>
+  <li><a href="/members/stats">Top ranks</a></li>
+  <li><a href="/members/addintel">Add intel/scans</a></li>
+  <li><a href="/members/addincs">Report incs</a></li>
+  <li><a href="/members/ircrequest">IRC request</a></li>
+  <li><a href="/stats/tags">Planet tags</a></li>
 </ul>
-[% END %]
-[% IF user.attacker AND c.user.planet %]
+[% END %] [% IF user.attacker AND c.user.planet %]
 <p>Fleet menu</p>
 <ul class="linkbar">
-	<li><a href="/members/launchConfirmation">Launch confirmation</a></li>
-	<li><a href="/raids">Web raids</a></li>
+  <li><a href="/members/launchConfirmation">Launch confirmation</a></li>
+  <li><a href="/raids">Web raids</a></li>
 </ul>
-<p><input type="button" value="Update target list"
-		onclick = "listTargets()">
+<p>
+  <input type="button" value="Update target list" onclick="listTargets()" />
 </p>
 <div id="targets">[% PROCESS inc/targetlist.tt2 %]</div>
 [% ELSIF user.attacker %]
-	<form action="/members/postowncoords" method="post">
-		<p>We need your planet's coordinates:
-		<input type="text" name="planet" value="">
-		<input type="submit" value="Submit">
-		</p>
-	</form>
-[% END %]
-[% IF c.check_user_roles("covop") %]
+<form action="/members/postowncoords" method="post">
+  <p>
+    We need your planet's coordinates:
+    <input type="text" name="planet" value="" />
+    <input type="submit" value="Submit" />
+  </p>
+</form>
+[% END %] [% IF c.check_user_roles("covop") %]
 <p>Covop menu</p>
 <ul class="linkbar">
-	<li><a href="/covop">Bank hacking</a></li>
-	<li><a href="/covop/distwhores">Distwhores</a></li>
-	<li><a href="/covop/easy">Easy targets</a></li>
+  <li><a href="/covop">Bank hacking</a></li>
+  <li><a href="/covop/distwhores">Distwhores</a></li>
+  <li><a href="/covop/easy">Easy targets</a></li>
 </ul>
-[% END %]
-[% IF c.check_user_roles("dc_menu") %]
+[% END %] [% IF c.check_user_roles("dc_menu") %]
 <p>DC menu</p>
 <ul class="linkbar">
-	<li><a href="/users/sms">Send SMS</a></li>
-	<li><a href="/members/defenders">Available defenders</a></li>
-	<li><a href="/calls/defleeches">Def Leeches</a></li>
-	<li><a href="/calls/list">Active calls</a></li>
-	<li><a href="/calls/list/recent">Recent calls</a></li>
-	<li><a href="/calls/list/uncovered">Not covered calls</a></li>
-	<li><a href="/calls/list/covered">Covered calls</a></li>
-	<li><a href="/calls/list/all">All calls</a></li>
+  <li><a href="/users/sms">Send SMS</a></li>
+  <li><a href="/members/defenders">Available defenders</a></li>
+  <li><a href="/calls/defleeches">Def Leeches</a></li>
+  <li><a href="/calls/list">Active calls</a></li>
+  <li><a href="/calls/list/recent">Recent calls</a></li>
+  <li><a href="/calls/list/uncovered">Not covered calls</a></li>
+  <li><a href="/calls/list/covered">Covered calls</a></li>
+  <li><a href="/calls/list/all">All calls</a></li>
 </ul>
-[% END %]
-[% IF c.check_user_roles("bc_menu") %]
+[% END %] [% IF c.check_user_roles("bc_menu") %]
 <p>BC menu</p>
 <ul class="linkbar">
-	<li><a href="/raids/create">Create raid</a></li>
-	<li><a href="/raids/targetlist">Find targets</a></li>
-	<li><a href="/raids/retal">Find retals</a></li>
+  <li><a href="/raids/create">Create raid</a></li>
+  <li><a href="/raids/targetlist">Find targets</a></li>
+  <li><a href="/raids/retal">Find retals</a></li>
 </ul>
-[% END %]
-[% IF c.check_user_roles("intel_menu") %]
+[% END %] [% IF c.check_user_roles("intel_menu") %]
 <p>Intel menu</p>
 <ul class="linkbar">
-	<li><a href="/intel">Intel</a></li>
-	<li><a href="/intel/channels">Channels</a></li>
-	<li><form action="/intel/find" method="post"><p>
-		<input class="coordsinput" type="text" name="coords" value="[% checkcoords %]">
-		<input class="coordsinput" type="submit" value="Check">
-		</p></form>
-	</li>
+  <li><a href="/intel">Intel</a></li>
+  <li><a href="/intel/channels">Channels</a></li>
+  <li>
+    <form action="/intel/find" method="post">
+      <p>
+        <input
+          class="coordsinput"
+          type="text"
+          name="coords"
+          value="[% checkcoords %]"
+        />
+        <input class="coordsinput" type="submit" value="Check" />
+      </p>
+    </form>
+  </li>
 </ul>
-[% END %]
-[% IF c.check_user_roles("hc_menu") %]
+[% END %] [% IF c.check_user_roles("hc_menu") %]
 <p>HC menu</p>
 <ul class="linkbar">
-	<li><a href="/users">List users</a></li>
-	<li><a href="/alliances">Alliances</a></li>
-	<li><a href="/alliances/hostile">Hostile Alliances</a></li>
-	<li><a href="/intel/members">Member Intel</a></li>
-	<li><a href="/alliances/resources">Alliance resources</a></li>
-	<li><a href="/intel/naps">Planet Naps</a></li>
-	<li><a href="/users/mail">Mail</a></li>
+  <li><a href="/users">List users</a></li>
+  <li><a href="/alliances">Alliances</a></li>
+  <li><a href="/alliances/hostile">Hostile Alliances</a></li>
+  <li><a href="/intel/members">Member Intel</a></li>
+  <li><a href="/alliances/resources">Alliance resources</a></li>
+  <li><a href="/intel/naps">Planet Naps</a></li>
+  <li><a href="/users/mail">Mail</a></li>
 </ul>
 [% END %]
