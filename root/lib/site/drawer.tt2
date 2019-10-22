@@ -10,7 +10,12 @@
     </div>
 
     <div class="card-action">
-      <a href="/forum/privmsg"><i class="material-icons left">inbox</i></a>
+      <a href="/forum/privmsg"><i class="material-icons left">mail</i></a>
+      <a href="/forum/allUnread" style="position: relative"
+        ><span class="[% IF user.newposts %]newposts[% ELSE %]b[% END %]"
+          >[% user.unreadposts %]</span
+        ><i class="material-icons left">forum</i></a
+      >
       <a href="/settings"><i class="material-icons left">settings</i></a>
       <a href="/logout"><i class="material-icons right">logout</i></a>
     </div>
@@ -38,6 +43,18 @@
     </div>
   </li>
   [% END %]
+  <div class="card drawer-card z-depth-0 p2">
+    <div class="card-content">
+      <form action="/wiki/search" method="post">
+        <div class="input-field">
+          <label class="label-icon" for="search"
+            ><i class="material-icons">search</i></label
+          >
+          <input id="search" placeholder="Search wiki" type="search" required />
+        </div>
+      </form>
+    </div>
+  </div>
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
       <li class="[% c.namespace() == 'forum' ? 'active' : null %]">
@@ -65,17 +82,22 @@
             <li><a href="/rankings/alliances">Alliance Rankings</a></li>
             <li><a href="/rankings/galaxies">Galaxy Rankings</a></li>
             <li>
-              <form action="/stats/find" method="post">
-                <p>
-                  <input
-                    class="coordsinput"
-                    type="text"
-                    name="coords"
-                    value="[% checkcoords %]"
-                  />
-                  <input class="coordsinput" type="submit" value="Check" />
-                </p>
-              </form>
+              <div class="card drawer-card z-depth-0">
+                <div class="card-content">
+                  <form action="/stats/find" method="post">
+                    <p>
+                      <input
+                        class="coordsinput"
+                        type="text"
+                        name="coords"
+                        placeholder="Lookup coords"
+                        value="[% checkcoords %]"
+                      />
+                      <input class="coordsinput" type="submit" value="Check" />
+                    </p>
+                  </form>
+                </div>
+              </div>
             </li>
           </ul>
         </div>
@@ -140,7 +162,7 @@
   [% END %] [% IF c.check_user_roles("dc_menu") %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li class="[% c.namespace() == 'members' ? 'active' : null %]">
+      <li class="[% c.namespace() == 'calls' ? 'active' : null %]">
         <a class="collapsible-header"
           >Defence<i class="material-icons">arrow_drop_down</i></a
         >
@@ -162,7 +184,7 @@
   [% END %] [% IF c.check_user_roles("bc_menu") %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'raids' ? 'active' : null %]">
         <a class="collapsible-header"
           >Attack<i class="material-icons">arrow_drop_down</i></a
         >
@@ -179,7 +201,7 @@
   [% END %] [% IF c.check_user_roles("hc_menu") %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li>
+      <li class="[% c.namespace() == 'alliances' ? 'active' : null %]">
         <a class="collapsible-header"
           >HC Tools<i class="material-icons">arrow_drop_down</i></a
         >

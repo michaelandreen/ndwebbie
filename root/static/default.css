@@ -14,6 +14,40 @@ nav {
   padding-left: 300px;
 }
 
+main {
+  padding-top: 20px;
+}
+
+.b {
+  position: absolute;
+  left: -90px;
+  top: -8px;
+  display: block;
+  color: white;
+  background: tomato;
+  border-radius: 9px;
+  width: auto;
+  min-width: 18px;
+  height: 18px;
+  text-align: center;
+  font-size: 0.8em;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.alert {
+  padding: 10px;
+  border-right: rgba(0, 0, 0, 0.3);
+  border-left: rgba(0, 0, 0, 0.3);
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.warning {
+  background: tomato;
+  color: white;
+}
+
 table {
   font-size: 13px;
 }
@@ -26,6 +60,26 @@ table td img {
 table td {
   padding: 5px 2px;
   border-right: 1px solid;
+}
+
+.sidenav .collapsible-header {
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-size: 15px;
+}
+
+.sidenav .input-field {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.sidenav .card-content {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.sidenav #search {
+  padding-left: 3rem;
+  width: calc(100% - 3rem);
 }
 
 @media only screen and (max-width: 992px) {

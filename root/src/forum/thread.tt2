@@ -1,109 +1,133 @@
 [% META title = 'Forum thread' %]
 <h2>[% thread.subject %]</h2>
-<h3>[% thread.category %] - <a href="[% c.uri_for('board',thread.fbid) %]">[% thread.board %]</a></h3>
+<h3>
+  [% thread.category %] -
+  <a href="[% c.uri_for('board',thread.fbid) %]">[% thread.board %]</a>
+</h3>
 [% IF thread.moderate %]
-<a href="[% c.uri_for('setSticky',thread.ftid, (thread.sticky ? 0 : 1)) %]">Make this thread [% thread.sticky ? 'unsticky' : 'sticky' %]</a>
-[% END %]
-
-[% IF c.user.id %]
-<a href="[% c.uri_for('markThreadAsUnread',thread.ftid) %]">Mark thread as unread</a>
-[% END %]
-
-[% createNewPostHr = 1 %]
-[% FOR post IN posts %]
-	[% IF createNewPostHr AND post.unread%]
-	[% createNewPostHr = 0 %]
-<hr>
+<a href="[% c.uri_for('setSticky',thread.ftid, (thread.sticky ? 0 : 1)) %]"
+  >Make this thread [% thread.sticky ? 'unsticky' : 'sticky' %]</a
+>
+[% END %] [% IF c.user.id %]
+<a href="[% c.uri_for('markThreadAsUnread',thread.ftid) %]"
+  >Mark thread as unread</a
+>
+[% END %] [% createNewPostHr = 1 %] [% FOR post IN posts %] [% IF
+createNewPostHr AND post.unread%] [% createNewPostHr = 0 %]
+<hr />
 <p><a name="NewPosts">New posts below:</a></p>
-	[% END %]
+[% END %]
 <fieldset class="forum-post">
-<legend class="forum-post-header"><b>[% post.username %]</b> : [% post.time %]
-	[% IF c.user.id %]
-	<a href="[% c.uri_for('markPostAsUnread',post.fpid) %]">Unread from here</a>
-	[% END %]
-</legend>
-<div class="forum-post-body">[% post.message %]</div>
+  <legend class="forum-post-header">
+    <b>[% post.username %]</b> : [% post.time %] [% IF c.user.id %]
+    <a href="[% c.uri_for('markPostAsUnread',post.fpid) %]">Unread from here</a>
+    [% END %]
+  </legend>
+  <div class="forum-post-body">[% post.message %]</div>
 </fieldset>
-[% END %]
-
-[% IF c.user.id %]
-<a href="[% c.uri_for('markThreadAsUnread',thread.ftid) %]">Mark thread as unread</a>
-[% END %]
-
-[% IF thread.post %]
-<form action="[% c.uri_for('addPost',thread.ftid) %]#NewPosts" method="post"><fieldset class="forum-post"> <legend><a name="Reply">New Reply</a></legend>
-	<textarea class="bbcode" rows="25" cols="60" name="message" id="replybox">[% previewMessage %]</textarea>
-	<br>
-	<input type="submit" name="cmd" value="Submit">
-	<input type="submit" name="cmd" value="Preview">
-</fieldset></form>
-[% END %]
-
-[% IF access.size > 0 %]
-[% hasaccess = 0 %]
-<p>The following ppl have access to this thread: [% FOR a IN access %]
-		[% IF a.uid == UID; hasaccess = 1; END %]
-[% a.username %]
-	[% END %]</p>
-	[% IF hasaccess %]
-	<p><a href="[% c.uri_for('removeownthreadaccess',thread.ftid) %]">Remove your access</a></p>
-	[% END %]
-[% END %]
-
-[% IF thread.moderate %]
+[% END %] [% IF c.user.id %]
+<a href="[% c.uri_for('markThreadAsUnread',thread.ftid) %]"
+  >Mark thread as unread</a
+>
+[% END %] [% IF thread.post %]
+<form action="[% c.uri_for('addPost',thread.ftid) %]#NewPosts" method="post">
+  <fieldset class="forum-post">
+    <legend><a name="Reply">New Reply</a></legend>
+    <textarea class="bbcode" rows="25" cols="60" name="message" id="replybox">
+[% previewMessage %]</textarea
+    >
+    <br />
+    <input type="submit" name="cmd" value="Submit" />
+    <input type="submit" name="cmd" value="Preview" />
+  </fieldset>
+</form>
+[% END %] [% IF access.size > 0 %] [% hasaccess = 0 %]
+<p>
+  The following ppl have access to this thread: [% FOR a IN access %] [% IF
+  a.uid == UID; hasaccess = 1; END %] [% a.username %] [% END %]
+</p>
+[% IF hasaccess %]
+<p>
+  <a href="[% c.uri_for('removeownthreadaccess',thread.ftid) %]"
+    >Remove your access</a
+  >
+</p>
+[% END %] [% END %] [% IF thread.moderate %]
 
 <form action="[% c.uri_for('moveThreads',thread.fbid) %]" method="post">
-<p>Move checked threads to:
-<input type="hidden" name="t:[% thread.ftid %]" value="1">
-<select name="board">
-[% FOR category IN categories %]
-	<optgroup label="[% category.category %]">
-	[% FOR targetboard IN category.boards %]
-		<option value="[% targetboard.fbid %]">[% targetboard.board %]</option>
-	[% END %]
-	</optgroup>
-[% END %]
-</select>
-<input type="submit" name="cmd" value="Move">
-</p>
+  <p>
+    Move checked threads to:
+    <input type="hidden" name="t:[% thread.ftid %]" value="1" />
+    <select name="board">
+      [% FOR category IN categories %]
+      <optgroup label="[% category.category %]">
+        [% FOR targetboard IN category.boards %]
+        <option value="[% targetboard.fbid %]">[% targetboard.board %]</option>
+        [% END %]
+      </optgroup>
+      [% END %]
+    </select>
+    <input type="submit" name="cmd" value="Move" />
+  </p>
 </form>
 
-<form action="[% c.uri_for('postthreadaccess',thread.ftid) %]#NewPosts" method="post">
-<fieldset class="forum-post"> <legend>Change thread access</legend>
-<table>
-	<tr><th>Add</th><th>Remove</th></tr>
-	<tr>
-		<td><select name="uid" multiple size="5">
-	[% FOR u IN users %]
-			<option value="[% u.uid %]">[% u.username %]</option>
-	[% END %]
-		</select></td>
-		<td><select name="access" multiple size="5">
-			<option value=""></option>
-	[% FOR u IN access %]
-			<option value="[% u.uid %]">[% u.username %]</option>
-	[% END %]
-		</select></td>
-	</tr>
-</table>
-<input type="submit" name="cmd" value="Change access">
-</fieldset></form>
-[% END %]
+<form
+  action="[% c.uri_for('postthreadaccess',thread.ftid) %]#NewPosts"
+  method="post"
+>
+  <fieldset class="forum-post">
+    <legend>Change thread access</legend>
+    <table>
+      <tr>
+        <th>Add</th>
+        <th>Remove</th>
+      </tr>
+      <tr>
+        <td>
+          <select name="uid" multiple size="5">
+            [% FOR u IN users %]
+            <option value="[% u.uid %]">[% u.username %]</option>
+            [% END %]
+          </select>
+        </td>
+        <td>
+          <select name="access" multiple size="5">
+            <option value=""></option>
+            [% FOR u IN access %]
+            <option value="[% u.uid %]">[% u.username %]</option>
+            [% END %]
+          </select>
+        </td>
+      </tr>
+    </table>
 
-[% IF thread.post %]
+    <input type="submit" name="cmd" value="Change access" />
+  </fieldset>
+</form>
+[% END %] [% IF thread.post %]
 <script type="text/javascript">
-$(document).ready(function(){
-	$(".forum-post-header").append(
-		$("<span>").text(" | "));
-	$(".forum-post-header").append(
-		$("<a>").attr("href","#Reply").addClass("quotelink").text("Quote"));
-	$(".quotelink").click(function(){
-		var text = $(this).parents("legend").siblings().text();
-		var username = $(this).parents("legend").text().split(" ",1);
-		var oldtext = $("#replybox").val();
-		$("#replybox").val(oldtext + "\n[quote=" + username + "]" + text + "[/quote]\n");
-	});
-});
+  $(document).ready(function() {
+    $(".forum-post-header").append($("<span>").text(" | "));
+    $(".forum-post-header").append(
+      $("<a>")
+        .attr("href", "#Reply")
+        .addClass("quotelink")
+        .text("Quote")
+    );
+    $(".quotelink").click(function() {
+      var text = $(this)
+        .parents("legend")
+        .siblings()
+        .text();
+      var username = $(this)
+        .parents("legend")
+        .text()
+        .split(" ", 1);
+      var oldtext = $("#replybox").val();
+      $("#replybox").val(
+        oldtext + "\n[quote=" + username + "]" + text + "[/quote]\n"
+      );
+    });
+  });
 </script>
-[% INCLUDE inc/markitup.tt2 %]
-[% END %]
+[% INCLUDE inc/markitup.tt2 %] [% END %]
