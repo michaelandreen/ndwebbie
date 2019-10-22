@@ -97,6 +97,8 @@ __PACKAGE__->deny_access_unless('/graphs/alliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/graphs/avgalliancevsintel',[qw/graphs_intel/]);
 __PACKAGE__->deny_access_unless('/members',[qw/members/]);
 __PACKAGE__->allow_access_if('/members/postowncoords',[qw/attack_menu/]);
+__PACKAGE__->allow_access_if('/members/launchConfirmation',[qw/attack_menu/]);
+__PACKAGE__->allow_access_if('/members/postconfirmation',[qw/attack_menu/]);
 __PACKAGE__->deny_access_unless('/members/defenders',[qw/members_defenders/]);
 __PACKAGE__->deny_access_unless('/covop',[qw/covop/]);
 __PACKAGE__->deny_access_unless('/calls',[qw/calls_edit/]);
