@@ -65,6 +65,7 @@
           <ul>
             <li><a href="/forum">Forum</a></li>
             <li><a href="/forum/search">Forum search</a></li>
+            <li><a href="/quotes">Quotes</a></li>
           </ul>
         </div>
       </li>
@@ -127,7 +128,7 @@
   [% END %] [% IF user.attacker AND c.user.planet %]
   <li class="no-padding">
     <ul class="collapsible collapsible-accordion">
-      <li class="[% c.namespace() == 'members' ? 'active' : null %]">
+      <li class="[% c.namespace() == 'raids' ? 'active' : null %]">
         <a class="collapsible-header"
           >Fleets<i class="material-icons">arrow_drop_down</i></a
         >
@@ -137,6 +138,20 @@
               <a href="/members/launchConfirmation">Launch confirmation</a>
             </li>
             <li><a href="/raids">Web raids</a></li>
+
+            <div class="card drawer-card z-depth-0">
+              <div class="card-content">
+                <input
+                  type="button"
+                  value="Update target list"
+                  onclick="listTargets()"
+                  class="btn"
+                />
+                <div id="targets">
+                  [% PROCESS inc/targetlist.tt2 %]
+                </div>
+              </div>
+            </div>
           </ul>
         </div>
       </li>

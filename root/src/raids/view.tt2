@@ -1,149 +1,194 @@
 [% META title = 'Raid claiming' %]
 
-<fieldset> <legend>Message</legend>
-	<p><b>REMEMBER TO PASTE LAUNCH CONFIRMATION IF YOU WANT AN ATTACK POINT</b></p>
-	<p><b style="color: red;">DO NOT JOIN A WAVE UNLESS YOU HAVE PERMISSION FROM THE PERSON WHO CLAIMED IT</b></p>
-	<p><b style="color: purple;">COORDS ARE NOT SHOWN UNTIL AT LEAST 10 MIN AFTER YOUR CLAIM</b></p>
-	<p>Landing tick first wave: [% landingtick %]</p>
-	[% message %]
+<fieldset>
+  <legend>Message</legend>
+  <p>
+    <b>REMEMBER TO PASTE LAUNCH CONFIRMATION IF YOU WANT AN ATTACK POINT</b>
+  </p>
+  <p>
+    <b style="color: red;"
+      >DO NOT JOIN A WAVE UNLESS YOU HAVE PERMISSION FROM THE PERSON WHO CLAIMED
+      IT</b
+    >
+  </p>
+  <p>
+    <b style="color: purple;"
+      >COORDS ARE NOT SHOWN UNTIL AT LEAST 10 MIN AFTER YOUR CLAIM</b
+    >
+  </p>
+  <p>Landing tick first wave: [% landingtick %]</p>
+  [% message %]
 </fieldset>
 
-<div id="floatmenu" style="right: 1em; top: 50px; position: absolute; marigin-left:120px;">
-<form action="" method="post">
-	<ul class="linkbar">
-		<li><input type="button" value="Update claims"
-			onclick = "update()">
-		<li><input type="button" value="Update target list"
-			onclick = "listTargets()">
-	</ul>
-</form>
+<div
+  id="floatmenu"
+  style="right: 1em; top: 50px; position: absolute; marigin-left:120px;"
+>
+  <form action="" method="post">
+    <ul class="linkbar">
+      <li>
+        <input
+          type="button"
+          class="btn"
+          value="Update claims"
+          onclick="update()"
+        />
+      </li>
+
+      <li>
+        <input
+          type="button"
+          value="Update target list"
+          class="btn"
+          onclick="listTargets()"
+        />
+      </li>
+    </ul>
+  </form>
 </div>
 
 [% FOR t IN targets %]
-<fieldset class="[% t.style %]"> <legend><a name="target[% t.id %]">Target: #[% t.id %]</a></legend>
-	<div class="leftinfo"><ul>
-		<li><a href="[% c.uri_for('targetcalc',t.id) %]" rel="external">Calc</a></li>
-		<li>Size: [% t.size %]</li>
-		<li class="[% t.scorebash %]">Score: [% t.score %]</li>
-		<li class="[% t.valuebash %]">Value: [% t.value %]</li>
-		<li>Fleet value: [% t.fleetvalue %]</li>
-		<li>Resource value: [% t.resvalue %]</li>
-		<li>Hidden value: [% t.hidden %]</li>
-		<li>Factory Usage: [% t.light %], [% t.medium %], [% t.heavy %]</li>
-		<li>Race: [% t.race %]</li>
-		<li>Cap: [% t.cap * 100 | format('%.02f') %]</li>
-		[% FOR r IN t.roids %]
-			<li>Roids wave [% r.wave %]: [% r.roids %] ([% r.xp | commify %] xp)</li>
-		[% END %]
-	</ul>
-	[% IF t.comment %]
-		<fieldset> <legend>Comment</legend>
-			[% t.comment %]
-		</fieldset>
-	[% END %]
-	<table>
-	<tr><th></th><th>Metal</th><th>Crystal</th><th>Eonium</th></tr>
-	<tr align="center">
-		<th>Roids</th>
-		<td>[% t.metal_roids | commify %]</td>
-		<td>[% t.crystal_roids | commify %]</td>
-		<td>[% t.eonium_roids | commify %]</td>
-	</tr>
-	<tr align="center">
-		<th>Resources</th>
-		<td>[% t.metal | commify %]</td>
-		<td>[% t.crystal | commify %]</td>
-		<td>[% t.eonium | commify %]</td>
-	</tr>
-
-	</table>
-	</div>
-	<div class="leftinfo">
-	<table>
-	<tr><th>Waves</th></tr>
-	<tr>
-		<td>Research</td>
-		<td>[% t.waves %]</td>
-	</tr>
-	<tr>
-		<td>Amps</td>
-		<td>[% t.amps %]</td>
-	</tr>
-	<tr>
-		<td>Dists</td>
-		<td>[% t.distorters %]</td>
-	</tr>
-	<tr><th>Production</th></tr>
-	<tr>
-		<td>Research</td>
-		<td>[% t.hulls %]</td>
-	</tr>
-	<tr>
-		<td>Light factory</td>
-		<td>[% t.light_fac %]</td>
-	</tr>
-	<tr>
-		<td>Medium factory</td>
-		<td>[% t.medium_fac %]</td>
-	</tr>
-	<tr>
-		<td>Heavy factory</td>
-		<td>[% t.heavy_fac %]</td>
-	</tr>
-	</table>
-	</div>
-	[% FOR m IN t.missions %]
-	<div class="leftinfo">
-
-		<p>[% m.name %]<br>
-			Tick: [% m.tick %]<br>
-			Ships: [% m.amount %]
-		</p>
-		<table>
-		[% FOR s IN m.ships %]
-		<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
-			<td>[% s.ship %]</td><td>[% s.amount | commify %]</td>
-		</tr>
-		[% END %]
-		</table>
-	</div>
-	[% END %]
-	<div class="clear"> &nbsp;</div>
-	<form action="" method="post">
-	<p class="claimlinks">
-	<span id="claim[% t.id %]">
-	[% FOR w IN t.claims %]
-	<input type="button" value="Claim wave [% w.wave %]"
-		onclick = "claim([% t.id %], [% w.wave %], 'claim')">
-	[% END %]
-	</span>
-	</p>
-	</form>
+<fieldset class="[% t.style %]">
+  <legend><a name="target[% t.id %]">Target: #[% t.id %]</a></legend>
+  <div class="leftinfo">
+    <ul>
+      <li>
+        <a href="[% c.uri_for('targetcalc',t.id) %]" rel="external">Calc</a>
+      </li>
+      <li>Size: [% t.size %]</li>
+      <li class="[% t.scorebash %]">Score: [% t.score %]</li>
+      <li class="[% t.valuebash %]">Value: [% t.value %]</li>
+      <li>Fleet value: [% t.fleetvalue %]</li>
+      <li>Resource value: [% t.resvalue %]</li>
+      <li>Hidden value: [% t.hidden %]</li>
+      <li>Factory Usage: [% t.light %], [% t.medium %], [% t.heavy %]</li>
+      <li>Race: [% t.race %]</li>
+      <li>Cap: [% t.cap * 100 | format('%.02f') %]</li>
+      [% FOR r IN t.roids %]
+      <li>Roids wave [% r.wave %]: [% r.roids %] ([% r.xp | commify %] xp)</li>
+      [% END %]
+    </ul>
+    [% IF t.comment %]
+    <fieldset>
+      <legend>Comment</legend>
+      [% t.comment %]
+    </fieldset>
+    [% END %]
+    <table>
+      <tr>
+        <th></th>
+        <th>Metal</th>
+        <th>Crystal</th>
+        <th>Eonium</th>
+      </tr>
+      <tr align="center">
+        <th>Roids</th>
+        <td>[% t.metal_roids | commify %]</td>
+        <td>[% t.crystal_roids | commify %]</td>
+        <td>[% t.eonium_roids | commify %]</td>
+      </tr>
+      <tr align="center">
+        <th>Resources</th>
+        <td>[% t.metal | commify %]</td>
+        <td>[% t.crystal | commify %]</td>
+        <td>[% t.eonium | commify %]</td>
+      </tr>
+    </table>
+  </div>
+  <div class="leftinfo">
+    <table>
+      <tr>
+        <th>Waves</th>
+      </tr>
+      <tr>
+        <td>Research</td>
+        <td>[% t.waves %]</td>
+      </tr>
+      <tr>
+        <td>Amps</td>
+        <td>[% t.amps %]</td>
+      </tr>
+      <tr>
+        <td>Dists</td>
+        <td>[% t.distorters %]</td>
+      </tr>
+      <tr>
+        <th>Production</th>
+      </tr>
+      <tr>
+        <td>Research</td>
+        <td>[% t.hulls %]</td>
+      </tr>
+      <tr>
+        <td>Light factory</td>
+        <td>[% t.light_fac %]</td>
+      </tr>
+      <tr>
+        <td>Medium factory</td>
+        <td>[% t.medium_fac %]</td>
+      </tr>
+      <tr>
+        <td>Heavy factory</td>
+        <td>[% t.heavy_fac %]</td>
+      </tr>
+    </table>
+  </div>
+  [% FOR m IN t.missions %]
+  <div class="leftinfo">
+    <p>
+      [% m.name %]<br />
+      Tick: [% m.tick %]<br />
+      Ships: [% m.amount %]
+    </p>
+    <table>
+      [% FOR s IN m.ships %]
+      <tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+        <td>[% s.ship %]</td>
+        <td>[% s.amount | commify %]</td>
+      </tr>
+      [% END %]
+    </table>
+  </div>
+  [% END %]
+  <div class="clear">&nbsp;</div>
+  <form action="" method="post">
+    <p class="claimlinks">
+      <span id="claim[% t.id %]">
+        [% FOR w IN t.claims %]
+        <input
+          type="button"
+          value="Claim wave [% w.wave %]"
+          onclick="claim([% t.id %], [% w.wave %], 'claim')"
+        />
+        [% END %]
+      </span>
+    </p>
+  </form>
 </fieldset>
 [% END %]
 
 <script type="text/javascript">
-function update(){
-	$.get("/jsrpc/update/[% raid %]/"+modified,{},parseUpdate);
-}
+  function update(){
+  	$.get("/jsrpc/update/[% raid %]/"+modified,{},parseUpdate);
+  }
 
-function claim(target,wave,command){
-	$.get("/jsrpc/"+command+"/"+[% raid %]+"/"+modified+"/"+target+"/"+wave,{},parseUpdate);
-}
+  function claim(target,wave,command){
+  	$.get("/jsrpc/"+command+"/"+[% raid %]+"/"+modified+"/"+target+"/"+wave,{},parseUpdate);
+  }
 
-function join(target,wave,joinable){
-	$.get("/jsrpc/joinable/"+[% raid %]+"/"+modified+"/"+target+"/"+wave+"/"+joinable,{},parseUpdate);
-}
+  function join(target,wave,joinable){
+  	$.get("/jsrpc/joinable/"+[% raid %]+"/"+modified+"/"+target+"/"+wave+"/"+joinable,{},parseUpdate);
+  }
 
-$(document).ready(function(){
-	update();
-	var targets = $('#targets');
-	$('#targets').remove();
-	$('#floatmenu').append(targets);
-	var menuYloc = parseInt($("#floatmenu").css("top").substring(0,$("#floatmenu").css("top").indexOf("px")))
-	$(window).scroll(function () {
-		var offset = menuYloc+$(document).scrollTop()+"px";
-		$('#floatmenu').animate({top:offset},{duration:500,queue:false});
-    });
-});
+  $(document).ready(function(){
+  	update();
+  	var targets = $('#targets');
+  	$('#targets').remove();
+  	$('#floatmenu').append(targets);
+  	var menuYloc = parseInt($("#floatmenu").css("top").substring(0,$("#floatmenu").css("top").indexOf("px")))
+  	$(window).scroll(function () {
+  		var offset = menuYloc+$(document).scrollTop()+"px";
+  		$('#floatmenu').animate({top:offset},{duration:500,queue:false});
+      });
+  });
 </script>

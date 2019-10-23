@@ -1,21 +1,44 @@
-[% IF claimedtargets.size > 0 %]
-<table>
-	<tr><th>Target</th><th>Tick</th></tr>
-	[% FOR target IN claimedtargets %]
-	<tr>
-		<td>[% IF target.released_coords %]<a href="[% c.uri_for('/stats/find',target.coords)%]"
-			title="Target [%target.id%]"> [% target.coords%][% IF target.launched%]*[% END %]</a>
-			[%ELSE%]Target [%target.id%][% END %]</td>
-		<td><a href="[% c.uri_for('/raids/view',target.raid)%]#target[% target.id %]">
-			[% target.landingtick %]</a></td>
-		<td>
-			<input title="Unclaim target" type="button" value="U" class="small" onclick =
-			"$.get('/jsrpc/unclaim/[% target.raid %]/0/[% target.id %]/[% target.wave %]',{},parseUpdate)">
-			<input title="[% IF target.joinable %]Disable joinable[% ELSE %]Make target joinable[% END %]"
-				type="button" class="small" value="[% IF target.joinable %]N[% ELSE %]J[% END %]" onclick = 
-			"$.get('/jsrpc/joinable/[% target.raid %]/0/[% target.id %]/[% target.wave %]/[% target.joinable %]',{},parseUpdate)">
-		</td>
-	</tr>
-	[% END %]
-</table>
-[% END %]
+[% IF claimedtargets.size > 0 %] [% FOR target IN claimedtargets %]
+<div class="row">
+  [% IF target.released_coords %]
+
+  <div class="col s3">
+    <a
+      class="col-a"
+      href="[% c.uri_for('/stats/find',target.coords)%]"
+      style="vertical-align: center"
+      title="Target [%target.id%]"
+    >
+      [% target.coords%][% IF target.launched%]*[% END %]</a
+    >
+  </div>
+  <div class="col s3">
+    [%ELSE%]Target [%target.id%][% END %]
+    <a
+      class="col-a"
+      style="vertical-align: center"
+      href="[% c.uri_for('/raids/view',target.raid)%]#target[% target.id %]"
+    >
+      [% target.landingtick %]</a
+    >
+  </div>
+  <div class="col s3">
+    <input
+      title="Unclaim target"
+      type="button"
+      value="U"
+      class="btn btn-small"
+      onclick="$.get('/jsrpc/unclaim/[% target.raid %]/0/[% target.id %]/[% target.wave %]',{},parseUpdate)"
+    />
+  </div>
+  <div class="col s3">
+    <input
+      title="[% IF target.joinable %]Disable joinable[% ELSE %]Make target joinable[% END %]"
+      type="button"
+      class="btn btn-small"
+      value="[% IF target.joinable %]N[% ELSE %]J[% END %]"
+      onclick="$.get('/jsrpc/joinable/[% target.raid %]/0/[% target.id %]/[% target.wave %]/[% target.joinable %]',{},parseUpdate)"
+    />
+  </div>
+</div>
+[% END %] [% END %]

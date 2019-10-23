@@ -82,6 +82,21 @@ table td {
   width: calc(100% - 3rem);
 }
 
+.sidenav .col-a {
+  padding-left: 0 !important;
+  color: blue;
+}
+
+#targets {
+  max-width: 300px;
+}
+#floatmenu {
+  margin-top: 20px;
+}
+#floatmenu #targets .card {
+  background: none;
+}
+
 @media only screen and (max-width: 992px) {
   header,
   main,
