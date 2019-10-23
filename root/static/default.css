@@ -1,256 +1,370 @@
-body,html {
-	color: black;
-	background-color: #D9D9D9;
-	font-family: sans-serif;
+body,
+html {
+  color: black;
+  background-color: #d9d9d9;
+  margin: 0;
+  flex: auto;
+  font-family: "Roboto", sans-serif;
 }
+
+header,
+main,
+footer,
+nav {
+  padding-left: 300px;
+}
+
+main {
+  padding-top: 20px;
+}
+
+.b {
+  position: absolute;
+  left: -90px;
+  top: -8px;
+  display: block;
+  color: white;
+  background: tomato;
+  border-radius: 9px;
+  width: auto;
+  min-width: 18px;
+  height: 18px;
+  text-align: center;
+  font-size: 0.8em;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.alert {
+  padding: 10px;
+  border-right: rgba(0, 0, 0, 0.3);
+  border-left: rgba(0, 0, 0, 0.3);
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.warning {
+  background: tomato;
+  color: white;
+}
+
+table {
+  font-size: 13px;
+}
+
+table td img {
+  float: right;
+  margin-top: 6px;
+}
+
+table td {
+  padding: 5px 2px;
+  border-right: 1px solid;
+}
+
+.sidenav .collapsible-header {
+  font-weight: 500;
+  letter-spacing: 1px;
+  font-size: 15px;
+}
+
+.sidenav .input-field {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.sidenav .card-content {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.sidenav #search {
+  padding-left: 3rem;
+  width: calc(100% - 3rem);
+}
+
+@media only screen and (max-width: 992px) {
+  header,
+  main,
+  footer {
+    padding-left: 0;
+  }
+}
+
+.drawer-card {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 #body {
-	padding-left: 15em;
-	/*padding-right: 12em;*/
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
 }
-#header {
-	padding-left: 15em;
-	/*padding-right: 12em;*/
+
+@media (min-width: 768px) {
+  #body {
+    width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
-#leftbar,#rightbar{
-	padding: 0;
-	margin: 0;
-	position: absolute;
-	width: 14em;
-	top: 1em;
+
+@media (min-width: 1199px) {
+  #body {
+    width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
-#leftbar{
-	left: 1em;
+
+#leftbar {
+  background: #070010;
+  height: 100%;
+  z-index: 5;
 }
-#rightbar{
-	right: 1em;
+
+#leftbar .mdc-drawer__content {
+  padding: 10px;
+}
+
+#rightbar {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  width: 14em;
+  top: 1em;
+}
+#rightbar {
+  right: 1em;
 }
 
 legend {
-	color: black;
-	background: white;
-	border-style: solid;
-	border-width: 1px;
-	padding: 1px;
+  color: black;
+  background: white;
+  border-style: solid;
+  border-width: 1px;
+  padding: 1px;
 }
+/*
 table.boards td {
-	/*border-style: solid;
-	border-width: 1px;*/
-	padding: 2px;
-	border-collapse: separate;
-	border-spacing: 15pt;
-	font-size: larger;
+  /*border-style: solid;
+	border-width: 1px;
+  padding: 2px;
+  border-collapse: separate;
+  border-spacing: 15pt;
+  font-size: larger;
 }
 table.boards td.sticky {
-	font-weight: bold;
+  font-weight: bold;
 }
-table.boards{
-	border-collapse: separate;
-	border-spacing: 5px;
+table.boards {
+  border-collapse: separate;
+  border-spacing: 5px;
 }
 table.boards th {
-	font-size: larger;
+  font-size: larger;
 }
 
-table.boards a, table.stats a {
-	text-decoration: none;
-	width: 100%;
-	display: block;
+table.boards a,
+table.stats a {
+  text-decoration: none;
+  width: 100%;
+  display: block;
 }
+*/
 fieldset.forum-post {
-	width: 40em;
-	padding: 5px;
+  width: 40em;
+  padding: 5px;
 }
 fieldset.forum-post legend b {
-	font-size: larger;
+  font-size: larger;
 }
-div.leftinfo{
-	float: left;
-	padding-right: 2em;
+div.leftinfo {
+  float: left;
+  padding-right: 2em;
 }
 
 fieldset {
-	display: block;
-	clear: left;
+  display: block;
+  clear: left;
 }
-p.claimlinks{
-	clear: both;
+p.claimlinks {
+  clear: both;
 }
 
 ul.linkbar {
-	list-style-type: none;
-	width: 13.5em;
-	padding: 0;
-	margin: 0;
+  list-style-type: none;
+  width: 13.5em;
+  padding: 0;
+  margin: 0;
 }
 ul.linkbar li {
-	background: white;
-	color: black;
-	margin: 0.5em 0;
-	padding: 0.3em;
-	/*border-right: 1em solid black;*/
+  margin: 0.5em 0;
+  padding: 0.3em;
+  /*border-right: 1em solid black;*/
 }
 ul.linkbar a {
-	text-decoration: none;
-	width: 100%;
-	display: block;
+  text-decoration: none;
+  width: 100%;
+  display: block;
 }
 ul.linkbar input {
-	width: 12em;
+  width: 12em;
 }
 ul.linkbar input.coordsinput {
-	width: 5em;
+  width: 5em;
 }
 input.small {
-	width: 1.7em;
+  width: 1.7em;
 }
 tr.odd {
-	background: white;
-	color: black;
+  background: white;
+  color: black;
 }
 tr.total {
-	background: black;
-	color: red;
+  background: black;
+  color: red;
 }
 
-td.ingal{
-	background: blue;
-	color: black;
+td.ingal {
+  background: blue;
+  color: black;
 }
-td.Defend{
-	background: green;
-	color: black;
+td.Defend {
+  background: green;
+  color: black;
 }
-td.AllyDef{
-	background: #00FF00;
-	color: black;
+td.AllyDef {
+  background: #00ff00;
+  color: black;
 }
-td.Attack{
-	background: red;
-	color: black;
-}
-
-input.unclaim{
-	background: green;
-}
-input.join{
-	background: #00AAAA;
-}
-input.taken{
-	background: #AA0000;
+td.Attack {
+  background: red;
+  color: black;
 }
 
-input.blocked{
-	background: black;
-	color: gray;
+input.unclaim {
+  background: green;
+}
+input.join {
+  background: #00aaaa;
+}
+input.taken {
+  background: #aa0000;
 }
 
-td.Friendly{
-	background: green;
-	color: black;
-}
-td.Friendly a{
-	color: yellow;
-	background: green;
-}
-td.Hostile{
-	background: red;
-	color: black;
-}
-td.NAP{
-	background: blue;
-	color: white;
-}
-td.NAP a{
-	color: yellow;
-	background: blue;
+input.blocked {
+  background: black;
+  color: gray;
 }
 
-td.old{
-	background: red;
-	color: black;
+td.Friendly {
+  background: green;
+  color: black;
 }
-td.semiold{
-	background: yellow;
-	color: black;
+td.Friendly a {
+  color: yellow;
+  background: green;
 }
-td.new{
-	background: green;
-	color: black;
+td.Hostile {
+  background: red;
+  color: black;
 }
-table.old{
-	border: outset 1pt;
-	border-collapse: separate;
-	border-color: red;
+td.NAP {
+  background: blue;
+  color: white;
+}
+td.NAP a {
+  color: yellow;
+  background: blue;
 }
 
-table.closedPlanet{
-	border: outset 2pt;
-	border-collapse: separate;
-	border-color: red;
+td.old {
+  background: red;
+  color: black;
 }
-li.bash{
-	color: #FF9933;
+td.semiold {
+  background: yellow;
+  color: black;
+}
+td.new {
+  background: green;
+  color: black;
+}
+table.old {
+  border: outset 1pt;
+  border-collapse: separate;
+  border-color: red;
+}
+
+table.closedPlanet {
+  border: outset 2pt;
+  border-collapse: separate;
+  border-color: red;
+}
+li.bash {
+  color: #ff9933;
 }
 div.clear {
-	clear: both;
-	height: 0;
-	margin: 0;
-	padding: 0;
-	line-height: 0.0;
-	font-size: 1px;
+  clear: both;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  font-size: 1px;
 }
 
-table.stats tr td{
-	padding-left: 0.5em;
+td.LowestPrio {
+  background: red;
+  color: black;
 }
-
-td.LowestPrio{
-	background: red;
-	color: black;
+td.MediumPrio {
+  background: yellow;
+  color: black;
 }
-td.MediumPrio{
-	background: yellow;
-	color: black;
+td.MediumPrio a {
+  background: yellow;
+  color: black;
 }
-td.MediumPrio a{
-	background: yellow;
-	color: black;
+td.HighestPrio {
+  background: green;
+  color: black;
 }
-td.HighestPrio{
-	background: green;
-	color: black;
-}
-span.newposts,span.unreadposts {
-	font-weight: bold;
+span.newposts,
+span.unreadposts {
+  font-weight: bold;
 }
 span.newposts {
-	color: red;
+  color: red;
 }
 
 input.email {
-	width: 30em;
+  width: 30em;
 }
 
-div.bbcode-quote,div.bbcode-code {
-	border: solid;
-	border-width: 1px;
-	MARGIN: 5px 15px 15px 15px; PADDING: 8px;
-	line-height: 1.4;
+div.bbcode-quote,
+div.bbcode-code {
+  border: solid;
+  border-width: 1px;
+  margin: 5px 15px 15px 15px;
+  padding: 8px;
+  line-height: 1.4;
 }
-div.bbcode-quote-head,div.bbcode-code-head {
-	font-weight: bold;
+div.bbcode-quote-head,
+div.bbcode-code-head {
+  font-weight: bold;
 }
 
 fieldset.incluster {
-	border: solid;
-	border-width: 2px;
-	border-color: red;
+  border: solid;
+  border-width: 2px;
+  border-color: red;
 }
 
 div#error {
-	font-weight: bold;
-	font-size: larger;
-	color: red;
-	border-style: solid;
-	border-width: 1px;
+  font-weight: bold;
+  font-size: larger;
+  color: red;
+  border-style: solid;
+  border-width: 1px;
 }

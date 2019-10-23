@@ -1,35 +1,67 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<head>
-	<title>[% site.title %]: [% title or template.title %]</title>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<link rel="stylesheet" type="text/css" href="/static/default.css">
-	<link rel="stylesheet" type="text/css" href="/static/css/[% user.css or "black" %].css">
-[%- FOR s IN site.stylesheets %]
-	<link rel="stylesheet" type="text/css" href="/static/[% s %]">
-[%- END %]
-[%- IF css %]
-<style type="text/css">
-[% css %]
-</style>
-[%- END %]
-	<link rel="icon" type="image/ico" href="/static/favicon.ico">
-	<script type="text/javascript" src="/static/js/raid.js"></script>
-	<script type="text/javascript" src="/static/js/jquery-1.4.2.min.js"></script>
-</head>
- <body>
-[% content %]
+  <head>
+    <title>[% site.title %]: [% title or template.title %]</title>
 
-<script type="text/javascript">
-<!--
-$(document).ready(function(){
-	$('.hidden').hide();
-	$('a[rel*="external"]').click(function() {
-		window.open( $(this).attr('href') );
-		return false;
-	});
-});
--->
-</script>
-</body>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densityDpi=device-dpi"
+    />
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    />
+
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <link rel="stylesheet" type="text/css" href="/static/default.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/[% user.css or
+    "black" %].css"> [%- FOR s IN site.stylesheets %]
+    <link rel="stylesheet" type="text/css" href="/static/[% s %]" />
+    [%- END %] [%- IF css %]
+    <style type="text/css">
+      [% css %]
+    </style>
+    [%- END %]
+    <link rel="icon" type="image/ico" href="/static/favicon.ico" />
+    <script type="text/javascript" src="/static/js/raid.js"></script>
+    <!--
+    <script
+      type="text/javascript"
+      src="/static/js/jquery-1.4.2.min.js"
+    ></script>
+	-->
+  </head>
+  <body>
+    [% page.name %] [% content %]
+
+    <script type="text/javascript">
+      <!--
+      $(document).ready(function(){
+      	$('.hidden').hide();
+      	$('a[rel*="external"]').click(function() {
+      		window.open( $(this).attr('href') );
+      		return false;
+      	});
+      });
+      -->
+    </script>
+
+    <script src="/static/js/md.js"></script>
+  </body>
 </html>

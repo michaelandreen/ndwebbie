@@ -1,119 +1,118 @@
-body,html,table,div {
-	font-family: sans-serif;
-	color: #B2B2B2;
-	background-color: black;
+body,
+html {
+  color: #b2b2b2;
+  background-color: #2d2d2d;
 }
 
 a {
-	color: white;
-	text-decoration:underline;
+  color: white;
 }
-a:hover, td.NAP a:hover {
-	color: black;
-	background: white;
+a:hover,
+td.NAP a:hover {
+  color: black;
 }
 
-input,textarea,select {
-	color: black;
-	background: #B2B2B2;
+input,
+textarea,
+select {
+  color: black;
+  background: #b2b2b2;
 }
 
 img.graph {
-	background: gray;
+  background: gray;
 }
 
 td.sticky {
-	font-weight: bold;
+  font-weight: bold;
 }
 
-
 legend {
-	color: black;
-	background: gray;
+  color: black;
+  background: gray;
 }
 
 ul.linkbar li {
-	background: gray;
-	color: black;
-	margin: 0.5em 0;
-	padding: 0.3em;
-	/*border-right: 1em solid black;*/
+  background: rgba(255, 255, 255, 0.05);
+  color: black;
+  margin: 0.5em 0;
+  padding: 0.3em;
+  /*border-right: 1em solid black;*/
 }
-
 
 tr.even {
-	background: #B2B2B2;
-	color: black;
+  background: #b2b2b2;
+  color: black;
 }
 tr.odd {
-	background: gray;
-	color: black;
+  background: gray;
+  color: black;
 }
 tr.total {
-	background: black;
-	color: red;
+  background: black;
+  color: red;
 }
 
 tr:hover {
-	/*color: black;
+  /*color: black;
 	background: #626262;*/
 }
 
-td.ingal{
-	background: blue;
-	color: black;
+td.ingal {
+  background: blue;
+  color: black;
 }
-td.Defend{
-	background: green;
-	color: black;
+td.Defend {
+  background: green;
+  color: black;
 }
-td.AllyDef{
-	background: #00FF00;
-	color: black;
+td.AllyDef {
+  background: #00ff00;
+  color: black;
 }
-td.Attack{
-	background: red;
-	color: black;
-}
-
-a.Unclaim{
-	color: green;
-}
-input.Unclaim{
-	background: green;
-}
-a.Claim{
-	color: blue;
-}
-a.Join{
-	color: #00AAAA;
-}
-input.Join{
-	background: #00AAAA;
+td.Attack {
+  background: red;
+  color: black;
 }
 
-td.Friendly{
-	background: green;
-	color: black;
+a.Unclaim {
+  color: green;
 }
-td.Friendly a{
-	color: yellow;
-	background: green;
+input.Unclaim {
+  background: green;
 }
-td.Hostile{
-	background: red;
-	color: black;
+a.Claim {
+  color: blue;
+}
+a.Join {
+  color: #00aaaa;
+}
+input.Join {
+  background: #00aaaa;
 }
 
-td.LowestPrio{
-	background: red;
-	color: black;
+td.Friendly {
+  background: green;
+  color: black;
 }
-td.MediumPrio{
-	background: yellow;
-	color: black;
+td.Friendly a {
+  color: yellow;
+  background: green;
 }
-td.HighestPrio{
-	background: green;
-	color: black;
+td.Hostile {
+  background: red;
+  color: black;
+}
+
+td.LowestPrio {
+  background: red;
+  color: black;
+}
+td.MediumPrio {
+  background: yellow;
+  color: black;
+}
+td.HighestPrio {
+  background: green;
+  color: black;
 }
