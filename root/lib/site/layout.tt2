@@ -6,6 +6,7 @@
       <a href="#" data-target="slide-out" class="sidenav-trigger left"
         ><i class="material-icons">menu</i></a
       >
+      [% template.title or site.title %]
     </div>
   </nav>
 </div>
@@ -14,7 +15,17 @@
 
 <main class="main-content" id="main-content">
   <div id="body">
-    [% IF error %]
+    [% IF user AND !c.user.planet %]
+    <div class="alert warning">
+      <form action="/members/postowncoords" method="post">
+        <p>
+          We need your planet's coordinates:
+          <input type="text" name="planet" value="" />
+          <input type="submit" value="Submit" />
+        </p>
+      </form>
+    </div>
+    [% END %] [% IF error %]
     <div id="error">
       [% error %]
     </div>

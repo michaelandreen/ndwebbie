@@ -9,13 +9,17 @@ html {
 
 header,
 main,
-footer,
-nav {
+footer {
   padding-left: 300px;
 }
 
 main {
   padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.navbar-fixed nav {
+  background: #125e82;
 }
 
 .b {
@@ -44,7 +48,7 @@ main {
 }
 
 .warning {
-  background: tomato;
+  background: #c10015;
   color: white;
 }
 

@@ -1,5 +1,8 @@
 [% META title = 'Main' %]
 
-<h1>Welcome to the planetarion alliance NewDawn</h1>
+<h3>Welcome to the planetarion alliance NewDawn</h3>
 
-<p>For more information visit us in #newdawn on <a href="irc://irc.netgamers.org">irc.netgamers.org</a></p>
+<p>
+  For more information visit us in #newdawn on
+  <a href="irc://irc.netgamers.org">irc.netgamers.org</a>
+</p>

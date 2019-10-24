@@ -48,7 +48,7 @@
 	-->
   </head>
   <body>
-    [% page.name %] [% content %]
+    [% content %]
 
     <script type="text/javascript">
       <!--
