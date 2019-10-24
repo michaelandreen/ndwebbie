@@ -6,7 +6,9 @@
       <a href="#" data-target="slide-out" class="sidenav-trigger left"
         ><i class="material-icons">menu</i></a
       >
-      [% template.title or site.title %]
+      <div class="nav-inner">
+        [% template.title or site.title %]
+      </div>
     </div>
   </nav>
 </div>
