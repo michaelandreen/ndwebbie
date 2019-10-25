@@ -31,13 +31,9 @@ main {
   background: #125e82;
 }
 
-.navbar-fixed .card-action a {
-  display: block;
-}
-
 .b {
   position: absolute;
-  left: -68px;
+  left: -90px;
   top: -8px;
   display: block;
   color: white;
