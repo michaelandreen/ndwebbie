@@ -10,13 +10,13 @@
     </div>
 
     <div class="card-action">
-      <a href="/forum/privmsg"><i class="material-icons left">mail</i></a>
+      <a href="/forum/privmsg"><i class="material-icons">mail</i></a>
       <a href="/forum/allUnread" style="position: relative"
         ><span class="[% IF user.newposts %]newposts[% ELSE %]b[% END %]"
           >[% user.unreadposts %]</span
-        ><i class="material-icons left">forum</i></a
+        ><i class="material-icons">forum</i></a
       >
-      <a href="/settings"><i class="material-icons left">settings</i></a>
+      <a href="/settings"><i class="material-icons">settings</i></a>
       <a href="/logout"><i class="material-icons right">logout</i></a>
     </div>
   </div>

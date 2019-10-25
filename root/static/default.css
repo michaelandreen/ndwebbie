@@ -33,8 +33,8 @@ main {
 
 .b {
   position: absolute;
-  left: -90px;
-  top: -8px;
+  left: 10px;
+  top: -18px;
   display: block;
   color: white;
   background: tomato;
