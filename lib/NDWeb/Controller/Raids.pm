@@ -106,7 +106,6 @@ sub view : Local {
 	$c->forward('findRaid');
 	$raid = $c->stash->{raid};
 
-	$c->stash(raid => $raid->{id});
 	my $planet;
 	if ($c->user->planet){
 		my $query = $dbh->prepare(q{SELECT value, score,x,y FROM current_planet_stats WHERE pid = ?});
@@ -188,9 +187,9 @@ ORDER BY name,tick DESC
 		$target->{claims} = \@claims;
 
 		my $num = pow(10,length($target->{score})-2);
-		$target->{score} = "Hidden"; #ceil($target->{score}/$num)*$num;
+		$target->{score} = "Hidden" unless $raid->{released_coords}; #ceil($target->{score}/$num)*$num;
 		$num = pow(10,length($target->{value})-2);
-		$target->{value} = "Hidden"; #ceil($target->{value}/$num)*$num;
+		$target->{value} = "Hidden" unless $raid->{released_coords}; #ceil($target->{value}/$num)*$num;
 		$num = pow(10,length($target->{size})-2);
 		$target->{size} = floor($target->{size}/$num)*$num;
 		$num = pow(10,length($target->{fleetvalue})-2);

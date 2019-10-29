@@ -23,6 +23,9 @@
 <fieldset class="[% t.style %]"> <legend><a name="target[% t.id %]">Target: #[% t.id %]</a></legend>
 	<div class="leftinfo"><ul>
 		<li><a href="[% c.uri_for('targetcalc',t.id) %]" rel="external">Calc</a></li>
+		[% IF raid.released_coords %]
+		<li>Coords: [% t.x %]:[% t.y %]:[% t.z %]</li>
+		[% END %]
 		<li>Size: [% t.size %]</li>
 		<li class="[% t.scorebash %]">Score: [% t.score %]</li>
 		<li class="[% t.valuebash %]">Value: [% t.value %]</li>
@@ -124,15 +127,15 @@
 
 <script type="text/javascript">
 function update(){
-	$.get("/jsrpc/update/[% raid %]/"+modified,{},parseUpdate);
+	$.get("/jsrpc/update/[% raid.id %]/"+modified,{},parseUpdate);
 }
 
 function claim(target,wave,command){
-	$.get("/jsrpc/"+command+"/"+[% raid %]+"/"+modified+"/"+target+"/"+wave,{},parseUpdate);
+	$.get("/jsrpc/"+command+"/"+[% raid.id %]+"/"+modified+"/"+target+"/"+wave,{},parseUpdate);
 }
 
 function join(target,wave,joinable){
-	$.get("/jsrpc/joinable/"+[% raid %]+"/"+modified+"/"+target+"/"+wave+"/"+joinable,{},parseUpdate);
+	$.get("/jsrpc/joinable/"+[% raid.id %]+"/"+modified+"/"+target+"/"+wave+"/"+joinable,{},parseUpdate);
 }
 
 $(document).ready(function(){
