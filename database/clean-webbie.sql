@@ -4,7 +4,7 @@ TRUNCATE alliance_stats ;
 TRUNCATE fleet_ships;
 TRUNCATE incomings;
 TRUNCATE raid_claims;
-/*TRUNCATE dumps;*/
+TRUNCATE dumps;
 TRUNCATE scan_requests;
 TRUNCATE fleet_scans;
 TRUNCATE launch_confirmations;
@@ -42,3 +42,4 @@ ALTER SEQUENCE scans_id_seq RESTART 1;
 ALTER SEQUENCE irc_requests_id_seq RESTART 1;
 ALTER SEQUENCE scan_requests_id_seq RESTART 1;
 ALTER SEQUENCE fleet_ships_num_seq RESTART 1;
+UPDATE misc SET value = 0 WHERE id = 'TICK';
