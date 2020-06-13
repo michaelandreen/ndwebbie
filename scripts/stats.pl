@@ -35,8 +35,6 @@ use ND::DB;
 
 our $dbh = ND::DB::DB();
 
-$dbh->do("SET CLIENT_ENCODING TO 'LATIN1';");
-
 my %classes = (Fighter => 'Fi', Corvette => 'Co', Frigate => 'Fr', Destroyer => 'De', Cruiser => 'Cr', Battleship => 'Bs');
 
 my $file = get("http://game.planetarion.com/manual.pl?page=stats");

@@ -41,7 +41,6 @@ our $dbh = ND::DB::DB();
 
 #my $test = $dbh->prepare(q{INSERT INTO scans (tick,scan_id) VALUES(1,3) RETURNING id});
 #print ;
-$dbh->do(q{SET CLIENT_ENCODING TO 'LATIN1';});
 
 my $scangroups = $dbh->prepare(q{SELECT id,scan_id,tick,uid FROM scans
 	WHERE groupscan AND NOT parsed FOR UPDATE

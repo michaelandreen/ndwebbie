@@ -36,8 +36,6 @@ use ND::DB;
 
 our $dbh = ND::DB::DB();
 
-$dbh->do("SET CLIENT_ENCODING TO 'LATIN1';");
-
 my $insert = $dbh->prepare("INSERT INTO dumps(tick,type,modified,dump) VALUES(?,?,?,?)");
 my $select = $dbh->prepare("SELECT 1 FROM dumps WHERE type = ? AND modified = ?");
 my $updated = 0;
