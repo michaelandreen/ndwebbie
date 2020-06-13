@@ -40,15 +40,16 @@ my %classes = (Fighter => 'Fi', Corvette => 'Co', Frigate => 'Fr', Destroyer => 
 my $file = get("http://game.planetarion.com/manual.pl?page=stats");
 $dbh->begin_work;
 my $st = $dbh->prepare(q{INSERT INTO ship_stats (ship,"class",t1,t2,t3,"type",init,guns,armor,damage,eres,metal,crystal,eonium,race) VALUES(?,?,NULLIF(?,'-'),NULLIF(?,'-'),NULLIF(?,'-'),?,?,?,?,?,?,?,?,?,?)});
-while ($file =~ /class="(\w+)"><td>((?:\w| )+)<\/td><td>(\w+)<\/td><td>(\w+|-)<\/td><td>(\w+|-)<\/td><td>(\w+)\D+(\d+)\D+(\d+)\D+(\d+)\D+?(\d+|-)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+\d+\D+\d+.+?(\w+)<\/td>/g){
-	my $dmg = $10;
+while ($file =~ /class="(\w+)"><td>((?:\w| )+)<\/td><td>(\w+)<\/td><td>(\w+|-)<\/td><td>(\w+|-)<\/td><td>(\w+|-)<\/td><td>(\w+)\D+(\d+)\D+(\d+)\D+(\d+)\D+?(\d+|-)\D+(\d+)\D+(\d+)\D+(\d+)\D+(\d+)\D+\d+\D+\d+.+?(\w+)<\/td>/g){
+	my $dmg = $11;
 	$dmg = 0 if $dmg eq '-';
 	my $class = $classes{$3};
-	my $type = $6;
+	my $type = $7;
 	$type = 'Emp' if $type eq 'EMP';
-	$st->execute($2,$class,$4,$5,'-',$6,$7,$8,$9,$dmg,$11,$12,$13,$14,$1) or die $dbh->errstr;
-	print "$2,$class,$4,$5,'-',$6,$7,$dmg,$9,$10,$11,$12,$13,$14,$1\n";
+	$st->execute($2,$class,$4,$5,$6,$7,$8,$9,$10,$dmg,$12,$13,$14,$15,$1) or die $dbh->errstr;
+	print "$2,$class,$4,$5,$6,$7,$8,$9,$10,$dmg,$12,$13,$14,$15,$1\n";
 }
+
 
 $dbh->commit;
 
