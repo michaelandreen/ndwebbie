@@ -23,6 +23,7 @@ use strict;
 use warnings;
 no warnings 'exiting';
 use local::lib;
+use Sys::RunAlone;
 use CGI;
 use DBI;
 use DBD::Pg qw(:pg_types);
@@ -306,3 +307,5 @@ sub addintel {
 		,$target,$tick, $eta, $back, $amount,$ingal);
 	return $id;
 }
+
+__END__
