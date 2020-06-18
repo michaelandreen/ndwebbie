@@ -158,8 +158,11 @@ ORDER BY name,tick DESC
 			WHERE fid = ? ORDER BY num
 		});
 		my @missions;
+		my $tick = 0;
 		while (my $mission = $unitscans->fetchrow_hashref){
 			my @ships;
+			last if $mission->{tick} <= $tick;
+			$tick = $mission->{tick};
 			$ships->execute($mission->{fid});
 			while (my $ship = $ships->fetchrow_hashref){
 				push @ships,$ship;
