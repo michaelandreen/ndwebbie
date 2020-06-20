@@ -7,7 +7,8 @@ FROM(
 	FROM forum_threads ft
 		LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1)
 			ftv USING (ftid)
-	WHERE COALESCE(ft.mtime > ftv.time,TRUE)
+	WHERE ft.mtime > NOW() - '50 days'::interval
+		AND COALESCE(ft.mtime > ftv.time,TRUE)
 		AND ((fbid > 0 AND
 				fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1)))
 			) OR ft.ftid IN (SELECT ftid FROM forum_priv_access WHERE uid = $1)

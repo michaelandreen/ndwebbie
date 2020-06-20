@@ -3316,6 +3316,8 @@ CREATE INDEX forum_posts_ftid_index ON forum_posts USING btree (ftid);
 CREATE INDEX forum_posts_textsearch_index ON forum_posts USING gin (textsearch);
 
 
+CREATE INDEX forum_threads_mtime_index ON forum_threads USING btree (mtime);
+
 --
 -- Name: groupmembers_uid_key; Type: INDEX; Schema: public; Owner: ndawn
 --

@@ -73,7 +73,8 @@ FROM forum_categories fc
 	JOIN users u ON u.uid = ft.uid
 	LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1)
 		ftv ON ftv.ftid = ft.ftid
-WHERE COALESCE(ft.mtime > ftv.time,TRUE)
+WHERE ft.mtime > NOW() - '50 days'::interval
+	AND COALESCE(ft.mtime > ftv.time,TRUE)
 	AND ft.ftid IN (SELECT ftid FROM forum_posts WHERE ftid = ft.ftid)
 	AND ((fbid > 0 AND
 			fb.fbid IN (SELECT fbid FROM forum_access WHERE gid IN (SELECT groups($1))))
