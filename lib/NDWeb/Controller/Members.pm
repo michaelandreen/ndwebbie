@@ -78,7 +78,7 @@ ORDER BY landing_tick DESC
 			LEFT OUTER JOIN (SELECT * FROM forum_thread_visits WHERE uid = $1) ftv ON ftv.ftid = ft.ftid
 		WHERE ft.fbid = 1
 		GROUP BY ft.ftid, ft.subject,ft.sticky,u.username
-		HAVING count(NULLIF(COALESCE(ft.sticky OR fp.time > ftv.time,TRUE),FALSE)) >= 1
+		HAVING count(NULLIF(COALESCE(fp.time > ftv.time,TRUE),FALSE)) >= 1
 		ORDER BY sticky DESC,last_post DESC
 		});
 	$announcements->execute($c->user->id);
