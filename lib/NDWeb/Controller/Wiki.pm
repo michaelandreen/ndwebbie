@@ -103,6 +103,9 @@ sub postedit : Local {
 	my ( $self, $c, $p ) = @_;
 	my $dbh = $c->model;
 
+	my $ns = $c->req->param('namespace');
+	my $name = $c->req->param('name');
+	my $text = $c->req->param('text');
 	eval {
 		$dbh->begin_work;
 
@@ -114,10 +117,10 @@ sub postedit : Local {
 			my $namespace = $dbh->selectrow_array(q{SELECT namespace
 				FROM wiki_namespace_access
 				WHERE namespace = $1 AND post AND gid IN (SELECT groups($2))
-			},undef,$c->req->param('namespace'), $c->stash->{UID});
+			},undef,$ns, $c->stash->{UID});
 
 			my $query = $dbh->prepare(q{INSERT INTO wiki_pages (namespace,name) VALUES($1,$2) RETURNING wpid});
-			$query->execute($namespace,$c->req->param('name'));
+			$query->execute($namespace,$name);
 			$wpid = $query->fetchrow;
 		}
 		$c->forward('findPage',[$wpid]);
@@ -129,8 +132,10 @@ sub postedit : Local {
 			RETURNING wprev
 			});
 		$c->req->params->{parent}||= undef;
-		$query->execute($wpid,$c->req->param('parent'),$c->req->param('text')
-			,$c->req->param('comment'),$c->stash->{UID});
+		my $parent = $c->req->param('parent');
+		my $comment = $c->req->param('comment');
+		$query->execute($wpid,$parent,$text
+			,$comment,$c->stash->{UID});
 		my $rev = $query->fetchrow;
 		$dbh->do(q{UPDATE wiki_pages SET wprev = $1 WHERE wpid = $2}
 			,undef,$rev,$wpid);
@@ -154,10 +159,10 @@ sub postedit : Local {
 	$c->forward('findPage') if $p;
 	$c->forward('findNamespaces');
 
-	$c->stash->{page}->{namespace} = $c->req->param('namespace');
-	$c->stash->{page}->{name} = $c->req->param('name');
+	$c->stash->{page}->{namespace} = $ns;
+	$c->stash->{page}->{name} = $name;
 
-	$c->stash(text => $c->req->param('text'));
+	$c->stash(text => $text);
 	$c->stash(template => 'wiki/edit.tt2');
 }
 
@@ -181,7 +186,8 @@ sub search : Local {
 			ORDER BY rank DESC
 		});
 		eval {
-			$posts->execute($c->stash->{UID},$c->req->param('search'));
+			my $search = $c->req->param('search');
+			$posts->execute($c->stash->{UID},$search);
 			my @posts;
 			while (my $post = $posts->fetchrow_hashref){
 				push @posts,$post;

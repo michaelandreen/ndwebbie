@@ -311,10 +311,11 @@ sub postraidupdate : Local {
 	my $dbh = $c->model;
 
 	$dbh->begin_work;
+	my $tick = $c->req->param('tick');
+	my $waves = $c->req->param('waves');
 	$dbh->do(q{UPDATE raids SET message = ?, tick = ?, waves = ? WHERE id = ?}
 		,undef,html_escape $c->req->param('message')
-		,$c->req->param('tick'),$c->req->param('waves')
-		,$raid);
+		,$tick,$waves,$raid);
 
 	$c->forward('log',[$raid, 'BC updated raid']);
 
@@ -516,10 +517,12 @@ sub postcreate : Local {
 
 	$dbh->begin_work;
 	my $query = $dbh->prepare(q{INSERT INTO raids (tick,waves,message) VALUES(?,?,?) RETURNING (id)});
-	$query->execute($c->req->param('tick'),$c->req->param('waves')
-		,html_escape $c->req->param('message'));
+	my $tick = $c->req->param('tick');
+	my $waves = $c->req->param('waves');
+	my $message = html_escape $c->req->param('message');
+	$query->execute($tick,$waves,$message);
 	my $raid = $query->fetchrow_array;
-	$c->forward('log',[$raid,"Created raid landing at tick: ".$c->req->param('tick')]);
+	$c->forward('log',[$raid,"Created raid landing at tick: ".$tick]);
 
 	if ($c->req->param('gal') || $c->req->param('target')) {
 		my @gals = $c->req->param('gal');
@@ -533,7 +536,8 @@ sub postcreate : Local {
 				)
 			)
 		});
-		$addtarget->execute($raid,\@targets,\@gals,$c->req->param('sizelimit'));
+		my $sizelimit = $c->req->param('sizelimit');
+		$addtarget->execute($raid,\@targets,\@gals,$sizelimit);
 		$c->forward('log',[$raid,"BC added planets (@targets) and the gals for (@gals)"]);
 	}
 	$dbh->do(q{INSERT INTO raid_access (raid,gid) VALUES(?,'M')}
@@ -722,9 +726,11 @@ sub postcreateretal : Local {
 	my $dbh = $c->model;
 
 	$dbh->begin_work;
+	my $tick = $c->req->param('tick');
+	my $waves = $c->req->param('waves');
+	my $message = html_escape $c->req->param('message');
 	my $query = $dbh->prepare(q{INSERT INTO raids (tick,waves,message) VALUES(?,?,?) RETURNING (id)});
-	$query->execute($c->req->param('tick'),$c->req->param('waves')
-		,html_escape $c->req->param('message'));
+	$query->execute($tick, $waves, $message);
 	my $raid = $query->fetchrow_array;
 	$c->forward('log',[$raid,"Created retal raid landing at tick: ".$c->req->param('tick')]);
 

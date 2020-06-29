@@ -329,7 +329,8 @@ sub moveThreads : Local {
 	my ( $self, $c, $board ) = @_;
 	my $dbh = $c->model;
 
-	$c->forward('findBoard',[$c->req->param('board')]);
+	my $b = $c->req->param('board');
+	$c->forward('findBoard',[$b]);
 	my $toboard = $c->stash->{board};
 	unless ($toboard->{moderate}){
 		$c->acl_access_denied('test',$c->action,'No moderator access for target board.')
@@ -381,10 +382,11 @@ sub insertThread : Private {
 	my ( $self, $c, $board ) = @_;
 	my $dbh = $c->model;
 
+	my $subject = html_escape($c->req->param('subject'));
 	my $insert = $dbh->prepare(q{INSERT INTO forum_threads (ftid,fbid,subject,uid)
 		VALUES(DEFAULT,$1,$2,$3) RETURNING (ftid);
 		});
-	$insert->execute($board,html_escape($c->req->param('subject')),$c->stash->{UID});
+	$insert->execute($board,$subject,$c->stash->{UID});
 	$c->stash(thread => $insert->fetchrow);
 	$insert->finish;
 }
@@ -549,21 +551,23 @@ sub findBoard : Private {
 
 sub previewPost : Private {
 	my ( $self, $c) = @_;
+	my $message = html_escape $c->req->param('message');
 	push @{$c->stash->{posts}}, {
 		unread => 1,
 		username => 'PREVIEW',
-		message => parseMarkup(html_escape $c->req->param('message')),
+		message => parseMarkup($message),
 	};
-	$c->stash(previewMessage => html_escape $c->req->param('message'));
+	$c->stash(previewMessage => $message);
 }
 
 sub insertPost : Private {
 	my ( $self, $c, $thread ) = @_;
 	my $dbh = $c->model;
 
+	my $message = html_escape($c->req->param('message'));
 	my $insert = $dbh->prepare(q{INSERT INTO forum_posts (ftid,message,uid)
 		VALUES($1,$2,$3)});
-	$insert->execute($thread,html_escape($c->req->param('message')),$c->stash->{UID});
+	$insert->execute($thread,$message,$c->stash->{UID});
 }
 
 sub listModeratorBoards : Private {

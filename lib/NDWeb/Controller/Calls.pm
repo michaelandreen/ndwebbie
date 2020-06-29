@@ -268,13 +268,15 @@ sub postcallupdate : Local {
 	if ($c->req->param('cmd') eq 'Submit'){
 		my $logmess = '';
 		if ($c->req->param('ctick')){
+			my $tick = $c->req->param('tick');
 			$dbh->do(q{UPDATE calls SET landing_tick = ? WHERE call = ?}
-				,undef,$c->req->param('tick'),$call->{call});
+				,undef,$tick,$call->{call});
 			$logmess .= "Updated landing tick from [B] $call->{landing_tick} [/B]\n";
 		}
 		if ($c->req->param('cinfo')){
+			my $info = $c->req->param('info');
 			$dbh->do(q{UPDATE calls SET info = ? WHERE call = ?}
-				,undef,$c->req->param('info'),$call->{call});
+				,undef,$info,$call->{call});
 			$logmess .= "Updated info\n";
 		}
 		if ($c->req->param('ccalc')){
@@ -284,8 +286,9 @@ sub postcallupdate : Local {
 			$logmess .= html_escape('Updated calc to: [URL]'.$calc."[/URL]\n");
 		}
 		if ($c->req->param('cstatus')){
+			my $status = $c->req->param('status');
 			$dbh->do(q{UPDATE calls SET status = $1, dc = $2 WHERE call = $3}
-				,undef,$c->req->param('status'),$c->user->id,$call->{call});
+				,undef,$status,$c->user->id,$call->{call});
 			$logmess .= "Changed status to: ".$c->req->param('status')."\n";
 		}
 		$log->execute($c->user->id,$call->{ftid},$logmess) if $log;

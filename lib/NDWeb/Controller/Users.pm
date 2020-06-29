@@ -159,30 +159,33 @@ sub postmail : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
+	my $group = $c->req->param('group');
 	my $emails = $dbh->prepare(q{SELECT email FROM users
 		WHERE uid IN (SELECT uid FROM groupmembers WHERE gid = $1)
 			AND email is not null});
-	$emails->execute($c->req->param('group'));
+	$emails->execute($group);
 	my @emails;
 	while (my $email = $emails->fetchrow_hashref){
 		push @emails,$email->{email};
 	}
 
+	my $subject = $c->req->param('subject');
+	my $message = $c->req->param('message');
 	my %mail = (
 		smtp => 'localhost',
 		BCC      => (join ',',@emails),
 		From    => 'NewDawn Command <nd@ruin.nu>',
 		'Content-type' => 'text/plain; charset="UTF-8"',
-		Subject => $c->req->param('subject'),
-		Message => $c->req->param('message'),
+		Subject => $subject,
+		Message => $message,
 	);
 
 	if (sendmail %mail) {
 		$c->flash(ok => \@emails);
 	}else {
 		$c->flash(error => $Mail::Sendmail::error);
-		$c->flash(subject => $c->req->param('subject'));
-		$c->flash(message => $c->req->param('message'));
+		$c->flash(subject => $subject);
+		$c->flash(message => $message);
 	}
 
 	$c->res->redirect($c->uri_for('mail'));
@@ -226,11 +229,12 @@ sub postsms : Local {
 
 	$c->req->parameters->{uid} = [$c->req->parameters->{uid}]
 		unless ref $c->req->parameters->{uid} eq 'ARRAY';
+	my $message = $c->req->param('message');
 
 	my $query = $dbh->prepare(q{INSERT INTO sms (uid,message,number)
 		(SELECT $1,$2, trim(leading '+' FROM sms) FROM users u WHERE uid = ANY ($3) AND sms SIMILAR TO '\+\d+' )});
 
-	$query->execute($c->user->id,$c->req->param('message'),$c->req->parameters->{uid});
+	$query->execute($c->user->id,$message,$c->req->parameters->{uid});
 
 	$c->res->redirect($c->uri_for('sms'));
 }

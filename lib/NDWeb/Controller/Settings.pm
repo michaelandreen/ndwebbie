@@ -68,7 +68,8 @@ sub changeStylesheet : Local {
 	my $query = $dbh->prepare(q{UPDATE users SET css = NULLIF($2,'Default')
 		WHERE uid = $1
 	});
-	$query->execute($c->user->id,html_escape $c->req->param('stylesheet'));
+	my $css = html_escape $c->req->param('stylesheet');
+	$query->execute($c->user->id,$css);
 
 	$c->res->redirect($c->uri_for(''));
 }
@@ -81,7 +82,8 @@ sub changeBirthday : Local {
 		WHERE uid = $1
 		});
 	eval{
-		$query->execute($c->user->id,html_escape $c->req->param('birthday'));
+		my $birthday = html_escape $c->req->param('birthday');
+		$query->execute($c->user->id,$birthday);
 	};
 	if ($@){
 		if ($@ =~ /invalid input syntax for type date/){
@@ -113,13 +115,15 @@ sub changePassword : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
-	if (length $c->req->param('pass') < 4) {
+	my $pass = $c->req->param('pass');
+	if (length $pass < 4) {
 		$c->flash(error => "Your password need to be at least 4 characters");
 	} else {
 		my $query = $dbh->prepare(q{UPDATE users SET password = $1
 			WHERE password = crypt($2,password) AND uid = $3
 		});
-		$query->execute($c->req->param('pass'),$c->req->param('oldpass'),$c->user->id);
+		my $oldpass = $c->req->param('oldpass');
+		$query->execute($pass,$oldpass,$c->user->id);
 
 		$c->flash(error => "Old password was invalid") unless $query->rows;
 	}
@@ -133,7 +137,7 @@ sub changeEmail : Local {
 
 	my $email = $c->req->param('email');
 
-	if ($email =~ /^s?$/) {
+	if ($email =~ /^\s*$/) {
 		my $update = $dbh->prepare(q{
 UPDATE users SET email = NULL WHERE uid = $1;
 			});

@@ -105,10 +105,14 @@ UPDATE sms SET status = $2, cost = $3
 WHERE msgid = $1
 		});
 
-	$sms->execute($c->req->param('apiMsgId')
-		,$clickatellstatus{$c->req->param('status')}
-		,$c->req->param('charge')
-		,$c->req->param('timestamp'));
+	my $apiMsgId = $c->req->param('apiMsgId');
+	my $status = $c->req->param('status');
+	my $charge = $c->req->param('charge');
+	my $timestamp = $c->req->param('timestamp');
+	$sms->execute($apiMsgId
+		,$clickatellstatus{$status}
+		,$charge
+		,$timestamp);
 
 }
 

@@ -95,8 +95,9 @@ sub posthostupdate : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
+	my $hostname = html_escape $c->req->param('hostname');
 	$dbh->do(q{UPDATE users SET hostmask = ? WHERE uid = ?
-		},undef, html_escape $c->req->param('hostname'), $c->user->id);
+		},undef, $hostname, $c->user->id);
 
 	$c->res->redirect($c->uri_for(''));
 }
@@ -123,10 +124,11 @@ sub postsmsupdate : Local {
 	my $dbh = $c->model;
 
 	my $callme = $c->req->param('callme') || 0;
+	my $sms = html_escape $c->req->param('sms');
+	my $smsnote = $c->req->param('smsnote');
 	$dbh->do(q{
 UPDATE users SET sms = $1, call_if_needed =  $2, sms_note = $3 WHERE uid = $4
-		},undef, html_escape $c->req->param('sms'),$callme
-		,$c->req->param('smsnote'), $c->user->id);
+		},undef, $sms, $callme, $smsnote, $c->user->id);
 
 	$c->res->redirect($c->uri_for(''));
 }
@@ -160,7 +162,8 @@ sub postowncoords : Local {
 			$c->flash(error => "No planet at coords: $x:$y:$z");
 		}
 	}else{
-		$c->flash(error => $c->req->param('planet') . " are not valid coords.");
+		my $error = $c->req->param('planet') . " are not valid coords.";
+		$c->flash(error => $error);
 	}
 
 	$c->res->redirect($c->uri_for('/'.$c->session->{referrer}));
@@ -215,17 +218,19 @@ sub postircrequest : Local {
 	my ( $self, $c ) = @_;
 	my $dbh = $c->model;
 
+	my $message = $c->req->param('message');
 	if ($c->req->param('channel')){
 		my $query = $dbh->prepare(q{
 INSERT INTO irc_requests (uid,channel,message) VALUES($1,$2,$3)
 		});
-		$query->execute($c->user->id,$c->req->param('channel'),$c->req->param('message'));
+		my $channel = $c->user->id,$c->req->param('channel');
+		$query->execute($channel, $message);
 		$c->signal_bots;
 
-		$c->flash(reply => "Msg sent to: ".$c->req->param('channel'));
+		$c->flash(reply => "Msg sent to: ".$channel);
 		$c->res->redirect($c->uri_for('ircrequest'));
 	}else{
-		$c->stash(ircmessage => $c->req->param('message'));
+		$c->stash(ircmessage => $message);
 		$c->go('ircrequest');
 	}
 }
@@ -327,7 +332,8 @@ sub postintelmessage : Local {
 SELECT coords(x,y,z), tick() FROM current_planet_stats WHERE pid = $1
 		}, undef, $c->user->planet);
 
-	$c->req->param(message => "[i]Posted by $coords at tick $tick [/i]\n\n" . $c->req->param('message'));
+	my $message = "[i]Posted by $coords at tick $tick [/i]\n\n" . $c->req->param('message');
+	$c->req->param(message => $message);
 	$c->forward('/forum/insertThread',[12]);
 	$c->forward('/forum/insertPost',[$c->stash->{thread}]);
 	$c->flash(intelmessage => 1);
@@ -507,7 +513,8 @@ WHERE uid = $1 AND num = $2 AND back > tick()
 		my $fullfleet = $dbh->prepare(q{INSERT INTO full_fleets
 					(fid,uid) VALUES (?,?)});
 		$dbh->begin_work;
-		my @missions = parseconfirmations($c->req->param('mission'), $c->stash->{TICK});
+		my $mission = $c->req->param('mission');
+		my @missions = parseconfirmations($mission, $c->stash->{TICK});
 		for my $m (@missions){
 			if ($m->{mission} eq 'Return'){
 				$c->forward("addReturnFleet", [$m]);
