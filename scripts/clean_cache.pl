@@ -9,7 +9,7 @@ use lib "$FindBin::Bin/../lib";
 
 use Cache::FileCache;
 
-my $cache = new Cache::FileCache({cache_root => "/tmp/ndweb-$<", namespace => 'cache'} );
+my $cache = Cache::FileCache->new({cache_root => "/tmp/ndweb-$<", namespace => 'cache'});
 
 $cache->purge;
 
