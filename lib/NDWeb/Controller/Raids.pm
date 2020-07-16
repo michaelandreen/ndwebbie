@@ -131,7 +131,7 @@ sub view : Local {
 			LEFT OUTER JOIN current_development_scans ds USING (pid)
 		WHERE r.raid = $1
 			AND NOT COALESCE(p.x = $2 AND p.y = $3,False)
-		ORDER BY size});
+		ORDER BY size DESC, value DESC, score DESC});
 	$targetquery->execute($raid->{id},$planet->{x},$planet->{y});
 	my @targets;
 	while (my $target = $targetquery->fetchrow_hashref){
@@ -206,7 +206,7 @@ ORDER BY name,tick DESC
 
 		push @targets,$target;
 	}
-	@targets = sort {$b->{roids}[0]{xp} <=> $a->{roids}[0]{xp} or $b->{size} <=> $a->{size}} @targets;
+	#@targets = sort {$b->{roids}[0]{xp} <=> $a->{roids}[0]{xp} or $b->{size} <=> $a->{size}} @targets;
 
 	$c->stash(targets => \@targets);
 }
