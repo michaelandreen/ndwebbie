@@ -30,6 +30,7 @@ use CGI qw/:standard/;
 use Email::Simple;
 use Email::StripMIME;
 use Encode;
+use Encoding::FixLatin qw(fix_latin);
 use MIME::QuotedPrint;
 
 use FindBin;
@@ -44,7 +45,7 @@ my $text = join '',@text;
 my $email = Email::Simple->new(Email::StripMIME::strip_mime($text));;
 
 my $subject = decode('MIME-Header', $email->header('Subject'));
-my $body = 'FROM:' . decode('UTF-8', decode_qp($email->header('From'))) . "\n\n" . decode('UTF-8',$email->body);
+my $body = 'FROM:' . decode('MIME-Header', $email->header('From')) . "\n\n" . fix_latin($email->body);
 
 
 $dbh->begin_work;
