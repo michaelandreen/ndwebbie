@@ -29,7 +29,7 @@ use CGI qw/:standard/;
 
 use Email::Simple;
 use Email::StripMIME;
-use Encode::Encoder qw(encoder);
+use Encode;
 use MIME::QuotedPrint;
 
 use FindBin;
@@ -43,8 +43,8 @@ my $text = join '',@text;
 
 my $email = Email::Simple->new(Email::StripMIME::strip_mime($text));;
 
-my $subject = encoder(decode_qp($email->header('Subject')))->utf8;
-my $body = 'FROM:'.encoder(decode_qp($email->header('From')))->utf8 . "\n\n" . encoder($email->body)->utf8;
+my $subject = decode('MIME-Header', $email->header('Subject'));
+my $body = 'FROM:' . decode('UTF-8', decode_qp($email->header('From'))) . "\n\n" . decode('UTF-8',$email->body);
 
 
 $dbh->begin_work;

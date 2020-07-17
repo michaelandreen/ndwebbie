@@ -28,7 +28,7 @@ use DBD::Pg qw(:pg_types);
 use CGI qw/:standard/;
 
 use Email::Simple;
-use Encode::Encoder qw(encoder);
+use Encode;
 use MIME::QuotedPrint;
 
 use FindBin;
@@ -46,7 +46,7 @@ my $user = $1;
 
 my $email = Email::Simple->new($text);
 
-my $body =  encoder($email->body,'ISO-8859-15')->utf8;
+my $body =  decode('ISO-8859-1', $email->body);
 
 my $c = $dbh->prepare(q{
 SELECT coords(x,y,z) FROM current_planet_stats WHERE pid = (SELECT pid FROM users WHERE username = $1
