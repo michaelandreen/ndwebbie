@@ -63,7 +63,7 @@ fieldset.forum-post {
 fieldset.forum-post legend b {
 	font-size: larger;
 }
-div.leftinfo{
+div.leftinfo, div.graphs{
 	float: left;
 	padding-right: 2em;
 }

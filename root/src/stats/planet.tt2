@@ -5,6 +5,7 @@
 <p> No such planet</p>
 [% END %]
 
+<div class="grid-container">
 <div class="leftinfo">
 [% IF planetscan.tick %]
 <table [% IF planetscan.tick < TICK - 24 %] class="old"[% END %]>
@@ -123,9 +124,10 @@
 	[% PROCESS inc/missionlist.tt2 missions=incomings %]
 </div>
 [% END %]
+</div>
 
 [% IF p.id %]
-<div class="leftinfo">
+<div class="graphs">
 <img class="graph" src="[% c.uri_for('/graphs/planetstats',p.id,STICK) %]" alt="stats" height="300" width="500">
 <img class="graph" src="[% c.uri_for('/graphs/planetranks',p.id,STICK) %]" alt="ranks" height="300" width="500">
 </div>
