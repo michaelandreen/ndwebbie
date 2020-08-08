@@ -124,6 +124,7 @@ __PACKAGE__->deny_access_unless('/intel/members',[qw/intel_members/]);
 __PACKAGE__->deny_access_unless('/intel/member',[qw/intel_member/]);
 __PACKAGE__->deny_access_unless('/intel/naps',[qw/intel_naps/]);
 __PACKAGE__->deny_access_unless('/jsrpc',[qw//]);
+__PACKAGE__->allow_access_if('/jsrpc/addscans',1);
 __PACKAGE__->allow_access_if('/jsrpc/end',1);
 __PACKAGE__->deny_access_unless('/forum/allUnread',[qw//]);
 __PACKAGE__->deny_access_unless('/forum/privmsg',[qw//]);

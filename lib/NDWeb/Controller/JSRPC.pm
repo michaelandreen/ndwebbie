@@ -219,6 +219,39 @@ sub assertTarget : Private {
 	}
 }
 
+sub addscans : Local {
+	my ( $self, $c ) = @_;
+	my $dbh = $c->model;
+
+	my $findscan = $dbh->prepare(q{SELECT scan_id FROM scans
+		WHERE scan_id = LOWER(?) AND tick >= tick() - 168 AND groupscan = ?
+		});
+	my $addscan = $dbh->prepare(q{INSERT INTO scans (scan_id,tick,uid,groupscan)
+		VALUES (LOWER(?),tick(),?,?)
+		});
+	my $addpoint = $dbh->prepare(q{UPDATE users SET scan_points = scan_points + 1
+		WHERE uid = ?
+		});
+	my $message = $c->req->param('message');
+	my @scans;
+	while ($message =~ m{scan(_id|_grp)?=(\w+)}g){
+		my $groupscan = (defined $1 && $1 eq '_grp') || 0;
+		my %scan;
+		$scan{id} = $2;
+		$scan{group} = $groupscan;
+		$findscan->execute($2,$groupscan);
+		if ($findscan->rows == 0){
+			if ($addscan->execute($2,$c->stash->{UID},$groupscan)){
+				$addpoint->execute($c->stash->{UID}) unless $groupscan;
+				$scan{added} = 1;
+			}
+		}else{
+			$scan{message} = 'already exists';
+		}
+		push @scans,\%scan;
+	}
+}
+
 sub end : ActionClass('RenderView') {
 	my ($self,$c) = @_;
 	$c->res->content_type('application/xml');
