@@ -64,7 +64,7 @@ __PACKAGE__->config->{'Plugin::Authentication'}{'use_session'} = 1;
 __PACKAGE__->config(session => {
 	storage => "/tmp/ndweb-$>/session",
 	directory_umask => 077,
-	expires => 300,
+	expires => 3600,
 	verify_address => 1,
 	cookie_secure => 2,
 });
