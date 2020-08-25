@@ -3,7 +3,7 @@
 <fieldset> <legend>Message</legend>
 	<p><b>REMEMBER TO PASTE LAUNCH CONFIRMATION IF YOU WANT AN ATTACK POINT</b></p>
 	<p><b style="color: red;">DO NOT JOIN A WAVE UNLESS YOU HAVE PERMISSION FROM THE PERSON WHO CLAIMED IT</b></p>
-	<p><b style="color: purple;">COORDS ARE NOT SHOWN UNTIL AT LEAST 10 MIN AFTER YOUR CLAIM</b></p>
+	<p><b style="color: purple;">TARGETS IN YOUR GALAXY ARE NOT SHOWN</b></p>
 	<p>Landing tick first wave: [% landingtick %]</p>
 	[% message %]
 </fieldset>
@@ -24,7 +24,7 @@
 	<div class="leftinfo"><ul>
 		<li><a href="[% c.uri_for('targetcalc',t.id) %]" rel="external">Calc</a></li>
 		[% IF raid.released_coords %]
-		<li>Coords: [% t.x %]:[% t.y %]:[% t.z %]</li>
+		<li>Coords: <a href="[% c.uri_for('/stats/planet',t.pid) %]">[% t.x %]:[% t.y %]:[% t.z %]</a></li>
 		[% END %]
 		<li>Size: [% t.size %]</li>
 		<li class="[% t.scorebash %]">Score: [% t.score %]</li>

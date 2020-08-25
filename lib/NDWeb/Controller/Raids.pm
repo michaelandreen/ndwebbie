@@ -114,7 +114,7 @@ sub view : Local {
 	$c->stash(message => parseMarkup($raid->{message}));
 	$c->stash(landingtick => $raid->{tick});
 	my $targetquery = $dbh->prepare(q{SELECT r.id, pid AS planet, size, score, value
-		, p.x,p.y,p.z, race
+		, p.pid, p.x,p.y,p.z, race
 		, p.value - p.size*200 -
 			COALESCE(ps.metal+ps.crystal+ps.eonium,0)/150 -
 			COALESCE(ds.total ,(SELECT
@@ -136,9 +136,9 @@ sub view : Local {
 	my @targets;
 	while (my $target = $targetquery->fetchrow_hashref){
 		if ($planet && $planet->{x}){
-			if ($planet->{x} == $target->{x}){
-				$target->{style} = 'incluster';
-			}
+			#if ($planet->{x} == $target->{x}){
+			#	$target->{style} = 'incluster';
+			#}
 			$target->{cap} = min(0.25,0.25 * pow($target->{value}/$planet->{value} , 0.5));
 			$target->{scorebash} = 'bash' if ($target->{score}/$planet->{score} < 0.6);
 			$target->{valuebash} = 'bash' if ($target->{value}/$planet->{value} < 0.4);
