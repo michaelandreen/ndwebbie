@@ -11,6 +11,7 @@
 			<p><a href="[% c.uri_for('remove',raid.id) %]">Remove raid</a></p>
 			<p>Landing tick: <input type="text" name="tick" value="[% raid.tick %]"></p>
 			<p>Number of waves: <input type="text" name="waves" value="[% raid.waves %]"></p>
+			<p>Opening tick: <input type="text" name="open_tick" value="[% raid.open_tick %]"></p>
 		[% IF removegroups.size > 0 %]
 			<p>The following groups has access to the raid</p>
 			<table>

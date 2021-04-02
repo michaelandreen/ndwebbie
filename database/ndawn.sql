@@ -2142,6 +2142,7 @@ CREATE TABLE raids (
     tick integer NOT NULL,
     open boolean DEFAULT false NOT NULL,
     waves integer DEFAULT 3 NOT NULL,
+    open_tick integer,
     message text NOT NULL,
     removed boolean DEFAULT false NOT NULL,
     released_coords boolean DEFAULT false NOT NULL,

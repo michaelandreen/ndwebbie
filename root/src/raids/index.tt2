@@ -38,6 +38,9 @@
 		[% END %]
 		Landing tick: [% r.tick %]
 		Waves: [% r.waves %]
+		[% IF r.open_tick %]
+		Opening tick: [% r.open_tick %]
+		[% END %]
 		Claims: [% r.claims %]
 		Launched: [% r.launched %]
 	</p>

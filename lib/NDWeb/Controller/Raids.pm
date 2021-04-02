@@ -54,7 +54,7 @@ sub index :Path :Args(0) {
 
 	if ($c->check_user_roles(qw/raids_info/)){
 		my $query = $dbh->prepare(q{
-		SELECT r.id,open ,tick
+		SELECT r.id,open ,tick, open_tick, released_coords AS releasedcoords
 			,waves*COUNT(DISTINCT rt.id) AS waves,COUNT(rc.uid) AS claims
 			,COUNT(nullif(rc.launched,false)) AS launched
 			,COUNT(NULLIF(uid > 0 OR rc.wave > r.waves,true)) AS blocked
@@ -215,7 +215,7 @@ sub edit : Local {
 	my ($self, $c, $raid, $order) = @_;
 	my $dbh = $c->model;
 
-	my $query = $dbh->prepare(q{SELECT id,tick,waves,message,released_coords,open,ftid
+	my $query = $dbh->prepare(q{SELECT id,tick,waves,message,released_coords,open,ftid,open_tick
 		FROM raids WHERE id = ?
 	});
 	$raid = $dbh->selectrow_hashref($query,undef,$raid);
@@ -313,9 +313,10 @@ sub postraidupdate : Local {
 	$dbh->begin_work;
 	my $tick = $c->req->param('tick');
 	my $waves = $c->req->param('waves');
-	$dbh->do(q{UPDATE raids SET message = ?, tick = ?, waves = ? WHERE id = ?}
+	my $open_tick = $c->req->param('open_tick') || undef;
+	$dbh->do(q{UPDATE raids SET message = ?, tick = ?, waves = ?, open_tick = ? WHERE id = ?}
 		,undef,html_escape $c->req->param('message')
-		,$tick,$waves,$raid);
+		,$tick,$waves,$open_tick,$raid);
 
 	$c->forward('log',[$raid, 'BC updated raid']);
 
