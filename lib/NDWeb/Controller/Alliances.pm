@@ -107,6 +107,23 @@ ORDER BY tick DESC, mission
 	$c->stash(intel => $query->fetchall_arrayref({}) );
 }
 
+
+sub pscans : Local {
+	my ( $self, $c, $id ) = @_;
+	my $dbh = $c->model;
+
+	my $members = $dbh->prepare(q{
+		SELECT pid AS id, coords(x,y,z), metal, crystal, eonium, ps.tick
+			,planet_status,hit_us, sizerank, scorerank, valuerank, xprank
+		FROM current_planet_stats p left outer join current_planet_scans ps using (pid)
+		WHERE p.aid = ?
+		ORDER BY x,y,z
+		});
+	$members->execute($id);
+	$c->stash(members => $members->fetchall_arrayref({}) );
+
+}
+
 sub postallianceupdate : Local {
 	my ( $self, $c, $id, $order ) = @_;
 	my $dbh = $c->model;
