@@ -25,7 +25,7 @@
 </fieldset>
 </div>
 </fieldset>
-<p><a href="[% c.uri_for('pscans',a.id) %]">Planet scans</a>.</p><p>Export information <a href="[% c.uri_for('/textexport/alliance',a.id) %]">as text</a>.</p>
+<p><a href="[% c.uri_for('pscans',a.id) %]">Planet scans</a> <a href="[% c.uri_for('fleet',a.id) %]">Member fleets</a></p><p>Export information <a href="[% c.uri_for('/textexport/alliance',a.id) %]">as text</a>.</p>
 <div class="leftinfo">
 <img class="graph" src="[% c.uri_for('/graphs/alliancevsintel',a.id,STICK) %]" alt="Alliance size and score vs members" height="300" width="500">
 <img class="graph" src="[% c.uri_for('/graphs/avgalliancevsintel',a.id,STICK) %]" alt="Avg alliance size and score vs members" height="300" width="500">

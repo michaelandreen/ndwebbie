@@ -1,0 +1,25 @@
+[% META title = 'Alliance P-Scans' %]
+
+[% USE JSON %]
+
+<table class="stats">
+	<tr>
+		<th>Coords</th>
+		<th>Race</th>
+		<th>Tick</th>
+[% FOR s IN ships %]
+		<th>[% s.ship %]</th>
+[% END %]
+	</tr>
+[% FOR m IN members %]
+	<tr class="[% loop.count % 2 == 0 ? 'even' : 'odd' %]">
+		<td><a href="[% c.uri_for('/stats/planet',m.pid) %]">[% m.coords %]</a></td>
+		<td>[% m.race %]</td>
+		<td>[% m.tick %]</td>
+[% fleet = JSON.json_decode(m.ships) %]
+[% FOR s IN ships %]
+		<td>[% fleet.${s.id} %]</td>
+[% END %]
+	</tr>
+[% END %]
+</table>

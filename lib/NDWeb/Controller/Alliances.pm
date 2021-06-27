@@ -124,6 +124,32 @@ sub pscans : Local {
 
 }
 
+sub fleet : Local {
+	my ( $self, $c, $id ) = @_;
+	my $dbh = $c->model;
+
+	my $query = $dbh->prepare(q{SELECT ship, id FROM ship_stats WHERE id >= 0 ORDER BY id ASC;});
+	$query->execute;
+	$c->stash(ships => $query->fetchall_arrayref({}));
+
+	my $members = $dbh->prepare(q{
+WITH
+aus AS (SELECT DISTINCT ON (pid) pid, fid, name,tick
+	FROM fleets f join fleet_scans fs using (fid)
+	WHERE mission = 'Full fleet' and name = 'Advanced Unit'
+	ORDER BY pid,tick DESC)
+,ships AS (SELECT pid, tick, ship, amount, id AS ship_id
+	FROM fleet_ships fs JOIN aus USING(fid) JOIN ship_stats USING(ship))
+SELECT pid, coords(x,y,z), p.race, tick, jsonb_object_agg(ship_id, amount) AS ships
+	FROM ships JOIN current_planet_stats p USING (pid)
+	WHERE p.aid = $1
+	GROUP BY x,y,z,pid,race,tick;
+		});
+	$members->execute($id);
+	$c->stash(members => $members->fetchall_arrayref({}) );
+
+}
+
 sub postallianceupdate : Local {
 	my ( $self, $c, $id, $order ) = @_;
 	my $dbh = $c->model;

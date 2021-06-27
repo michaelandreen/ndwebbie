@@ -17,6 +17,7 @@
 - GD::Graph
 - Email::Simple
 - Email::StripMIME
+- Template::Plugin::JSON
 
 
 Bot deps:
