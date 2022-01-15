@@ -599,13 +599,14 @@ sub targetcalc : Local {
 	my $dbh = $c->model;
 
 	$c->stash(target => $dbh->selectrow_hashref(q{
-SELECT pid,metal_roids, crystal_roids, eonium_roids, ds.total
+SELECT pid, x, y, z, released_coords, metal_roids, crystal_roids, eonium_roids, ds.total
 FROM raids r
 	JOIN raid_targets rt ON r.id = rt.raid
+	JOIN current_planet_stats p USING (pid)
 	LEFT OUTER JOIN current_planet_scans ps USING (pid)
 	LEFT OUTER JOIN current_development_scans ds USING (pid)
-WHERE rt.id = ? AND r.open AND not r.removed
-	AND r.id IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = ?)
+WHERE rt.id = $1 AND r.open AND not r.removed
+	AND r.id IN (SELECT raid FROM raid_access NATURAL JOIN groupmembers WHERE uid = $2)
 		},undef,$target,$c->user->id));
 
 	my $fleets = $dbh->prepare(q{
@@ -633,8 +634,9 @@ sub fleetcalc : Local {
 	my $dbh = $c->model;
 
 	$c->stash(target => $dbh->selectrow_hashref(q{
-SELECT pid,metal_roids, crystal_roids, eonium_roids, ds.total
+SELECT pid, x, y, z, released_coords, metal_roids, crystal_roids, eonium_roids, ds.total
 FROM launch_confirmations lc
+	JOIN current_planet_stats p USING (pid)
 	LEFT OUTER JOIN current_planet_scans ps USING (pid)
 	LEFT OUTER JOIN current_development_scans ds USING (pid)
 WHERE uid = $1 AND fid = $2
@@ -672,6 +674,13 @@ sub calcredir : Private {
 		"def_crystal_asteroids=".($c->stash->{target}->{crystal_roids} // 0),
 		"def_eonium_asteroids=".($c->stash->{target}->{eonium_roids} // 0),
 	);
+
+	if ($c->stash->{target}->{released_coords}) {
+		push @query
+			,"def_coords_x_1=".$c->stash->{target}->{x}
+			,"def_coords_y_1=".$c->stash->{target}->{y}
+			,"def_coords_z_1=".$c->stash->{target}->{z};
+	}
 
 	my $ships = $dbh->prepare(q{
 SELECT id, amount FROM fleet_ships fs JOIN ship_stats s USING (ship)
